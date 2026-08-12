@@ -8,8 +8,9 @@
     "aten.copy_.default",
     "aten.relu.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "torchbench/infer/opacus_cifar10",
     "torchbench_opacus_cifar10_infer_006"
   ]
 }

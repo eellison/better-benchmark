@@ -1,38 +1,24 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "symint",
-      "name": "arg0_1",
-      "value": 32
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        64,
-        32,
-        1,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 1,
-          "symbol": "s67",
-          "default": 32
-        }
+    ["I",512,"s67"],
+    [[64,"s67",1,1],"f32",{"n":"arg1_1","st":["s67",1,1,1]}]
+  ],
+  "outputs": [
+    [[64,"s67"],"f32",{"n":"output_0","st":["s67",1]}]
+  ],
+  "tensor_attrs": {},
+  "symbols": {
+    "s67": {
+      "hint": 512,
+      "range": [
+        2,
+        null
       ]
     }
-  ],
-  "outputs": [],
-  "tensor_attrs": {},
+  },
+  "guards": [],
+  "captured_dynamic": true,
   "graph": "full_graph_023.py",
   "source": {
     "kind": "model",
@@ -40,5 +26,26 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_023.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 2,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.mean.dim": 1,
+        "aten.reshape.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok",
+  "roundtrip_spelling_notes": [
+    "missing 67992e7acf17 (ops ['aten.mean.dim', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)",
+    "extra 12e84f3f91ca (ops ['aten.mean.dim', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+  ]
 }

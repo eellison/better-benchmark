@@ -1,52 +1,13 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        10,
-        512
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        10
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg2_1",
-      "shape": [
-        64,
-        512
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[10,512],"f32",{"n":"arg0_1"}],
+    [[10],"f32",{"n":"arg1_1"}],
+    [[64,512],"f32",{"n":"arg2_1"}]
   ],
-  "outputs": [],
+  "outputs": [
+    [[64,10],"f32",{"n":"output_0"}]
+  ],
   "tensor_attrs": {},
   "graph": "full_graph_024.py",
   "source": {
@@ -55,5 +16,23 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_024.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 0,
+      "fusible_unpartitioned": 1,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {},
+      "fusible_unpartitioned": {
+        "aten.permute.default": 1
+      },
+      "non_fusible": {
+        "aten.addmm.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
 }

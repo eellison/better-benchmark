@@ -1,65 +1,35 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        64,
-        64,
-        3,
-        3
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
+    [[64,64,3,3],"f32",{"n":"arg0_1"}],
+    ["I",8,"s16"],
+    ["I",8,"s82"],
+    [[64,64,"s16","s82"],"f32",{"n":"arg3_1","st":["64*s16*s82","s16*s82","s82",1]}]
+  ],
+  "outputs": [
+    [[64,64,"s16","s82"],"f32",{"n":"output_0","st":["64*s16*s82","s16*s82","s82",1]}]
+  ],
+  "tensor_attrs": {},
+  "symbols": {
+    "s16": {
+      "hint": 8,
+      "range": [
+        2,
+        null
+      ]
     },
-    {
-      "kind": "symint",
-      "name": "arg1_1",
-      "value": 32
-    },
-    {
-      "kind": "symint",
-      "name": "arg2_1",
-      "value": 32
-    },
-    {
-      "kind": "tensor",
-      "name": "arg3_1",
-      "shape": [
-        64,
-        64,
-        32,
-        32
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 2,
-          "symbol": "s16",
-          "default": 32
-        },
-        {
-          "dim": 3,
-          "symbol": "s82",
-          "default": 32
-        }
+    "s82": {
+      "hint": 8,
+      "range": [
+        2,
+        null
       ]
     }
+  },
+  "guards": [
+    "64*s16*s82 <= 2147483647"
   ],
-  "outputs": [],
-  "tensor_attrs": {},
+  "captured_dynamic": true,
   "graph": "full_graph_003.py",
   "source": {
     "kind": "model",
@@ -67,5 +37,21 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_003.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 1,
+    "counts": {
+      "fusible_in_partition": 0,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {},
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.convolution.default": 1
+      }
+    }
+  },
+  "roundtrip": "ok"
 }

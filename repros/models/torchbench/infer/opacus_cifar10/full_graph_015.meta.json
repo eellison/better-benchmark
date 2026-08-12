@@ -1,76 +1,34 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        256
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
+    [[256],"f32",{"n":"arg0_1"}],
+    [[256],"f32",{"n":"arg1_1"}],
+    ["I",2,"s16"],
+    ["I",2,"s82"],
+    [[64,256,"s16","s82"],"f32",{"n":"arg4_1","st":["256*s16*s82","s16*s82","s82",1]}]
+  ],
+  "outputs": [
+    [[64,256,"s16","s82"],"f32",{"n":"output_0","st":["256*s16*s82","s16*s82","s82",1]}]
+  ],
+  "tensor_attrs": {},
+  "symbols": {
+    "s16": {
+      "hint": 2,
+      "range": [
+        2,
+        null
+      ]
     },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        256
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "symint",
-      "name": "arg2_1",
-      "value": 32
-    },
-    {
-      "kind": "symint",
-      "name": "arg3_1",
-      "value": 32
-    },
-    {
-      "kind": "tensor",
-      "name": "arg4_1",
-      "shape": [
-        64,
-        256,
-        32,
-        32
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 2,
-          "symbol": "s16",
-          "default": 32
-        },
-        {
-          "dim": 3,
-          "symbol": "s82",
-          "default": 32
-        }
+    "s82": {
+      "hint": 2,
+      "range": [
+        2,
+        null
       ]
     }
-  ],
-  "outputs": [],
-  "tensor_attrs": {},
+  },
+  "guards": [],
+  "captured_dynamic": true,
   "graph": "full_graph_015.py",
   "source": {
     "kind": "model",
@@ -78,5 +36,34 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_015.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 18,
+    "counts": {
+      "fusible_in_partition": 17,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 1
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "_operator.getitem": 2,
+        "aten.add.Tensor": 2,
+        "aten.mul.Tensor": 2,
+        "aten.reshape.default": 2,
+        "aten.rsqrt.default": 1,
+        "aten.sub.Tensor": 1,
+        "aten.unsqueeze.default": 6,
+        "aten.var_mean.correction": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "_operator.mul": 1
+      }
+    }
+  },
+  "roundtrip": "ok",
+  "roundtrip_spelling_notes": [
+    "missing 3a40eaee0716 (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
+    "extra 663c5e3067ba (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
+  ]
 }

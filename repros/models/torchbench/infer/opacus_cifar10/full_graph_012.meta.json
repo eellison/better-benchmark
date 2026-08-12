@@ -1,77 +1,50 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "symint",
-      "name": "arg0_1",
-      "value": 32
-    },
-    {
-      "kind": "symint",
-      "name": "arg1_1",
-      "value": 32
-    },
-    {
-      "kind": "tensor",
-      "name": "arg2_1",
-      "shape": [
-        64,
-        128,
-        32,
-        32
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 2,
-          "symbol": "s57",
-          "default": 32
-        },
-        {
-          "dim": 3,
-          "symbol": "s39",
-          "default": 32
-        }
+    ["I",4,"s57"],
+    ["I",4,"s39"],
+    [[64,128,"s57","s39"],"f32",{"n":"arg2_1","st":["128*s39*s57","s39*s57","s39",1]}],
+    [[64,128,"s57","s39"],"f32",{"n":"arg3_1","st":["128*s39*s57","s39*s57","s39",1]}]
+  ],
+  "outputs": [
+    [[64,128,"s57","s39"],"f32",{"n":"output_0","st":["128*s39*s57","s39*s57","s39",1]}]
+  ],
+  "tensor_attrs": {},
+  "symbols": {
+    "s57": {
+      "hint": 4,
+      "range": [
+        2,
+        null
       ]
     },
-    {
-      "kind": "tensor",
-      "name": "arg3_1",
-      "shape": [
-        64,
-        128,
-        32,
-        32
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 2,
-          "symbol": "s57",
-          "default": 32
-        },
-        {
-          "dim": 3,
-          "symbol": "s39",
-          "default": 32
-        }
+    "s68": {
+      "hint": 4,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s89": {
+      "hint": 4,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s39": {
+      "hint": 4,
+      "range": [
+        2,
+        null
       ]
     }
+  },
+  "guards": [
+    "Eq(s39, s68)",
+    "Eq(s89, s57)"
   ],
-  "outputs": [],
-  "tensor_attrs": {},
+  "captured_dynamic": true,
   "graph": "full_graph_012.py",
   "source": {
     "kind": "model",
@@ -79,5 +52,23 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_012.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 3,
+    "counts": {
+      "fusible_in_partition": 3,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.copy_.default": 1,
+        "aten.relu.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

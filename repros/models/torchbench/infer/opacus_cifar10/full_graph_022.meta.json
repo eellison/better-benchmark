@@ -1,62 +1,34 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "symint",
-      "name": "arg0_1",
-      "value": 32
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        64,
-        32,
-        1,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 1,
-          "symbol": "s49",
-          "default": 32
-        }
+    ["I",512,"s49"],
+    [[64,"s49",1,1],"f32",{"n":"arg1_1","st":["s49",1,1,1]}],
+    [[64,"s49",1,1],"f32",{"n":"arg2_1","st":["s49",1,1,1]}]
+  ],
+  "outputs": [
+    [[64,"s49",1,1],"f32",{"n":"output_0","st":["s49",1,1,1]}]
+  ],
+  "tensor_attrs": {},
+  "symbols": {
+    "s67": {
+      "hint": 512,
+      "range": [
+        2,
+        null
       ]
     },
-    {
-      "kind": "tensor",
-      "name": "arg2_1",
-      "shape": [
-        64,
-        32,
-        1,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      },
-      "symbolic_dims": [
-        {
-          "dim": 1,
-          "symbol": "s49",
-          "default": 32
-        }
+    "s49": {
+      "hint": 512,
+      "range": [
+        2,
+        null
       ]
     }
+  },
+  "guards": [
+    "Eq(s49, s67)"
   ],
-  "outputs": [],
-  "tensor_attrs": {},
+  "captured_dynamic": true,
   "graph": "full_graph_022.py",
   "source": {
     "kind": "model",
@@ -64,5 +36,23 @@
     "mode": "infer",
     "model": "opacus_cifar10",
     "graph": "full_graph_022.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 3,
+    "counts": {
+      "fusible_in_partition": 3,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.copy_.default": 1,
+        "aten.relu.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

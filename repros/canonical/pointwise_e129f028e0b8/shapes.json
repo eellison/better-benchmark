@@ -1,0 +1,125 @@
+{
+  "points": [
+    {
+      "shape_hash": "ce6a0437",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,64,8,8],"f32"],
+        [[64,64,8,8],"f32"]
+      ]
+    },
+    {
+      "shape_hash": "df9da442",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,128,"s0","s1"],"f32",{"st":["128*s0*s1","s0*s1","s1",1]}],
+        [[64,128,"s0","s1"],"f32",{"st":["128*s0*s1","s0*s1","s1",1]}]
+      ],
+      "bindings": {
+        "s0": 4,
+        "s2": 4,
+        "s3": 4,
+        "s1": 4
+      },
+      "captured_dynamic": true
+    },
+    {
+      "shape_hash": "97f1201a",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,"s0","s1","s2"],"f32",{"st":["s0*s1*s2","s1*s2","s2",1]}],
+        [[64,"s0","s1","s2"],"f32",{"st":["s0*s1*s2","s1*s2","s2",1]}]
+      ],
+      "bindings": {
+        "s0": 256,
+        "s1": 2,
+        "s3": 2,
+        "s5": 256,
+        "s4": 2,
+        "s2": 2
+      },
+      "captured_dynamic": true
+    },
+    {
+      "shape_hash": "27b6c75e",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [[64,"s0",1,1],"f32",{"st":["s0",1,1,1]}],
+        [[64,"s0",1,1],"f32",{"st":["s0",1,1,1]}]
+      ],
+      "bindings": {
+        "s0": 512,
+        "s1": 512
+      },
+      "captured_dynamic": true
+    }
+  ],
+  "symbols": {
+    "s0": {
+      "hint": 512,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s2": {
+      "hint": 2,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s3": {
+      "hint": 2,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s1": {
+      "hint": 512,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s5": {
+      "hint": 256,
+      "range": [
+        2,
+        null
+      ]
+    },
+    "s4": {
+      "hint": 2,
+      "range": [
+        2,
+        null
+      ]
+    }
+  },
+  "guards": [
+    "Eq(s1, s2)",
+    "Eq(s3, s0)",
+    "Eq(s2, s3)",
+    "Eq(s4, s1)",
+    "Eq(s5, s0)",
+    "Eq(s1, s0)"
+  ]
+}

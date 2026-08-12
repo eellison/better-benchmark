@@ -1,0 +1,34 @@
+{
+  "points": [
+    {
+      "shape_hash": "7395c806",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,64,16,16],"f32"],
+        [[64],"f32"],
+        [[64],"f32"],
+        ["S",[64,32,2,256]],
+        ["S",[64,64,16,16]]
+      ]
+    },
+    {
+      "shape_hash": "79c604e4",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[64,512,1,1],"f32"],
+        [[512],"f32"],
+        [[512],"f32"],
+        ["S",[64,32,16,1]],
+        ["S",[64,512,1,1]]
+      ]
+    }
+  ]
+}
