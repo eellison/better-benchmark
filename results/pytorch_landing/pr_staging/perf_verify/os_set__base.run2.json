@@ -1,0 +1,71 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "862f00e6ee3e982a95e023662427766c88ecf0e5",
+    "pytorch_commit": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-07-15T11:33:27Z",
+    "n_repros": 3,
+    "n_results": 3,
+    "workload_kind": "repro"
+  },
+  "repros/canonical/amax_sum_02064a1e60ac/repro.py": {
+    "TrOCRForCausalLM_19ef62d0": {
+      "compiled_us": 154.4319987297058,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 47.93599992990494,
+      "total_bytes": 287309824,
+      "n_kernels": 1,
+      "gap_default": 3.221628816662343,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/amax_sum_sum_3f000d9caa57/repro.py": {
+    "BartForCausalLM_4445581e": {
+      "compiled_us": 626.4320015907288,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 242.68800020217896,
+      "total_bytes": 1647214600,
+      "n_kernels": 2,
+      "gap_default": 2.5812236330962373,
+      "gap_cd": null
+    },
+    "PegasusForCausalLM_f78f1ecd": {
+      "compiled_us": 1224.5759963989258,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 480.1599979400635,
+      "total_bytes": 3294429192,
+      "n_kernels": 2,
+      "gap_default": 2.5503498868137386,
+      "gap_cd": null
+    },
+    "TrOCRForCausalLM_e195ea0d": {
+      "compiled_us": 1224.768042564392,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 479.96801137924194,
+      "total_bytes": 3294429192,
+      "n_kernels": 2,
+      "gap_default": 2.5517701461913758,
+      "gap_cd": null
+    }
+  },
+  "repros/canonical/amax_sum_sum_04ddf882ff17/repro.py": {
+    "MobileBertForMaskedLM_8f164373": {
+      "compiled_us": 2180.0320148468018,
+      "coord_descent_us": null,
+      "memcopy_sol_us": 930.6240081787109,
+      "total_bytes": 6001253616,
+      "n_kernels": 2,
+      "gap_default": 2.342548650892061,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 3,
+    "ok": 3,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 9.259884595870972
+  }
+}

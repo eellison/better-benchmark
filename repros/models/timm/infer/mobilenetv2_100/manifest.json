@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilenetv2_100",
+  "patterns": [
+    "083e5d528a28",
+    "818c3aa59952",
+    "9595e73ff43b",
+    "e6ddc8e897ec"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

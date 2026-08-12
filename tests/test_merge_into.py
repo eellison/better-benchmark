@@ -1,0 +1,779 @@
+"""
+Adversarial tests for _merge_into_baseline and _results_payload.
+
+Tests edge cases including:
+- Malformed/empty baseline JSON
+- Success -> failure transitions
+- Failure -> success transitions
+- --merge-into with nonexistent file (fresh write)
+- Untouched repros remain in baseline
+- Concurrent writes from multiple processes
+- Baseline with only __failures__ / only successes
+- Repro names that collide with reserved keys
+"""
+import json
+import multiprocessing
+import os
+import sys
+import tempfile
+import time
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+
+# Import the functions under test. File moved from scripts/ to tests/;
+# bench_parallel lives in repo-root/scripts (tests/conftest.py adds it to
+# sys.path for pytest; insert here too for standalone execution).
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+# bench_parallel uses subprocess for git rev-parse; we mock it globally
+# so tests don't depend on the git state.
+_FAKE_COMMIT = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+
+
+def _mock_sp_run(*args, **kwargs):
+    """Mock subprocess.run for git rev-parse."""
+    class FakeResult:
+        stdout = _FAKE_COMMIT + "\n"
+        returncode = 0
+    return FakeResult()
+
+
+from bench_parallel import (
+    _git_query,
+    _merge_into_baseline,
+    _pytorch_provenance,
+    _results_payload,
+    _run_metadata,
+)
+
+
+# ─── Fixtures ────────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def tmp_baseline(tmp_path):
+    """Returns a helper that creates a baseline file with given content."""
+    def _make(content=None, raw_text=None):
+        p = tmp_path / "baseline.json"
+        if raw_text is not None:
+            p.write_text(raw_text)
+        elif content is not None:
+            p.write_text(json.dumps(content, indent=2))
+        return p
+    return _make
+
+
+def _sample_result(compiled_us=10.0, sol_us=5.0):
+    return {
+        "default": {
+            "compiled_us": compiled_us,
+            "coord_descent_us": compiled_us * 0.9,
+            "memcopy_sol_us": sol_us,
+            "total_bytes": 4096,
+            "gap_default": compiled_us / sol_us,
+            "gap_cd": (compiled_us * 0.9) / sol_us,
+        }
+    }
+
+
+def _sample_failure(error="CUDA OOM"):
+    return {
+        "status": "failed",
+        "gpu": "0",
+        "elapsed": 1.5,
+        "error": error,
+    }
+
+
+def _sample_skip(reason="unsupported graph"):
+    return {
+        "status": "skipped",
+        "category": "unsafe_integer_input",
+        "reason": reason,
+        "hint": "recapture with sidecars",
+    }
+
+
+def _sample_full_graph_result():
+    result = _sample_result()
+    result["__graph__"] = {
+        "source": {
+            "kind": "model",
+            "suite": "hf",
+            "mode": "infer",
+            "model": "Tiny",
+            "graph": "full_graph_000.py",
+        }
+    }
+    return result
+
+
+# ─── Tests ───────────────────────────────────────────────────────────────────
+
+
+class TestResultsPayload:
+    """Basic sanity checks on the payload assembly function."""
+
+    def test_empty_results(self):
+        payload = _results_payload({})
+        assert payload == {}
+
+    def test_success_only(self):
+        results = {"repro/a/repro.py": _sample_result()}
+        payload = _results_payload(results)
+        assert "repro/a/repro.py" in payload
+        assert "__failures__" not in payload
+        assert "__summary__" not in payload
+
+    def test_failures_included(self):
+        results = {"repro/a/repro.py": _sample_result()}
+        failures = {"repro/b/repro.py": _sample_failure()}
+        payload = _results_payload(results, failures)
+        assert "repro/a/repro.py" in payload
+        assert "__failures__" in payload
+        assert "repro/b/repro.py" in payload["__failures__"]
+
+    def test_empty_failures_omitted(self):
+        """Empty failure dict should NOT appear in payload (falsy check)."""
+        payload = _results_payload({"a": 1}, {})
+        assert "__failures__" not in payload
+
+    def test_metadata_key(self):
+        payload = _results_payload({}, metadata={"commit": "abc"})
+        assert payload["_metadata"] == {"commit": "abc"}
+
+
+class TestMergeIntoBaseline:
+    """Core merge logic tests."""
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_fresh_write_nonexistent_file(self, mock_sp, tmp_path):
+        """If baseline doesn't exist, create it from scratch."""
+        baseline = tmp_path / "subdir" / "results.json"
+        assert not baseline.exists()
+
+        new_results = {"repro/a/repro.py": _sample_result()}
+        new_failures = {"repro/b/repro.py": _sample_failure()}
+
+        _merge_into_baseline(baseline, new_results, new_failures)
+
+        assert baseline.exists()
+        data = json.loads(baseline.read_text())
+        assert "repro/a/repro.py" in data
+        assert "__failures__" in data
+        assert "repro/b/repro.py" in data["__failures__"]
+        assert data["_metadata"]["commit"] == _FAKE_COMMIT
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_malformed_json_raises(self, mock_sp, tmp_baseline):
+        """Malformed baseline JSON should raise an error (not silently overwrite)."""
+        baseline = tmp_baseline(raw_text="this is not json {{{")
+        with pytest.raises(json.JSONDecodeError):
+            _merge_into_baseline(baseline, {"a": _sample_result()}, {})
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_empty_json_string(self, mock_sp, tmp_baseline):
+        """Empty string baseline should raise JSONDecodeError."""
+        baseline = tmp_baseline(raw_text="")
+        with pytest.raises(json.JSONDecodeError):
+            _merge_into_baseline(baseline, {"a": _sample_result()}, {})
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_empty_json_object(self, mock_sp, tmp_baseline):
+        """Empty {} baseline should work fine -- no existing repros."""
+        baseline = tmp_baseline(content={})
+        new_results = {"repro/x/repro.py": _sample_result(compiled_us=20.0)}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        assert "repro/x/repro.py" in data
+        assert "__summary__" in data
+        assert data["__summary__"]["ok"] == 1
+        assert data["__summary__"]["failed"] == 0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_success_to_failure(self, mock_sp, tmp_baseline):
+        """A repro that was successful but now fails moves to __failures__."""
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result(), "repro/b/repro.py": _sample_result()},
+            None,
+            {"total": 2, "ok": 2, "failed": 0},
+            {"commit": "old", "timestamp": "old", "n_repros": 2},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        # Re-run repro/a -- it now fails
+        new_results = {}
+        new_failures = {"repro/a/repro.py": _sample_failure("segfault")}
+        _merge_into_baseline(baseline, new_results, new_failures)
+
+        data = json.loads(baseline.read_text())
+        # a should be in failures, not in top-level
+        assert "repro/a/repro.py" not in data
+        assert "repro/a/repro.py" in data["__failures__"]
+        assert data["__failures__"]["repro/a/repro.py"]["error"] == "segfault"
+        # b should remain untouched
+        assert "repro/b/repro.py" in data
+        # summary should reflect the change
+        assert data["__summary__"]["ok"] == 1
+        assert data["__summary__"]["failed"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_failure_to_success(self, mock_sp, tmp_baseline):
+        """A repro that was failed but now succeeds moves out of __failures__."""
+        existing = _results_payload(
+            {"repro/b/repro.py": _sample_result()},
+            {"repro/a/repro.py": _sample_failure("OOM")},
+            {"total": 2, "ok": 1, "failed": 1},
+            {"commit": "old", "timestamp": "old", "n_repros": 1},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        # Re-run repro/a -- it now succeeds
+        new_results = {"repro/a/repro.py": _sample_result(compiled_us=7.0)}
+        new_failures = {}
+        _merge_into_baseline(baseline, new_results, new_failures)
+
+        data = json.loads(baseline.read_text())
+        assert "repro/a/repro.py" in data
+        # Should NOT be in failures anymore
+        assert "__failures__" not in data or "repro/a/repro.py" not in data.get("__failures__", {})
+        # b untouched
+        assert "repro/b/repro.py" in data
+        assert data["__summary__"]["ok"] == 2
+        assert data["__summary__"]["failed"] == 0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_untouched_repros_preserved(self, mock_sp, tmp_baseline):
+        """Repros not in new_results or new_failures remain untouched."""
+        existing = _results_payload(
+            {
+                "repro/a/repro.py": _sample_result(compiled_us=10.0),
+                "repro/b/repro.py": _sample_result(compiled_us=20.0),
+                "repro/c/repro.py": _sample_result(compiled_us=30.0),
+            },
+            {"repro/d/repro.py": _sample_failure("timeout")},
+            {"total": 4, "ok": 3, "failed": 1},
+            {"commit": "old", "timestamp": "old", "n_repros": 3},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        # Only re-run repro/a
+        new_results = {"repro/a/repro.py": _sample_result(compiled_us=5.0)}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        # a updated
+        assert data["repro/a/repro.py"]["default"]["compiled_us"] == 5.0
+        # b, c unchanged
+        assert data["repro/b/repro.py"]["default"]["compiled_us"] == 20.0
+        assert data["repro/c/repro.py"]["default"]["compiled_us"] == 30.0
+        # d still in failures
+        assert "repro/d/repro.py" in data["__failures__"]
+        # summary updated
+        assert data["__summary__"]["ok"] == 3
+        assert data["__summary__"]["failed"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_update_existing_result(self, mock_sp, tmp_baseline):
+        """Re-running an already-successful repro should update its data."""
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result(compiled_us=100.0)},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        # Re-run with better numbers
+        new_results = {"repro/a/repro.py": _sample_result(compiled_us=50.0)}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        assert data["repro/a/repro.py"]["default"]["compiled_us"] == 50.0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_metadata_updated_on_merge(self, mock_sp, tmp_baseline):
+        """Metadata (commit, timestamp, n_repros) should be updated."""
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "oldcommit", "timestamp": "2024-01-01T00:00:00Z", "n_repros": 1},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(baseline, {"repro/b/repro.py": _sample_result()}, {})
+
+        data = json.loads(baseline.read_text())
+        assert data["_metadata"]["commit"] == _FAKE_COMMIT
+        assert data["_metadata"]["n_repros"] == 2
+        assert "last_merge" in data["_metadata"]
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_full_graph_into_legacy_repro_baseline(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old", "timestamp": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="Cannot merge"):
+            _merge_into_baseline(
+                baseline,
+                {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+                {},
+                workload_kind="full_graph",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_repro_into_legacy_full_graph_baseline(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old", "timestamp": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="Cannot merge"):
+            _merge_into_baseline(
+                baseline,
+                {"repro/a/repro.py": _sample_result()},
+                {},
+                workload_kind="repro",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_failure_only_legacy_repro_baseline_mismatch(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {},
+            {"repro/a/repro.py": _sample_failure()},
+            {"total": 1, "ok": 0, "failed": 1},
+            {"commit": "old", "timestamp": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="Cannot merge"):
+            _merge_into_baseline(
+                baseline,
+                {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+                {},
+                workload_kind="full_graph",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_both_success_and_failure_in_same_merge(self, mock_sp, tmp_baseline):
+        """A merge batch can have both new successes and new failures."""
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        new_results = {"repro/b/repro.py": _sample_result()}
+        new_failures = {"repro/c/repro.py": _sample_failure("import error")}
+        _merge_into_baseline(baseline, new_results, new_failures)
+
+        data = json.loads(baseline.read_text())
+        assert "repro/a/repro.py" in data
+        assert "repro/b/repro.py" in data
+        assert "repro/c/repro.py" in data["__failures__"]
+        assert data["__summary__"]["ok"] == 2
+        assert data["__summary__"]["failed"] == 1
+        assert data["__summary__"]["total"] == 3
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_skipped_failures_are_counted_separately(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0, "skipped": 0},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {},
+            {"repro/b/repro.py": _sample_skip()},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data["__summary__"]["ok"] == 1
+        assert data["__summary__"]["failed"] == 0
+        assert data["__summary__"]["skipped"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_metadata_content_kind_mismatch(self, mock_sp, tmp_baseline):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"workload_kind": "full_graph"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        with pytest.raises(ValueError, match="metadata"):
+            _merge_into_baseline(
+                baseline,
+                {"repros/models/hf/infer/Tiny/full_graph_000.py": _sample_full_graph_result()},
+                {},
+                workload_kind="full_graph",
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_empty_new_results_and_failures(self, mock_sp, tmp_baseline):
+        """Merging nothing should leave the baseline unchanged (modulo metadata)."""
+        original_results = {"repro/a/repro.py": _sample_result()}
+        existing = _results_payload(
+            original_results,
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old", "timestamp": "old", "n_repros": 1},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(baseline, {}, {})
+
+        data = json.loads(baseline.read_text())
+        assert "repro/a/repro.py" in data
+        assert data["__summary__"]["ok"] == 1
+        assert data["__summary__"]["failed"] == 0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_reserved_key_collision(self, mock_sp, tmp_baseline):
+        """Repro paths that look like reserved keys (unlikely but adversarial)."""
+        existing = _results_payload(
+            {"repro/normal/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old"},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        # Merge a repro whose path starts with underscore (edge case for the filter)
+        new_results = {"_weirdly_named_repro": _sample_result()}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        assert "_weirdly_named_repro" in data
+        assert "repro/normal/repro.py" in data
+        assert data["__summary__"]["ok"] == 2
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_json_array_baseline_raises(self, mock_sp, tmp_baseline):
+        """Baseline that's a JSON array instead of object should raise."""
+        baseline = tmp_baseline(raw_text='["not", "an", "object"]')
+        with pytest.raises((TypeError, AttributeError)):
+            _merge_into_baseline(baseline, {"a": _sample_result()}, {})
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_large_merge(self, mock_sp, tmp_baseline):
+        """Stress: merge 1000 new results into a 1000-repro baseline."""
+        existing_results = {f"repro/{i:04d}/repro.py": _sample_result() for i in range(1000)}
+        existing = _results_payload(
+            existing_results, None,
+            {"total": 1000, "ok": 1000, "failed": 0},
+            {"commit": "old", "n_repros": 1000},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        new_results = {f"repro/{i:04d}/repro.py": _sample_result(compiled_us=float(i))
+                       for i in range(1000, 2000)}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        assert data["__summary__"]["ok"] == 2000
+        assert data["__summary__"]["failed"] == 0
+        # Original preserved
+        assert "repro/0000/repro.py" in data
+        # New added
+        assert "repro/1999/repro.py" in data
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_failure_overwrite(self, mock_sp, tmp_baseline):
+        """Re-running a failed repro that fails again should update the failure info."""
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            {"repro/b/repro.py": _sample_failure("OOM")},
+            {"total": 2, "ok": 1, "failed": 1},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        # b fails again with different error
+        new_failures = {"repro/b/repro.py": _sample_failure("segfault")}
+        _merge_into_baseline(baseline, {}, new_failures)
+
+        data = json.loads(baseline.read_text())
+        assert data["__failures__"]["repro/b/repro.py"]["error"] == "segfault"
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_concurrent_merge_into_same_file(self, mock_sp, tmp_path):
+        """Two processes merging into the same file -- last writer wins (no corruption)."""
+        baseline = tmp_path / "concurrent.json"
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            None,
+            {"total": 1, "ok": 1, "failed": 0},
+            {"commit": "old", "n_repros": 1},
+        )
+        baseline.write_text(json.dumps(existing, indent=2))
+
+        def _worker(worker_id):
+            """Each worker merges a unique repro."""
+            with patch("subprocess.run", side_effect=_mock_sp_run):
+                results = {f"repro/worker_{worker_id}/repro.py": _sample_result(compiled_us=float(worker_id))}
+                _merge_into_baseline(baseline, results, {})
+
+        # Run two merges sequentially (simulating race -- true parallelism
+        # would need file locking which the function doesn't implement)
+        _worker(1)
+        _worker(2)
+
+        data = json.loads(baseline.read_text())
+        # Both should be present since they run sequentially
+        assert "repro/a/repro.py" in data
+        assert "repro/worker_1/repro.py" in data
+        assert "repro/worker_2/repro.py" in data
+        # Verify the file is valid JSON (no corruption)
+        assert data["__summary__"]["ok"] == 3
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_true_concurrent_writes_no_corruption(self, mock_sp, tmp_path):
+        """Multiple processes writing simultaneously -- file should be valid JSON after."""
+        baseline = tmp_path / "race.json"
+        existing = _results_payload(
+            {f"repro/existing_{i}/repro.py": _sample_result() for i in range(10)},
+            None,
+            {"total": 10, "ok": 10, "failed": 0},
+            {"commit": "old", "n_repros": 10},
+        )
+        baseline.write_text(json.dumps(existing, indent=2))
+
+        def _concurrent_worker(args):
+            worker_id, path = args
+            with patch("subprocess.run", side_effect=_mock_sp_run):
+                results = {f"repro/concurrent_{worker_id}/repro.py": _sample_result()}
+                _merge_into_baseline(Path(path), results, {})
+
+        # Use multiprocessing to actually race
+        # Note: this might produce a corrupted file under true concurrency.
+        # The test verifies the file is at least valid JSON afterward
+        # (in practice, the short write is somewhat atomic on Linux for small files).
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            pool.map(_concurrent_worker, [(i, str(baseline)) for i in range(4)])
+
+        data = json.loads(baseline.read_text())
+        assert isinstance(data, dict)
+        for i in range(10):
+            assert f"repro/existing_{i}/repro.py" in data
+        for i in range(4):
+            assert f"repro/concurrent_{i}/repro.py" in data
+        assert data["__summary__"]["ok"] == 14
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_baseline_with_no_summary_or_metadata(self, mock_sp, tmp_baseline):
+        """Baseline that has results but no __summary__ or _metadata (hand-edited)."""
+        raw = {"repro/a/repro.py": _sample_result(), "repro/b/repro.py": _sample_result()}
+        baseline = tmp_baseline(content=raw)
+
+        new_results = {"repro/c/repro.py": _sample_result()}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        assert "repro/a/repro.py" in data
+        assert "repro/b/repro.py" in data
+        assert "repro/c/repro.py" in data
+        assert data["__summary__"]["ok"] == 3
+        assert data["__summary__"]["failed"] == 0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_null_values_in_baseline(self, mock_sp, tmp_baseline):
+        """Baseline with null values for some keys."""
+        raw = {
+            "repro/a/repro.py": _sample_result(),
+            "__failures__": None,  # pathological
+            "__summary__": None,
+        }
+        baseline = tmp_baseline(content=raw)
+
+        # This will call existing.pop("__failures__", {}) on None -- should we handle it?
+        # Let's see what happens
+        new_results = {"repro/b/repro.py": _sample_result()}
+        # The code does: old_failures = existing.pop("__failures__", {})
+        # If __failures__ is None (not missing), pop returns None, then
+        # old_failures.pop(repro_path, None) would fail.
+        # This IS a bug -- let's verify it and then fix it.
+        try:
+            _merge_into_baseline(baseline, new_results, {})
+            # If it doesn't crash, verify output
+            data = json.loads(baseline.read_text())
+            assert "repro/b/repro.py" in data
+        except (TypeError, AttributeError) as e:
+            # Bug: None.__getattr__('pop') fails
+            pytest.fail(
+                f"_merge_into_baseline crashes on null __failures__/__summary__ in baseline: {e}"
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_unicode_repro_paths(self, mock_sp, tmp_baseline):
+        """Repro paths with unicode characters."""
+        existing = _results_payload(
+            {"repro/normal/repro.py": _sample_result()},
+        )
+        baseline = tmp_baseline(content=existing)
+
+        new_results = {"repro/élève/repro.py": _sample_result()}
+        _merge_into_baseline(baseline, new_results, {})
+
+        data = json.loads(baseline.read_text())
+        assert "repro/élève/repro.py" in data
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_very_long_error_string(self, mock_sp, tmp_baseline):
+        """Failure with extremely long error string."""
+        existing = _results_payload({"repro/a/repro.py": _sample_result()})
+        baseline = tmp_baseline(content=existing)
+
+        long_error = "x" * 100000
+        new_failures = {"repro/b/repro.py": _sample_failure(long_error)}
+        _merge_into_baseline(baseline, {}, new_failures)
+
+        data = json.loads(baseline.read_text())
+        assert "repro/b/repro.py" in data["__failures__"]
+        assert len(data["__failures__"]["repro/b/repro.py"]["error"]) == 100000
+
+
+class _FakeTorch:
+    """Stand-in for the ``torch`` module imported by _pytorch_provenance."""
+
+    class version:  # noqa: N801 — mirrors torch.version namespace
+        git_version = None
+
+    def __init__(self, *, file="/fake/pytorch/torch/__init__.py", git_version=None):
+        self.__file__ = file
+        self.version = type("version", (), {"git_version": git_version})
+
+
+def _install_fake_torch(monkeypatch, fake):
+    """Make ``import torch`` inside _pytorch_provenance resolve to ``fake``."""
+    import builtins
+
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name == "torch":
+            if fake is None:
+                raise ImportError("no torch")
+            return fake
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+
+class TestPytorchProvenance:
+    """_pytorch_provenance resolves the pytorch commit + branch/ref defensively."""
+
+    def test_git_checkout_branch(self, monkeypatch):
+        """Source checkout on a branch: commit from HEAD, ref from symbolic-ref."""
+        _install_fake_torch(monkeypatch, _FakeTorch())
+
+        def fake_git(args, cwd=None):
+            if args[:2] == ["rev-parse", "HEAD"]:
+                return "daa79cd25ca9a80bfd65799394cf4255d6be75a6"
+            if args[0] == "symbolic-ref":
+                return "tmp_work"
+            return None
+
+        monkeypatch.setattr("bench_parallel._git_query", fake_git)
+        commit, ref = _pytorch_provenance()
+        assert commit == "daa79cd25ca9a80bfd65799394cf4255d6be75a6"
+        assert ref == "tmp_work"
+
+    def test_detached_head(self, monkeypatch):
+        """Detached HEAD: symbolic-ref fails, abbrev-ref == 'HEAD' -> 'DETACHED'."""
+        _install_fake_torch(monkeypatch, _FakeTorch())
+
+        def fake_git(args, cwd=None):
+            if args[:2] == ["rev-parse", "HEAD"]:
+                return "deadbeef" * 5
+            if args[0] == "symbolic-ref":
+                return None  # detached: symbolic-ref -q exits non-zero
+            if args[:2] == ["rev-parse", "--abbrev-ref"]:
+                return "HEAD"  # git's literal sentinel for detached HEAD
+            return None
+
+        monkeypatch.setattr("bench_parallel._git_query", fake_git)
+        commit, ref = _pytorch_provenance()
+        assert commit == "deadbeef" * 5
+        assert ref == "DETACHED"
+
+    def test_wheel_install_fallback(self, monkeypatch):
+        """Installed wheel (no git checkout): commit from torch.version.git_version,
+        ref is None — never crashes."""
+        _install_fake_torch(
+            monkeypatch,
+            _FakeTorch(git_version="abc123def456abc123def456abc123def456abcd"),
+        )
+        # Not a git repo: every git query fails.
+        monkeypatch.setattr("bench_parallel._git_query", lambda args, cwd=None: None)
+        commit, ref = _pytorch_provenance()
+        assert commit == "abc123def456abc123def456abc123def456abcd"
+        assert ref is None
+
+    def test_torch_not_importable(self, monkeypatch):
+        """torch missing entirely: (None, None), no crash."""
+        _install_fake_torch(monkeypatch, None)
+        monkeypatch.setattr("bench_parallel._git_query", lambda args, cwd=None: None)
+        assert _pytorch_provenance() == (None, None)
+
+    def test_git_query_never_raises(self, monkeypatch):
+        """_git_query swallows subprocess failures and returns None."""
+        def boom(*args, **kwargs):
+            raise OSError("git not found")
+
+        monkeypatch.setattr("subprocess.run", boom)
+        assert _git_query(["rev-parse", "HEAD"]) is None
+
+
+class TestRunMetadata:
+    """_run_metadata emits pytorch provenance alongside the back-compat bb commit."""
+
+    def test_emits_pytorch_commit_and_ref(self, monkeypatch):
+        # bb-repo commit query (cwd=None) vs pytorch query are both routed
+        # through _git_query; the provenance helper is mocked directly.
+        monkeypatch.setattr(
+            "bench_parallel._git_query",
+            lambda args, cwd=None: "bbcommit0000000000000000000000000000000",
+        )
+        monkeypatch.setattr(
+            "bench_parallel._pytorch_provenance",
+            lambda: ("ptcommit1111111111111111111111111111111", "tmp_work"),
+        )
+        md = _run_metadata(workload_kind="repro", n_results=5)
+        # New structured pytorch provenance:
+        assert md["pytorch_commit"] == "ptcommit1111111111111111111111111111111"
+        assert md["pytorch_ref"] == "tmp_work"
+        # Back-compat: the bb-repo commit field is still present (consumers:
+        # results/b200/_stamp.py, the merge path, TestMergeIntoBaseline above).
+        assert md["commit"] == "bbcommit0000000000000000000000000000000"
+        assert md["workload_kind"] == "repro"
+        assert md["n_results"] == 5
+
+    def test_pytorch_ref_null_on_wheel(self, monkeypatch):
+        """When provenance can't resolve a ref (wheel), pytorch_ref is null but
+        the key is still present and _run_metadata does not crash."""
+        monkeypatch.setattr(
+            "bench_parallel._git_query", lambda args, cwd=None: "bbcommit"
+        )
+        monkeypatch.setattr(
+            "bench_parallel._pytorch_provenance",
+            lambda: ("wheelsha", None),
+        )
+        md = _run_metadata(workload_kind=None, n_results=1)
+        assert md["pytorch_commit"] == "wheelsha"
+        assert md["pytorch_ref"] is None
+        assert "workload_kind" not in md  # omitted when falsy

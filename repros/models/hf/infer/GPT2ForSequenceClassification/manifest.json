@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPT2ForSequenceClassification",
+  "patterns": [
+    "0ada225c0a04",
+    "1611fb0c7845",
+    "2d969ac9ad59",
+    "3a2d56cdea00",
+    "5ec2187b5869",
+    "a0354c147dd8",
+    "de8967598ec8",
+    "f4578c128d74"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

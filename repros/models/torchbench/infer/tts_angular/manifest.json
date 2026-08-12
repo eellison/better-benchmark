@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "tts_angular",
+  "patterns": [
+    "59cd03f5c32f"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,684 @@
+{
+  "traceEvents": [
+    {
+      "name": "process_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 0,
+      "args": {
+        "name": "alexnet"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "name": "fusible (current compile, real us)"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "name": "extern (real us: conv/GEMM/SDPA)"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "name": "oracle ceiling (fusible: ref-kernel us; extern: same real us)"
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 0.0,
+      "dur": 799.616,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution",
+        "order_index": 17,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 3, 224, 224],torch.bfloat16,[150528, 50176, 224, 1]),T([64, 3, 11, 11],torch.bfloat16,[363, 121, 11, 1]),T([64],torch.bfloat16,[1]),[4,4],[2,2],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 799.6159791946411,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 0.0,
+      "dur": 799.616,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution",
+        "order_index": 17,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 3, 224, 224],torch.bfloat16,[150528, 50176, 224, 1]),T([64, 3, 11, 11],torch.bfloat16,[363, 121, 11, 1]),T([64],torch.bfloat16,[1]),[4,4],[2,2],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 799.6159791946411,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "eff4b8c521ae/9594e3d9",
+      "ph": "X",
+      "ts": 799.616,
+      "dur": 35.936,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "getitem_1",
+        "order_index": 21,
+        "key": [
+          "eff4b8c521ae",
+          "9594e3d9"
+        ],
+        "us": 35.93600168824196,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "eff4b8c521ae/9594e3d9 (oracle)",
+      "ph": "X",
+      "ts": 799.616,
+      "dur": 41.66,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "getitem_1",
+        "order_index": 21,
+        "pattern_hash": "eff4b8c521ae",
+        "shape_hash": "9594e3d9",
+        "oracle_us": 41.66,
+        "matched_compile_us": 54.98,
+        "node_real_compile_us": 35.93600168824196,
+        "ratio": 1.32,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_eff4b8c521ae",
+        "point_key": "alexnet_9594e3d9"
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 835.552,
+      "dur": 132.0,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_1",
+        "order_index": 22,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 64, 27, 27],torch.bfloat16,[46656, 729, 27, 1]),T([192, 64, 5, 5],torch.bfloat16,[1600, 25, 5, 1]),T([192],torch.bfloat16,[1]),[1,1],[2,2],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 131.99999928474426,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 835.552,
+      "dur": 132.0,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_1",
+        "order_index": 22,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 64, 27, 27],torch.bfloat16,[46656, 729, 27, 1]),T([192, 64, 5, 5],torch.bfloat16,[1600, 25, 5, 1]),T([192],torch.bfloat16,[1]),[1,1],[2,2],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 131.99999928474426,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "eff4b8c521ae/27e7b058",
+      "ph": "X",
+      "ts": 967.552,
+      "dur": 26.432,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "getitem_3",
+        "order_index": 26,
+        "key": [
+          "eff4b8c521ae",
+          "27e7b058"
+        ],
+        "us": 26.43200010061264,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "eff4b8c521ae/27e7b058 (oracle)",
+      "ph": "X",
+      "ts": 967.552,
+      "dur": 26.24,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "getitem_3",
+        "order_index": 26,
+        "pattern_hash": "eff4b8c521ae",
+        "shape_hash": "27e7b058",
+        "oracle_us": 26.24,
+        "matched_compile_us": 25.31,
+        "node_real_compile_us": 26.43200010061264,
+        "ratio": 0.965,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_eff4b8c521ae",
+        "point_key": "alexnet_27e7b058"
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 993.984,
+      "dur": 77.536,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_2",
+        "order_index": 27,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 13, 13],torch.bfloat16,[32448, 169, 13, 1]),T([384, 192, 3, 3],torch.bfloat16,[1728, 9, 3, 1]),T([384],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 77.53600180149078,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 993.984,
+      "dur": 77.536,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_2",
+        "order_index": 27,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 192, 13, 13],torch.bfloat16,[32448, 169, 13, 1]),T([384, 192, 3, 3],torch.bfloat16,[1728, 9, 3, 1]),T([384],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 77.53600180149078,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "3abc926270f6/a831c950",
+      "ph": "X",
+      "ts": 1071.52,
+      "dur": 11.36,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_2",
+        "order_index": 28,
+        "key": [
+          "3abc926270f6",
+          "a831c950"
+        ],
+        "us": 11.359999887645245,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "3abc926270f6/a831c950 (oracle)",
+      "ph": "X",
+      "ts": 1071.52,
+      "dur": 10.21,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_2",
+        "order_index": 28,
+        "pattern_hash": "3abc926270f6",
+        "shape_hash": "a831c950",
+        "oracle_us": 10.21,
+        "matched_compile_us": 13.44,
+        "node_real_compile_us": 11.359999887645245,
+        "ratio": 1.317,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_3abc926270f6",
+        "point_key": "alexnet_a831c950"
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1082.88,
+      "dur": 81.728,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_3",
+        "order_index": 29,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 13, 13],torch.bfloat16,[64896, 169, 13, 1]),T([256, 384, 3, 3],torch.bfloat16,[3456, 9, 3, 1]),T([256],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 81.727996468544,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 1082.88,
+      "dur": 81.728,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_3",
+        "order_index": 29,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 384, 13, 13],torch.bfloat16,[64896, 169, 13, 1]),T([256, 384, 3, 3],torch.bfloat16,[3456, 9, 3, 1]),T([256],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 81.727996468544,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "3abc926270f6/a8ee30c6",
+      "ph": "X",
+      "ts": 1164.608,
+      "dur": 9.664,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_3",
+        "order_index": 30,
+        "key": [
+          "3abc926270f6",
+          "a8ee30c6"
+        ],
+        "us": 9.664000011980534,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "3abc926270f6/a8ee30c6 (oracle)",
+      "ph": "X",
+      "ts": 1164.608,
+      "dur": 9.06,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_3",
+        "order_index": 30,
+        "pattern_hash": "3abc926270f6",
+        "shape_hash": "a8ee30c6",
+        "oracle_us": 9.06,
+        "matched_compile_us": 11.04,
+        "node_real_compile_us": 9.664000011980534,
+        "ratio": 1.219,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_3abc926270f6",
+        "point_key": "alexnet_a8ee30c6"
+      }
+    },
+    {
+      "name": "aten.convolution.default",
+      "ph": "X",
+      "ts": 1174.272,
+      "dur": 67.936,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_4",
+        "order_index": 31,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 256, 13, 13],torch.bfloat16,[43264, 169, 13, 1]),T([256, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),T([256],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 67.9360032081604,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.convolution.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 1174.272,
+      "dur": 67.936,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "convolution_4",
+        "order_index": 31,
+        "key": [
+          "aten.convolution.default",
+          "((T([128, 256, 13, 13],torch.bfloat16,[43264, 169, 13, 1]),T([256, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),T([256],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+        ],
+        "us": 67.9360032081604,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "76ffbcc3b8af/a8ee30c6",
+      "ph": "X",
+      "ts": 1242.208,
+      "dur": 11.232,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "view",
+        "order_index": 37,
+        "key": [
+          "76ffbcc3b8af",
+          "a8ee30c6"
+        ],
+        "us": 11.231999844312668,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "76ffbcc3b8af/a8ee30c6 (oracle)",
+      "ph": "X",
+      "ts": 1242.208,
+      "dur": 11.07,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "view",
+        "order_index": 37,
+        "pattern_hash": "76ffbcc3b8af",
+        "shape_hash": "a8ee30c6",
+        "oracle_us": 11.07,
+        "matched_compile_us": 10.82,
+        "node_real_compile_us": 11.231999844312668,
+        "ratio": 0.977,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_76ffbcc3b8af",
+        "point_key": "alexnet_a8ee30c6"
+      }
+    },
+    {
+      "name": "aten.addmm.default",
+      "ph": "X",
+      "ts": 1253.44,
+      "dur": 26.368,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm",
+        "order_index": 39,
+        "key": [
+          "aten.addmm.default",
+          "((T([4096],torch.bfloat16,[1]),T([128, 9216],torch.bfloat16,[9216, 1]),T([9216, 4096],torch.bfloat16,[1, 9216])),{})"
+        ],
+        "us": 26.367999613285065,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.addmm.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 1253.44,
+      "dur": 26.368,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm",
+        "order_index": 39,
+        "key": [
+          "aten.addmm.default",
+          "((T([4096],torch.bfloat16,[1]),T([128, 9216],torch.bfloat16,[9216, 1]),T([9216, 4096],torch.bfloat16,[1, 9216])),{})"
+        ],
+        "us": 26.367999613285065,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "3abc926270f6/18290e58",
+      "ph": "X",
+      "ts": 1279.808,
+      "dur": 7.04,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_5",
+        "order_index": 40,
+        "key": [
+          "3abc926270f6",
+          "18290e58"
+        ],
+        "us": 7.040000054985285,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "3abc926270f6/18290e58 (oracle)",
+      "ph": "X",
+      "ts": 1279.808,
+      "dur": 5.92,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_5",
+        "order_index": 40,
+        "pattern_hash": "3abc926270f6",
+        "shape_hash": "18290e58",
+        "oracle_us": 5.92,
+        "matched_compile_us": 5.92,
+        "node_real_compile_us": 7.040000054985285,
+        "ratio": 1.0,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_3abc926270f6",
+        "point_key": "alexnet_18290e58"
+      }
+    },
+    {
+      "name": "aten.addmm.default",
+      "ph": "X",
+      "ts": 1286.848,
+      "dur": 15.968,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm_1",
+        "order_index": 42,
+        "key": [
+          "aten.addmm.default",
+          "((T([4096],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 4096],torch.bfloat16,[1, 4096])),{})"
+        ],
+        "us": 15.968000516295433,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.addmm.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 1286.848,
+      "dur": 15.968,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm_1",
+        "order_index": 42,
+        "key": [
+          "aten.addmm.default",
+          "((T([4096],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 4096],torch.bfloat16,[1, 4096])),{})"
+        ],
+        "us": 15.968000516295433,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    },
+    {
+      "name": "3abc926270f6/18290e58",
+      "ph": "X",
+      "ts": 1302.816,
+      "dur": 7.04,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_6",
+        "order_index": 43,
+        "key": [
+          "3abc926270f6",
+          "18290e58"
+        ],
+        "us": 7.040000054985285,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "3abc926270f6/18290e58 (oracle)",
+      "ph": "X",
+      "ts": 1302.816,
+      "dur": 5.92,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_000",
+        "node_name": "relu_6",
+        "order_index": 43,
+        "pattern_hash": "3abc926270f6",
+        "shape_hash": "18290e58",
+        "oracle_us": 5.92,
+        "matched_compile_us": 5.92,
+        "node_real_compile_us": 7.040000054985285,
+        "ratio": 1.0,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "pointwise_3abc926270f6",
+        "point_key": "alexnet_18290e58"
+      }
+    },
+    {
+      "name": "aten.addmm.default",
+      "ph": "X",
+      "ts": 1309.856,
+      "dur": 12.032,
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm_2",
+        "order_index": 45,
+        "key": [
+          "aten.addmm.default",
+          "((T([1000],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 1000],torch.bfloat16,[1, 4096])),{})"
+        ],
+        "us": 12.032000347971916,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "aten.addmm.default (extern: no oracle, real us)",
+      "ph": "X",
+      "ts": 1309.856,
+      "dur": 12.032,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "extern",
+        "graph": "full_graph_000",
+        "node_name": "addmm_2",
+        "order_index": 45,
+        "key": [
+          "aten.addmm.default",
+          "((T([1000],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 1000],torch.bfloat16,[1, 4096])),{})"
+        ],
+        "us": 12.032000347971916,
+        "has_oracle": false,
+        "note": "extern is not an oracle target; same real us mirrored so externs cancel between the clocks."
+      }
+    }
+  ],
+  "displayTimeUnit": "ns"
+}

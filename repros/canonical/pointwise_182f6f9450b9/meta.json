@@ -7,17 +7,9 @@
     "aten.mul.Tensor",
     "aten.sigmoid.default"
   ],
-  "n_models": 10,
+  "n_models": 2,
   "models": [
-    "timm_tf_efficientnet_b0_infer",
-    "timm_tf_efficientnet_b0_infer_000",
-    "timm_tf_efficientnet_b0_train",
-    "timm_tf_efficientnet_b0_train_000",
-    "timm_timm_tf_efficientnet_b0_infer_infer_000",
-    "timm_timm_tf_efficientnet_b0_train_train_000",
-    "torchbench_timm_efficientnet_infer_000",
-    "torchbench_timm_efficientnet_train_000",
-    "torchbench_timm_regnet_infer_000",
-    "torchbench_timm_regnet_train_000"
+    "timm/infer/tf_efficientnet_b0",
+    "timm/train/tf_efficientnet_b0"
   ]
 }

@@ -1,0 +1,36 @@
+{
+  "schema_version": 2,
+  "inputs": [],
+  "outputs": [
+    [[128,1,128,128],"b8",{"n":"output_0","st":[0,128,1,0],"gen":["randint",0,2]}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "PegasusForCausalLM",
+    "graph": "full_graph_001.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 7,
+    "counts": {
+      "fusible_in_partition": 7,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.expand.default": 1,
+        "aten.ge.Scalar": 1,
+        "aten.unsqueeze.default": 3,
+        "prims.iota.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

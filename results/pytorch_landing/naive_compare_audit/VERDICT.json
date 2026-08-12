@@ -1,0 +1,556 @@
+{
+  "_meta": {
+    "investigation": "naive A/B compare audit (compiled_us regressions) vs trusted CD-based headline",
+    "base_commit": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+    "head_commit": "daa79cd25ca9a80bfd65799394cf4255d6be75a6",
+    "n_benched_walk_states": 29,
+    "schema_note": "state point dicts contain compiled_us (DEFAULT torch.compile), coord_descent_us (autotuned), memcopy_sol_us (bandwidth floor). NO oracle_us/status field. bench_report.py --compare reads compiled_us; the TRUSTED headline rollup (results/perf_ab/rollup.py) reads coord_descent_us."
+  },
+  "key_mechanism": {
+    "naive_compare_metric": "compiled_us (default config, no coordinate_descent_tuning)",
+    "trusted_headline_metric": "coord_descent_us (rollup.py line 57)",
+    "explanation": "The order-0 mega-commit 97385fb32737 (incl U33 persistent-reduction-threshold raise + scalar-acc) makes the DEFAULT-config kernel much slower on reduction-heavy shapes (mean/sum/var_mean), while coord-descent autotuning still finds the good config. So compiled_us steps +100-390% at order 0 but coord_descent_us is flat. The named alarming clusters are this artifact.",
+    "control": "pytorch_unet (R1): coord_descent_us ALSO regresses (+310%/+292%) -> a REAL headline-affecting regression, already known."
+  },
+  "clusters": [
+    {
+      "cluster": "nfnet mean_c9e1a8113328",
+      "repro": "repros/canonical/mean_c9e1a8113328/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "dm_nfnet_f0_69db7514",
+          "base_us": 26.3,
+          "head_us": 14.0,
+          "naive_compiled_delta_pct": -47.0,
+          "shape_matched_compiled_delta_pct": -47.0,
+          "cd_delta_pct": -1.7,
+          "compiled_step_at_order0": false,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_280fa7d2",
+          "base_us": 23.6,
+          "head_us": 100.2,
+          "naive_compiled_delta_pct": 324.7,
+          "shape_matched_compiled_delta_pct": 324.7,
+          "cd_delta_pct": 4.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_2645a53e",
+          "base_us": 27.7,
+          "head_us": 114.4,
+          "naive_compiled_delta_pct": 312.2,
+          "shape_matched_compiled_delta_pct": 312.2,
+          "cd_delta_pct": 2.9,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_4ca56f88",
+          "base_us": 58.3,
+          "head_us": 205.8,
+          "naive_compiled_delta_pct": 252.8,
+          "shape_matched_compiled_delta_pct": 252.8,
+          "cd_delta_pct": 19.2,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_d1686c77",
+          "base_us": 23.5,
+          "head_us": 13.4,
+          "naive_compiled_delta_pct": -43.1,
+          "shape_matched_compiled_delta_pct": -43.1,
+          "cd_delta_pct": -0.3,
+          "compiled_step_at_order0": false,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_333b11d0",
+          "base_us": 17.2,
+          "head_us": 78.7,
+          "naive_compiled_delta_pct": 358.6,
+          "shape_matched_compiled_delta_pct": 358.6,
+          "cd_delta_pct": 1.8,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_547c8164",
+          "base_us": 19.3,
+          "head_us": 93.9,
+          "naive_compiled_delta_pct": 386.7,
+          "shape_matched_compiled_delta_pct": 386.7,
+          "cd_delta_pct": 4.1,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_f0a667e3",
+          "base_us": 37.8,
+          "head_us": 114.8,
+          "naive_compiled_delta_pct": 203.6,
+          "shape_matched_compiled_delta_pct": 203.6,
+          "cd_delta_pct": 20.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_44f1e75f",
+          "base_us": 20.9,
+          "head_us": 47.9,
+          "naive_compiled_delta_pct": 129.4,
+          "shape_matched_compiled_delta_pct": 129.4,
+          "cd_delta_pct": -0.5,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_4784273d",
+          "base_us": 34.7,
+          "head_us": 147.2,
+          "naive_compiled_delta_pct": 324.7,
+          "shape_matched_compiled_delta_pct": 324.7,
+          "cd_delta_pct": -4.6,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_3cf84b69",
+          "base_us": 33.8,
+          "head_us": 157.4,
+          "naive_compiled_delta_pct": 366.3,
+          "shape_matched_compiled_delta_pct": 366.3,
+          "cd_delta_pct": 14.1,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_2150fa2c",
+          "base_us": 68.7,
+          "head_us": 258.1,
+          "naive_compiled_delta_pct": 275.5,
+          "shape_matched_compiled_delta_pct": 275.5,
+          "cd_delta_pct": 14.5,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_6b68d184",
+          "base_us": 25.4,
+          "head_us": 13.5,
+          "naive_compiled_delta_pct": -46.8,
+          "shape_matched_compiled_delta_pct": -46.8,
+          "cd_delta_pct": 3.8,
+          "compiled_step_at_order0": false,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_d3381898",
+          "base_us": 24.3,
+          "head_us": 93.9,
+          "naive_compiled_delta_pct": 286.7,
+          "shape_matched_compiled_delta_pct": 286.7,
+          "cd_delta_pct": -1.1,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_473b7062",
+          "base_us": 23.5,
+          "head_us": 102.1,
+          "naive_compiled_delta_pct": 335.3,
+          "shape_matched_compiled_delta_pct": 335.3,
+          "cd_delta_pct": 1.5,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_630d0797",
+          "base_us": 46.0,
+          "head_us": 159.5,
+          "naive_compiled_delta_pct": 246.8,
+          "shape_matched_compiled_delta_pct": 246.8,
+          "cd_delta_pct": 15.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "Albert sum_sum_sum_c304a1364550",
+      "repro": "repros/canonical/sum_sum_sum_c304a1364550/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "AlbertForMaskedLM_4a97732f",
+          "base_us": 129.2,
+          "head_us": 585.7,
+          "naive_compiled_delta_pct": 353.5,
+          "shape_matched_compiled_delta_pct": 353.5,
+          "cd_delta_pct": -2.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "Albert sum_sum_sum_b703e5a31562",
+      "repro": "repros/canonical/sum_sum_sum_b703e5a31562/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "AlbertForMaskedLM_4a97732f",
+          "base_us": 136.2,
+          "head_us": 587.6,
+          "naive_compiled_delta_pct": 331.5,
+          "shape_matched_compiled_delta_pct": 331.5,
+          "cd_delta_pct": -4.9,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "Albert sum_sum_sum_748c3850ee18",
+      "repro": "repros/canonical/sum_sum_sum_748c3850ee18/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "AlbertForMaskedLM_f2a6d7d1",
+          "base_us": 137.7,
+          "head_us": 587.8,
+          "naive_compiled_delta_pct": 326.8,
+          "shape_matched_compiled_delta_pct": 326.8,
+          "cd_delta_pct": -0.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "sum_abcd9bccce7d (Pegasus/Bart/Blenderbot/vit/M2M/OPT/PLBart)",
+      "repro": "repros/canonical/sum_abcd9bccce7d/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "vit_base_patch16_siglip_256_fd01dd4f",
+          "base_us": 5.9,
+          "head_us": 7.0,
+          "naive_compiled_delta_pct": 18.9,
+          "shape_matched_compiled_delta_pct": 18.9,
+          "cd_delta_pct": 5.8,
+          "compiled_step_at_order0": false,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "BartForCausalLM_9ca5cb3f",
+          "base_us": 12.0,
+          "head_us": 30.2,
+          "naive_compiled_delta_pct": 151.1,
+          "shape_matched_compiled_delta_pct": 151.1,
+          "cd_delta_pct": -2.7,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "BlenderbotForCausalLM_c14b0cba",
+          "base_us": 13.8,
+          "head_us": 36.1,
+          "naive_compiled_delta_pct": 161.3,
+          "shape_matched_compiled_delta_pct": 161.3,
+          "cd_delta_pct": -5.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "BlenderbotForConditionalGeneration_4252d9ce",
+          "base_us": 11.9,
+          "head_us": 25.6,
+          "naive_compiled_delta_pct": 114.2,
+          "shape_matched_compiled_delta_pct": 114.2,
+          "cd_delta_pct": 1.5,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "M2M100ForConditionalGeneration_cc365d90",
+          "base_us": 12.0,
+          "head_us": 29.7,
+          "naive_compiled_delta_pct": 147.5,
+          "shape_matched_compiled_delta_pct": 147.5,
+          "cd_delta_pct": -2.7,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "OPTForCausalLM_f696cede",
+          "base_us": 11.2,
+          "head_us": 27.6,
+          "naive_compiled_delta_pct": 146.0,
+          "shape_matched_compiled_delta_pct": 146.0,
+          "cd_delta_pct": 9.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "PLBartForCausalLM_73dfcea9",
+          "base_us": 14.0,
+          "head_us": 44.0,
+          "naive_compiled_delta_pct": 213.9,
+          "shape_matched_compiled_delta_pct": 213.9,
+          "cd_delta_pct": 3.1,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "PegasusForCausalLM_2ed1d266",
+          "base_us": 15.2,
+          "head_us": 53.0,
+          "naive_compiled_delta_pct": 247.7,
+          "shape_matched_compiled_delta_pct": 247.7,
+          "cd_delta_pct": 7.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "sum_6d68a671ec4a (vit dinov2/deit/mobilevit)",
+      "repro": "repros/canonical/sum_6d68a671ec4a/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "deit_tiny_patch16_224.fb_in1k_8a12efe4",
+          "base_us": 24.1,
+          "head_us": 56.1,
+          "naive_compiled_delta_pct": 132.9,
+          "shape_matched_compiled_delta_pct": 132.9,
+          "cd_delta_pct": -2.9,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "deit_base_distilled_patch16_224_ae8c34ef",
+          "base_us": 65.1,
+          "head_us": 194.4,
+          "naive_compiled_delta_pct": 198.9,
+          "shape_matched_compiled_delta_pct": 198.9,
+          "cd_delta_pct": -4.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "mobilevit_s_7f46223b",
+          "base_us": 28.2,
+          "head_us": 69.6,
+          "naive_compiled_delta_pct": 146.6,
+          "shape_matched_compiled_delta_pct": 146.6,
+          "cd_delta_pct": -3.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "vit_base_patch14_dinov2.lvd142m_15da2150",
+          "base_us": 402.4,
+          "head_us": 1263.6,
+          "naive_compiled_delta_pct": 214.0,
+          "shape_matched_compiled_delta_pct": 214.0,
+          "cd_delta_pct": -1.6,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "vit_base_patch16_siglip_256_ac9c688a",
+          "base_us": 82.7,
+          "head_us": 248.0,
+          "naive_compiled_delta_pct": 199.8,
+          "shape_matched_compiled_delta_pct": 199.8,
+          "cd_delta_pct": -2.6,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "sum_a72724ce25f0 (nfnet)",
+      "repro": "repros/canonical/sum_a72724ce25f0/repro.py",
+      "known_R1R2R3": false,
+      "tags": [
+        {
+          "tag": "dm_nfnet_f0_206932cb",
+          "base_us": 77.7,
+          "head_us": 249.7,
+          "naive_compiled_delta_pct": 221.3,
+          "shape_matched_compiled_delta_pct": 221.3,
+          "cd_delta_pct": -5.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_89759c54",
+          "base_us": 44.0,
+          "head_us": 130.8,
+          "naive_compiled_delta_pct": 197.4,
+          "shape_matched_compiled_delta_pct": 197.4,
+          "cd_delta_pct": -5.1,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_fba7f37b",
+          "base_us": 35.1,
+          "head_us": 101.6,
+          "naive_compiled_delta_pct": 189.8,
+          "shape_matched_compiled_delta_pct": 189.8,
+          "cd_delta_pct": -4.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "dm_nfnet_f0_f88457c3",
+          "base_us": 16.3,
+          "head_us": 32.5,
+          "naive_compiled_delta_pct": 100.0,
+          "shape_matched_compiled_delta_pct": 100.0,
+          "cd_delta_pct": 7.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_77f5e18d",
+          "base_us": 122.7,
+          "head_us": 330.6,
+          "naive_compiled_delta_pct": 169.5,
+          "shape_matched_compiled_delta_pct": 169.5,
+          "cd_delta_pct": -2.3,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_69ed9b17",
+          "base_us": 55.0,
+          "head_us": 173.0,
+          "naive_compiled_delta_pct": 214.3,
+          "shape_matched_compiled_delta_pct": 214.3,
+          "cd_delta_pct": 1.9,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_45166747",
+          "base_us": 44.8,
+          "head_us": 133.0,
+          "naive_compiled_delta_pct": 196.8,
+          "shape_matched_compiled_delta_pct": 196.8,
+          "cd_delta_pct": 0.0,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        },
+        {
+          "tag": "nfnet_l0_0e3d6755",
+          "base_us": 19.2,
+          "head_us": 41.8,
+          "naive_compiled_delta_pct": 117.5,
+          "shape_matched_compiled_delta_pct": 117.5,
+          "cd_delta_pct": -0.4,
+          "compiled_step_at_order0": true,
+          "cd_persistent_step": null
+        }
+      ]
+    },
+    {
+      "cluster": "CONTROL pytorch_unet pointwise_457ec7dce9c1 (R1)",
+      "repro": "repros/canonical/pointwise_457ec7dce9c1/repro.py",
+      "known_R1R2R3": true,
+      "tags": [
+        {
+          "tag": "pytorch_unet_e3cdab72",
+          "base_us": 179.7,
+          "head_us": 752.6,
+          "naive_compiled_delta_pct": 318.8,
+          "shape_matched_compiled_delta_pct": 318.8,
+          "cd_delta_pct": 309.8,
+          "compiled_step_at_order0": false,
+          "cd_persistent_step": [
+            313.1,
+            25,
+            178.4,
+            737.2
+          ]
+        }
+      ]
+    },
+    {
+      "cluster": "CONTROL pytorch_unet pointwise_87cb1a76ed86 (R1)",
+      "repro": "repros/canonical/pointwise_87cb1a76ed86/repro.py",
+      "known_R1R2R3": true,
+      "tags": [
+        {
+          "tag": "pytorch_unet_f4799916",
+          "base_us": 96.1,
+          "head_us": 380.9,
+          "naive_compiled_delta_pct": 296.2,
+          "shape_matched_compiled_delta_pct": 296.2,
+          "cd_delta_pct": 287.1,
+          "compiled_step_at_order0": false,
+          "cd_persistent_step": [
+            292.6,
+            40,
+            95.9,
+            376.4
+          ]
+        }
+      ]
+    }
+  ],
+  "global_classification_of_871_naive_regressions": {
+    "method": "For all 4977 shape-matched (repro,model-tag) points common to base+head, classify compiled_us delta; then for compiled regressions, examine coord_descent_us behavior across the 29-state walk.",
+    "naive_compiled_us_compare": {
+      "improved": 1251,
+      "regressed": 871,
+      "neutral": 2855,
+      "threshold_pct": 5
+    },
+    "of_871_compiled_regressions": {
+      "cd_flat_<=5pct (compiled-config-only, headline-INVARIANT)": 357,
+      "cd_also_>5pct_at_endpoints (candidates)": 396,
+      "cd_improved_<-5pct": 118
+    },
+    "of_396_cd_endpoint_candidates": {
+      "CD-BOUNCE (head within walk noise band, no step) = NOISE": 339,
+      "CD-STEP-candidate (head above band)": 57,
+      "after_trace_step_vs_bounce_most_57_are_small-kernel_endpoint_jitter": "e.g. pointwise_ccd411f2a45d ~5us oscillates 4.9-5.8us across all 29 states, no step"
+    },
+    "robust_adjacency_persistent_CD_steps_total_points": 53,
+    "interpretation": "Of 871 naive 'regressions': ~357 are pure default-config artifacts (CD flat); ~339 of the rest are CD endpoint jitter (loose per-point A/A floor, p95~8.4%). Only ~53 points show a genuine persistent CD step. The bulk (>90%) of the 871 are NOT headline-relevant."
+  },
+  "real_CD_regressions_by_commit": {
+    "note": "Genuine persistent coord_descent_us steps (the headline metric). Grouped by the walk commit that introduced them. These ARE real kernel regressions; verified against trusted per-model rollup below.",
+    "order1_ab29345d82d (CE loop-invariant hoisting)": "ghostnet/repvgg/mobilenet sum_sum* +21-35%",
+    "order20_4427bfd553c (scatter_add_into_fusion dtype)": "Blenderbot/Deberta/MobileBert/resnet18 var_mean* +22-46%",
+    "order22_d8e9914094a (scatter read bypass for Longformer)": "AllenaiLongformer(=R3)+densenet/phlippe/GPTNeo sum_sum* +21-112% (14 pts)",
+    "order25_d95f59fb1bc (pointwise_cat shared reads / SwiGLU)": "pytorch_unet(=R1) +313% + deit_base/vit/XGLM/vit_siglip +38-70%",
+    "order30_c465f1751c6 (scheduler mutation recursion fix)": "GPTNeo+89%/DistilBert+78%/DebertaV2/densenet/TrOCR +28-89%",
+    "order40_44802547aa9 (_get_nd_reduction_numels crash fix)": "pytorch_unet(=R1) +293% + deit_tiny +29%",
+    "order59_a85d79a900a (segment-aligned split)": "densenet/phlippe sum_sum +28-38%"
+  },
+  "new_regression_audit": {
+    "question": "Do the real CD steps in models NOT in R1/R2/R3 (GPTNeo, DistilBert, DebertaV2, TrOCR, XGLM, vit_dinov2, deit_base, densenet, phlippe, ghostnet, repvgg, Blenderbot, MobileBert, visformer, Albert, nfnet) constitute NEW unaccounted model-level regressions?",
+    "answer": "NO. Two outcomes, both already correct in the trusted methodology:",
+    "outcome_A_already_in_regression_list": "Blenderbot, densenet121, MobileBert, ghostnet, repvgg, visformer, mobilenetv2/v3, deit_tiny, nfnet_l0/dm_nfnet, Albert, deit_base(infer), Longformer(R3) -- all present in results/perf_ab/regressions.md (37-model known list) with the exact offending kernels. Model-level impact is small (mostly <2%; nfnet -0.06%) because these CD-regressed kernels are a tiny fraction of model time.",
+    "outcome_B_net_positive_models": "GPTNeo(+2.5%/+3.1%), DistilBert(+12.4%/+3.6%), DebertaV2(+3.2%/+1.8%), TrOCR(+12.8%/+18.6%), XGLM(+11.5%/+9.6%), DistillGPT2(+13.8%/+2.1%), GPT2ForSeq(+0.7%/+1.3%), YituTech(+3.8%/+2.0%), phlippe_densenet(+4.4%), vit_dinov2_train(+1.3%) -- net POSITIVE in trusted rollup.json. The real kernel CD regression is offset by larger wins elsewhere in the same model; correctly NOT in the regression list.",
+    "conclusion": "No new model-level regression exists outside R1(pytorch_unet)/R2(pyhpc)/R3(Longformer) + the documented 37-model regression list. The headline (119 improved / 31-37 regressed / 8 flat over 158 models) already accounts for every regression found.",
+    "honest_caveat": "There ARE genuine kernel-level coord_descent_us regressions on individual reduction kernels (e.g. densenet sum_sum +112% at order 22, GPTNeo sum +89% at order 30). They are real and could be worth a follow-up fix, but they do NOT move the per-model-e2e headline because the affected kernels are a small fraction of model time and/or the model is net-positive overall."
+  },
+  "bottom_line": {
+    "naive_all-points_compiled_us_compare_is_NOT_trustworthy_for_README": true,
+    "reason": "It reads compiled_us (default config); the headline reads coord_descent_us. The order-0 mega-commit regresses default-config reductions by +100-390% while coord-descent (and thus the headline) is unaffected.",
+    "of_871_naive_regressions": "~357 are default-config-only (CD flat, headline-invariant); ~339 more are CD endpoint jitter; only ~53 points are genuine persistent CD steps -- and ALL of those resolve to either the known 37-model regression list or net-positive models.",
+    "new_real_regression_outside_R1R2R3": "NONE at the model (headline) level. The scary nfnet/Albert/Pegasus/vit clusters are the default-config artifact.",
+    "README_gate": "SAFE to publish the +2.18% median / +4.51% (mean +4.33%) geomean CD-based headline. The naive compiled_us compare should NOT be cited."
+  }
+}

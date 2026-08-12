@@ -1,38 +1,15 @@
 {
   "schema_version": 2,
   "inputs": [
-    [[256,128,1,1],"f32",{"n":"arg0_1"}],
-    ["I",4,"s16"],
-    ["I",4,"s82"],
-    [[64,128,"s16","s82"],"f32",{"n":"arg3_1","st":["128*s16*s82","s16*s82","s82",1]}]
+    [[256,256,3,3],"bf16",{"n":"arg0_1"}],
+    ["sym",2],
+    ["sym",2],
+    [[64,256,2,2],"bf16",{"n":"arg3_1"}]
   ],
   "outputs": [
-    [[64,256,"(((s16 - 1)//2)) + 1","(((s82 - 1)//2)) + 1"],"f32",{"n":"output_0","st":["256*((((s16 - 1)//2)) + 1)*((((s82 - 1)//2)) + 1)","((((s16 - 1)//2)) + 1)*((((s82 - 1)//2)) + 1)","(((s82 - 1)//2)) + 1",1]}]
+    [[64,256,2,2],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
-  "symbols": {
-    "s16": {
-      "hint": 4,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s82": {
-      "hint": 4,
-      "range": [
-        2,
-        null
-      ]
-    }
-  },
-  "guards": [
-    "128*s16*s82 <= 2147483647",
-    "(256*(((s16 - 1)//2)) + 256)*((((s82 - 1)//2)) + 1) <= 2147483647",
-    "Ne((((s82 - 1)//2)) + 1, 1)",
-    "Ne((((s16 - 1)//2)) + 1, 1)"
-  ],
-  "captured_dynamic": true,
   "graph": "full_graph_017.py",
   "source": {
     "kind": "model",
@@ -56,5 +33,5 @@
       }
     }
   },
-  "roundtrip": "ok"
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 256"
 }

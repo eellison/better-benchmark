@@ -1,66 +1,15 @@
 {
   "schema_version": 2,
   "inputs": [
-    ["I",256,"s66"],
-    ["I",2,"s57"],
-    ["I",2,"s39"],
-    [[64,"s66","s57","s39"],"f32",{"n":"arg3_1","st":["s39*s57*s66","s39*s57","s39",1]}],
-    [[64,"s66","s57","s39"],"f32",{"n":"arg4_1","st":["s39*s57*s66","s39*s57","s39",1]}]
+    [[256,128,1,1],"bf16",{"n":"arg0_1"}],
+    ["sym",4],
+    ["sym",4],
+    [[64,128,4,4],"bf16",{"n":"arg3_1"}]
   ],
   "outputs": [
-    [[64,"s66","s57","s39"],"f32",{"n":"output_0","st":["s39*s57*s66","s39*s57","s39",1]}]
+    [[64,256,2,2],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
-  "symbols": {
-    "s66": {
-      "hint": 256,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s57": {
-      "hint": 2,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s68": {
-      "hint": 2,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s67": {
-      "hint": 256,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s89": {
-      "hint": 2,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s39": {
-      "hint": 2,
-      "range": [
-        2,
-        null
-      ]
-    }
-  },
-  "guards": [
-    "Eq(s39, s68)",
-    "Eq(s89, s57)",
-    "Eq(s67, s66)"
-  ],
-  "captured_dynamic": true,
   "graph": "full_graph_018.py",
   "source": {
     "kind": "model",
@@ -70,21 +19,19 @@
     "graph": "full_graph_018.py"
   },
   "node_accounting": {
-    "total_call_functions": 3,
+    "total_call_functions": 1,
     "counts": {
-      "fusible_in_partition": 3,
+      "fusible_in_partition": 0,
       "fusible_unpartitioned": 0,
-      "non_fusible": 0
+      "non_fusible": 1
     },
     "ops": {
-      "fusible_in_partition": {
-        "aten.add.Tensor": 1,
-        "aten.copy_.default": 1,
-        "aten.relu.default": 1
-      },
+      "fusible_in_partition": {},
       "fusible_unpartitioned": {},
-      "non_fusible": {}
+      "non_fusible": {
+        "aten.convolution.default": 1
+      }
     }
   },
-  "roundtrip": "ok"
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 2048 != 128"
 }

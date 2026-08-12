@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "DistillGPT2",
+  "patterns": [
+    "03788f40c42f",
+    "04d85912d998",
+    "05643331629f",
+    "06edf7b2c05f",
+    "1b3981f4d189",
+    "1bd9fae13cde",
+    "4042d49bf67b",
+    "47bdc8c7c0cd",
+    "4a268d7c766e",
+    "52fe1925ccda",
+    "6d75f431992b",
+    "700e0afd67fd",
+    "7551a58e5d34",
+    "75fe8662cbb9",
+    "79c321089383",
+    "952857910fc0",
+    "96b55483e3cf",
+    "97fd1a9318ef",
+    "9b4501cc7b35",
+    "b5aeecfb82a3",
+    "c4177f8f8203",
+    "c8d23ac4414d",
+    "ccd411f2a45d",
+    "d5a413a2c233",
+    "e7781939b0a2",
+    "e93685de7228",
+    "ed793bcaf7cf",
+    "f574b8ec0222",
+    "fb4ae0eb915f"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json"
+  },
+  "mode": "train"
+}

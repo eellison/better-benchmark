@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "swin_base_patch4_window7_224",
+  "patterns": [
+    "004f9a9ea198",
+    "0584ac272c37",
+    "07361cbc8321",
+    "0ec03ae7565f",
+    "25c71e7fbc96",
+    "265507cb5c7e",
+    "2db21af13668",
+    "50d468f5399f",
+    "52ddb6a14d4e",
+    "6387c0ecdffe",
+    "6cd69c8f3b06",
+    "6de4787c0d2d",
+    "821fb95bd167",
+    "826ea0b5f6e4",
+    "a4aad49412c5",
+    "ac4bab3e35d2",
+    "d3e13f25b442",
+    "e24ed1c36a95",
+    "ed86b04d7ae6",
+    "f1e6419d4a7f"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

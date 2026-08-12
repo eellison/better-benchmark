@@ -1,0 +1,142 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "2df7bcca6b5d": {
+      "a7052938": 1
+    },
+    "644fa7675014": {
+      "d67c38a5": 1
+    },
+    "af505388b035": {
+      "bc0fb1fb": 1
+    },
+    "647d3ac3f711": {
+      "bcb2f702": 1
+    },
+    "96edf0542ecd": {
+      "94a8a62c": 1
+    },
+    "826ea0b5f6e4": {
+      "e223410f": 12
+    },
+    "da5aa7a47091": {
+      "94a8a62c": 12
+    },
+    "e87d6ebc9ded": {
+      "2cdbce9d": 12
+    },
+    "301cf5a13527": {
+      "b8160d07": 12
+    },
+    "e232f7a3d0d8": {
+      "730342a3": 12
+    },
+    "f2a03dbd04dd": {
+      "b8160d07": 12
+    },
+    "a18f3869022f": {
+      "b8160d07": 12
+    },
+    "393456b916a6": {
+      "94a8a62c": 11
+    },
+    "035e4d7f5117": {
+      "d7517139": 12
+    },
+    "0a49dc00cbaf": {
+      "d7517139": 24
+    },
+    "31bb65844b3f": {
+      "67f7e2f4": 1
+    },
+    "562d52916cc9": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "272a369db8ad",
+      "count": 1,
+      "sig": "((T([256],torch.bfloat16,[1]),T([32768, 128],torch.bfloat16,[128, 1]),T([128, 256],torch.bfloat16,[1, 128])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 12.06399966031313,
+      "branch_us": 12.06399966031313
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "8bf660b7a770",
+      "count": 48,
+      "sig": "((T([256],torch.bfloat16,[1]),T([32768, 256],torch.bfloat16,[256, 1]),T([256, 256],torch.bfloat16,[1, 256])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 13.120000250637531,
+      "branch_us": 13.120000250637531
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "c70f084d7aff",
+      "count": 12,
+      "sig": "((T([256, 512, 64],torch.bfloat16,[32768, 64, 1]),T([256, 64, 512],torch.bfloat16,[32768, 512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 31.488001346588135,
+      "branch_us": 31.488001346588135
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "5f80a524ac8e",
+      "count": 12,
+      "sig": "((T([256, 512, 512],torch.bfloat16,[262144, 512, 1]),T([256, 512, 64],torch.bfloat16,[32768, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 36.57599911093712,
+      "branch_us": 36.57599911093712
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "314f720d5ca1",
+      "count": 12,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([32768, 256],torch.bfloat16,[256, 1]),T([256, 1024],torch.bfloat16,[1, 256])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 24.25600029528141,
+      "branch_us": 24.25600029528141
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "57ed2d5638df",
+      "count": 12,
+      "sig": "((T([256],torch.bfloat16,[1]),T([32768, 1024],torch.bfloat16,[1024, 1]),T([1024, 256],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "addmm_6",
+      "baseline_us": 23.48800003528595,
+      "branch_us": 23.48800003528595
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2e4400b24308",
+      "count": 1,
+      "sig": "((T([128],torch.bfloat16,[1]),T([32768, 256],torch.bfloat16,[256, 1]),T([256, 128],torch.bfloat16,[1, 256])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "addmm_73",
+      "baseline_us": 11.872000060975552,
+      "branch_us": 11.872000060975552
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "9dcff53341f2",
+      "count": 1,
+      "sig": "((T([30528],torch.bfloat16,[1]),T([32768, 128],torch.bfloat16,[128, 1]),T([128, 30528],torch.bfloat16,[30528, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "node": "addmm_74",
+      "baseline_us": 445.3760087490082,
+      "branch_us": 445.3760087490082
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "ElectraForCausalLM"
+}

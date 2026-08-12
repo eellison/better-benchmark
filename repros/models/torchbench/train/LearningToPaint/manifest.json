@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "LearningToPaint",
+  "patterns": [
+    "04d85912d998",
+    "0c1c9fc832f4",
+    "100a39b686e3",
+    "246850b7c198",
+    "2a737da66d69",
+    "36c3c08e0a4d",
+    "42fad1ece813",
+    "5cc92f5d49c1",
+    "643db2887a01",
+    "6a8cdea856dd",
+    "84dec355d0a4",
+    "86b0392acb3d",
+    "8bb40810003c",
+    "ccd411f2a45d",
+    "fb3a1658dadb"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

@@ -1,0 +1,127 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "ee1163128221": {
+      "eacfffdd": 1
+    },
+    "0ada225c0a04": {
+      "f2c837cd": 1
+    },
+    "2d969ac9ad59": {
+      "5cd82a46": 24
+    },
+    "3a2d56cdea00": {
+      "f2c837cd": 24
+    },
+    "e87d6ebc9ded": {
+      "e6f344ac": 24
+    },
+    "301cf5a13527": {
+      "af0c9f46": 24
+    },
+    "13a9aaa2eadb": {
+      "0b7018c4": 23
+    },
+    "3ce87c35ea2d": {
+      "af0c9f46": 24
+    },
+    "03afed5ec8e9": {
+      "af0c9f46": 24
+    },
+    "b19e82f2a47b": {
+      "f2c837cd": 23
+    },
+    "c372431bff28": {
+      "5911cf96": 1
+    },
+    "37bf4eff6ec9": {
+      "5247d883": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "5e0db6bb7d79",
+      "count": 72,
+      "sig": "((T([4096, 2048],torch.bfloat16,[2048, 1]),T([2048, 2048],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 30.432000756263733,
+      "branch_us": 30.432000756263733
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "740e870d8399",
+      "count": 24,
+      "sig": "((T([512, 128, 128],torch.float32,[16384, 128, 1]),T([512, 128, 128],torch.float32,[16384, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 62.49599903821945,
+      "branch_us": 62.49599903821945
+    },
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "b5fd2657ac78",
+      "count": 1,
+      "sig": "((T([32, 128],torch.bool,[128, 1]),-1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 11.168000288307667,
+      "branch_us": 11.168000288307667
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "c69263866d44",
+      "count": 24,
+      "sig": "((T([512, 128, 128],torch.bfloat16,[16384, 128, 1]),T([512, 128, 128],torch.bfloat16,[16384, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 15.296000055968761,
+      "branch_us": 15.296000055968761
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "35671cac8608",
+      "count": 24,
+      "sig": "((T([2048],torch.bfloat16,[1]),T([4096, 2048],torch.bfloat16,[2048, 1]),T([2048, 2048],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 28.44800055027008,
+      "branch_us": 28.44800055027008
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "8876dbd2ef6f",
+      "count": 24,
+      "sig": "((T([8192],torch.bfloat16,[1]),T([4096, 2048],torch.bfloat16,[2048, 1]),T([2048, 8192],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 79.55200225114822,
+      "branch_us": 79.55200225114822
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "486a9d1a4e1e",
+      "count": 24,
+      "sig": "((T([2048],torch.bfloat16,[1]),T([4096, 8192],torch.bfloat16,[8192, 1]),T([8192, 2048],torch.bfloat16,[1, 8192])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 95.16800194978714,
+      "branch_us": 95.16800194978714
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4cf8ef1fa197",
+      "count": 1,
+      "sig": "((T([4096, 2048],torch.bfloat16,[2048, 1]),T([2048, 2],torch.bfloat16,[1, 2048])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTNeoForSequenceClassification/full_graph_000.py",
+      "node": "mm_72",
+      "baseline_us": 18.015999346971512,
+      "branch_us": 18.015999346971512
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "GPTNeoForSequenceClassification"
+}

@@ -8,8 +8,8 @@
   ],
   "n_models": 3,
   "models": [
-    "torchbench_lennard_jones_infer_000",
-    "torchbench_lennard_jones_train_000",
-    "torchbench_pytorch_CycleGAN_and_pix2pix_infer_000"
+    "torchbench/infer/lennard_jones",
+    "torchbench/infer/pytorch_CycleGAN_and_pix2pix",
+    "torchbench/train/lennard_jones"
   ]
 }

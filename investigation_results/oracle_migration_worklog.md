@@ -4,17 +4,45 @@ Updated: 2026-06-15
 
 ## Current Worker Pool
 
-- Row 808 `amax_amax_any_b95e33d56ab6`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
-- Row 809 `amax_amax_any_b9844e73a342`: active worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
-- Row 810 `amax_amax_any_c92f837439d6`: active worker `019ebd75-6886-78e3-bf4e-af115c359931`.
-- Row 811 `amax_amax_any_dc2cfaa9c1cb`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
-- Row 812 `amax_amax_any_df3d9090847f`: active worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
+- Row 1 `pointwise_04d85912d998`: active worker `019ebd79-2f9f-7013-9350-8b73673b29a7`.
+- Row 2 `pointwise_ccd411f2a45d`: active worker `019ebd74-7360-7202-89cd-ec88aae96af5`.
+- Row 1549 `var_mean_6cd69c8f3b06`: claimed for worker `019ebd71-bd99-7ed3-9664-561ca57b630e`.
+- Row 1500 `var_mean_4425f695fc68`: claimed for worker `019ebd75-6886-78e3-bf4e-af115c359931`.
+- Row 1489 `var_mean_3bc311a8676a`: claimed for worker `019ebd73-a5cc-7672-95d6-b8cd6a888e02`.
 
-Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are marked needs_work after parent-confirmed bench failures. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
+Tail lane owned by this session: rows 1549-1654. Rows 1514-1548 are claimed by a midqueue worker and must not be touched by this tail lane. Rows 1489, 1500, 1549, 1554, 1647, 1648, 1659, 1673, 1700, 1701, 1711, 1716, and 1718 are claimed for high-end refill or pending parent review. Rows 1550-1553, 1555-1558, 1560-1629, 1630-1646, 1649-1658, 1660-1672, 1674-1699, 1702-1710, 1712-1715, 1717, and 1719-1727 are parent-verified on H100 fallback, pending B200 verification. Rows 577-588 were released to avoid colliding with the forward-moving manager. Recheck origin before reusing any older historical batch listed in the queue.
 
-Lower-gap refill buffer claimed by this session: rows 808-812 are active; rows 800-807 are spare claimed buffer. Rows 850, 852-854, 858-859, 862, 869, 873, 886, 895-896, 908, 916, 951-952, 957-958, and 966-968 were marked needs_work after parent-confirmed bench failures. Rows 813-849, 851, 855-857, 860-861, 863-868, 870-872, 874-878, 879-885, 887-894, 897-907, 909-915, 917-950, 953-956, 959, and 969 are parent-verified on H100 fallback, pending B200 verification. Historical lower-gap status is authoritative in `investigation_results/oracle_migration_queue.csv`.
+Rows 1711, 1716, and 1718 were parent-reviewed: row 1716 is kept as `1_AT_FLOOR`; rows 1711 and 1718 are back to needs_work after `1_BAD_ORACLE` locked benches.
+
+Row 1673 was parent-reviewed and kept as `1_AT_FLOOR`; no-skip checks cover the stochastic outputs and locked bench had no CUDAGraph warnings.
+
+Row 1700 was parent-reviewed and returned to needs_work after a `1_BAD_ORACLE` locked bench despite passing checks.
+
+Rows 1648 and 1659 were parent-reviewed and kept as `1_AT_FLOOR`; no-skip checks pass and locked benches had no CUDAGraph warnings.
+
+Lower-gap refill buffer claimed by this session: rows 1 and 2 are active. Rows 94 and 96 are back to needs_work after reproducing `1_BAD_ORACLE_23_GOOD` and `8_BAD_ORACLE_4_GOOD_4_AT_FLOOR`, respectively. Rows 1514-1548 remain reserved for the separate midqueue worker. Rows 43, 58, 62, 84, 94, 96, 124, 181, 183, 203, 207, 221, 232, 246, 294, 563, 740-741, 748, 757-758, 775, 780, 850, 852-854, 858-859, 862, 869, 873, 886, 895-896, 908, 916, 951-952, 957-958, 966-968, and 1500 were marked needs_work after parent-confirmed bench failures. Rows 53, 75, 172, 194, 223-224, 286, 440-442, 466, 469, 473, 497-499, 559-562, 564, 715-716, 742-747, 749-756, 759-774, 776-779, 781-849, 851, 855-857, 860-861, 863-868, 870-872, 874-878, 879-885, 887-894, 897-907, 909-915, 917-950, 953-956, 959, 969, and 1470-1513 are parent-verified on H100 fallback, pending B200 verification. Historical lower-gap status is authoritative in `investigation_results/oracle_migration_queue.csv`.
+
+Rows 85 and 93 were parent-rechecked after the pulled implementation: checks pass, but locked bench fails `NUMERICS_WORSE_THAN_COMPILED` on all points due the NaN fp64 gate, so their oracle files are deleted and queue status is back to needs_work.
+
+Row 84 was also parent-rechecked after the pulled implementation: checks pass, but locked bench fails `NUMERICS_WORSE_THAN_COMPILED` because the oracle differs from the fp64 ref while compiled has zero error, so its oracle file is deleted and queue status is back to needs_work.
+
+Row 99 was parent-rechecked after the pulled implementation: checks pass, but locked bench is `BAD_ORACLE` (`19.30us` oracle vs `18.14us` compile), so its oracle file is deleted and queue status is back to needs_work.
+
+Rows 94 and 103 were parent-rechecked after the pulled implementation: row 94 passes required locked bench (`23GOOD_1AT_FLOOR`) and is kept; row 103 fails required locked bench (`1BAD_ORACLE_1AT_FLOOR`), so its oracle file is deleted and queue status is back to needs_work.
+
+Additional lower-gap refill buffer claimed by this session: rows 740-749.
+
+Additional lower-gap refill buffer claimed by this session: rows 750-759.
+
+Additional lower-gap refill buffer claimed by this session: rows 760-769.
 
 Additional lower-gap refill buffer claimed by this session: rows 800-859.
+
+Additional lower-gap refill buffer claimed by this session: rows 790-799.
+
+Additional lower-gap refill buffer claimed by this session: rows 780-789.
+
+Additional lower-gap refill buffer claimed by this session: rows 770-779.
 
 Additional lower-gap refill buffer claimed by this session: rows 860-869.
 
@@ -507,6 +535,147 @@ Additional lower-gap refill buffer claimed by this session: rows 1370-1379.
 - Row 276 `sum_07fa37421ff1`: worker checks passed; fallback bench was `1GOOD`.
 - Row 277 `sum_2ba0992ca00b`: worker checks passed; fallback bench was `1GOOD`.
 - Row 257 `pointwise_3a0cd5d11499`: measured, 3/3 checks, H100 fallback bench `2GOOD_1AT_FLOOR`.
+- Row 1500 `var_mean_4425f695fc68`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=29.92us`, `compile=34.05us`, ratio `1.138`).
+- Row 1554 `var_mean_771a0a39f4b9`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=54.11us`, `compile=54.72us`, ratio `1.011`).
+- Row 1647 `var_mean_d0ae6f6e894f`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=30.59us`, `compile=31.30us`, ratio `1.023`).
+- Row 1701 `var_mean_fbfc0104897d`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=20.51us`, `compile=19.87us`, ratio `0.969`).
+- Row 1692 `var_mean_f13145f53165`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=150.98us`, `compile=175.65us`, ratio `1.163`).
+- Row 1489 `var_mean_3bc311a8676a`: returned to `needs_work`; retry still failed exact `complex64` output 3 and bench stopped at `UNVERIFIED_NUMERICS`, with no CUDAGraph warnings.
+- Row 1549 `var_mean_6cd69c8f3b06`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=15.71us`, `compile=14.72us`, ratio `0.937`).
+- Row 1561 `var_mean_8187f7c4e01e`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=72.96us`, `compile=72.90us`, ratio `0.999`).
+- Row 1608 `var_mean_a7b32508693f`: returned to `needs_work`; retry still failed exact `complex64` output 3 and bench stopped at `UNVERIFIED_NUMERICS`, with no CUDAGraph warnings.
+- Row 1445 `var_mean_087d5b4f064d`: returned to `needs_work`; retry still failed exact `complex64` output 3 and bench stopped at `UNVERIFIED_NUMERICS`, with no CUDAGraph warnings.
+- Row 1432 `sum_sum_sum_f7a87f05bdd2`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` for visible reduction outputs 1 and 2, with no CUDAGraph warnings.
+- Row 1398 `sum_sum_sum_86e661f4be59`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` for visible reduction outputs 1 and 2, with no CUDAGraph warnings.
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; retry fixed numerics but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=1397.73us`, `compile=162.78us`, ratio `0.116`).
+- Row 2 `pointwise_ccd411f2a45d`: parent-verified, 455/455 checks plus no-skip pass, locked H100 fallback bench `450AT_FLOOR_5GOOD` with no CUDAGraph warnings (ratio range `0.954` to `1.063`).
+- Row 1401 `sum_sum_sum_9ab0961d1fd9`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=32.96us`, `compile=40.16us`, ratio `1.218`).
+- Row 1402 `sum_sum_sum_9ae530fb77de`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=30.69us`, `compile=44.58us`, ratio `1.453`).
+- Row 1385 `sum_sum_sum_603e69b709ae`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=532.51us`, `compile=602.62us`, ratio `1.132`).
+- Row 1386 `sum_sum_sum_60a418792eff`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=106.53us`, `compile=105.60us`, ratio `0.991`).
+- Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=132.16us`, `compile=286.24us`, ratio `2.166`).
+- Row 1373 `sum_sum_sum_31ea6dc807dd`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 0 and 2, with no CUDAGraph warnings.
+- Row 1382 `sum_sum_sum_51b3bd5aa388`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=71.30us`, `compile=71.49us`, ratio `1.003`).
+- Row 1370 `sum_sum_sum_275ca61fceb8`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 1 and 2, with no CUDAGraph warnings.
+- Row 1369 `sum_sum_sum_23c53e2c6899`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=12.35us`, `compile=16.00us`, ratio `1.295`).
+- Row 1365 `sum_sum_sum_1a561863a1c6`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 1 and 2, with no CUDAGraph warnings.
+- Row 1357 `sum_sum_sum_0a8714a3041e`: returned to `needs_work`; checks passed but bench stopped at `NUMERICS_WORSE_THAN_COMPILED` on outputs 1, 2, and 3, with no CUDAGraph warnings.
+- Row 1288 `sum_sum_563676e3726c`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=47.78us`, `compile=47.84us`, ratio `1.001`).
+- Row 1 `pointwise_04d85912d998`: parent-verified, 469/469 checks plus no-skip pass, locked H100 fallback bench `425AT_FLOOR_44GOOD` with no CUDAGraph warnings (ratio range `0.960` to `1.182`).
+- Row 1274 `sum_sum_370ed60792c7`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=8.93us`, `compile=9.18us`, ratio `1.029`).
+- Row 1271 `sum_sum_3104a9ce2ada`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=96.61us`, `compile=96.83us`, ratio `1.002`).
+- Row 1255 `sum_sum_139d37b65771`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=363.07us`, `compile=353.34us`, ratio `0.973`).
+- Row 1212 `sum_84a4b14c240d`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=29.89us`, `compile=31.04us`, ratio `1.039`).
+- Row 1238 `sum_c5765737e761`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=15.84us`, `compile=15.81us`, ratio `0.998`).
+- Row 1223 `sum_9b2fcee49b0a`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=164.45us`, `compile=163.23us`, ratio `0.993`).
+- Row 852 `amax_sum_7303c49b6018`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=713.44us`, `compile=956.83us`, ratio `1.341`).
+- Row 853 `amax_sum_79b08bfeb860`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=713.63us`, `compile=956.61us`, ratio `1.340`).
+- Row 858 `amax_sum_884c406c2df8`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=716.80us`, `compile=961.54us`, ratio `1.341`).
+- Row 859 `amax_sum_8f72f9914b96`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=717.09us`, `compile=958.88us`, ratio `1.337`).
+- Row 1605 `var_mean_a4c92b1bdab7`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.50us`, `compile=175.42us`, ratio `1.107`).
+- Row 1561 `var_mean_8187f7c4e01e`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=73.09us`, `compile=73.12us`, ratio `1.000`).
+- Row 1608 `var_mean_a7b32508693f`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.56us`, `compile=175.33us`, ratio `1.106`).
+- Row 1718 `var_mean_mean_c2c0ad00da48`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=21.63us`, `compile=20.13us`, ratio `0.930`).
+- Row 1549 `var_mean_6cd69c8f3b06`: returned to `needs_work`; parent checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=15.65us`, `compile=14.62us`, ratio `0.935`).
+- Row 1209 `sum_7ba9dcb96142`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=610.85us`, `compile=1449.76us`, ratio `2.373`).
+- Row 1247 `sum_sum_0189bf613c7e`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=1493.66us`, `compile=1539.10us`, ratio `1.030`).
+- Row 1445 `var_mean_087d5b4f064d`: parent-verified with numerics flag; exact `complex64` output drifts while faithful float outputs pass tolerance, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.91us`, `compile=175.68us`, ratio `1.106`).
+- Row 1446 `var_mean_08f6231329f7`: parent-verified with numerics flag, checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=6.59us`, `compile=6.43us`, ratio `0.976`).
+- Row 1489 `var_mean_3bc311a8676a`: parent-verified with numerics flag; exact `complex64` output drifts while faithful float outputs pass tolerance, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=152.19us`, `compile=175.49us`, ratio `1.153`).
+- Row 1700 `var_mean_fbc9e58f2e01`: parent-verified with numerics flag, checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=23.07us`, `compile=22.24us`, ratio `0.964`).
+- Row 780 `var_mean_mean_de769927fa58`: parent-verified, 2/2 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR_1GOOD` with no CUDAGraph warnings (`db4bc2f7 oracle=22.88us compile=22.08us ratio=0.965`; `86b98b1a oracle=65.70us compile=73.41us ratio=1.117`).
+- Row 1162 `pointwise_ee5b7a9ccfd4`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=24.64us`, `compile=24.06us`, ratio `0.977`).
+- Row 1204 `sum_68fcffe5c7fb`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=32.70us`, `compile=34.78us`, ratio `1.064`).
+- Row 1233 `sum_b2873b4c9052`: parent-verified with numerics flag; checks plus no-skip pass, official bench OOMs in fp64 gate, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=3942.46us`, `compile=4124.74us`, ratio `1.046`).
+- Row 1207 `sum_75456ad2c2c7`: parent-verified with numerics flag; check reports tolerance drift, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=190.59us`, `compile=196.26us`, ratio `1.030`).
+- Row 1173 `pointwise_faf725b387f9`: returned to `needs_work`; worker checks passed but locked H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=58.56us`, `compile=47.23us`, ratio `0.807`).
+- Row 1197 `sum_4fd6e4019857`: parent-verified with numerics flag; check fails on bf16 large-value drift (`max_diff=3.44e10`), skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=5789.92us`, `compile=5848.67us`, ratio `1.010`).
+- Row 393 `mean_65a318c9ed9c`: returned to `needs_work`; parent recheck found skipped-gate bench `1BAD_ORACLE_1GOOD_2AT_FLOOR`, with the bad point `3e244c1d` at `oracle=84.54us`, `compile=50.05us`, ratio `0.592`, no CUDAGraph warnings.
+- Row 394 `mean_b138a1e42dbc`: parent-verified with numerics flag, 5/5 checks plus no-skip pass, skipped-gate locked H100 fallback bench `1AT_FLOOR_4GOOD` with no CUDAGraph warnings (ratio range `0.984` to `1.585`).
+- Row 850 `amax_sum_7079889cfc04`: parent-verified with numerics flag, checks plus no-skip pass, official bench OOMs in fp64 gate, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=5778.37us`, `compile=5767.52us`, ratio `0.998`).
+- Row 958 `mean_470cecc170ec`: returned to `needs_work`; worker checks passed but skipped-gate H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=36.29us`, `compile=31.04us`, ratio `0.855`).
+- Row 1064 `pointwise_584a8c609627`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=113.06us`, `compile=135.10us`, ratio `1.195`).
+- Row 1068 `pointwise_6410fc21ba59`: claimed for inf/nan numerics-gate reaudit/refill.
+- Row 210 `pointwise_1611fb0c7845`: kept as `needs_work`; faithful alias-only oracle checks pass 2/2, but locked bench is invalid for both points due compiled empty-CUDAGraph warning, so there is no valid floor number.
+- Row 1071 `pointwise_656833e29d89`: claimed for scatter/numerics reaudit/refill.
+- Row 1068 `pointwise_6410fc21ba59`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by fp64 inf/nan gate on all 32 outputs, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=32.86us`, `compile=51.20us`, ratio `1.558`).
+- Row 958 `mean_470cecc170ec`: returned to `needs_work`; parent checks pass but skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=58.69us`, `compile=30.75us`, ratio `0.524`).
+- Row 1083 `pointwise_7308e0024674`: claimed for nan numerics-gate reaudit/refill.
+- Row 1008 `mean_var_mean_768bb6a7efb9`: returned to `needs_work`; parent checks pass but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=24.67us`, `compile=21.34us`, ratio `0.865`), so worker oracle was not committed.
+- Row 1096 `pointwise_87cb1a76ed86`: claimed for nan numerics-gate reaudit/refill.
+- Row 1092 `pointwise_802def73cfd7`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by fp64 inf/nan gate on all 12 outputs, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=169.82us`, `compile=177.95us`, ratio `1.048`).
+- Row 1111 `pointwise_a7159158fa8e`: claimed for bad-oracle reaudit/refill.
+- Row 1104 `pointwise_99e028e77568`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by fp64 NaN gate on both outputs, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=8.80us`, `compile=16.48us`, ratio `1.873`).
+- Row 1120 `pointwise_ac8d8e1c9b73`: claimed for bad-oracle reaudit/refill.
+- Row 1117 `pointwise_aa30343135f0`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by fp64 inf/nan gate on all six outputs, skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=46.62us`, `compile=45.89us`, ratio `0.984`).
+- Row 1140 `pointwise_c9af56d69f6c`: claimed for inf/nan numerics-gate reaudit/refill.
+- Row 1111 `pointwise_a7159158fa8e`: returned to `needs_work`; parent checks pass but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.27us`, `compile=12.38us`, ratio `0.868`).
+- Row 1142 `pointwise_cbb8d3f0ed92`: claimed for bad-oracle reaudit/refill.
+- Row 1138 `pointwise_c9434eade687`: returned to `needs_work`; parent checks pass exactly, but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=20.38us`, `compile=18.50us`, ratio `0.907`), so the worker oracle was not committed.
+- Row 1549 `var_mean_6cd69c8f3b06`: claimed from the tail for bad-oracle reaudit/refill.
+- Row 1154 `pointwise_e0570a5d1c15`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by the fp64 inf gate on all 28 outputs, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=29.06us`, `compile=45.47us`, ratio `1.565`).
+- Row 1432 `sum_sum_sum_f7a87f05bdd2`: claimed from the tail for reduction numerics reaudit/refill.
+- Row 1156 `pointwise_e2bdfd3a6695`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by the fp64 inf gate on all 5 outputs, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=8.16us`, `compile=11.36us`, ratio `1.392`).
+- Row 1549 `var_mean_6cd69c8f3b06`: returned to `needs_work`; parent checks pass but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=15.71us`, `compile=14.75us`, ratio `0.939`), so the worker oracle was not committed.
+- Row 1450 `var_mean_0d6f1eb6e0c6`: claimed from the tail for bad-oracle reaudit/refill.
+- Row 1230 `sum_b011c33c656b`: returned to `needs_work`; worker removed tolerance targeting and checks pass, but skipped-gate H100 fallback bench is still `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=4640.99us`, `compile=1374.66us`, ratio `0.296`), so the worker oracle was not committed.
+- Row 1336 `sum_sum_cc37fdc0b4ba`: returned to `needs_work`; parent checks pass but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=63.84us`, `compile=59.42us`, ratio `0.931`), so the worker oracle was not committed.
+- Row 1425 `sum_sum_sum_ee5e53038768`: claimed from the tail for bad-oracle reaudit/refill.
+- Row 1357 `sum_sum_sum_0a8714a3041e`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by precision drift on outputs 1/2/3, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=57.82us`, `compile=61.57us`, ratio `1.065`).
+- Row 1398 `sum_sum_sum_86e661f4be59`: claimed from the tail for reduction numerics reaudit/refill.
+- Row 1373 `sum_sum_sum_31ea6dc807dd`: claimed from the tail for reduction numerics reaudit/refill.
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; worker candidate fails check on output 3 (`max_diff=8.00`) and skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=359.23us`, `compile=163.68us`, ratio `0.456`), so it was not committed.
+- Row 1365 `sum_sum_sum_1a561863a1c6`: claimed from the tail for reduction numerics reaudit/refill.
+- Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; worker candidate was a full-reference wrapper rather than a slim Triton oracle and skipped-gate H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=2754.91us`, `compile=288.06us`, ratio `0.105`), so it was not committed.
+- Row 246 `sum_sum_sum_ddcfccfb8340`: returned to `needs_work`; worker candidate fails output 2 on all four points and skipped-gate H100 fallback bench has `1BAD_ORACLE_3AT_FLOOR`, so it was not committed.
+- Row 1373 `sum_sum_sum_31ea6dc807dd`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by precision drift on outputs 0/2, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=69.31us`, `compile=110.85us`, ratio `1.599`).
+- Row 1071 `pointwise_656833e29d89`: claimed for explicit-offset Triton floor retry.
+- Row 1370 `sum_sum_sum_275ca61fceb8`: claimed from the tail for reduction numerics reaudit/refill.
+- Row 1379 `sum_sum_sum_4aae5698dd79`: claimed from the tail for large-diff reduction reaudit/refill.
+- Row 1053 `pointwise_43588d3e9780`: claimed for final scatter/stencil Triton or capture-support retry.
+- Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified, 1/1 checks plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=132.22us`, `compile=286.14us`, ratio `2.164`); large sentinel-scale diffs pass the numerics gate.
+- Row 1120 `pointwise_ac8d8e1c9b73`: worker checks pass including stochastic exactness, but locked H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.21us`, `compile=12.35us`, ratio `0.869`); remote re-claimed for a third-worker retry, so the candidate was not committed.
+- Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; final retry was still a reference wrapper rather than a slim Triton oracle and skipped-gate H100 fallback bench was `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=2744.29us`, `compile=286.72us`, ratio `0.104`).
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; different-worker retry still fails output 3 (`max_diff=8.00`) and skipped-gate H100 fallback bench is `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=358.02us`, `compile=163.65us`, ratio `0.457`).
+- Row 1120 `pointwise_ac8d8e1c9b73`: returned to `needs_work`; third-worker retry checks pass including stochastic exactness, but locked H100 fallback bench remains `1BAD_ORACLE` with no CUDAGraph warnings (`oracle=14.21us`, `compile=12.35us`, ratio `0.869`).
+- Rows 1053 `pointwise_43588d3e9780`, 1120 `pointwise_ac8d8e1c9b73`, and 1425 `sum_sum_sum_ee5e53038768`: re-claimed for a last pass that must avoid the known-bad wrapper/slow/wrong-output approaches.
+- Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; no slim Triton candidate found. The only local wrapper checks correctly but is `1BAD_ORACLE` (`~2744us` vs `~287us`), and a real fix requires reimplementing the full PyHPC scatter/stencil recurrence and boundary semantics.
+- Row 1071 `pointwise_656833e29d89`: parent-verified with numerics flag, 1/1 checks plus no-skip pass, official bench blocked by fp64 precision/NaN numerics gate, skipped-gate locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=233.09us`, `compile=474.62us`, ratio `2.036`).
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; final retry preserved `/2560.0`, output order, bf16 dense rounding, and final sum over rounded dense, but pure Triton variants still fail dense output 3 (`max_diff=128`) and exact/hybrid paths are slower than compiled (`best ~194us vs ~163us`, exact hybrid ~1100us), with no CUDAGraph warnings.
+- Row 246 `sum_sum_sum_ddcfccfb8340`: returned to `needs_work`; final retry checks and numerics gate pass all 4 points with no CUDAGraph warnings, but the large `8185fd2d` point remains `BAD_ORACLE` (`1969.02us` vs `1180.45us`), while the other points are `1AT_FLOOR_2GOOD`; oracle candidate was not committed.
+- Row 402 `sum_6d8612892024`: parent-verified after restoring the local passing oracle candidate; 4/4 checks plus no-skip pass, numerics gate passes, locked H100 fallback bench `1AT_FLOOR_3GOOD` with no CUDAGraph warnings (`165.31/162.37us`, `385.41/559.23us`, `261.44/488.80us`, `60.26/169.50us`).
+- Row 1051 `pointwise_4254ac4c0d96`: parent-verified existing oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=183.78us`, `compile=217.76us`, ratio `1.185`).
+- Row 571 `var_mean_dc4abd356145`: parent-verified existing oracle, 3/3 checks plus no-skip pass, locked H100 fallback bench `1AT_FLOOR_2GOOD` with no CUDAGraph warnings (`79.65/77.28us`, `106.82/151.94us`, `139.33/147.81us`).
+- Row 1064 `pointwise_584a8c609627`: parent-verified existing oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`112.77us` vs `135.04us`).
+- Row 1223 `sum_9b2fcee49b0a`: parent-verified existing oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=165.02us`, `compile=163.26us`, ratio `0.989`); large absolute diff matches compiled under the numerics gate.
+- Row 1197 `sum_4fd6e4019857`: parent-verified as `NUMERICS_FLAG`; py_compile passes, normal/no-skip checks fail by precision drift on the huge bf16 output (`max_diff=3.44e10`), skipped-gate locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=5804.83us`, `compile=5855.74us`, ratio `1.009`).
+- Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified existing oracle, 1/1 check plus no-skip pass, numerics gate passes, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=133.25us`, `compile=286.43us`, ratio `2.150`).
+- Row 1209 `sum_7ba9dcb96142`: parent-verified Longformer scatter fix, 1/1 check plus no-skip pass, numerics gate passes, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=625.60us`, `compile=1453.09us`, ratio `2.323`); fix adds missing chunk boundary stores.
+- Row 1445 `var_mean_087d5b4f064d`: parent-verified existing oracle version, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.46us`, `compile=174.94us`, ratio `1.104`).
+- Row 1207 `sum_75456ad2c2c7`: parent-verified as `NUMERICS_FLAG`; py_compile passes, normal/no-skip checks fail by precision drift (`max_diff=3.36e7`), official bench reports `UNVERIFIED_NUMERICS`, and `--bench-unchecked` shows H100 fallback `AT_FLOOR` with fp64 gate pass and no CUDAGraph warnings (`oracle=194.94us`, `compile=196.35us`, ratio `1.007`). This is not an official clean floor measurement.
+- Row 1489 `var_mean_3bc311a8676a`: parent-verified oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=151.97us`, `compile=175.20us`, ratio `1.153`).
+- Row 1561 `var_mean_8187f7c4e01e`: parent-verified existing oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=73.44us`, `compile=73.44us`, ratio `1.000`).
+- Row 1608 `var_mean_a7b32508693f`: parent-verified oracle, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=158.21us`, `compile=175.81us`, ratio `1.111`).
+- Row 1053 `pointwise_43588d3e9780`: returned to `needs_work`; final pass found no valid slim oracle. The only local wrapper remains forbidden and slow, and a real implementation must cover the full PyHPC TKE functional-update graph with three visible outputs.
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; final pass found no new faithful fast path. Existing ConvNeXtV2 GRN prior art is reduction-only/subset-scope, while this repro requires dense bf16 output 3 plus output 4 sum over that dense tensor.
+- Row 1053 `pointwise_43588d3e9780`: parent-verified new slim Triton PyHPC stencil oracle, 1/1 normal and no-skip checks pass exactly. Official bench reports `NUMERICS_WORSE_THAN_COMPILED` because output 1 has matching NaNs in oracle/compiled/fp64 reference; skipped-gate locked H100 fallback bench is `1GOOD` with no CUDAGraph warnings (`oracle=146.98us`, `compile=288.29us`, ratio `1.961`).
+- Row 103 `pointwise_f22251f83eba`: restored missing XLNet layout oracle from prior retry after the queue had carried B200 fleet verification. Parent H100 fallback checks pass 2/2 plus no-skip 2/2; locked H100 fallback bench is `1BAD_ORACLE_1AT_FLOOR` with no CUDAGraph warnings (`144bae60` `21.66us` vs `18.53us`, `e95c7520` `37.06us` vs `36.42us`), so this remains dependent on the existing B200 PASS note rather than H100 timing.
+- Row 103 `pointwise_f22251f83eba`: added H100-specific launch registrations to the restored XLNet layout oracle and parent-verified it. Checks pass 2/2 plus no-skip 2/2; locked H100 exact-dispatch bench is `2AT_FLOOR` with numerics gate pass and no CUDAGraph warnings (`144bae60` `18.62us` vs `18.43us`, `e95c7520` `34.94us` vs `36.48us`).
+- Row 1425 `sum_sum_sum_ee5e53038768`: returned to `needs_work`; two final audits found no faithful sub-compile Triton path. The repro requires dense bf16 output 3 plus output 4 as the sum over that rounded dense tensor after per-`(N,C)` and per-`N` reductions; prior faithful paths are slower than compile (`~193-194us` vs `~158-163us`), while faster pure Triton variants fail dense output 3 (`max_diff=8/64/128`). Reduction-only ConvNeXtV2 prior art is subset scope.
+- Row 246 `sum_sum_sum_ddcfccfb8340`: returned to `needs_work`; current oracle checks pass 4/4 plus no-skip 4/4 and numerics gate passes, but locked H100 fallback bench remains `1BAD_ORACLE_1AT_FLOOR_2GOOD` with no CUDAGraph warnings (`8185fd2d` `2131.94us` vs `1177.15us`, `1b9e6372` `1219.39us` vs `1221.28us`, `76e2a948` `518.53us` vs `635.23us`, `d8a24a49` `342.53us` vs `369.73us`). Final fast-stats attempts either failed dense output 2 exactness (`max_diff` up to `2.05e3`) or emulated PyTorch order and became slower than the current oracle.
+- Row 53 `sum_sum_sum_4a1fb62e29b0`: parent-verified worker fix, 4/4 checks plus no-skip pass, locked H100 fallback bench `4GOOD` with no CUDAGraph warnings (`6de23498` `123.23us` vs `141.22us`, `c21f4298` `487.49us` vs `585.18us`, `c1e38d67` `258.91us` vs `292.90us`, `5acb4703` `159.17us` vs `206.37us`). Fix changes the 768-wide c21 row reduction to the compensated 128-lane path while keeping c1 on the original generic path.
+- Row 312 `sum_sum_sum_cc4b6a77cc6b`: parent-verified worker fix, 1/1 check plus no-skip pass, locked H100 fallback bench `1GOOD` with no CUDAGraph warnings (`oracle=113.09us`, `compile=147.78us`, ratio `1.307`). Fix matches the final 32-lane reduction order to the warp-shuffle order.
+- Row 326 `sum_444779f98932`: parent-verified worker+tuner fix, 1/1 check plus no-skip pass exactly, locked H100 exact-dispatch bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=1377.15us`, `compile=1348.03us`, ratio `0.979`). Fix replaces fused epilogue FMA with explicit round-to-nearest f32 mul/add and adds an H100-specific launch (`X=512`, `RX=2`).
+- Row 467 `sum_898c72fb606a`: parent-verified worker fix, 1/1 check plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=11.84us`, `compile=11.30us`, ratio `0.954`). Fix makes bf16 rounding boundaries explicit around the final scale/store.
+- Row 470 `sum_sum_1e07e3ba8c68`: parent-verified worker fix, 1/1 check plus no-skip pass, locked H100 fallback bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=119.10us`, `compile=117.47us`, ratio `0.986`). Fix splits 256-wide partial tiles into the 128-wide reduction units used by the compiled path before finalization.
+- Row 470 `sum_sum_1e07e3ba8c68`: after native B200 reopened the H100 fix (`max_diff=3.84`), parent-verified a fused-f32-producer retry on H100 fallback. Checks plus no-skip pass, numerics gate now passes, locked bench is `1AT_FLOOR` with no CUDAGraph warnings (`oracle=117.73us`, `compile=117.95us`, ratio `1.002`); re-claimed pending native B200 verification.
+- Row 742 `sum_sum_sum_d2c97d17f3dc`: parent-verified worker fix on H100 fallback, 1/1 check plus no-skip pass, locked bench `1GOOD` with no CUDAGraph warnings (`oracle=3465.22us`, `compile=21576.61us`, ratio `6.227`). Fix adds explicit rn f32 arithmetic and separate masked/unmasked 1024-wide reduction trees; kept status `claimed` pending native B200 verification.
+- Row 233 `sum_sum_sum_951d09ecbec1`: parent-verified head/tail MobileViT tuner fix on H100 fallback, 3/3 checks plus no-skip pass, locked bench `3GOOD` with no CUDAGraph warnings (`30b03cad` `110.91us` vs `121.54us`, `1c6da2dd` `69.57us` vs `91.87us`, `0c9dc299` `20.10us` vs `40.10us`). This replaces the row-stats candidate that was `2GOOD_1BAD`; kept status `claimed` pending native B200 verification.
+- Row 1209 `sum_7ba9dcb96142`: parent-verified worker fix on H100 fallback, 1/1 check plus no-skip pass, locked bench `1GOOD` with no CUDAGraph warnings (`oracle=628.38us`, `compile=1450.27us`, ratio `2.308`). Fix mirrors the older Longformer direct scatter mapping by applying start/end edge masks before the four final output stores; kept status `claimed` pending native B200 verification.
+- Row 1223 `sum_9b2fcee49b0a`: parent-verified worker fix on H100 fallback, 1/1 check plus no-skip pass, locked bench `1AT_FLOOR` with no CUDAGraph warnings (`oracle=163.84us`, `compile=163.39us`, ratio `0.997`). Fix makes the final bf16 cast explicitly round-to-nearest-even; kept status `claimed` pending native B200 verification.
+- Row 1379 `sum_sum_sum_4aae5698dd79`: parent-verified worker fix on H100 fallback, 1/1 check plus no-skip pass, locked bench `1GOOD` with no CUDAGraph warnings (`oracle=231.01us`, `compile=286.30us`, ratio `1.239`). Fix uses libdevice exp, rn arithmetic, exact bucket wrapping/clamping, and full-batch branch tiling; kept status `claimed` pending native B200 verification.
+- Row 1197 `sum_4fd6e4019857`: after native B200 reopened the H100 candidate (`max_diff=16800000.0`), parent-verified an RN epilogue retry on H100. Normal and no-skip checks now pass (`max_diff=2.10e6`) instead of the prior H100 precision-drift failure; official locked bench still OOMs in the fp64 numerics gate while allocating `compiled_f64`, so no official time is recorded. Worker diagnostic skip-gate timing was `AT_FLOOR` (`oracle=5807.36us`, `compile=5857.44us`, ratio `1.009`) with no CUDAGraph warning; kept claimed pending native B200 verification.
+- Row 742 `sum_sum_sum_d2c97d17f3dc`: after native B200 reopened the H100 candidate (`max_diff=3490000000.0`), parent-verified a deterministic bucket retry on H100 fallback. The patch removes `tl.atomic_add` from the bucket outputs, writes per-row bucket partials, and finalizes them with a fixed reduction while preserving dense bf16 outputs and cast boundaries. Checks plus no-skip pass; locked bench is `1GOOD` with no CUDAGraph warnings (`oracle=3178.66us`, `compile=21548.22us`, ratio `6.779`); kept claimed pending native B200 verification.
 
 All H100 fallback rows still need native B200 measurement before treating timings as official B200 floors.
 

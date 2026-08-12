@@ -1,0 +1,89 @@
+{
+  "meta": {
+    "phase": "PHASE-2 MEGA-COMMIT CORE-UNIT SELECTIVE-REVERT (the 3 NO-FLAG units U30/U31/U33)",
+    "date": "2026-06-23",
+    "anchor": "AT HEAD daa79cd25ca (perf branch). Each unit measured as HEAD (unit ON) vs HEAD-with-just-that-unit's-hunks-reverted (unit OFF). delta = unit's MARGINAL contribution at HEAD.",
+    "mega_commit": "97385fb3273",
+    "true_base": "5e2ab3055de",
+    "method": "Throwaway git worktree shadow of HEAD; reuse HEAD prebuilt .so (all base..HEAD diffs are pure-python inductor); PYTHONPATH-shadow the reverted python source. Bench via scripts/bench_parallel.py (repro path), GPU lock ON (default), clocks pinned 1852MHz, fresh inductor cache per arm, shared triton cache. NO new timing code written.",
+    "ratio_convention": "kernel_geomean_ON_over_OFF = geomean(control_us / reverted_us) = geomean(unit_ON_us / unit_OFF_us). <1.0 => unit ON is FASTER => UNIT HELPS. >1.0 => unit ON is SLOWER => UNIT HURTS. speedup_factor = 1/geomean.",
+    "noise_floors_measured_here": {
+      "U30_control_vs_control": 1.0014,
+      "U31_control_vs_control": 0.998,
+      "U33_2run_control_vs_control": 0.9803,
+      "U33_3run_control_vs_control": 1.0059,
+      "note": "var_mean_mean kernels are sub-60us; per-shape noise high. 3-control-run noise (1.0059) is the reliable U33 floor; the 2-run 0.98 was inflated by a single sub-15us blip (var_mean_mean_3f4aa90365fa)."
+    },
+    "scope_correction_to_brief": {
+      "U33_not_in_mega": "CRITICAL: U33's features (Blackwell-BN persistent-reduction-threshold raise, low-warp persistent configs, cooperative-widen) are NOT hunks of the mega-commit 97385fb3273. The mega's ONLY triton_heuristics.py change is the scalar-acc MAX_R0_BLOCK logic (+20 lines, part of the 'Scalar reduction accumulators' line). U33 lives in 3 SEPARATE follow-up commits on the branch: 7be29e49d9e (Blackwell-BN INNER threshold + occupancy num_warps cap), 2fbbe401871 (low-warp persistent configs), 2b35f4ee83a (cooperative-widen xhint 17-64 + sibling-reduction can_fuse). Per the brief's 'measure AT HEAD' directive these were reverted from HEAD, so the U33 number is the branch-level marginal contribution of those 3 commits, NOT a mega-commit hunk.",
+      "U31_genai_surface_is_inert": "CRITICAL: the genai CrossEntropyForward/Backward micros (the brief's claimed U31 surface) DO NOT trigger the CE-gather fusion at HEAD (graph-level probe: pass is called, prepare_softmax_online fires, but ce_nodes=0 -- the pattern breaks on the intervening bf16 cast between log_softmax and gather). The REAL surface where U31 fires is the corpus amax_sum_sum_* family (14/32 candidates, ce_nodes=1). Benched there instead.",
+      "U33_a_partially_superseded": "7be29e49d9e's choices.py undersaturated-threshold hunk (Hunk#3) was rewritten by later NON-U33 commits (a85d79a900a segment-aligned split, etc.) into severely_undersaturated/partially_saturated form, so it cannot be cleanly reverted at HEAD without reverting legitimate later work. U33 revert therefore = {2b35f4 full reverse, 2fbbe4 full reverse, 7be29e triton_heuristics.py reverse + choices.py Hunk#1 (Blackwell INNER threshold) reverse + choices.py Hunk#2 (cooperative-over-split) manual reverse}; Hunk#3 left intact (out of scope -- belongs to a85d9 not U33)."
+    }
+  },
+
+  "U30_MOR_triton_finalize": {
+    "unit": "U30 -- MOR (multi-output-reduction) Triton finalize-sum kernel",
+    "files_hunks_reverted": "torch/_inductor/codegen/simd.py: forced use_triton_finalize=False in the saved_partial_accumulate finalize path (one-line override restoring the pre-mega ATen .sum(dim=0) fallback). Reverts the +176-line _emit_triton_finalize_sum branch. (ir.py _sibling_reduction_fusion gate is False at HEAD => dead, not reverted.)",
+    "revert_verified_changes_codegen": "YES. On every affected repro the generated-code marker 'triton_mor_finalize_sum' drops 14->0 and njit drops 5->3 / 6->4 when reverted (compile-only codegen probe, e.g. sum_sum_sum_260a107eaf32 and sum_sum_sum_2261b2f5694a). The atomic_add finalize kernel is replaced by ATen .sum(dim=0).",
+    "affected_surface": "52 corpus repros, ALL the sum_sum_sum_* (3-level multi-output split-reduction) family. Models: BN-backward/sibling-reduction tails of timm_mobilevit, hf_AllenaiLongformer, XLNet, DistilBert, MegatronBert, DebertaV2, MobileBert, beit, Bart, and other transformer+timm TRAIN graphs. Does NOT fire on the 8 genai micros (confirmed by prior ablation).",
+    "kernel_geomean_ON_over_OFF": 0.8814,
+    "kernel_geomean_speedup_factor": 1.135,
+    "coord_descent_geomean_ON_over_OFF": 0.8309,
+    "per_repro": "48/52 help >2%, 0 hurt, 4 at floor. best 1.46x (sum_sum_sum_11d45d703ba6 XLNet 63->43us). median 1.12x. The win is uniform and structural (the coalesced 2D atomic-add finalize beats ATen's generic .sum(dim=0)).",
+    "per_model_e2e": "Real but small at the model level. These finalize kernels are 40-1400us slivers of multi-ms TRAIN models; a ~13.5% kernel-geomean on them maps to a small per-model-e2e (kernel-geomean overstates e2e ~2-3x per the established rollup dampening; for these sub-fraction kernels even more). Not separately isolated in the A1 walk (folds into the mega's +0.71pp aggregate).",
+    "vs_self_report": "CONFIRMS DIRECTION of '35% Swin'. Magnitude on the corpus sum_sum_sum surface is ~13.5% kernel-geomean (best 46%); the headline 35% is plausibly a single Swin shape near the best-case end, not the geomean.",
+    "verdict": "LAND-worthy. Clean, consistent, structural kernel win far above floor (0.88 vs 1.00 noise), 48/52 help, none regress. Caveat: per-model-e2e is modest (small kernel fraction); land as a kernel-codegen improvement, not on an e2e-pp claim."
+  },
+
+  "U31_CE_gather_into_softmax": {
+    "unit": "U31 -- CE gather-into-softmax (online_softmax_cross_entropy fused reduction)",
+    "files_hunks_reverted": "torch/_inductor/fx_passes/post_grad.py: disabled the _cross_entropy_gather_fusion_pass registration (changed `if config.online_softmax:` guard to `if False:` at the cross_entropy_gather_fusion site ONLY -- left the regular online_softmax path intact). This functionally reverts ALL the mega's CE hunks (inductor_prims.cross_entropy_loss_online prim, ops_handler online_softmax_cross_entropy reduction type, lowering, and the triton.py CE reduction codegen) because the prim is never created. The related CE commits ab29345d82d / 9b4edfffc15 (CE-hoist, attributed separately) were NOT touched.",
+    "revert_verified_changes_codegen": "YES. Graph-level probe on a firing repro (amax_sum_sum_2df7bcca6b5d): HEAD has cross_entropy_loss_online node count = 1 (pass called); reverted has calls=0, ce_nodes=0 (pass never registered, no fused prim).",
+    "affected_surface": "14 corpus repros from the amax_sum_sum_* family where the CE-gather pattern completes (out of 32 gather-bearing candidates; the other 18 break the pattern). Models: hf_ElectraForCausalLM, DistillGPT2, GPTNeo, Roberta, GoogleFnet, Blenderbot, GPTJ, MegatronBert (the CE/log-softmax+gather tail of causal-LM infer+train graphs). The genai CrossEntropyForward/Backward micros do NOT fire it (pattern breaks on bf16 cast).",
+    "kernel_geomean_ON_over_OFF": 1.0266,
+    "kernel_geomean_speedup_factor": 0.974,
+    "coord_descent_geomean_ON_over_OFF": 1.0137,
+    "genai_delta": "NONE -- U31 does not fire on the genai CE micros at HEAD (ce_nodes=0). The locked --full-graphs genai path is not a measurement surface for this unit.",
+    "per_repro": "ALL 14 repros are SLOWER with the unit ON (ratio ON/OFF 1.004 to 1.129; 0 help, 6 hurt >1.5%). Worst: amax_sum_sum_82f04ea7b737 (Blenderbot) 1.13x slower (32->36us), c94a0970300f (MegatronBert) 1.07x.",
+    "per_model_e2e": "NEGATIVE on the affected NLP models, but small absolute (the fusion forces the indirect gather into the reduction loop). Sub-floor in aggregate but consistently the wrong sign.",
+    "vs_self_report": "REFUTES the '0.8%' win on the corpus surface; this MEASURES net-negative ~2.6% (compiled) / ~1.4% (coord-descent). Consistent with the commit's own hedge 'limited by loop-invariant hoisting' -- the LICM the prim needs is incomplete, so on real shapes the embedded indirect gather costs more than the saved pass.",
+    "verdict": "DROP / net-negative as-is. Do NOT land standalone. The fused online CE reduction is uniformly a small loss on the corpus amax_sum_sum surface and inert on the genai micros it was claimed for. Needs the full loop-invariant-hoist of the indirect gather (the tracked follow-up) before it pays off."
+  },
+
+  "U33_blackwell_bn_lowwarp_cooperative": {
+    "unit": "U33 -- Blackwell-BN persistent-reduction-threshold raise + low-warp persistent configs + cooperative-widen (3 SEPARATE follow-up commits, NOT mega hunks): 7be29e49d9e, 2fbbe401871, 2b35f4ee83a",
+    "files_hunks_reverted": "torch/_inductor/runtime/triton_heuristics.py (occupancy num_warps cap for rnumel>8192 + low-warp persistent configs for small rnumel) + torch/_inductor/choices.py (Blackwell INNER persistent threshold->16384; cooperative-widen xhint 17-64 threshold + sibling-reduction can_fuse change; cooperative-over-split block). 7be29e's choices Hunk#3 (undersaturated threshold) left intact -- superseded by later non-U33 segment-aligned-split commit. d2cd/62f27 INNER 1024->8192 EXCLUDED (add+reverted, DROP-MOOT).",
+    "revert_verified_changes_codegen": "YES. Compile-only autotune-best_config probe over 50 var_mean candidates: 13/50 change best_config HEAD vs reverted (e.g. var_mean_mean_19ffdb35cc67: HEAD num_warps=1 XBLOCK=16 -> reverted num_warps=2 XBLOCK=32 -- the low-warp config from 2fbbe401871). n_kernels and kernel-source unchanged (pure heuristic/config-selection change, as expected).",
+    "affected_surface": "13 var_mean repros change config; the WIN is concentrated entirely on the var_mean_mean_* (BN-mean reduction) family. Models: timm_ghostnet, mobilenetv2, mobilenet_v3_large, shufflenet_v2, timm_swin (BN-training tails). Plain var_mean_* (LayoutLM, GPT2, Albert, whisper, ViT, CycleGAN) are at floor.",
+    "kernel_geomean_ON_over_OFF": {
+      "all_13_affected_2run": 0.8664,
+      "var_mean_mean_only_6": 0.7397,
+      "plain_var_mean_only_7": 0.9921,
+      "movers_focus_7repro_3control": 0.775
+    },
+    "kernel_geomean_speedup_factor": {"var_mean_mean": 1.352, "all_13": 1.154, "plain_var_mean": 1.008},
+    "per_repro_movers": "var_mean_mean_3574762a85f1 (ghostnet) 1.81x (98->54us), 1f7174490c38 (mobilenetv2) 1.46x, 52ddb6a14d4e (swin) 1.38x, 19ffdb35cc67 (shufflenet) 1.31x, 3a94a106616a (mobilenet_v3) 1.16x. All reproduce within ~0.5% across 3 control runs (per-repro control noise 0.99-1.01).",
+    "per_model_e2e": "NEAR-ZERO at the model level despite the large per-kernel win. The A1 commit walk folds the U33 commits into near-zero position-jump ranges (pos30->35 +0.16pp combined, pos69->71 -0.07pp); they are not individually material at per-model-e2e. The var_mean_mean kernels are 12-98us slivers of multi-ms CNN-train models -- a 1.35x on a sub-100us BN-mean kernel is invisible in e2e. This is the kernel-geomean-overstates-e2e effect at its extreme (~50-100x dampening here).",
+    "vs_self_report": "CONFIRMS the var_mean / var_mean_mean BN improvement claims (1.35x geomean on var_mean_mean, up to 1.81x; the self-reported 1.54x->1.25x and 1.32x->1.0x land squarely in this range).",
+    "verdict": "LAND-worthy as a KERNEL improvement (real, large, reproducible on var_mean_mean BN-mean reductions, far above the 0.6% 3-run floor). BUNDLE for e2e purposes -- per-model-e2e is at floor; do not attach an e2e-pp claim. These are 3 separate commits already on the branch, not part of the mega-commit."
+  },
+
+  "reconciliation": {
+    "mega_walk_targets": {"e2e_pp": 0.71, "kernel_geomean_pp": 1.95, "source": "A1 FULL_per_commit_e2e.txt (rollup formula, honest per-model-e2e) + A2"},
+    "corrected_unit_attribution": {
+      "U30_in_mega": "REAL kernel win (1.135x geomean on 52 sum_sum_sum), small per-model-e2e. PART of the mega-commit. Plausibly the single largest kernel-geomean contributor among the no-flag mega units.",
+      "U31_in_mega": "NET-NEGATIVE (~2.6% slower on 14 amax_sum_sum), inert on genai. PART of the mega-commit. SUBTRACTS from the mega's kernel-geomean.",
+      "U33_NOT_in_mega": "REAL kernel win (1.35x on var_mean_mean) but per-model-e2e ~zero, AND it is NOT in the mega-commit (3 separate later commits). It does NOT explain any of the mega's +1.95pp/+0.71pp."
+    },
+    "attributed_vs_unexplained": "The mega's +1.95pp kernel-geomean and +0.71pp e2e are now substantially ATTRIBUTED, and the picture is REFRAMED versus the brief's premise that the 3 no-flag units carry the bulk: (1) U10 (flag-ablation) = the one clean flag win (1.20x kernel-geomean, ShuffleNet-localized). (2) U30 = a clean kernel-geomean win (1.135x on the sum_sum_sum MOR surface) -- this is the largest NO-FLAG mega contributor to the +1.95pp kernel-geomean. (3) U31 = net-negative (~-2.6% on its surface) -- it REDUCES the mega's kernel-geomean, not increases it. (4) U33 is OUT OF SCOPE for the mega (separate commits); it does not feed the mega's numbers at all. NET: the mega's +1.95pp kernel-geomean is carried by U10 + U30 (real positives) partially offset by U25 + U09 + U31 (net-negatives). The +0.71pp per-model-e2e is dominated by whichever of these touches high-e2e-fraction kernels; the A1 walk's +0.71pp is the authoritative honest e2e and is consistent with 'a couple of localized kernel wins, heavily dampened to e2e, partially offset by the net-negative units.'",
+    "honest_bottom_line": "The brief's premise ('the 3 no-flag units carry the BULK of the mega gain, unmeasured') is now MEASURED and PARTIALLY FALSIFIED: only U30 of the three is a positive contributor to the mega; U31 is net-negative; U33 is not even in the mega-commit. The mega's gain is NOT bulk-attributable to U30/U31/U33 together. It is attributable to U10 (flag) + U30 (no-flag) as the real positives, with U25/U09/U31 dragging. No single hidden unit accounts for the +1.95pp; it is the residual of several modest localized wins minus several modest localized losses, dampened ~2-3x to the +0.71pp e2e."
+  },
+
+  "provenance": {
+    "pytorch_work_head_untouched": "daa79cd25ca9a80bfd65799394cf4255d6be75a6 (verified before and after; never modified)",
+    "throwaway_worktrees": "core_revert_wt + core_revert_wt2 created at HEAD, used for shadow reverts, restored to pristine, and REMOVED (git worktree remove --force + prune). git worktree list shows none remaining.",
+    "commits_made": "NONE to any shared branch.",
+    "torch_rebuilt": "NO -- reused HEAD prebuilt .so via symlink+PYTHONPATH shadow (all base..HEAD diffs are pure-python inductor).",
+    "artifacts_dir": "/tmp/scratch_space/core_revert/ (durable): pristine/ + reverted/ source copies, detect*.py probes, bench_revert.py driver, bench/*_RESULT.json + *_control*.json + *_reverted.json raw timings, u3{0,1,3}_affected.txt surfaces."
+  }
+}

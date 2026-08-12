@@ -1,0 +1,104 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "dda19333a406": {
+      "fddbd2f3": 1
+    },
+    "ccd411f2a45d": {
+      "350e66d2": 1,
+      "d5cd3fbe": 3
+    },
+    "edfab1af9465": {
+      "5a025cf0": 3
+    },
+    "8bb40810003c": {
+      "a876c3bb": 3
+    },
+    "bec1cdfbbce4": {
+      "1b1f1ebc": 1
+    },
+    "04d85912d998": {
+      "40eb390a": 1,
+      "24be48e8": 3,
+      "a0f5c667": 1
+    },
+    "14dda90622f5": {
+      "387810f3": 1
+    },
+    "4a0cb54db4dc": {
+      "387810f3": 2
+    },
+    "c902430e8a5b": {
+      "395f4c9c": 1
+    },
+    "9552a61d796d": {
+      "10254c9c": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "053843685bb4",
+      "count": 3,
+      "sig": "((T([16],torch.bfloat16,[1]),T([128, 16],torch.bfloat16,[16, 1]),T([16, 16],torch.bfloat16,[1, 16])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/lennard_jones/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 6.432000081986189,
+      "branch_us": 6.432000081986189
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "70c9ea940dd2",
+      "count": 1,
+      "sig": "((T([1],torch.bfloat16,[1]),T([128, 16],torch.bfloat16,[16, 1]),T([16, 1],torch.bfloat16,[1, 16])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/lennard_jones/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 7.807999849319458,
+      "branch_us": 7.807999849319458
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "7c1c2789a7f9",
+      "count": 1,
+      "sig": "((T([1, 128],torch.bfloat16,[1, 1]),T([128, 16],torch.bfloat16,[16, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/lennard_jones/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 7.872000336647034,
+      "branch_us": 7.872000336647034
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0dbcdf7b7884",
+      "count": 3,
+      "sig": "((T([128, 16],torch.bfloat16,[16, 1]),T([16, 16],torch.bfloat16,[16, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/lennard_jones/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 5.98399993032217,
+      "branch_us": 5.98399993032217
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "c6f84ed0a477",
+      "count": 3,
+      "sig": "((T([16, 128],torch.bfloat16,[1, 16]),T([128, 16],torch.bfloat16,[16, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/lennard_jones/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 7.7760000713169575,
+      "branch_us": 7.7760000713169575
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "685c9f0e24b5",
+      "count": 1,
+      "sig": "((T([16, 128],torch.bfloat16,[1, 16]),T([128, 1],torch.bfloat16,[1, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/lennard_jones/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 5.98399993032217,
+      "branch_us": 5.98399993032217
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "train",
+  "model": "lennard_jones"
+}

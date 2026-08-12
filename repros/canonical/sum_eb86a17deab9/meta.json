@@ -10,10 +10,10 @@
   ],
   "n_models": 5,
   "models": [
-    "hf_AllenaiLongformerBase_train_005",
-    "hf_BartForCausalLM_train_007",
-    "torchbench_hf_Bart_train_011",
-    "torchbench_hf_Bart_train_014",
-    "torchbench_hf_Longformer_train_005"
+    "hf/infer/BartForCausalLM",
+    "hf/train/AllenaiLongformerBase",
+    "hf/train/BartForCausalLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/TrOCRForCausalLM"
   ]
 }

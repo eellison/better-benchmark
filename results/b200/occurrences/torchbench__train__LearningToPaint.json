@@ -1,0 +1,398 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "246850b7c198": {
+      "c06edc2f": 1
+    },
+    "8bb40810003c": {
+      "5c0408c4": 1
+    },
+    "ccd411f2a45d": {
+      "4f085c05": 1,
+      "efc828f0": 3,
+      "4243bfc6": 1,
+      "eea0502a": 1,
+      "a4d83e10": 3,
+      "26982251": 1,
+      "f9953a7f": 1,
+      "04088f3f": 3,
+      "25553762": 1,
+      "3a10002b": 1,
+      "7448da56": 4,
+      "05f6fc2b": 1,
+      "6c4ea3d9": 1,
+      "cd9cb3ab": 1
+    },
+    "84dec355d0a4": {
+      "adc76233": 1
+    },
+    "100a39b686e3": {
+      "896c6bb5": 21
+    },
+    "42fad1ece813": {
+      "49824dd5": 2,
+      "3798dfee": 2,
+      "67dcaf05": 2,
+      "7feb8094": 2,
+      "2448297b": 1
+    },
+    "5cc92f5d49c1": {
+      "45788330": 1,
+      "0fb91edf": 1,
+      "5550fafe": 1,
+      "aa800003": 1
+    },
+    "0c1c9fc832f4": {
+      "2a5a9625": 1,
+      "c772ba0f": 1,
+      "8d0ce3d5": 1
+    },
+    "04d85912d998": {
+      "ecec6381": 1,
+      "86e1e916": 4,
+      "1e3eed28": 1,
+      "77b99a1e": 1,
+      "8b038b8d": 3,
+      "86b35d84": 1,
+      "e3ba5155": 1,
+      "2fbe85f1": 3,
+      "bca6105c": 1,
+      "6dbeafa9": 1,
+      "8bb60dcb": 3,
+      "321d80cd": 1,
+      "d37cbbac": 1
+    },
+    "6a8cdea856dd": {
+      "1f3fcf29": 1
+    },
+    "643db2887a01": {
+      "8d74958e": 2,
+      "992dca8a": 2,
+      "4b502692": 2,
+      "7ec4fd96": 2
+    },
+    "fb3a1658dadb": {
+      "32659d96": 1,
+      "a05f5297": 1,
+      "ee822c25": 1,
+      "947f7696": 1
+    },
+    "2a737da66d69": {
+      "ef12a986": 1,
+      "a61533e5": 1,
+      "bdb05274": 1
+    },
+    "86b0392acb3d": {
+      "ab4c6849": 1
+    },
+    "36c3c08e0a4d": {
+      "286ee5cf": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0c7bda4f8679",
+      "count": 1,
+      "sig": "((T([96, 9, 128, 128],torch.bfloat16,[147456, 16384, 128, 1]),T([64, 9, 3, 3],torch.bfloat16,[81, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 163.61600160598755,
+      "branch_us": 163.61600160598755
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "25b7d93c5bf0",
+      "count": 1,
+      "sig": "((T([96, 64, 64, 64],torch.bfloat16,[262144, 4096, 64, 1]),T([64, 64, 3, 3],torch.bfloat16,[576, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 77.7600035071373,
+      "branch_us": 77.7600035071373
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c7798e7b1e3f",
+      "count": 3,
+      "sig": "((T([96, 64, 32, 32],torch.bfloat16,[65536, 1024, 32, 1]),T([64, 64, 3, 3],torch.bfloat16,[576, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_2",
+      "baseline_us": 42.94399917125702,
+      "branch_us": 42.94399917125702
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d4dbd3b619fb",
+      "count": 1,
+      "sig": "((T([96, 64, 64, 64],torch.bfloat16,[262144, 4096, 64, 1]),T([64, 64, 1, 1],torch.bfloat16,[64, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_3",
+      "baseline_us": 75.42400062084198,
+      "branch_us": 75.42400062084198
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b3c4e22823f7",
+      "count": 1,
+      "sig": "((T([96, 64, 32, 32],torch.bfloat16,[65536, 1024, 32, 1]),T([128, 64, 3, 3],torch.bfloat16,[576, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_6",
+      "baseline_us": 35.58399900794029,
+      "branch_us": 35.58399900794029
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d0468659381d",
+      "count": 3,
+      "sig": "((T([96, 128, 16, 16],torch.bfloat16,[32768, 256, 16, 1]),T([128, 128, 3, 3],torch.bfloat16,[1152, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_7",
+      "baseline_us": 31.5839983522892,
+      "branch_us": 31.5839983522892
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "ac6ab0b67574",
+      "count": 1,
+      "sig": "((T([96, 64, 32, 32],torch.bfloat16,[65536, 1024, 32, 1]),T([128, 64, 1, 1],torch.bfloat16,[64, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_8",
+      "baseline_us": 32.416000962257385,
+      "branch_us": 32.416000962257385
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "cb0148dea97a",
+      "count": 1,
+      "sig": "((T([96, 128, 16, 16],torch.bfloat16,[32768, 256, 16, 1]),T([256, 128, 3, 3],torch.bfloat16,[1152, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_11",
+      "baseline_us": 28.16000021994114,
+      "branch_us": 28.16000021994114
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "be97104b0ccf",
+      "count": 3,
+      "sig": "((T([96, 256, 8, 8],torch.bfloat16,[16384, 64, 8, 1]),T([256, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_12",
+      "baseline_us": 29.503999277949333,
+      "branch_us": 29.503999277949333
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "756e7abe75b0",
+      "count": 1,
+      "sig": "((T([96, 128, 16, 16],torch.bfloat16,[32768, 256, 16, 1]),T([256, 128, 1, 1],torch.bfloat16,[128, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_13",
+      "baseline_us": 22.304000332951546,
+      "branch_us": 22.304000332951546
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d2a866a9e3a7",
+      "count": 1,
+      "sig": "((T([96, 256, 8, 8],torch.bfloat16,[16384, 64, 8, 1]),T([512, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_16",
+      "baseline_us": 28.44800055027008,
+      "branch_us": 28.44800055027008
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "08f48e493647",
+      "count": 3,
+      "sig": "((T([96, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),T([512, 512, 3, 3],torch.bfloat16,[4608, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_17",
+      "baseline_us": 36.67199984192848,
+      "branch_us": 36.67199984192848
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "fee4149e850f",
+      "count": 1,
+      "sig": "((T([96, 256, 8, 8],torch.bfloat16,[16384, 64, 8, 1]),T([512, 256, 1, 1],torch.bfloat16,[256, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "convolution_18",
+      "baseline_us": 18.112000077962875,
+      "branch_us": 18.112000077962875
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "55aa329f676c",
+      "count": 1,
+      "sig": "((T([65],torch.bfloat16,[1]),T([96, 512],torch.bfloat16,[512, 1]),T([512, 65],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 11.19999960064888,
+      "branch_us": 11.19999960064888
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2fb38f242804",
+      "count": 1,
+      "sig": "((T([96, 65],torch.bfloat16,[65, 1]),T([65, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 8.1599997356534,
+      "branch_us": 8.1599997356534
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0d85db95d2b7",
+      "count": 1,
+      "sig": "((T([65, 96],torch.bfloat16,[1, 65]),T([96, 512],torch.bfloat16,[512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 9.151999838650227,
+      "branch_us": 9.151999838650227
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "5c2c78cac8a2",
+      "count": 1,
+      "sig": "((T([96, 512, 4, 4],torch.bfloat16,[8192, 16, 4, 1]),T([96, 512, 4, 4],torch.bfloat16,[8192, 1, 2048, 512]),T([512, 512, 3, 3],torch.bfloat16,[4608, 1, 1536, 512]),[0],[1,1],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 28.12799997627735,
+      "branch_us": 28.12799997627735
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "c9362a8af7b8",
+      "count": 2,
+      "sig": "((T([96, 512, 4, 4],torch.bfloat16,[8192, 1, 2048, 512]),T([96, 512, 4, 4],torch.bfloat16,[8192, 1, 2048, 512]),T([512, 512, 3, 3],torch.bfloat16,[4608, 1, 1536, 512]),[0],[1,1],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_1",
+      "baseline_us": 23.77600036561489,
+      "branch_us": 23.77600036561489
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8e7346e2502e",
+      "count": 1,
+      "sig": "((T([96, 512, 4, 4],torch.bfloat16,[8192, 1, 2048, 512]),T([96, 256, 8, 8],torch.bfloat16,[16384, 1, 2048, 256]),T([512, 256, 1, 1],torch.bfloat16,[256, 1, 256, 256]),[0],[2,2],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_2",
+      "baseline_us": 25.728000327944756,
+      "branch_us": 25.728000327944756
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "68f1df9a4110",
+      "count": 1,
+      "sig": "((T([96, 512, 4, 4],torch.bfloat16,[8192, 1, 2048, 512]),T([96, 256, 8, 8],torch.bfloat16,[16384, 1, 2048, 256]),T([512, 256, 3, 3],torch.bfloat16,[2304, 1, 768, 256]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_4",
+      "baseline_us": 38.59199956059456,
+      "branch_us": 38.59199956059456
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "1404dc0901cd",
+      "count": 3,
+      "sig": "((T([96, 256, 8, 8],torch.bfloat16,[16384, 1, 2048, 256]),T([96, 256, 8, 8],torch.bfloat16,[16384, 1, 2048, 256]),T([256, 256, 3, 3],torch.bfloat16,[2304, 1, 768, 256]),[0],[1,1],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_5",
+      "baseline_us": 26.367999613285065,
+      "branch_us": 26.367999613285065
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "8d09af024549",
+      "count": 1,
+      "sig": "((T([96, 256, 8, 8],torch.bfloat16,[16384, 1, 2048, 256]),T([96, 128, 16, 16],torch.bfloat16,[32768, 1, 2048, 128]),T([256, 128, 1, 1],torch.bfloat16,[128, 1, 128, 128]),[0],[2,2],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_7",
+      "baseline_us": 76.73600316047668,
+      "branch_us": 76.73600316047668
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "dd8cb5dcb4b9",
+      "count": 1,
+      "sig": "((T([96, 256, 8, 8],torch.bfloat16,[16384, 1, 2048, 256]),T([96, 128, 16, 16],torch.bfloat16,[32768, 1, 2048, 128]),T([256, 128, 3, 3],torch.bfloat16,[1152, 1, 384, 128]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_9",
+      "baseline_us": 108.47999900579453,
+      "branch_us": 108.47999900579453
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "6e6bfbb01cbe",
+      "count": 3,
+      "sig": "((T([96, 128, 16, 16],torch.bfloat16,[32768, 1, 2048, 128]),T([96, 128, 16, 16],torch.bfloat16,[32768, 1, 2048, 128]),T([128, 128, 3, 3],torch.bfloat16,[1152, 1, 384, 128]),[0],[1,1],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_10",
+      "baseline_us": 36.99199855327606,
+      "branch_us": 36.99199855327606
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "6adeafbf1f9e",
+      "count": 1,
+      "sig": "((T([96, 128, 16, 16],torch.bfloat16,[32768, 1, 2048, 128]),T([96, 64, 32, 32],torch.bfloat16,[65536, 1, 2048, 64]),T([128, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),[0],[2,2],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_12",
+      "baseline_us": 38.656000047922134,
+      "branch_us": 38.656000047922134
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "718fe87ff570",
+      "count": 1,
+      "sig": "((T([96, 128, 16, 16],torch.bfloat16,[32768, 1, 2048, 128]),T([96, 64, 32, 32],torch.bfloat16,[65536, 1, 2048, 64]),T([128, 64, 3, 3],torch.bfloat16,[576, 1, 192, 64]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_14",
+      "baseline_us": 46.9760000705719,
+      "branch_us": 46.9760000705719
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "559c01c725f7",
+      "count": 3,
+      "sig": "((T([96, 64, 32, 32],torch.bfloat16,[65536, 1, 2048, 64]),T([96, 64, 32, 32],torch.bfloat16,[65536, 1, 2048, 64]),T([64, 64, 3, 3],torch.bfloat16,[576, 1, 192, 64]),[0],[1,1],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_15",
+      "baseline_us": 44.79999840259552,
+      "branch_us": 44.79999840259552
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "5ba0bd154a33",
+      "count": 1,
+      "sig": "((T([96, 64, 32, 32],torch.bfloat16,[65536, 1, 2048, 64]),T([96, 64, 64, 64],torch.bfloat16,[262144, 1, 4096, 64]),T([64, 64, 1, 1],torch.bfloat16,[64, 1, 64, 64]),[0],[2,2],[0,0],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_17",
+      "baseline_us": 68.54400038719177,
+      "branch_us": 68.54400038719177
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "98c5b702cfea",
+      "count": 1,
+      "sig": "((T([96, 64, 32, 32],torch.bfloat16,[65536, 1, 2048, 64]),T([96, 64, 64, 64],torch.bfloat16,[262144, 1, 4096, 64]),T([64, 64, 3, 3],torch.bfloat16,[576, 1, 192, 64]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_19",
+      "baseline_us": 69.5360004901886,
+      "branch_us": 69.5360004901886
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "777f489449d2",
+      "count": 1,
+      "sig": "((T([96, 64, 64, 64],torch.bfloat16,[262144, 1, 4096, 64]),T([96, 9, 128, 128],torch.bfloat16,[147456, 1, 1152, 9]),T([64, 9, 3, 3],torch.bfloat16,[81, 1, 27, 9]),[0],[2,2],[1,1],[1,1],False,[0,0],1,[False,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/train/LearningToPaint/full_graph_001.py",
+      "node": "convolution_backward_20",
+      "baseline_us": 141.27999544143677,
+      "branch_us": 141.27999544143677
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "train",
+  "model": "LearningToPaint"
+}

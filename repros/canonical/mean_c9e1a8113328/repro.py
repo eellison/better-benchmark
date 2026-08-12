@@ -1,35 +1,48 @@
 """
 Standalone repro captured via capture_hook.
-Label: timm_dm_nfnet_f0_infer_000
+Label: timm_dm_nfnet_f0_infer
 Pattern hash: c9e1a8113328
-Shape hash: a32ea189
+Shape hash: 69db7514
 """
+import sys
+from pathlib import Path
 
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 from math import inf, nan
 from torch import device
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_repro_version = 2
-_shapes_config = "(T([128, 1536, 6, 6], f32))"
+_repro_version = 3
+# Input shapes/strides/dtypes live in the sibling shapes.json (structured,
+# one entry per point); forward()'s annotations document the default shapes
+# inline. Default inputs = the first shapes.json point.
 
 class Repro(torch.nn.Module):
-    def forward(self, convolution_77: "f32[128, 1536, 6, 6]"):
+    def forward(self, arg0_1: "bf16[128, 1536, 8, 8]"):
         # No stacktrace found for following nodes
-        mean_dim: "f32[128, 1536, 1, 1]" = torch.ops.aten.mean.dim(convolution_77, [2, 3], True);  convolution_77 = None
-        return mean_dim
+        mean: "bf16[128, 1536, 1, 1]" = torch.ops.aten.mean.dim(arg0_1, [2, 3], True);  arg0_1 = None
+        return mean
+
+
 
 def _default_make_inputs():
-    from repro_harness import parse_shapes_config
-    return parse_shapes_config(_shapes_config)
+    configs = load_shape_configs(__file__)
+    if not configs:
+        raise RuntimeError(
+            "no shapes.json next to this repro — pass an explicit config "
+            "via make_inputs(shape_config=...)")
+    return make_inputs_from_config(next(iter(configs.values())))
+
 
 def make_inputs(shape_config=None):
     """Generate inputs for a specific shape config, or default."""
     if shape_config is not None:
         return make_inputs_from_config(shape_config)
     return _default_make_inputs()
+
 
 if __name__ == "__main__":
     benchmark_repro(__file__, Repro, make_inputs)

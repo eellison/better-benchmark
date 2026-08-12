@@ -1,43 +1,11 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "primals_1",
-      "shape": [
-        128
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 128
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 128
-      },
-      "constraint_source": "graph_inference"
-    },
-    {
-      "kind": "tensor",
-      "name": "tangents_1",
-      "shape": [
-        128,
-        2560
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[128],"i64",{"n":"primals_1","gen":["index",0,128],"x":{"constraint_source":"default_unobserved"}}],
+    [[128,2560],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[128,2560],"f32",{"n":"output_1"}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_011.py",
@@ -47,5 +15,27 @@
     "mode": "train",
     "model": "BlenderbotForConditionalGeneration",
     "graph": "full_graph_011.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 8,
+    "counts": {
+      "fusible_in_partition": 8,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten._unsafe_masked_index_put_accumulate.default": 1,
+        "aten.bitwise_and.Tensor": 2,
+        "aten.full.default": 1,
+        "aten.ge.Scalar": 1,
+        "aten.lt.Scalar": 1,
+        "aten.ne.Scalar": 1,
+        "aten.unsqueeze.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

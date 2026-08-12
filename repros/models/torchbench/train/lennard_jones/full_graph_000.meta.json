@@ -1,166 +1,29 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "primals_1",
-      "shape": [
-        16,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_2",
-      "shape": [
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_3",
-      "shape": [
-        1000,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_4",
-      "shape": [
-        16,
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_5",
-      "shape": [
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_6",
-      "shape": [
-        16,
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_7",
-      "shape": [
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_8",
-      "shape": [
-        16,
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_9",
-      "shape": [
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_10",
-      "shape": [
-        1,
-        16
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_11",
-      "shape": [
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[16,1],"f32",{"n":"primals_1"}],
+    [[16],"f32",{"n":"primals_2"}],
+    [[128,1],"f32",{"n":"primals_3"}],
+    [[16,16],"f32",{"n":"primals_4"}],
+    [[16],"f32",{"n":"primals_5"}],
+    [[16,16],"f32",{"n":"primals_6"}],
+    [[16],"f32",{"n":"primals_7"}],
+    [[16,16],"f32",{"n":"primals_8"}],
+    [[16],"f32",{"n":"primals_9"}],
+    [[1,16],"f32",{"n":"primals_10"}],
+    [[1],"f32",{"n":"primals_11"}]
+  ],
+  "outputs": [
+    [[128,1],"bf16",{"n":"output_0"}],
+    [[1,16],"f32",{"n":"output_1"}],
+    [[128,1],"bf16",{"n":"output_2"}],
+    [[128,16],"bf16",{"n":"output_3"}],
+    [[128,16],"bf16",{"n":"output_4"}],
+    [[128,16],"bf16",{"n":"output_5"}],
+    [[128,16],"bf16",{"n":"output_6"}],
+    [[16,16],"bf16",{"n":"output_7"}],
+    [[16,16],"bf16",{"n":"output_8"}],
+    [[16,16],"bf16",{"n":"output_9"}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_000.py",
@@ -170,5 +33,27 @@
     "mode": "train",
     "model": "lennard_jones",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 35,
+    "counts": {
+      "fusible_in_partition": 31,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 4
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.mul.Tensor": 3,
+        "aten.permute.default": 8,
+        "aten.tanh.default": 4,
+        "prims.convert_element_type.default": 15
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {
+        "aten.addmm.default": 4
+      }
+    }
+  },
+  "roundtrip": "ok"
 }

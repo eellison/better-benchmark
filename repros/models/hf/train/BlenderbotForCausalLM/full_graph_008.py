@@ -1,14 +1,12 @@
-import torch
-from torch import device
-from math import inf, nan
-
 class GraphModule(torch.nn.Module):
-    def forward(self, primals_1: "i64[128]", tangents_1: "f32[128, 2560]"):
+    def forward(self, primals_1: "i64[128][1]cuda:0", tangents_1: "f32[128, 2560][2560, 1]cuda:0"):
         # File: /home/dev/.conda/envs/pytorch-work-b200/lib/python3.12/site-packages/transformers/models/blenderbot/modeling_blenderbot.py:82 in forward, code: return super().forward(position_ids)
-        eq: "b8[128]" = torch.ops.aten.eq.Scalar(primals_1, -1)
-        unsqueeze: "b8[128, 1]" = torch.ops.aten.unsqueeze.default(eq, -1);  eq = None
-        full_default: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        where: "f32[128, 2560]" = torch.ops.aten.where.self(unsqueeze, full_default, tangents_1);  unsqueeze = full_default = tangents_1 = None
-        full_default_1: "f32[128, 2560]" = torch.ops.aten.full.default([128, 2560], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
-        index_put: "f32[128, 2560]" = torch.ops.aten.index_put.default(full_default_1, [primals_1], where, True);  full_default_1 = primals_1 = where = None
-        return (None, index_put)
+        ge: "b8[128][1]cuda:0" = torch.ops.aten.ge.Scalar(primals_1, 0)
+        lt: "b8[128][1]cuda:0" = torch.ops.aten.lt.Scalar(primals_1, 128)
+        bitwise_and: "b8[128][1]cuda:0" = torch.ops.aten.bitwise_and.Tensor(ge, lt);  ge = lt = None
+        ne: "b8[128][1]cuda:0" = torch.ops.aten.ne.Scalar(primals_1, -1)
+        bitwise_and_1: "b8[128][1]cuda:0" = torch.ops.aten.bitwise_and.Tensor(bitwise_and, ne);  bitwise_and = ne = None
+        unsqueeze: "b8[128, 1][1, 1]cuda:0" = torch.ops.aten.unsqueeze.default(bitwise_and_1, -1);  bitwise_and_1 = None
+        full_default: "f32[128, 2560][2560, 1]cuda:0" = torch.ops.aten.full.default([128, 2560], 0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+        _unsafe_masked_index_put_accumulate: "f32[128, 2560][2560, 1]cuda:0" = torch.ops.aten._unsafe_masked_index_put_accumulate.default(full_default, unsqueeze, [primals_1], tangents_1);  full_default = unsqueeze = primals_1 = tangents_1 = None
+        return (None, _unsafe_masked_index_put_accumulate)

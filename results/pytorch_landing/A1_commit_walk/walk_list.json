@@ -1,0 +1,605 @@
+{
+  "base": "5e2ab3055de",
+  "head": "daa79cd25ca",
+  "n": 62,
+  "derivation": "83 commits 5e2ab..daa79cd; dropped 7 plumbing + 5 revert(f74a KEPT per task) + 6 reverted + 3 superseded = 21 -> 62 surviving. Phase-1's '61' DROPS f74a as a revert; task says KEEP it -> 62.",
+  "dropped": {
+    "plumbing": [
+      "09aece4c5b8",
+      "111efb8724a",
+      "47aafe246e1",
+      "9c296b0e9b4",
+      "a1c8cd8e1c9",
+      "aa798f9f052",
+      "ac93f5b2845"
+    ],
+    "revert": [
+      "1787656f21b",
+      "282760481f8",
+      "62f27911a59",
+      "f0b54e1aa1f",
+      "f654a5d3a0b"
+    ],
+    "reverted": [
+      "13cbc75b516",
+      "1a824e0747a",
+      "84a2a5cf6ae",
+      "9ae68049a93",
+      "caa0b614314",
+      "d2cd52d3117"
+    ],
+    "superseded": [
+      "8586e404cc8",
+      "be6874e5fa2",
+      "f9493caabcd"
+    ]
+  },
+  "walk": [
+    {
+      "order": 0,
+      "sha_full": "97385fb32737cf2bd7a5bf291c8f63cd41b99047",
+      "sha": "97385fb3273",
+      "subject": "[inductor] All kernel optimization improvements (June 2026 session)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U07:slice_scatter_elision",
+        "U08:as_strided_scatter_elision",
+        "U09:linear_reduction_elimination",
+        "U10:layout_transform_store_sinking",
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils",
+        "U30:MOR",
+        "U31:CE gather-into-softmax",
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ]
+    },
+    {
+      "order": 1,
+      "sha_full": "ab29345d82d4a6c0ed48e05493c988f1a51ecfa6",
+      "sha": "ab29345d82d",
+      "subject": "[inductor] CE loop-invariant hoisting: realize gather before reduction",
+      "a0_features": [
+        "U31:CE gather-into-softmax"
+      ]
+    },
+    {
+      "order": 2,
+      "sha_full": "ca8f961d6b037cc76d3fa784a89f37ae9410cc96",
+      "sha": "ca8f961d6b0",
+      "subject": "[inductor] Gate scalar_acc on num_load <= 4 (fix 14-22% regressions)",
+      "a0_features": [
+        "U29:scalar reduction accumulators"
+      ]
+    },
+    {
+      "order": 3,
+      "sha_full": "94ad050dee0ae439ca32b978e64f9353f4d444be",
+      "sha": "94ad050dee0",
+      "subject": "[inductor] Add select_scatter_sparsity pass + split_cat_maxpool config",
+      "a0_features": [
+        "U06:select_scatter_sparsity"
+      ]
+    },
+    {
+      "order": 4,
+      "sha_full": "f74a7f1372377899d3c614c6a79465ed679c6d1a",
+      "sha": "f74a7f13723",
+      "subject": "Revert \"[inductor] Raise realize_reads_threshold from 4 to 30\"",
+      "a0_features": []
+    },
+    {
+      "order": 5,
+      "sha_full": "afc3d5956d59c5174571cc6cef49f2d2d642645a",
+      "sha": "afc3d5956d5",
+      "subject": "[inductor] Elide constant-index bounds checks + split-reductions-for-fusion + index-through-norm",
+      "a0_features": [
+        "U16:index_through_norm",
+        "U24:split_multilayer_second_step + split_reductions_for_fusion"
+      ]
+    },
+    {
+      "order": 6,
+      "sha_full": "565695da70be6e23d773a88ceb80eac4c4c8654a",
+      "sha": "565695da70b",
+      "subject": "[inductor] Constant-fold iota/arange in ConstantFolder and materialize constant-full outputs (var_mean_c408, 1.44x -> 1.0x)",
+      "a0_features": [
+        "U19:constant-fold uniform-through-view + iota/arange ConstantFolder + materialize constant-full"
+      ]
+    },
+    {
+      "order": 7,
+      "sha_full": "2b35f4ee83a5c6b06aa21629c69228f856be4de3",
+      "sha": "2b35f4ee83a",
+      "subject": "[inductor] Widen cooperative_reductions heuristic for xhint 17-64",
+      "a0_features": [
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ]
+    },
+    {
+      "order": 8,
+      "sha_full": "30cc64e2343c26f7b5755c075a82e459ef72acf6",
+      "sha": "30cc64e2343",
+      "subject": "[inductor] Deduplicate identical graph outputs (pointwise_c14f03aac63b, 5.13x->0.71x)",
+      "a0_features": [
+        "U18:dedupe_graph_outputs"
+      ]
+    },
+    {
+      "order": 9,
+      "sha_full": "14b0254f8a96950d66154141d2d57115148452fb",
+      "sha": "14b0254f8a9",
+      "subject": "[inductor] Optimize unrolled argmax/argmin: eliminate redundant tie-break ops (pointwise_e33f44c6dd73, 1.59x->1.31x)",
+      "a0_features": [
+        "U32:argmax/argmin unrolled tie-break elimination"
+      ]
+    },
+    {
+      "order": 10,
+      "sha_full": "905450a5a5df02c97c69590b2f72152701902b87",
+      "sha": "905450a5a5d",
+      "subject": "[inductor] WIP: scheduler-level inline_recomputable_producers pass",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 11,
+      "sha_full": "f595e0cac3a7261fb0c34b9d8ffc29a6319e0f9f",
+      "sha": "f595e0cac3a",
+      "subject": "[inductor] Fix topological ordering bug in select_scatter_sparsity pass (sum_sum_sum_5f0c557e2169)",
+      "a0_features": [
+        "U06:select_scatter_sparsity"
+      ]
+    },
+    {
+      "order": 12,
+      "sha_full": "a73d1583b348acfadfb2089e87e9c94572120910",
+      "sha": "a73d1583b34",
+      "subject": "[inductor] Canonicalize reciprocal(sqrt(x)) to rsqrt(x) (mean_7639, 1.41x->1.09x)",
+      "a0_features": [
+        "U20:rsqrt_canonicalization"
+      ]
+    },
+    {
+      "order": 13,
+      "sha_full": "6fdaadaa2c08cda7f2df7712cbbf9d079bd81040",
+      "sha": "6fdaadaa2c0",
+      "subject": "[inductor] Cat-through-reduction FX pass (mean_d0fc206717a8, 1.81x->0.90x; mean_5c93e9826aa8, 1.45x->0.61x)",
+      "a0_features": [
+        "U14:cat_through_reduction"
+      ]
+    },
+    {
+      "order": 14,
+      "sha_full": "86c5451e197ab87575bae9bcccdb0a2bc67f336e",
+      "sha": "86c5451e197",
+      "subject": "[inductor] BN-inference affine folding FX pass (pointwise_42ab411e21f6, 1.27x->1.23x)",
+      "a0_features": [
+        "U17:bn_affine_folding"
+      ]
+    },
+    {
+      "order": 15,
+      "sha_full": "b1e8a30af150048a001aa1855e2fc7236f81aca1",
+      "sha": "b1e8a30af15",
+      "subject": "[inductor] Materialize multi-user transcendental nodes to avoid broadcast recomputation (sum_51d2ed69e698, 2.19x->1.27x)",
+      "a0_features": [
+        "U26:ir realize-on-reuse: materialize heavy transcendentals + indirect-indexed nodes"
+      ]
+    },
+    {
+      "order": 16,
+      "sha_full": "e034b931eab6e7637982eb591be2d69f47b2f52d",
+      "sha": "e034b931eab",
+      "subject": "[inductor] Add scatter-add-into fusion pass for embedding backward",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U03:scatter_add_into_fusion"
+      ]
+    },
+    {
+      "order": 17,
+      "sha_full": "2fbbe4018715f3daf351f7ef55ba9a2964ac95e0",
+      "sha": "2fbbe401871",
+      "subject": "[inductor] Add low-warp persistent reduction configs for small rnumel (var_mean_mean_2ac1c2eb8544, 1.54x->1.25x)",
+      "a0_features": [
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ]
+    },
+    {
+      "order": 18,
+      "sha_full": "290b0f22d9a905a9ee84a3be5eb6eeeca0c6b214",
+      "sha": "290b0f22d9a",
+      "subject": "[inductor] Add reduce-scatter distribution pass for LN-backward (sum_sum_sum_6a2ad206248c, 1.97x->1.93x)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U04:reduce_scatter_distribution"
+      ]
+    },
+    {
+      "order": 19,
+      "sha_full": "846f6be70153fd74f9173576153e33e07e66ef80",
+      "sha": "846f6be7015",
+      "subject": "[inductor] Fix reduction hint for indirect-indexed reads and enable MOR sibling fusion (sum_sum_sum_37ed72cc58f3, 2.02x->1.02x)",
+      "a0_features": [
+        "U30:MOR"
+      ]
+    },
+    {
+      "order": 20,
+      "sha_full": "4427bfd553cb413a3bd7435e223cbdfd4318e1b2",
+      "sha": "4427bfd553c",
+      "subject": "[inductor] Extend scatter_add_into_fusion to handle dtype cast variant (sum_sum_ceb449ea29e4, 2.18x->0.87x)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U03:scatter_add_into_fusion"
+      ]
+    },
+    {
+      "order": 21,
+      "sha_full": "5d4ce5df93b500bbcf21ab619598b5eb66477076",
+      "sha": "5d4ce5df93b",
+      "subject": "[inductor] Split reductions when GPU is undersaturated on B200+ (var_mean_598830735cf6, 1.82x->1.29x)",
+      "a0_features": [
+        "U22:split-reduction cost model: undersaturated + partially-saturated GPU split"
+      ]
+    },
+    {
+      "order": 22,
+      "sha_full": "d8e9914094a16120024a9d2bce5cc812968bc532",
+      "sha": "d8e9914094a",
+      "subject": "[inductor] Add scatter read bypass pass for Longformer attention (8->5 kernels)",
+      "a0_features": [
+        "U11:diagonal_skew_elimination"
+      ]
+    },
+    {
+      "order": 23,
+      "sha_full": "715c6fc42ac16b830d3d8b74d8e44e91ac3c727f",
+      "sha": "715c6fc42ac",
+      "subject": "[inductor] Materialize indirect-indexed nodes on reuse to avoid replayed gathers (amax_sum_9f4956227a79, 1.62x->0.89x)",
+      "a0_features": [
+        "U26:ir realize-on-reuse: materialize heavy transcendentals + indirect-indexed nodes"
+      ]
+    },
+    {
+      "order": 24,
+      "sha_full": "aa83bc1951c3ec7fc417c079bc74a27c01826676",
+      "sha": "aa83bc1951c",
+      "subject": "[inductor] Clamp embedding indices to elide device_assert (amax_sum_5f0c26b7e967, 1.52x->1.01x)",
+      "a0_features": []
+    },
+    {
+      "order": 25,
+      "sha_full": "d95f59fb1bc6a2f4ab53af8b5f0f3ecc42679773",
+      "sha": "d95f59fb1bc",
+      "subject": "[inductor] Fix pointwise_cat shared reads heuristic for SwiGLU patterns (pointwise_f6d6f135f57e, 2.10x->0.97x)",
+      "a0_features": []
+    },
+    {
+      "order": 26,
+      "sha_full": "e6d89ca0b3162ad2a046b8f63c98cf09b0caffeb",
+      "sha": "e6d89ca0b31",
+      "subject": "[inductor] Extend scatter_reduce_fusion to handle channel-sliced scatter_add patterns",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U03:scatter_add_into_fusion"
+      ]
+    },
+    {
+      "order": 27,
+      "sha_full": "12e839eb0fc4c2d95926686ca63433ac0dbfb3e7",
+      "sha": "12e839eb0fc",
+      "subject": "[inductor] Fix inline_recomputable_producers inverse indexer and enable by default (pointwise_e26de0a669ae, 1.43x->0.75x)",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 28,
+      "sha_full": "d75864dea062d11c4eb1d124b085ab36ea36d03c",
+      "sha": "d75864dea06",
+      "subject": "[inductor] Aggressive split factor for undersaturated multi-output reductions (sum_sum_e9338369070e, 2.96x->0.69x)",
+      "a0_features": [
+        "U22:split-reduction cost model: undersaturated + partially-saturated GPU split"
+      ]
+    },
+    {
+      "order": 29,
+      "sha_full": "7be29e49d9e243654b69dcef0efc7d77f78c7dc3",
+      "sha": "7be29e49d9e",
+      "subject": "[inductor] Raise persistent reduction threshold on Blackwell for BN-training patterns (var_mean_65e90900fd65, 1.32x->1.0x)",
+      "a0_features": [
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ]
+    },
+    {
+      "order": 30,
+      "sha_full": "c465f1751c6fb964133f8fc9230d13b26137cdbc",
+      "sha": "c465f1751c6",
+      "subject": "[inductor] Fix recursion and KeyError in scheduler mutation_renames (var_mean_9e94237b5daf, 1.26x->1.19x)",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 31,
+      "sha_full": "9b4edfffc15535f782744dd62352457f1478fa0f",
+      "sha": "9b4edfffc15",
+      "subject": "[inductor] Hoist loop-invariant target_logit in online_softmax_cross_entropy codegen",
+      "a0_features": [
+        "U07:slice_scatter_elision",
+        "U31:CE gather-into-softmax"
+      ]
+    },
+    {
+      "order": 32,
+      "sha_full": "c33b0e7861841d5564a288c30bf0eb8cabb43f96",
+      "sha": "c33b0e78618",
+      "subject": "[inductor] Add expand-sum elision FX pass (sum_sum_sum_6b7ff2251678, 1.694x->1.17x)",
+      "a0_features": [
+        "U13:expand_sum_elision"
+      ]
+    },
+    {
+      "order": 33,
+      "sha_full": "3e627768c9f1aba0fa27358835c16a27d8b70a44",
+      "sha": "3e627768c9f",
+      "subject": "[inductor] Extend constant-fold to propagate uniform values through view/expand ops (any_amax_sum, 1.098x->1.092x)",
+      "a0_features": [
+        "U19:constant-fold uniform-through-view + iota/arange ConstantFolder + materialize constant-full"
+      ]
+    },
+    {
+      "order": 34,
+      "sha_full": "2199f90f78285b3171a220cc411bbd1f29cac7bd",
+      "sha": "2199f90f782",
+      "subject": "[inductor] Rewrite slice_scatter partial elision to use small slice_scatter instead of cat",
+      "a0_features": [
+        "U07:slice_scatter_elision"
+      ]
+    },
+    {
+      "order": 35,
+      "sha_full": "d85ab5508e36a273650f50e7102f912637029516",
+      "sha": "d85ab5508e3",
+      "subject": "[inductor] Split large second-step reductions in multilayer decomposition (mean_sum_e5a21319f6c6, 1.88x->0.77x)",
+      "a0_features": [
+        "U24:split_multilayer_second_step + split_reductions_for_fusion"
+      ]
+    },
+    {
+      "order": 36,
+      "sha_full": "ec674714f38bfbee4829c1b4905307d08290085c",
+      "sha": "ec674714f38",
+      "subject": "[inductor] Fix inline_recomputable_producers removing buffers still needed",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 37,
+      "sha_full": "054c68b5e152484c3ba8f606ce575fb7098037a5",
+      "sha": "054c68b5e15",
+      "subject": "[inductor] Fix dead_node_elimination removing graph outputs and mutation targets",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 38,
+      "sha_full": "a6e9664fb72a5a9b0a839fb27ae6aa8c1b0b37ea",
+      "sha": "a6e9664fb72",
+      "subject": "[inductor] Extend inline_recomputable_producers for cheap non-broadcast producers (var_mean_deb7c9191e39, 1.41x->1.10x)",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 39,
+      "sha_full": "ab46039c49268bf84b497c544db67a516ac82efc",
+      "sha": "ab46039c492",
+      "subject": "[inductor] Fix split-K regression for near-saturated reductions (sum_sum_57e5518c4d1d, 5.89x->1.01x)",
+      "a0_features": [
+        "U22:split-reduction cost model: undersaturated + partially-saturated GPU split"
+      ]
+    },
+    {
+      "order": 40,
+      "sha_full": "44802547aa9ccc22f99d67e82819333e17d77970",
+      "sha": "44802547aa9",
+      "subject": "[inductor] Fix assertion crash in _get_nd_reduction_numels when rnumel > TRITON_MAX_BLOCK",
+      "a0_features": [
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ]
+    },
+    {
+      "order": 41,
+      "sha_full": "2b40e059b84e69852fb88bf2cd4cd9941d66150d",
+      "sha": "2b40e059b84",
+      "subject": "[inductor] Fix inline_recomputable_producers removing buffers still read by ExternKernels",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ]
+    },
+    {
+      "order": 42,
+      "sha_full": "049d1229d84310f84045347b1305660244cbebd8",
+      "sha": "049d1229d84",
+      "subject": "[inductor] One-hot reduction elimination pass (sum_cfe874779dd6 1.62x->1.03x, sum_77824d392401 1.21x->0.95x)",
+      "a0_features": [
+        "U12:one_hot_reduction_elimination"
+      ]
+    },
+    {
+      "order": 43,
+      "sha_full": "6703f38fa2de418e19e2e621250ae203790eb226",
+      "sha": "6703f38fa2d",
+      "subject": "[inductor] Canonicalize reciprocal(sqrt(x)) to rsqrt (mean_7639bfb9be38, 1.41x->0.99x)",
+      "a0_features": [
+        "U20:rsqrt_canonicalization"
+      ]
+    },
+    {
+      "order": 44,
+      "sha_full": "52d4cadfac01a3c2e16a50f065d023ebe38c58e3",
+      "sha": "52d4cadfac0",
+      "subject": "[inductor] Loop-invariant compute/gather hoisting for looped reductions (neutral on B200, default off)",
+      "a0_features": []
+    },
+    {
+      "order": 45,
+      "sha_full": "1406552b9d3c16c98824f69ea7ed1581526dd69e",
+      "sha": "1406552b9d3",
+      "subject": "[inductor] Rotate-half gather pass: RoPE rotation as single-load gather (sum_51d2ed69e698, 1.27x->1.00x)",
+      "a0_features": [
+        "U15:rotate_half_gather"
+      ]
+    },
+    {
+      "order": 46,
+      "sha_full": "edbd4b67279d586563bc0c7709aec6bb9cd08ba7",
+      "sha": "edbd4b67279",
+      "subject": "[inductor] Fix stale other_node in chained scatter_add_into rewrites (sum_sum_sum_04ab10ca59ee, 1.39x->0.82x)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U03:scatter_add_into_fusion"
+      ]
+    },
+    {
+      "order": 47,
+      "sha_full": "bbf37d454c29aeebd60c329a502e0c25000bd05e",
+      "sha": "bbf37d454c2",
+      "subject": "[inductor] Compact slice outputs of pointwise epilogues (sum_sum_b16afac198fb, 1.87x->1.00x)",
+      "a0_features": [
+        "U21:slice_output_compaction"
+      ]
+    },
+    {
+      "order": 48,
+      "sha_full": "5489b8c2bb9ebe73b609e51ddbfec2d618d675a5",
+      "sha": "5489b8c2bb9",
+      "subject": "[inductor] Eliminate scatter_add feeding full reductions via gather-predicate rewrite (sum_sum_3219a09ab96a, 3.60x->0.45x)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U02:scatter_add_reduce_elimination"
+      ]
+    },
+    {
+      "order": 49,
+      "sha_full": "3b746fce6609467ee2169b4e7a94acc399638833",
+      "sha": "3b746fce660",
+      "subject": "WIP: extend slice-output compaction to select.int and multi-view bases",
+      "a0_features": [
+        "U21:slice_output_compaction"
+      ]
+    },
+    {
+      "order": 50,
+      "sha_full": "bdc289b36441ad02426d56bdc8b4fb8e966ed7d2",
+      "sha": "bdc289b3644",
+      "subject": "[inductor] Split partially-saturated multi-output reductions (sum_sum_63e248035ceb, 1.68x->1.03x)",
+      "a0_features": [
+        "U22:split-reduction cost model: undersaturated + partially-saturated GPU split"
+      ]
+    },
+    {
+      "order": 51,
+      "sha_full": "3bf69043be096a277c6977d8134a39a64adba8d6",
+      "sha": "3bf69043be0",
+      "subject": "[inductor] Extend slice-output compaction: select.int outputs, multi-view bases, min-saved-bytes gate (var_mean_c5067e6e3750 1.14x->0.88x, var_mean_2ec780efd8cf 1.34x->1.08x, sum_sum_3d76bb8bc6b6 1.63x->1.29x, sum_sum_98c4811f6ddf 1.12x->0.82x)",
+      "a0_features": [
+        "U21:slice_output_compaction"
+      ]
+    },
+    {
+      "order": 52,
+      "sha_full": "f6ae31e698437ae29b554b31c0c2210901953220",
+      "sha": "f6ae31e6984",
+      "subject": "[WIP][inductor] Require r-contiguity for evict_first reduction loads (sum_011e69da166d 1.42x->0.98x)",
+      "a0_features": [
+        "U27:triton evict_first policy"
+      ]
+    },
+    {
+      "order": 53,
+      "sha_full": "e45f846f8d149e5515eff4684a720c40e846a34a",
+      "sha": "e45f846f8d1",
+      "subject": "[inductor] Drop evict_first for x-contiguous reduction loads with misaligned strides (sum_011e69da166d, 1.42x->0.98x)",
+      "a0_features": [
+        "U27:triton evict_first policy"
+      ]
+    },
+    {
+      "order": 54,
+      "sha_full": "60431eca431fa8b38b6ff31f5d7139ba4b9aeb26",
+      "sha": "60431eca431",
+      "subject": "[inductor] Gate evict_first drop on misaligned x-only loads to kernels with in-loop side stores (sum_sum_666d023699ba, sum_31bf563cdf96 counterexamples)",
+      "a0_features": [
+        "U27:triton evict_first policy"
+      ]
+    },
+    {
+      "order": 55,
+      "sha_full": "e9a67c98a8c2493d45b492f64a307903e32c8d38",
+      "sha": "e9a67c98a8c",
+      "subject": "[inductor] Restrict evict_first drop to kernels whose iteration space exceeds L2 (sum_sum_06ebd69de9aa counterexample)",
+      "a0_features": [
+        "U27:triton evict_first policy"
+      ]
+    },
+    {
+      "order": 56,
+      "sha_full": "a26fc2c8bf45dd402c95814a3aebb3656bef35c7",
+      "sha": "a26fc2c8bf4",
+      "subject": "[inductor] Fast combine for online-softmax loops (amax_sum_sum_6fd07d12d98a, 1.42x->1.01x)",
+      "a0_features": [
+        "U28:online-softmax fast combine"
+      ]
+    },
+    {
+      "order": 57,
+      "sha_full": "60dd3839913619cc209039e55f2c21f60bd7557f",
+      "sha": "60dd3839913",
+      "subject": "[inductor] dedupe_graph_outputs: pick earliest node in graph order as canonical",
+      "a0_features": [
+        "U18:dedupe_graph_outputs"
+      ]
+    },
+    {
+      "order": 58,
+      "sha_full": "56959375c338a6338934d267fdb0c94f640f9ee8",
+      "sha": "56959375c33",
+      "subject": "[inductor] Decode affine-iota overlapping-window index_put scatters into overlap-add (sum_c2895e89552b, 2.85x->1.47x)",
+      "a0_features": [
+        "U05:structured_scatter_decode"
+      ]
+    },
+    {
+      "order": 59,
+      "sha_full": "a85d79a900a598df4edb38618e9907ffccde30e8",
+      "sha": "a85d79a900a",
+      "subject": "[inductor] Segment-aligned split introduction (sum_0becf9609ad7 1.41x->0.62x, sum_21c4018e2b7b 1.26x->0.89x)",
+      "a0_features": [
+        "U23:segment-aligned split-reduction introduction"
+      ]
+    },
+    {
+      "order": 60,
+      "sha_full": "9dde2c59a519c8f92480131f5d743117d13e2198",
+      "sha": "9dde2c59a51",
+      "subject": "[inductor] Ungate scalar-acc configs from CD + raise rnumel ceiling (genai SoftmaxForward default 3541->1905us)",
+      "a0_features": [
+        "U29:scalar reduction accumulators"
+      ]
+    },
+    {
+      "order": 61,
+      "sha_full": "daa79cd25ca9a80bfd65799394cf4255d6be75a6",
+      "sha": "daa79cd25ca",
+      "subject": "[inductor] dedupe_graph_outputs: iterative structural hash (deep-graph RecursionError)",
+      "a0_features": [
+        "U18:dedupe_graph_outputs"
+      ]
+    }
+  ]
+}

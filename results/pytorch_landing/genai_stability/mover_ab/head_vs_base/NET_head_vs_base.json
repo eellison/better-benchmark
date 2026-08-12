@@ -1,0 +1,141 @@
+{
+  "framing": "net branch effect: pred=BASE 5e2ab3055de, mover=HEAD daa79cd25ca; delta_pct>0 = HEAD faster",
+  "method": "genai_ab.py locked path --full-graphs, fresh inductor cache per side, N=3 cold (no >1% spread -> no bump)",
+  "note": "run invoked as --pair HEAD BASE so raw pair_deltas.json has inverted sign; THIS file is the corrected pred=BASE/mover=HEAD orientation",
+  "rows": [
+    {
+      "micro": "CrossEntropyBackward",
+      "fam": "CrossEntropy",
+      "graph": "000",
+      "base_us": 2171.71,
+      "head_us": 715.87,
+      "delta_pct": 67.037,
+      "verdict": "real",
+      "is_fwd": false,
+      "spread_base": 0.001,
+      "spread_head": 0.107
+    },
+    {
+      "micro": "CrossEntropyForward",
+      "fam": "CrossEntropy",
+      "graph": "000",
+      "base_us": 2133.86,
+      "head_us": 708.48,
+      "delta_pct": 66.798,
+      "verdict": "real",
+      "is_fwd": true,
+      "spread_base": 0.004,
+      "spread_head": 0.014
+    },
+    {
+      "micro": "LayerNormBackward",
+      "fam": "LayerNorm",
+      "graph": "000",
+      "base_us": 392.1,
+      "head_us": 306.98,
+      "delta_pct": 21.709,
+      "verdict": "real",
+      "is_fwd": false,
+      "spread_base": 0.033,
+      "spread_head": 0.021
+    },
+    {
+      "micro": "LayerNormBackward",
+      "fam": "LayerNorm",
+      "graph": "001",
+      "base_us": 695.2,
+      "head_us": 677.92,
+      "delta_pct": 2.486,
+      "verdict": "real",
+      "is_fwd": false,
+      "spread_base": 0.032,
+      "spread_head": 0.453
+    },
+    {
+      "micro": "LayerNormForward",
+      "fam": "LayerNorm",
+      "graph": "000",
+      "base_us": 342.94,
+      "head_us": 342.24,
+      "delta_pct": 0.204,
+      "verdict": "no-move",
+      "is_fwd": true,
+      "spread_base": 0.243,
+      "spread_head": 0.252
+    },
+    {
+      "micro": "RMSNormBackward",
+      "fam": "RMSNorm",
+      "graph": "000",
+      "base_us": 395.01,
+      "head_us": 306.94,
+      "delta_pct": 22.296,
+      "verdict": "real",
+      "is_fwd": false,
+      "spread_base": 0.049,
+      "spread_head": 0.031
+    },
+    {
+      "micro": "RMSNormBackward",
+      "fam": "RMSNorm",
+      "graph": "001",
+      "base_us": 395.17,
+      "head_us": 380.83,
+      "delta_pct": 3.629,
+      "verdict": "real",
+      "is_fwd": false,
+      "spread_base": 0.526,
+      "spread_head": 0.336
+    },
+    {
+      "micro": "RMSNormForward",
+      "fam": "RMSNorm",
+      "graph": "000",
+      "base_us": 343.81,
+      "head_us": 343.84,
+      "delta_pct": -0.009,
+      "verdict": "no-move",
+      "is_fwd": true,
+      "spread_base": 0.009,
+      "spread_head": 0.037
+    },
+    {
+      "micro": "SoftmaxBackward",
+      "fam": "Softmax",
+      "graph": "000",
+      "base_us": 3350.62,
+      "head_us": 1432.54,
+      "delta_pct": 57.246,
+      "verdict": "real",
+      "is_fwd": false,
+      "spread_base": 0.025,
+      "spread_head": 0.056
+    },
+    {
+      "micro": "SoftmaxBackward",
+      "fam": "Softmax",
+      "graph": "001",
+      "base_us": 2878.43,
+      "head_us": 2878.37,
+      "delta_pct": 0.002,
+      "verdict": "no-move",
+      "is_fwd": false,
+      "spread_base": 0.064,
+      "spread_head": 0.039
+    },
+    {
+      "micro": "SoftmaxForward",
+      "fam": "Softmax",
+      "graph": "000",
+      "base_us": 3461.98,
+      "head_us": 1904.58,
+      "delta_pct": 44.986,
+      "verdict": "real",
+      "is_fwd": true,
+      "spread_base": 0.005,
+      "spread_head": 0.323
+    }
+  ],
+  "geomean_fwd_only_pct": 53.039,
+  "geomean_incl_bwd_pct": 46.771
+}

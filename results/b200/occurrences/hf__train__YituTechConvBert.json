@@ -1,0 +1,455 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "08d044dd173f": {
+      "4b47cbc0": 1
+    },
+    "7cb726f1f92d": {
+      "6925c38d": 1
+    },
+    "52fe1925ccda": {
+      "2e6d9a9a": 1
+    },
+    "21faaccf749d": {
+      "ca0eabd2": 1
+    },
+    "8bb40810003c": {
+      "f5f85987": 13,
+      "ae9f1068": 12,
+      "44a2434c": 12,
+      "aa459734": 48,
+      "a7aca999": 12
+    },
+    "232f8ebe7430": {
+      "d429ff7b": 1
+    },
+    "ccd411f2a45d": {
+      "726421b1": 25,
+      "7a1c483f": 12,
+      "649b2327": 48,
+      "d54e4e78": 12,
+      "8071b732": 12
+    },
+    "826ea0b5f6e4": {
+      "92efc45e": 12
+    },
+    "47eaf3cbeb9b": {
+      "d429ff7b": 1
+    },
+    "5e648310bc29": {
+      "add2068b": 12
+    },
+    "2b46022db36e": {
+      "3f2521b1": 11
+    },
+    "7a65d2915044": {
+      "6210275d": 12
+    },
+    "60c4eafecc9d": {
+      "06a51e7f": 12
+    },
+    "62fd7229eda3": {
+      "d429ff7b": 1
+    },
+    "38f166201359": {
+      "d429ff7b": 1
+    },
+    "2b382ed802af": {
+      "d429ff7b": 1
+    },
+    "d99603638029": {
+      "d429ff7b": 1
+    },
+    "30b31415eb6f": {
+      "d429ff7b": 1
+    },
+    "bdf875eb35d3": {
+      "d429ff7b": 1
+    },
+    "62d1a04fba6c": {
+      "d429ff7b": 1
+    },
+    "11df982f906b": {
+      "d429ff7b": 1
+    },
+    "e512a263e932": {
+      "d429ff7b": 1
+    },
+    "fb9b8dccff88": {
+      "d429ff7b": 1
+    },
+    "fb44620c46b0": {
+      "d429ff7b": 1
+    },
+    "23294968b555": {
+      "d429ff7b": 1
+    },
+    "922c346a8f22": {
+      "d429ff7b": 1
+    },
+    "3260131881b0": {
+      "d429ff7b": 1
+    },
+    "e835ce476902": {
+      "d429ff7b": 1
+    },
+    "5e0db2d8059c": {
+      "d429ff7b": 1
+    },
+    "92d134082176": {
+      "d429ff7b": 1
+    },
+    "d8be325d48fc": {
+      "d429ff7b": 1
+    },
+    "e39b672700be": {
+      "d429ff7b": 1
+    },
+    "a678817dc522": {
+      "d429ff7b": 1
+    },
+    "ece687e898ac": {
+      "d429ff7b": 1
+    },
+    "c3bca3bfa0d7": {
+      "d429ff7b": 1
+    },
+    "9a63444680ea": {
+      "edd7640e": 1
+    },
+    "84c3481ab476": {
+      "e57d24c8": 1
+    },
+    "7157158c7b49": {
+      "50c7603a": 1
+    },
+    "04d85912d998": {
+      "29b3fcbd": 48,
+      "465149ba": 12,
+      "90becd17": 12,
+      "9fe13ed9": 12,
+      "2ddc1bad": 13,
+      "6393d8ae": 12,
+      "5a62163f": 12
+    },
+    "80d7d20cfbde": {
+      "f85fe078": 11
+    },
+    "785c25a716ed": {
+      "f85fe078": 11,
+      "9876fbcf": 1
+    },
+    "8d6ca7cce8c9": {
+      "0c475f9a": 12
+    },
+    "0bc6cca52a2d": {
+      "0636dd1f": 11
+    },
+    "e35c7162abbb": {
+      "d20f46e2": 12
+    },
+    "260a107eaf32": {
+      "9846b7f2": 12
+    },
+    "139a3020e8bf": {
+      "05a5e903": 12
+    },
+    "56a68a521d26": {
+      "730e8332": 11
+    },
+    "623a84402e27": {
+      "9876fbcf": 1
+    },
+    "d915970dff62": {
+      "00333af8": 1
+    },
+    "d0cb44a92f6d": {
+      "dca7eb09": 1
+    },
+    "199240d27571": {
+      "02c9dc6d": 1
+    },
+    "85ee747617a6": {
+      "7eef06a5": 1
+    },
+    "c8d23ac4414d": {
+      "cd997de8": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "74a18e47afbe",
+      "count": 48,
+      "sig": "((T([384],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 384],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 18.112000077962875,
+      "branch_us": 18.112000077962875
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f99cc26b3762",
+      "count": 12,
+      "sig": "((T([32, 768, 512],torch.bfloat16,[393216, 1, 768]),T([768, 1, 9],torch.bfloat16,[9, 9, 1]),None,[1],[4],[1],False,[0],768),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 199.39200580120087,
+      "branch_us": 199.39200580120087
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "b7182ef31eb0",
+      "count": 12,
+      "sig": "((T([32, 768, 512],torch.bfloat16,[393216, 512, 1]),T([384, 768, 1],torch.bfloat16,[768, 1, 1]),None,[1],[0],[1],False,[0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 15.744000673294067,
+      "branch_us": 15.744000673294067
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "b0023747d33a",
+      "count": 12,
+      "sig": "((T([16384, 384],torch.bfloat16,[384, 1]),T([384, 54],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 13.856000266969204,
+      "branch_us": 13.856000266969204
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "36d5a93ba28a",
+      "count": 12,
+      "sig": "((T([98304, 64, 9],torch.bfloat16,[576, 9, 1]),T([98304, 9, 1],torch.bfloat16,[9, 1, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 160.64000129699707,
+      "branch_us": 160.64000129699707
+    },
+    {
+      "target": "aten._scaled_dot_product_flash_attention.default",
+      "shape_hash": "998f0e0f21ee",
+      "count": 12,
+      "sig": "((T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),0.1),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "_scaled_dot_product_flash_attention",
+      "baseline_us": 74.78400319814682,
+      "branch_us": 74.78400319814682
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "570612514809",
+      "count": 13,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 22.23999984562397,
+      "branch_us": 22.23999984562397
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "199b1770013c",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 50.87999999523163,
+      "branch_us": 50.87999999523163
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ec3c06b9ce24",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "addmm_6",
+      "baseline_us": 57.21599981188774,
+      "branch_us": 57.21599981188774
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "24042f7bff27",
+      "count": 1,
+      "sig": "((T([30528],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 30528],torch.bfloat16,[30528, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_000.py",
+      "node": "addmm_85",
+      "baseline_us": 485.1840138435364,
+      "branch_us": 485.1840138435364
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "783f0bc761ed",
+      "count": 1,
+      "sig": "((T([16384, 30528],torch.bfloat16,[30528, 1]),T([30528, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 487.39200830459595,
+      "branch_us": 487.39200830459595
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "436c080a40dd",
+      "count": 1,
+      "sig": "((T([30522, 16384],torch.bfloat16,[1, 30522]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 2737.1199131011963,
+      "branch_us": 2737.1199131011963
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0ae1cdfa8630",
+      "count": 13,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 22.048000246286392,
+      "branch_us": 22.048000246286392
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d2d83a56efdc",
+      "count": 13,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 28.192000463604927,
+      "branch_us": 28.192000463604927
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ef862f961114",
+      "count": 12,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_4",
+      "baseline_us": 50.81599950790405,
+      "branch_us": 50.81599950790405
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2f3ed20bf89d",
+      "count": 12,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_5",
+      "baseline_us": 54.27199974656105,
+      "branch_us": 54.27199974656105
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "203209dc6807",
+      "count": 12,
+      "sig": "((T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_6",
+      "baseline_us": 58.9120015501976,
+      "branch_us": 58.9120015501976
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0685871ab71c",
+      "count": 12,
+      "sig": "((T([3072, 16384],torch.bfloat16,[1, 3072]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 55.07199838757515,
+      "branch_us": 55.07199838757515
+    },
+    {
+      "target": "aten._scaled_dot_product_flash_attention_backward.default",
+      "shape_hash": "9c6c745a9467",
+      "count": 1,
+      "sig": "((T([32, 6, 512, 64],torch.bfloat16,[196608, 32768, 64, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512],torch.float32,[3072, 512, 1]),None,None,512,512,0.1,False,T([2],torch.uint64,[1]),T([],torch.uint64,[])),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "_scaled_dot_product_flash_attention_backward",
+      "baseline_us": 192.1599954366684,
+      "branch_us": 192.1599954366684
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "d89fb4c5186f",
+      "count": 12,
+      "sig": "((T([98304, 9, 64],torch.bfloat16,[576, 1, 9]),T([98304, 64, 1],torch.bfloat16,[64, 1, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "bmm",
+      "baseline_us": 125.791996717453,
+      "branch_us": 125.791996717453
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "059c0819200a",
+      "count": 48,
+      "sig": "((T([16384, 384],torch.bfloat16,[384, 1]),T([384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_10",
+      "baseline_us": 15.87199978530407,
+      "branch_us": 15.87199978530407
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "5da7da116918",
+      "count": 48,
+      "sig": "((T([384, 16384],torch.bfloat16,[1, 384]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_11",
+      "baseline_us": 22.048000246286392,
+      "branch_us": 22.048000246286392
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "da74d59023d2",
+      "count": 12,
+      "sig": "((T([54, 16384],torch.bfloat16,[1, 54]),T([16384, 384],torch.bfloat16,[384, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_12",
+      "baseline_us": 19.168000668287277,
+      "branch_us": 19.168000668287277
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "57480f1b1c0a",
+      "count": 12,
+      "sig": "((T([16384, 54],torch.bfloat16,[54, 1]),T([54, 384],torch.bfloat16,[384, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "mm_13",
+      "baseline_us": 16.1920003592968,
+      "branch_us": 16.1920003592968
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "1604dee10089",
+      "count": 12,
+      "sig": "((T([32, 384, 512],torch.bfloat16,[196608, 1, 384]),T([32, 768, 512],torch.bfloat16,[393216, 512, 1]),T([384, 768, 1],torch.bfloat16,[768, 1, 1]),[0],[1],[0],[1],False,[0],1,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "convolution_backward",
+      "baseline_us": 104.2879968881607,
+      "branch_us": 104.2879968881607
+    },
+    {
+      "target": "aten.convolution_backward.default",
+      "shape_hash": "cede015111e6",
+      "count": 12,
+      "sig": "((T([32, 768, 512],torch.bfloat16,[393216, 512, 1]),T([32, 768, 512],torch.bfloat16,[393216, 1, 768]),T([768, 1, 9],torch.bfloat16,[9, 9, 1]),[0],[1],[4],[1],False,[0],768,[True,True,False]),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "convolution_backward_1",
+      "baseline_us": 376.67199969291687,
+      "branch_us": 376.67199969291687
+    },
+    {
+      "target": "aten._scaled_dot_product_flash_attention_backward.default",
+      "shape_hash": "dccbb81ca3e5",
+      "count": 11,
+      "sig": "((T([32, 6, 512, 64],torch.bfloat16,[196608, 32768, 64, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 64, 384, 1]),T([32, 6, 512, 64],torch.bfloat16,[196608, 1, 384, 6]),T([32, 6, 512, 64],torch.bfloat16,[196608, 1, 384, 6]),T([32, 6, 512, 64],torch.bfloat16,[196608, 1, 384, 6]),T([32, 6, 512],torch.float32,[3072, 512, 1]),None,None,512,512,0.1,False,T([2],torch.uint64,[1]),T([],torch.uint64,[])),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/YituTechConvBert/full_graph_001.py",
+      "node": "_scaled_dot_product_flash_attention_backward_1",
+      "baseline_us": null,
+      "branch_us": null
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "train",
+  "model": "YituTechConvBert"
+}

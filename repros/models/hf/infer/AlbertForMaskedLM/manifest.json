@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "AlbertForMaskedLM",
+  "patterns": [
+    "035e4d7f5117",
+    "08f6231329f7",
+    "0a49dc00cbaf",
+    "2d969ac9ad59",
+    "301cf5a13527",
+    "31bb65844b3f",
+    "393456b916a6",
+    "45f7dfd4a983",
+    "4779980113db",
+    "562d52916cc9",
+    "96edf0542ecd",
+    "a18f3869022f",
+    "e232f7a3d0d8",
+    "e87d6ebc9ded",
+    "f2a03dbd04dd"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

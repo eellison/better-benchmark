@@ -1,0 +1,473 @@
+{
+  "n_graphs": 7,
+  "fusible": {
+    "8cc7ad505f35": {
+      "0105f520": 1
+    },
+    "ac2b7ba56267": {
+      "496feaec": 1
+    },
+    "6a41a6a28b15": {
+      "d7517139": 1
+    },
+    "403020d93ad2": {
+      "5002b631": 1
+    },
+    "1918882eece2": {
+      "5002b631": 1
+    },
+    "01fbd6c1b27f": {
+      "04503798": 1
+    },
+    "8bb40810003c": {
+      "ae9f1068": 12,
+      "44a2434c": 12,
+      "f5f85987": 49
+    },
+    "ccd411f2a45d": {
+      "726421b1": 13,
+      "7a1c483f": 12
+    },
+    "826ea0b5f6e4": {
+      "d05618d1": 12
+    },
+    "378513bb3108": {
+      "726994b7": 1
+    },
+    "d13382187963": {
+      "ced82531": 12
+    },
+    "c7832ce0ffe9": {
+      "53c69788": 12
+    },
+    "bf0fd469b53e": {
+      "b64f0e8a": 1
+    },
+    "d65c0807a819": {
+      "53c69788": 12
+    },
+    "62ec9910b2e0": {
+      "53c69788": 12
+    },
+    "5c40fc7d02ca": {
+      "04503798": 1
+    },
+    "a93937c5ef33": {
+      "726994b7": 1
+    },
+    "14cb1ca39cba": {
+      "b64f0e8a": 1
+    },
+    "e5a8f396e9fa": {
+      "04503798": 1
+    },
+    "bfb43d518019": {
+      "726994b7": 1
+    },
+    "7303c49b6018": {
+      "b64f0e8a": 1
+    },
+    "9051d879a6b2": {
+      "04503798": 1
+    },
+    "4903d1ba689a": {
+      "726994b7": 1
+    },
+    "8f72f9914b96": {
+      "b64f0e8a": 1
+    },
+    "a83b84b3c160": {
+      "04503798": 1
+    },
+    "3dd1f797edda": {
+      "726994b7": 1
+    },
+    "f812d7f85634": {
+      "b64f0e8a": 1
+    },
+    "939bc8d57810": {
+      "04503798": 1
+    },
+    "1fc57d20f910": {
+      "726994b7": 1
+    },
+    "abc117528ea8": {
+      "b64f0e8a": 1
+    },
+    "53e4de98e8f7": {
+      "04503798": 1
+    },
+    "771a0a39f4b9": {
+      "726994b7": 1
+    },
+    "e24ce795856b": {
+      "b64f0e8a": 1
+    },
+    "ed2e4094de1e": {
+      "04503798": 1
+    },
+    "e59fb82095be": {
+      "726994b7": 1
+    },
+    "31d85970adb2": {
+      "b64f0e8a": 1
+    },
+    "4348a08765d9": {
+      "04503798": 1
+    },
+    "3e50d103dcec": {
+      "726994b7": 1
+    },
+    "99e031979c34": {
+      "b64f0e8a": 1
+    },
+    "8ef72e7459c3": {
+      "04503798": 1
+    },
+    "e187399c29bb": {
+      "726994b7": 1
+    },
+    "884c406c2df8": {
+      "b64f0e8a": 1
+    },
+    "6b958e610b41": {
+      "04503798": 1
+    },
+    "32d451b71a93": {
+      "726994b7": 1
+    },
+    "79b08bfeb860": {
+      "b64f0e8a": 1
+    },
+    "d7e9d309a0c1": {
+      "04503798": 1
+    },
+    "c7e6741fa8cd": {
+      "726994b7": 1
+    },
+    "bf7830302e6d": {
+      "50ff733e": 1
+    },
+    "38c88cc47464": {
+      "784a7239": 1
+    },
+    "3f000d9caa57": {
+      "4445581e": 1
+    },
+    "7cb726f1f92d": {
+      "06af09d8": 1
+    },
+    "52fe1925ccda": {
+      "6ce50a53": 1
+    },
+    "21faaccf749d": {
+      "a565199e": 1
+    },
+    "36f727d981e4": {
+      "784a7239": 1
+    },
+    "04d85912d998": {
+      "2ddc1bad": 49,
+      "6393d8ae": 12,
+      "5a62163f": 12
+    },
+    "00686ee773b3": {
+      "07bfd41e": 1
+    },
+    "199240d27571": {
+      "248b11c9": 1
+    },
+    "fa1cc97c6cfd": {
+      "c7a73141": 1
+    },
+    "c8d23ac4414d": {
+      "d59edba9": 1
+    },
+    "aad9b35ce285": {
+      "5599a41a": 1
+    },
+    "f2ae34e9b8f1": {
+      "b940b015": 1
+    },
+    "42c689cc9c14": {
+      "37e882df": 12
+    },
+    "6ad4e4f2ca8d": {
+      "37e882df": 12
+    },
+    "07fa37421ff1": {
+      "a120887f": 12
+    },
+    "d8b4b9aa58c4": {
+      "8c9b0625": 12
+    },
+    "b011c33c656b": {
+      "c623eb69": 1
+    },
+    "7939829e1a9f": {
+      "07bfd41e": 12
+    },
+    "135a329ed033": {
+      "5a443972": 12
+    },
+    "139a3020e8bf": {
+      "58ff2bc5": 12
+    },
+    "cc4b6a77cc6b": {
+      "7dd29037": 11
+    },
+    "444779f98932": {
+      "47e7063f": 10
+    },
+    "f84d2f33f15b": {
+      "d7517139": 1
+    },
+    "035e4d7f5117": {
+      "d7517139": 2
+    },
+    "7ba9dcb96142": {
+      "39dafa96": 1
+    },
+    "6fa7595f145a": {
+      "d7517139": 1
+    },
+    "00a35e7a9bcb": {
+      "f006a98f": 1
+    },
+    "eb86a17deab9": {
+      "784a7239": 1
+    },
+    "7a3340d935e9": {
+      "b79fa38b": 1
+    },
+    "0e08b9d50286": {
+      "05376402": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "8fe17a1ecfdb",
+      "count": 1,
+      "sig": "((T([8, 1024],torch.int32,[1024, 1]),1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 13.952000066637993,
+      "branch_us": 13.952000066637993
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4963a6c93143",
+      "count": 48,
+      "sig": "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_002.py",
+      "node": "mm",
+      "baseline_us": 16.127999871969223,
+      "branch_us": 16.127999871969223
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "90a620b62e02",
+      "count": 12,
+      "sig": "((T([288, 512, 64],torch.bfloat16,[32768, 64, 1]),T([288, 64, 512],torch.bfloat16,[32768, 512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_002.py",
+      "node": "bmm",
+      "baseline_us": 34.40000116825104,
+      "branch_us": 34.40000116825104
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "df75406d42cc",
+      "count": 12,
+      "sig": "((T([384, 256, 768],torch.bfloat16,[197120, 769, 1]),T([384, 768, 64],torch.bfloat16,[49152, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_002.py",
+      "node": "bmm_1",
+      "baseline_us": 120.54400146007538,
+      "branch_us": 120.54400146007538
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ed49a0e34fe5",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_002.py",
+      "node": "addmm",
+      "baseline_us": 30.33600002527237,
+      "branch_us": 30.33600002527237
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "228429ca499a",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_002.py",
+      "node": "addmm_1",
+      "baseline_us": 35.74400022625923,
+      "branch_us": 35.74400022625923
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b0b76a4e5fa5",
+      "count": 1,
+      "sig": "((T([768],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_003.py",
+      "node": "addmm",
+      "baseline_us": 16.16000011563301,
+      "branch_us": 16.16000011563301
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b3f35073baef",
+      "count": 1,
+      "sig": "((T([50272],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 50272],torch.bfloat16,[50272, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_003.py",
+      "node": "addmm_1",
+      "baseline_us": 409.4719886779785,
+      "branch_us": 409.4719886779785
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "34f98f40339f",
+      "count": 1,
+      "sig": "((T([8192, 50272],torch.bfloat16,[50272, 1]),T([50272, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_004.py",
+      "node": "mm",
+      "baseline_us": 403.23200821876526,
+      "branch_us": 403.23200821876526
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4e3b3ffb7378",
+      "count": 1,
+      "sig": "((T([50272, 8192],torch.bfloat16,[8192, 1]),T([8192, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_004.py",
+      "node": "mm_1",
+      "baseline_us": 388.0319893360138,
+      "branch_us": 388.0319893360138
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "dee3a83c3eaa",
+      "count": 49,
+      "sig": "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_004.py",
+      "node": "mm_2",
+      "baseline_us": 20.096000283956528,
+      "branch_us": 20.096000283956528
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "22aaa167f84b",
+      "count": 49,
+      "sig": "((T([768, 8192],torch.bfloat16,[1, 768]),T([8192, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_004.py",
+      "node": "mm_3",
+      "baseline_us": 18.079999834299088,
+      "branch_us": 18.079999834299088
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "9f7595661af3",
+      "count": 12,
+      "sig": "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "mm",
+      "baseline_us": 30.719999223947525,
+      "branch_us": 30.719999223947525
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f4ca1c755b04",
+      "count": 12,
+      "sig": "((T([768, 8192],torch.bfloat16,[1, 768]),T([8192, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "mm_1",
+      "baseline_us": 31.5839983522892,
+      "branch_us": 31.5839983522892
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "7dc2a5a66b6d",
+      "count": 12,
+      "sig": "((T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "mm_2",
+      "baseline_us": 35.93600168824196,
+      "branch_us": 35.93600168824196
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "8edc7ef0eabc",
+      "count": 12,
+      "sig": "((T([3072, 8192],torch.bfloat16,[1, 3072]),T([8192, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "mm_3",
+      "baseline_us": 32.19199925661087,
+      "branch_us": 32.19199925661087
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "499a30cb483c",
+      "count": 12,
+      "sig": "((T([384, 768, 256],torch.bfloat16,[197120, 1, 769]),T([384, 256, 64],torch.bfloat16,[16384, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "bmm",
+      "baseline_us": 106.20799660682678,
+      "branch_us": 106.20799660682678
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "6a1ac99bec27",
+      "count": 12,
+      "sig": "((T([384, 256, 64],torch.bfloat16,[16384, 64, 1]),T([384, 64, 768],torch.bfloat16,[49152, 1, 64])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "bmm_1",
+      "baseline_us": 36.51199862360954,
+      "branch_us": 36.51199862360954
+    },
+    {
+      "target": "aten.index_add.default",
+      "shape_hash": "83c9fbb09ad4",
+      "count": 12,
+      "sig": "((T([9437184],torch.bfloat16,[1]),0,T([18874368],torch.int64,[1]),T([18874368],torch.bfloat16,[1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "index_add",
+      "baseline_us": 5867.519855499268,
+      "branch_us": 5867.519855499268
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "87eb84ccda66",
+      "count": 12,
+      "sig": "((T([288, 64, 512],torch.bfloat16,[32768, 1, 64]),T([288, 512, 512],torch.bfloat16,[262144, 512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "bmm_2",
+      "baseline_us": 39.903998374938965,
+      "branch_us": 39.903998374938965
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "13303271143c",
+      "count": 12,
+      "sig": "((T([288, 512, 512],torch.bfloat16,[262144, 512, 1]),T([288, 512, 64],torch.bfloat16,[32768, 1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "bmm_3",
+      "baseline_us": 42.7200011909008,
+      "branch_us": 42.7200011909008
+    },
+    {
+      "target": "aten.index_add.default",
+      "shape_hash": "a6acfd16cc0b",
+      "count": 24,
+      "sig": "((T([6291456],torch.bfloat16,[1]),0,T([9437184],torch.int64,[1]),T([9437184],torch.bfloat16,[1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_005.py",
+      "node": "index_add_1",
+      "baseline_us": 2938.8160705566406,
+      "branch_us": 2938.8160705566406
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "train",
+  "model": "AllenaiLongformerBase"
+}

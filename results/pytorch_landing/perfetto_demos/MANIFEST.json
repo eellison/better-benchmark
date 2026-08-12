@@ -1,0 +1,72 @@
+{
+  "_what": "Provenance manifest for the perfetto demo traces in this dir. Regenerate with scripts/regen_perfetto_demos.py.",
+  "last_regen_at": "2026-07-14T17:06:29+00:00",
+  "timings_file": "results/all_oracle_timings_b200_v2.json",
+  "timings_priced_families": 1514,
+  "traces": {
+    "AllenaiLongformerBase": {
+      "model": "AllenaiLongformerBase",
+      "n_fusible_slices": 131,
+      "n_extern_slices": 99,
+      "n_oracle_hit": 118,
+      "n_oracle_miss": 13,
+      "oracle_miss_reasons": {
+        "FAM_UNPRICED": 13
+      },
+      "compile_fusible_us": 11907.46,
+      "oracle_fusible_us": 5748.18,
+      "fusible_compile_over_oracle_ratio": 2.0715,
+      "fusible_headroom_us": 6159.27,
+      "unpriced": false,
+      "trace_file": "AllenaiLongformerBase_oracle_overlay.perfetto.json",
+      "attr_file": "attr_longformer.json",
+      "pytorch_git_version": "UNKNOWN (legacy attr JSON, benched before provenance stamping; rerun without --skip-gpu to refresh)",
+      "attr_generated_at": null,
+      "trace_generated_at": "2026-07-14T17:06:29+00:00",
+      "timings_file": "results/all_oracle_timings_b200_v2.json",
+      "timings_priced_families": 1514
+    },
+    "alexnet": {
+      "model": "alexnet",
+      "n_fusible_slices": 7,
+      "n_extern_slices": 8,
+      "n_oracle_hit": 7,
+      "n_oracle_miss": 0,
+      "oracle_miss_reasons": {},
+      "compile_fusible_us": 108.7,
+      "oracle_fusible_us": 110.08,
+      "fusible_compile_over_oracle_ratio": 0.9875,
+      "fusible_headroom_us": -1.38,
+      "unpriced": false,
+      "trace_file": "alexnet_oracle_overlay.perfetto.json",
+      "attr_file": "attr_alexnet.json",
+      "pytorch_git_version": "UNKNOWN (legacy attr JSON, benched before provenance stamping; rerun without --skip-gpu to refresh)",
+      "attr_generated_at": null,
+      "trace_generated_at": "2026-07-14T17:06:29+00:00",
+      "timings_file": "results/all_oracle_timings_b200_v2.json",
+      "timings_priced_families": 1514
+    },
+    "mobilenetv2_100": {
+      "model": "mobilenetv2_100",
+      "n_fusible_slices": 52,
+      "n_extern_slices": 53,
+      "n_oracle_hit": 0,
+      "n_oracle_miss": 52,
+      "oracle_miss_reasons": {
+        "FAM_UNPRICED": 52
+      },
+      "compile_fusible_us": 962.78,
+      "oracle_fusible_us": 962.78,
+      "fusible_compile_over_oracle_ratio": 1.0,
+      "fusible_headroom_us": 0.0,
+      "unpriced": true,
+      "trace_file": "mobilenetv2_100_UNPRICED_example.perfetto.json",
+      "attr_file": "attr_mobilenetv2_collect_order.json",
+      "pytorch_git_version": "UNKNOWN (legacy attr JSON, benched before provenance stamping; rerun without --skip-gpu to refresh)",
+      "attr_generated_at": null,
+      "trace_generated_at": "2026-07-14T17:06:29+00:00",
+      "timings_file": "results/all_oracle_timings_b200_v2.json",
+      "timings_priced_families": 1514
+    }
+  }
+}

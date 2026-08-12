@@ -1,0 +1,125 @@
+{
+  "meta": {
+    "phase": "PHASE-2 MEGA-COMMIT FLAG-ABLATION",
+    "date": "2026-06-23",
+    "ablation_anchor": "AT HEAD daa79cd25ca (the active editable torch at /tmp/pytorch-work; == A0 ab_target_B)",
+    "method": "HEAD-default (control) vs HEAD-with-one-flag-toggled (marginal contribution). Locked path only: scripts/bench_parallel.py (repro path for corpus, --full-graphs for genai), INDUCTOR_GPU_BENCH_LOCK + do_bench min-of-100. Fresh/separate TORCHINDUCTOR_CACHE_DIR per arm.",
+    "mega_commit": "97385fb3273",
+    "walk_reconciliation_target": {"e2e_pp": 0.71, "kernel_geomean_pp": 1.95, "source": "A1 FULL_per_commit_e2e.txt + A2_verdict_table.md"},
+    "noise_floor": {
+      "method": "two independent control runs (HEAD default, fresh caches), same 60 shape-points",
+      "kernel_geomean_control_vs_control": 1.0017,
+      "worst_per_shape_dev_pct": 9.04,
+      "note": "geomean noise ~0.2%; per-shape noise up to ~9% on sub-10us kernels. A geomean within ~1% of 1.0, or a per-shape move under ~9% on a tiny kernel, is AT FLOOR. n_kernels change is the structural tell of a real codegen difference.",
+      "genai_isolated_spread_pct": "0.0-0.5 (locked --full-graphs path, run in ISOLATION)"
+    }
+  },
+  "env_var_mechanism_verification": {
+    "confirmed": true,
+    "how": "bench_parallel._locked_worker builds env=os.environ.copy() and passes it to the worker subprocess (subprocess.Popen(..., env=env)); the worker imports torch._inductor.config which binds TORCHINDUCTOR_* at import. Verified U09: TORCHINDUCTOR_LINEAR_REDUCTION_ELIMINATION=0 flips config.linear_reduction_elimination True->False inside the worker, AND the per-pass counter + generated-Triton structure change accordingly.",
+    "caveat_found": "The generated-source HASH alone is NOT a reliable affected-repro signal: inductor embeds a config-hash COMMENT in the output, so the hash differs even when the pass did not fire. The authoritative signal is counters['inductor'][<pass>] (>0 = pass fired = repro affected) and/or n_kernels change. Corrected the proxy to use counters.",
+    "env_bound_flags_OK": ["TORCHINDUCTOR_SCATTER_REDUCE_FUSION", "TORCHINDUCTOR_SLICE_SCATTER_ELISION", "TORCHINDUCTOR_SLICE_SCATTER_PARTIAL_ELISION", "TORCHINDUCTOR_AS_STRIDED_SCATTER_ELISION", "TORCHINDUCTOR_LINEAR_REDUCTION_ELIMINATION", "TORCHINDUCTOR_LAYOUT_TRANSFORM_STORE_SINKING"],
+    "u25_not_env_bound": "config.inline_recomputable_producers is a plain `= True` with NO Config(env_name_...) binding; generic TORCHINDUCTOR_INLINE_RECOMPUTABLE_PRODUCERS does NOTHING (verified). Ablated instead via a usercustomize.py on the worker's PYTHONPATH that sets the flag False at interpreter startup when ABLATE_U25_OFF=1 — NOT a new timer, just a config patch in the worker before any compile. Verified it flips the flag inside a worker-equivalent process AND changes n_kernels on real repros."
+  },
+  "affected_set_discovery": {
+    "method": "corpus-wide counter scan: compile each of 1727 canonical repros once under default config (U01 with scatter_reduce_fusion forced ON, since its HEAD default is OFF) and record every pass counter. counter>0 => affected.",
+    "errors": 0,
+    "per_unit": {
+      "U01_scatter_reduce_fusion": {"affected_repros": 0, "note": "ZERO fires across all 1727 repros EVEN WITH scatter_reduce_fusion=True. The masked/bilinear scatter-reduce-gather pattern it targets does not exist in this corpus. Its only evidence is the self-reported microbench in A0."},
+      "U07_slice_scatter_elision": {"affected_repros": 18, "counters": {"slice_scatter_elisions": 2, "slice_scatter_partial_elisions": 17}, "families": "AllenaiLongformer (amax_sum/sum), pyhpc_* (pointwise)"},
+      "U08_as_strided_scatter_elision": {"affected_repros": 10, "families": "CNN BN-reduction (nfnet, mobilenet, convnext, inception, ghostnet, visformer, repvgg, mobilevit, efficientnet)"},
+      "U09_linear_reduction_elimination": {"affected_repros": 6, "families": "functorch_dp_cifar10 (BN-backward sum_sum_sum) ONLY"},
+      "U10_layout_transform_store_sinking": {"affected_repros": 14, "families": "shufflenet_v2 (channel-shuffle layout transforms) ONLY"},
+      "U25_inline_recomputable_producers": {"affected_repros": 746, "note": "fires on 43% of the corpus (pervasive scheduler decision), but is performance-neutral on the vast majority: only ~2/66 sampled shapes change n_kernels."}
+    }
+  },
+  "units": {
+    "U01": {
+      "flag": "TORCHINDUCTOR_SCATTER_REDUCE_FUSION (default 0=OFF; ablated ON)",
+      "ablatable": true,
+      "repros_affected": 0,
+      "kernel_geomean": null,
+      "per_model_e2e": null,
+      "genai": "counter probe: zero fires on all 8 micros",
+      "verdict": "DROP-on-corpus (zero corpus footprint). Self-reported microbench only. Land only if its target workload (masked/bilinear scatter-reduce gather) is in scope elsewhere; otherwise no corpus/genai evidence supports it."
+    },
+    "U07": {
+      "flag": "TORCHINDUCTOR_SLICE_SCATTER_ELISION=0 + TORCHINDUCTOR_SLICE_SCATTER_PARTIAL_ELISION=0",
+      "ablatable": true,
+      "repros_affected": 18,
+      "kernel_geomean_ablated_over_control": 1.0067,
+      "interpretation": "AT NOISE FLOOR (geomean 1.0067 vs noise 1.0017). One real structural win: pointwise_656833e29d89 (pyhpc_isoneutral) nk 30->61 when off, 1.33x; pyhpc_turbulent (pointwise_43588d3e9780) nk 91->87, 1.07x. But the 13 Longformer shapes are flat (1.00x, nk unchanged) and 5 shapes show >3% moves in BOTH directions (noise). Net geomean is indistinguishable from zero.",
+      "per_model_e2e": "negligible: the 2 structural wins are isolated pyhpc shapes; the Longformer mass is unaffected.",
+      "genai": "zero fires",
+      "verdict": "BUNDLE (below 0.82pp floor on corpus). Keep for the pyhpc structural cases but do not land as a standalone perf PR; ship inside a scatter-elision family PR."
+    },
+    "U08": {
+      "flag": "TORCHINDUCTOR_AS_STRIDED_SCATTER_ELISION=0",
+      "ablatable": true,
+      "repros_affected": 10,
+      "kernel_geomean_ablated_over_control": 1.0043,
+      "interpretation": "AT NOISE FLOOR (1.0043 vs 1.0017). 5 small CNN-BN shapes help 1.3-9% (nk drops, e.g. 1->3 when off), but ONE shape is NET-NEGATIVE: tf_efficientnet_b0 0.748 (off is 25% FASTER) — the elision induced a worse kernel there. Mixed; geomean ~ noise.",
+      "per_model_e2e": "negligible/mixed: small absolute kernels (14-220us); the efficientnet regression cancels the small wins.",
+      "genai": "zero fires",
+      "verdict": "BUNDLE / borderline. Below floor and carries a per-shape regression (tf_efficientnet 0.748). Land only inside a scatter-elision family PR after gating out the efficientnet-shaped regression."
+    },
+    "U09": {
+      "flag": "TORCHINDUCTOR_LINEAR_REDUCTION_ELIMINATION=0",
+      "ablatable": true,
+      "repros_affected": 6,
+      "kernel_geomean_ablated_over_control": 0.9929,
+      "interpretation": "NET-NEGATIVE on corpus (0.9929 < 1.0 => turning the flag OFF is ~0.7% FASTER on average), though within noise. 4 BN-backward shapes hurt by the flag, 2 helped. n_kernels NEVER changes (identical codegen structure) — the flag only perturbs block-size/algebra and on this corpus it perturbs slightly wrong. All 6 affected repros are functorch_dp_cifar10.",
+      "per_model_e2e": "near-zero / slightly negative for functorch_dp_cifar10 BN-backward.",
+      "genai": "zero movement isolated (within +-1% on all 11 micro-graphs)",
+      "verdict": "DROP-net-negative (on corpus). Like BN-affine-fold (-0.29), the linear-reduction-elimination algebra is a wash-to-slight-loss on the measured corpus. Do not land standalone; needs a cost-model gate."
+    },
+    "U10": {
+      "flag": "TORCHINDUCTOR_LAYOUT_TRANSFORM_STORE_SINKING=0",
+      "ablatable": true,
+      "repros_affected": 14,
+      "kernel_geomean_ablated_over_control": 1.2003,
+      "interpretation": "REAL, LARGE win, FAR above noise. 15/18 shapes slower when off (up to 1.80x). Structural: kernel count rises when off (1->3, 2->3, 6->5) — the store-sinking fuses the channel-shuffle layout transform into its producer. All 14 affected repros are shufflenet_v2_x1_0.",
+      "per_model_e2e": "concentrated but real: shufflenet_v2 layout-transform/var_mean kernels are 9-53us; a 1.2x kernel-geomean on the channel-shuffle kernels. Per-MODEL e2e impact bounded to ShuffleNetV2's layout-transform fraction (kernel-geomean OVERSTATES per-model, but the structural nk drop confirms a genuine fusion win).",
+      "genai": "zero movement isolated",
+      "verdict": "LAND-worthy (clearly above floor, structural, unambiguous). Only caveat: footprint is ShuffleNetV2-specific in this corpus; verify per-model-e2e on a ShuffleNet roll-up before claiming a corpus-wide pp."
+    },
+    "U25": {
+      "flag": "config.inline_recomputable_producers (NO env binding; ablated via usercustomize config-patch). NOTE: inline_cheap_producers_into_stencils is FALSE at HEAD (zero contribution), so U25's only active half is inline_recomputable_producers.",
+      "ablatable": "via config-patch (usercustomize), NOT env var",
+      "repros_affected_counter": 746,
+      "repros_with_structural_change_in_sample": "2/66",
+      "kernel_geomean_ablated_over_control_sample48": 0.9826,
+      "interpretation": "NET-NEGATIVE and a MIXED BAG with REAL, REPRODUCIBLE large regressions. Geomean 0.9826 (off is ~1.7% faster). On 48-repro stratified sample (66 shape-points): 4 help >3%, 10 hurt >3%, 52 at floor. The extreme movers REPRODUCE on re-bench: pointwise_07c6ea330ab4 (Longformer) 1.36x HELP (nk 1->2); but sum_68fcffe5c7fb (XGLM) 0.66x, any_amax_amax_af50781fc699 (XLNet) 0.62x, sum_02fe2c82b1fd (GPTNeo) 0.77x are all the flag making transformer reductions 25-60% SLOWER. The XLNet/XGLM regressions have nk 1->1 (same kernel count, worse heuristics from the inlining).",
+      "per_model_e2e": "NEGATIVE on several transformers (XLNet, XGLM, GPTNeo). Matches A1 cross-check: pytorch_unet is -0.50% AT the mega-commit (the 'R1 realization family' A0 flagged). The fix-chain (A0's 8 follow-up commits) did NOT fully neutralize the transformer regressions measured here.",
+      "genai": "zero movement isolated (within +-1%)",
+      "verdict": "DROP-net-negative as-is / needs-selective-revert-of-fix-chain. The producer-inlining is a per-pattern win (Longformer 1.36x) buried under per-pattern losses (transformer reductions 0.6-0.8x). Do NOT land the bare flag; it needs the cost-model gate that distinguishes the Longformer stencil case from the transformer-reduction case. This is the unit most in need of decomposition."
+    },
+    "U30": {
+      "flag": "NONE (simd.py _emit_triton_finalize_sum +176, unconditional; _sibling_reduction_fusion is False at HEAD)",
+      "ablatable": false,
+      "verdict": "REQUIRES SELECTIVE-REVERT (not env-ablatable). The MOR finalize-kernel codegen is unconditional. Mega-commit claims 35% Swin. Cannot be flag-ablated; benching requires reverting the simd.py +176 hunk on a worktree (out of scope for env-ablation). NOTE: counter probe shows it does NOT fire on the 8 genai micros, so genai is NOT the right surface for U30 either; the right surface is Swin (a model roll-up), which needs a selective-revert arm."
+    },
+    "U31": {
+      "flag": "NONE (cross_entropy_loss_online prim + new reduction type; always active on pattern match)",
+      "ablatable": false,
+      "verdict": "REQUIRES SELECTIVE-REVERT. The genai CrossEntropyForward/Backward micros are the right surface, but the feature has no flag — the CE pattern either lowers to the online fused reduction or not. To attribute, revert the prim+ops_handler+lowering+triton CE hunks together on a worktree and re-bench CrossEntropy* via the locked --full-graphs path. Mega-commit claims 0.8%."
+    },
+    "U33": {
+      "flag": "PARTIAL: TORCHINDUCTOR_PERSISTENT_REDUCTION_THRESHOLD_INNER is an env-tunable SCALAR (not a feature on/off); the Blackwell-BN threshold raise + low-warp configs + cooperative-widen are NO-FLAG code changes.",
+      "ablatable": false,
+      "verdict": "REQUIRES SELECTIVE-REVERT (mostly). The d2cd/62f27 INNER-threshold 1024->8192 was added+reverted (net zero, A2 confirms DROP-MOOT). The Blackwell-BN + low-warp config additions are autotune-config code changes that need a selective revert arm, not an env toggle."
+    }
+  },
+  "reconciliation": {
+    "walk_mega_commit": {"e2e_pp": 0.71, "kernel_geomean_pp": 1.95},
+    "marginal_sum_of_6_ablatable_on_corpus": "Of the 6 env/config-ablatable units, only U10 clears the noise floor with a real positive (1.20x kernel-geomean, ShuffleNetV2-localized). U01=zero footprint; U07,U08 at floor (mixed); U09 net-slightly-negative; U25 NET-NEGATIVE with reproducible transformer regressions. So the 6 ablatable units do NOT sum to a large positive on the corpus — the mega-commit's +1.95pp kernel-geomean must come substantially from the 3 NO-FLAG units (U30 MOR/Swin 35%-claim, U31 CE, U33 Blackwell-BN/low-warp) which this corpus+genai-flag surface cannot capture, PLUS U10's localized win.",
+    "net_negative_units": ["U25 (inline_recomputable_producers, 0.9826 + reproducible XLNet 0.62x / XGLM 0.66x / GPTNeo 0.77x regressions)", "U09 (linear_reduction_elimination, 0.9929)"],
+    "does_it_reconcile": "PARTIALLY, and it REFRAMES the mega-commit. The walk's +1.95pp kernel-geomean / +0.71pp e2e is NOT evenly spread across the 9 units. On the measured corpus+genai-flag surface: U10 is the only clean positive; U25 is net-negative (and is the source of the A1 pytorch_unet -0.50% regression AT the mega-commit). The bulk of the claimed +1.95pp is therefore attributable to the NO-FLAG units (U30 Swin-MOR, U31 CE, U33 BN/low-warp) whose surfaces (Swin model roll-up, the CE-pattern) are NOT exercised by env-ablation. CONCLUSION for the A2 plan: do NOT land the mega-commit's flags as an undifferentiated bundle — U10 lands clean, U07/U08 bundle below floor, U01 is corpus-dead, and U09+U25 are net-negative and must be gated/decomposed (U25 most urgently)."
+  },
+  "provenance": {
+    "pytorch_work_head": "daa79cd25ca (UNTOUCHED; third_party/* submodule-pointer dirt is pre-existing, not written by this ablation)",
+    "worktrees_created": "none (existing worktrees in `git worktree list` predate this work)",
+    "commits_made": "none (better_benchmark HEAD still ecf195500)",
+    "artifacts_dir": "/tmp/scratch_space/mega_ablation/ (durable) + this RESULTS.json under results/pytorch_landing/mega_ablation/"
+  }
+}

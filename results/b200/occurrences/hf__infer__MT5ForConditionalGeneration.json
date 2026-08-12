@@ -1,0 +1,141 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "4779980113db": {
+      "29bccbec": 1
+    },
+    "f08c75b5f21f": {
+      "841ed042": 1
+    },
+    "a07e50c2fb69": {
+      "4ff4f886": 16
+    },
+    "41e8bba10b8b": {
+      "841ed042": 16
+    },
+    "e87d6ebc9ded": {
+      "fb089404": 24
+    },
+    "301cf5a13527": {
+      "cb7fdfdf": 48
+    },
+    "fa4cc85fe5ad": {
+      "215d1cc0": 8
+    },
+    "0aaf589f7fad": {
+      "cb7fdfdf": 24
+    },
+    "8818e35b12aa": {
+      "841ed042": 8
+    },
+    "979a0af8f7a7": {
+      "d3b915a9": 14
+    },
+    "bf2ed36e56df": {
+      "841ed042": 14
+    },
+    "426e2409482e": {
+      "841ed042": 1
+    },
+    "9ebf0de28bbb": {
+      "e7595a1e": 1
+    },
+    "630822b58781": {
+      "81ea203a": 2
+    },
+    "c35490c8001a": {
+      "e7595a1e": 1
+    },
+    "035e4d7f5117": {
+      "d7517139": 2
+    },
+    "c3d0c3208b3d": {
+      "2a837a19": 1
+    },
+    "0a49dc00cbaf": {
+      "d7517139": 1
+    },
+    "9f7dce7fb407": {
+      "2a837a19": 1
+    },
+    "e40852a34050": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "7b8fbe289cc8",
+      "count": 72,
+      "sig": "((T([4096, 512],torch.bfloat16,[512, 1]),T([512, 384],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 9.79200005531311,
+      "branch_us": 9.79200005531311
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "7ead2dc83097",
+      "count": 24,
+      "sig": "((T([192, 128, 64],torch.bfloat16,[8192, 64, 1]),T([192, 64, 128],torch.bfloat16,[8192, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 8.991999551653862,
+      "branch_us": 8.991999551653862
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "7b868d7e24ef",
+      "count": 24,
+      "sig": "((T([192, 128, 128],torch.bfloat16,[16384, 128, 1]),T([192, 128, 64],torch.bfloat16,[8192, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 9.920000098645687,
+      "branch_us": 9.920000098645687
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "1fa429021a8d",
+      "count": 24,
+      "sig": "((T([4096, 384],torch.bfloat16,[384, 1]),T([384, 512],torch.bfloat16,[1, 384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "mm_3",
+      "baseline_us": 9.02399979531765,
+      "branch_us": 9.02399979531765
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "705b376d5e47",
+      "count": 32,
+      "sig": "((T([4096, 512],torch.bfloat16,[512, 1]),T([512, 1024],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "mm_9",
+      "baseline_us": 11.04000024497509,
+      "branch_us": 11.04000024497509
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "590175cf34f8",
+      "count": 16,
+      "sig": "((T([4096, 1024],torch.bfloat16,[1024, 1]),T([1024, 512],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "mm_11",
+      "baseline_us": 11.711999773979187,
+      "branch_us": 11.711999773979187
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2314353936c7",
+      "count": 1,
+      "sig": "((T([4096, 512],torch.bfloat16,[512, 1]),T([512, 250112],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/MT5ForConditionalGeneration/full_graph_000.py",
+      "node": "mm_144",
+      "baseline_us": 725.9200215339661,
+      "branch_us": 725.9200215339661
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "MT5ForConditionalGeneration"
+}

@@ -1,0 +1,2111 @@
+{
+  "traceEvents": [
+    {
+      "name": "process_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 0,
+      "args": {
+        "name": "mobilenetv2_100_PROOF"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "name": "fusible (current compile, real us)"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 2,
+      "args": {
+        "name": "extern (real us: conv/GEMM/SDPA)"
+      }
+    },
+    {
+      "name": "thread_name",
+      "ph": "M",
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "name": "oracle ceiling (fusible: ref-kernel us; extern: same real us)"
+      }
+    },
+    {
+      "name": "1ed9095f244e/a44186d7",
+      "ph": "X",
+      "ts": 0.0,
+      "dur": 37.57,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_1ed9095f244e",
+        "order_index": 0,
+        "key": [
+          "1ed9095f244e",
+          "a44186d7"
+        ],
+        "us": 37.57,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "1ed9095f244e/a44186d7 (oracle)",
+      "ph": "X",
+      "ts": 0.0,
+      "dur": 39.55,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_1ed9095f244e",
+        "order_index": 0,
+        "pattern_hash": "1ed9095f244e",
+        "shape_hash": "a44186d7",
+        "oracle_us": 39.55,
+        "matched_compile_us": 37.57,
+        "node_real_compile_us": 37.57,
+        "ratio": 0.95,
+        "status": "BAD_ORACLE",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_1ed9095f244e",
+        "point_key": "mobilenetv2_100_a44186d7"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/8693ecd8",
+      "ph": "X",
+      "ts": 37.57,
+      "dur": 155.46,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 1,
+        "key": [
+          "0bad56ceb78f",
+          "8693ecd8"
+        ],
+        "us": 155.46,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/8693ecd8 (oracle)",
+      "ph": "X",
+      "ts": 37.57,
+      "dur": 145.38,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 1,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "8693ecd8",
+        "oracle_us": 145.38,
+        "matched_compile_us": 155.46,
+        "node_real_compile_us": 155.46,
+        "ratio": 1.069,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_8693ecd8"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/e4902295",
+      "ph": "X",
+      "ts": 193.03,
+      "dur": 3397.63,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 2,
+        "key": [
+          "0bad56ceb78f",
+          "e4902295"
+        ],
+        "us": 3397.63,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/e4902295 (oracle)",
+      "ph": "X",
+      "ts": 193.03,
+      "dur": 506.75,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 2,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "e4902295",
+        "oracle_us": 506.75,
+        "matched_compile_us": 3397.63,
+        "node_real_compile_us": 3397.63,
+        "ratio": 6.705,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_e4902295"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/cea53ab1",
+      "ph": "X",
+      "ts": 3590.66,
+      "dur": 936.83,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 3,
+        "key": [
+          "0bad56ceb78f",
+          "cea53ab1"
+        ],
+        "us": 936.83,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/cea53ab1 (oracle)",
+      "ph": "X",
+      "ts": 3590.66,
+      "dur": 141.22,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 3,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "cea53ab1",
+        "oracle_us": 141.22,
+        "matched_compile_us": 936.83,
+        "node_real_compile_us": 936.83,
+        "ratio": 6.634,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_cea53ab1"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/d3515732",
+      "ph": "X",
+      "ts": 4527.49,
+      "dur": 1394.56,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 4,
+        "key": [
+          "0bad56ceb78f",
+          "d3515732"
+        ],
+        "us": 1394.56,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/d3515732 (oracle)",
+      "ph": "X",
+      "ts": 4527.49,
+      "dur": 210.69,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 4,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "d3515732",
+        "oracle_us": 210.69,
+        "matched_compile_us": 1394.56,
+        "node_real_compile_us": 1394.56,
+        "ratio": 6.619,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_d3515732"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/72305b66",
+      "ph": "X",
+      "ts": 5922.05,
+      "dur": 365.5,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 5,
+        "key": [
+          "0bad56ceb78f",
+          "72305b66"
+        ],
+        "us": 365.5,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/72305b66 (oracle)",
+      "ph": "X",
+      "ts": 5922.05,
+      "dur": 62.34,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 5,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "72305b66",
+        "oracle_us": 62.34,
+        "matched_compile_us": 365.5,
+        "node_real_compile_us": 365.5,
+        "ratio": 5.863,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_72305b66"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/ddbc642b",
+      "ph": "X",
+      "ts": 6287.55,
+      "dur": 487.2,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 6,
+        "key": [
+          "0bad56ceb78f",
+          "ddbc642b"
+        ],
+        "us": 487.2,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/ddbc642b (oracle)",
+      "ph": "X",
+      "ts": 6287.55,
+      "dur": 77.31,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 6,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "ddbc642b",
+        "oracle_us": 77.31,
+        "matched_compile_us": 487.2,
+        "node_real_compile_us": 487.2,
+        "ratio": 6.302,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_ddbc642b"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/20e7cc5d",
+      "ph": "X",
+      "ts": 6774.75,
+      "dur": 137.66,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 7,
+        "key": [
+          "0bad56ceb78f",
+          "20e7cc5d"
+        ],
+        "us": 137.66,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/20e7cc5d (oracle)",
+      "ph": "X",
+      "ts": 6774.75,
+      "dur": 26.3,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 7,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "20e7cc5d",
+        "oracle_us": 26.3,
+        "matched_compile_us": 137.66,
+        "node_real_compile_us": 137.66,
+        "ratio": 5.234,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_20e7cc5d"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/8fbbedd9",
+      "ph": "X",
+      "ts": 6912.41,
+      "dur": 261.09,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 8,
+        "key": [
+          "0bad56ceb78f",
+          "8fbbedd9"
+        ],
+        "us": 261.09,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/8fbbedd9 (oracle)",
+      "ph": "X",
+      "ts": 6912.41,
+      "dur": 44.58,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 8,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "8fbbedd9",
+        "oracle_us": 44.58,
+        "matched_compile_us": 261.09,
+        "node_real_compile_us": 261.09,
+        "ratio": 5.857,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_8fbbedd9"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/cfc1c8b3",
+      "ph": "X",
+      "ts": 7173.5,
+      "dur": 385.79,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 9,
+        "key": [
+          "0bad56ceb78f",
+          "cfc1c8b3"
+        ],
+        "us": 385.79,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/cfc1c8b3 (oracle)",
+      "ph": "X",
+      "ts": 7173.5,
+      "dur": 61.34,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 9,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "cfc1c8b3",
+        "oracle_us": 61.34,
+        "matched_compile_us": 385.79,
+        "node_real_compile_us": 385.79,
+        "ratio": 6.289,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_cfc1c8b3"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/425108c3",
+      "ph": "X",
+      "ts": 7559.29,
+      "dur": 120.64,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 10,
+        "key": [
+          "0bad56ceb78f",
+          "425108c3"
+        ],
+        "us": 120.64,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/425108c3 (oracle)",
+      "ph": "X",
+      "ts": 7559.29,
+      "dur": 23.97,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 10,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "425108c3",
+        "oracle_us": 23.97,
+        "matched_compile_us": 120.64,
+        "node_real_compile_us": 120.64,
+        "ratio": 5.033,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_425108c3"
+      }
+    },
+    {
+      "name": "0bad56ceb78f/47a686d2",
+      "ph": "X",
+      "ts": 7679.93,
+      "dur": 194.27,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 11,
+        "key": [
+          "0bad56ceb78f",
+          "47a686d2"
+        ],
+        "us": 194.27,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "0bad56ceb78f/47a686d2 (oracle)",
+      "ph": "X",
+      "ts": 7679.93,
+      "dur": 35.71,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_0bad56ceb78f",
+        "order_index": 11,
+        "pattern_hash": "0bad56ceb78f",
+        "shape_hash": "47a686d2",
+        "oracle_us": 35.71,
+        "matched_compile_us": 194.27,
+        "node_real_compile_us": 194.27,
+        "ratio": 5.44,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_0bad56ceb78f",
+        "point_key": "mobilenetv2_100_47a686d2"
+      }
+    },
+    {
+      "name": "183b124c731f/06e3c268",
+      "ph": "X",
+      "ts": 7874.2,
+      "dur": 170.75,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 12,
+        "key": [
+          "183b124c731f",
+          "06e3c268"
+        ],
+        "us": 170.75,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/06e3c268 (oracle)",
+      "ph": "X",
+      "ts": 7874.2,
+      "dur": 56.96,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 12,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "06e3c268",
+        "oracle_us": 56.96,
+        "matched_compile_us": 170.75,
+        "node_real_compile_us": 170.75,
+        "ratio": 2.998,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_06e3c268"
+      }
+    },
+    {
+      "name": "183b124c731f/7f09d5e1",
+      "ph": "X",
+      "ts": 8044.95,
+      "dur": 77.57,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 13,
+        "key": [
+          "183b124c731f",
+          "7f09d5e1"
+        ],
+        "us": 77.57,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/7f09d5e1 (oracle)",
+      "ph": "X",
+      "ts": 8044.95,
+      "dur": 28.35,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 13,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "7f09d5e1",
+        "oracle_us": 28.35,
+        "matched_compile_us": 77.57,
+        "node_real_compile_us": 77.57,
+        "ratio": 2.736,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_7f09d5e1"
+      }
+    },
+    {
+      "name": "183b124c731f/1c020ea5",
+      "ph": "X",
+      "ts": 8122.52,
+      "dur": 36.32,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 14,
+        "key": [
+          "183b124c731f",
+          "1c020ea5"
+        ],
+        "us": 36.32,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/1c020ea5 (oracle)",
+      "ph": "X",
+      "ts": 8122.52,
+      "dur": 15.87,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 14,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "1c020ea5",
+        "oracle_us": 15.87,
+        "matched_compile_us": 36.32,
+        "node_real_compile_us": 36.32,
+        "ratio": 2.288,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_1c020ea5"
+      }
+    },
+    {
+      "name": "183b124c731f/51768188",
+      "ph": "X",
+      "ts": 8158.84,
+      "dur": 29.54,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 15,
+        "key": [
+          "183b124c731f",
+          "51768188"
+        ],
+        "us": 29.54,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/51768188 (oracle)",
+      "ph": "X",
+      "ts": 8158.84,
+      "dur": 15.26,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 15,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "51768188",
+        "oracle_us": 15.26,
+        "matched_compile_us": 29.54,
+        "node_real_compile_us": 29.54,
+        "ratio": 1.935,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_51768188"
+      }
+    },
+    {
+      "name": "183b124c731f/0b7b8941",
+      "ph": "X",
+      "ts": 8188.38,
+      "dur": 36.64,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 16,
+        "key": [
+          "183b124c731f",
+          "0b7b8941"
+        ],
+        "us": 36.64,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/0b7b8941 (oracle)",
+      "ph": "X",
+      "ts": 8188.38,
+      "dur": 16.93,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 16,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "0b7b8941",
+        "oracle_us": 16.93,
+        "matched_compile_us": 36.64,
+        "node_real_compile_us": 36.64,
+        "ratio": 2.164,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_0b7b8941"
+      }
+    },
+    {
+      "name": "183b124c731f/4a86e94b",
+      "ph": "X",
+      "ts": 8225.02,
+      "dur": 36.03,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 17,
+        "key": [
+          "183b124c731f",
+          "4a86e94b"
+        ],
+        "us": 36.03,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/4a86e94b (oracle)",
+      "ph": "X",
+      "ts": 8225.02,
+      "dur": 13.82,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 17,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "4a86e94b",
+        "oracle_us": 13.82,
+        "matched_compile_us": 36.03,
+        "node_real_compile_us": 36.03,
+        "ratio": 2.606,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_4a86e94b"
+      }
+    },
+    {
+      "name": "183b124c731f/797c887f",
+      "ph": "X",
+      "ts": 8261.05,
+      "dur": 58.05,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 18,
+        "key": [
+          "183b124c731f",
+          "797c887f"
+        ],
+        "us": 58.05,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "183b124c731f/797c887f (oracle)",
+      "ph": "X",
+      "ts": 8261.05,
+      "dur": 16.13,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_183b124c731f",
+        "order_index": 18,
+        "pattern_hash": "183b124c731f",
+        "shape_hash": "797c887f",
+        "oracle_us": 16.13,
+        "matched_compile_us": 58.05,
+        "node_real_compile_us": 58.05,
+        "ratio": 3.599,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_183b124c731f",
+        "point_key": "mobilenetv2_100_797c887f"
+      }
+    },
+    {
+      "name": "894f3180f3c4/65b876e3",
+      "ph": "X",
+      "ts": 8319.1,
+      "dur": 22.08,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 19,
+        "key": [
+          "894f3180f3c4",
+          "65b876e3"
+        ],
+        "us": 22.08,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "894f3180f3c4/65b876e3 (oracle)",
+      "ph": "X",
+      "ts": 8319.1,
+      "dur": 20.26,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 19,
+        "pattern_hash": "894f3180f3c4",
+        "shape_hash": "65b876e3",
+        "oracle_us": 20.26,
+        "matched_compile_us": 22.08,
+        "node_real_compile_us": 22.08,
+        "ratio": 1.09,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_894f3180f3c4",
+        "point_key": "mobilenetv2_100_65b876e3"
+      }
+    },
+    {
+      "name": "894f3180f3c4/1b9feebb",
+      "ph": "X",
+      "ts": 8341.18,
+      "dur": 26.53,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 20,
+        "key": [
+          "894f3180f3c4",
+          "1b9feebb"
+        ],
+        "us": 26.53,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "894f3180f3c4/1b9feebb (oracle)",
+      "ph": "X",
+      "ts": 8341.18,
+      "dur": 17.98,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 20,
+        "pattern_hash": "894f3180f3c4",
+        "shape_hash": "1b9feebb",
+        "oracle_us": 17.98,
+        "matched_compile_us": 26.53,
+        "node_real_compile_us": 26.53,
+        "ratio": 1.475,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_894f3180f3c4",
+        "point_key": "mobilenetv2_100_1b9feebb"
+      }
+    },
+    {
+      "name": "894f3180f3c4/3726f4ca",
+      "ph": "X",
+      "ts": 8367.71,
+      "dur": 31.36,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 21,
+        "key": [
+          "894f3180f3c4",
+          "3726f4ca"
+        ],
+        "us": 31.36,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "894f3180f3c4/3726f4ca (oracle)",
+      "ph": "X",
+      "ts": 8367.71,
+      "dur": 20.06,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 21,
+        "pattern_hash": "894f3180f3c4",
+        "shape_hash": "3726f4ca",
+        "oracle_us": 20.06,
+        "matched_compile_us": 31.36,
+        "node_real_compile_us": 31.36,
+        "ratio": 1.563,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_894f3180f3c4",
+        "point_key": "mobilenetv2_100_3726f4ca"
+      }
+    },
+    {
+      "name": "894f3180f3c4/9793b43e",
+      "ph": "X",
+      "ts": 8399.07,
+      "dur": 21.89,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 22,
+        "key": [
+          "894f3180f3c4",
+          "9793b43e"
+        ],
+        "us": 21.89,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "894f3180f3c4/9793b43e (oracle)",
+      "ph": "X",
+      "ts": 8399.07,
+      "dur": 16.16,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "sum_sum_894f3180f3c4",
+        "order_index": 22,
+        "pattern_hash": "894f3180f3c4",
+        "shape_hash": "9793b43e",
+        "oracle_us": 16.16,
+        "matched_compile_us": 21.89,
+        "node_real_compile_us": 21.89,
+        "ratio": 1.354,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "sum_sum_894f3180f3c4",
+        "point_key": "mobilenetv2_100_9793b43e"
+      }
+    },
+    {
+      "name": "2e254a2827d8/1da92f6a",
+      "ph": "X",
+      "ts": 8420.96,
+      "dur": 22.02,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 23,
+        "key": [
+          "2e254a2827d8",
+          "1da92f6a"
+        ],
+        "us": 22.02,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/1da92f6a (oracle)",
+      "ph": "X",
+      "ts": 8420.96,
+      "dur": 21.25,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 23,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "1da92f6a",
+        "oracle_us": 21.25,
+        "matched_compile_us": 22.02,
+        "node_real_compile_us": 22.02,
+        "ratio": 1.036,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_1da92f6a"
+      }
+    },
+    {
+      "name": "2e254a2827d8/3795f0b2",
+      "ph": "X",
+      "ts": 8442.98,
+      "dur": 21.89,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 24,
+        "key": [
+          "2e254a2827d8",
+          "3795f0b2"
+        ],
+        "us": 21.89,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/3795f0b2 (oracle)",
+      "ph": "X",
+      "ts": 8442.98,
+      "dur": 21.54,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 24,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "3795f0b2",
+        "oracle_us": 21.54,
+        "matched_compile_us": 21.89,
+        "node_real_compile_us": 21.89,
+        "ratio": 1.016,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_3795f0b2"
+      }
+    },
+    {
+      "name": "2e254a2827d8/21699593",
+      "ph": "X",
+      "ts": 8464.87,
+      "dur": 89.73,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 25,
+        "key": [
+          "2e254a2827d8",
+          "21699593"
+        ],
+        "us": 89.73,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/21699593 (oracle)",
+      "ph": "X",
+      "ts": 8464.87,
+      "dur": 41.89,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 25,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "21699593",
+        "oracle_us": 41.89,
+        "matched_compile_us": 89.73,
+        "node_real_compile_us": 89.73,
+        "ratio": 2.142,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_21699593"
+      }
+    },
+    {
+      "name": "2e254a2827d8/90bca16f",
+      "ph": "X",
+      "ts": 8554.6,
+      "dur": 63.46,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 26,
+        "key": [
+          "2e254a2827d8",
+          "90bca16f"
+        ],
+        "us": 63.46,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/90bca16f (oracle)",
+      "ph": "X",
+      "ts": 8554.6,
+      "dur": 30.53,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 26,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "90bca16f",
+        "oracle_us": 30.53,
+        "matched_compile_us": 63.46,
+        "node_real_compile_us": 63.46,
+        "ratio": 2.079,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_90bca16f"
+      }
+    },
+    {
+      "name": "2e254a2827d8/51d348b6",
+      "ph": "X",
+      "ts": 8618.06,
+      "dur": 136.93,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 27,
+        "key": [
+          "2e254a2827d8",
+          "51d348b6"
+        ],
+        "us": 136.93,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/51d348b6 (oracle)",
+      "ph": "X",
+      "ts": 8618.06,
+      "dur": 52.06,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 27,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "51d348b6",
+        "oracle_us": 52.06,
+        "matched_compile_us": 136.93,
+        "node_real_compile_us": 136.93,
+        "ratio": 2.63,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_51d348b6"
+      }
+    },
+    {
+      "name": "2e254a2827d8/9d6ef1f8",
+      "ph": "X",
+      "ts": 8754.99,
+      "dur": 114.4,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 28,
+        "key": [
+          "2e254a2827d8",
+          "9d6ef1f8"
+        ],
+        "us": 114.4,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/9d6ef1f8 (oracle)",
+      "ph": "X",
+      "ts": 8754.99,
+      "dur": 40.8,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 28,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "9d6ef1f8",
+        "oracle_us": 40.8,
+        "matched_compile_us": 114.4,
+        "node_real_compile_us": 114.4,
+        "ratio": 2.804,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_9d6ef1f8"
+      }
+    },
+    {
+      "name": "2e254a2827d8/46238279",
+      "ph": "X",
+      "ts": 8869.39,
+      "dur": 460.54,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 29,
+        "key": [
+          "2e254a2827d8",
+          "46238279"
+        ],
+        "us": 460.54,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/46238279 (oracle)",
+      "ph": "X",
+      "ts": 8869.39,
+      "dur": 132.0,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 29,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "46238279",
+        "oracle_us": 132.0,
+        "matched_compile_us": 460.54,
+        "node_real_compile_us": 460.54,
+        "ratio": 3.489,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_46238279"
+      }
+    },
+    {
+      "name": "2e254a2827d8/21476974",
+      "ph": "X",
+      "ts": 9329.93,
+      "dur": 412.51,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 30,
+        "key": [
+          "2e254a2827d8",
+          "21476974"
+        ],
+        "us": 412.51,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/21476974 (oracle)",
+      "ph": "X",
+      "ts": 9329.93,
+      "dur": 90.98,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 30,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "21476974",
+        "oracle_us": 90.98,
+        "matched_compile_us": 412.51,
+        "node_real_compile_us": 412.51,
+        "ratio": 4.534,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_21476974"
+      }
+    },
+    {
+      "name": "2e254a2827d8/8026229d",
+      "ph": "X",
+      "ts": 9742.44,
+      "dur": 1597.38,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 31,
+        "key": [
+          "2e254a2827d8",
+          "8026229d"
+        ],
+        "us": 1597.38,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/8026229d (oracle)",
+      "ph": "X",
+      "ts": 9742.44,
+      "dur": 327.52,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 31,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "8026229d",
+        "oracle_us": 327.52,
+        "matched_compile_us": 1597.38,
+        "node_real_compile_us": 1597.38,
+        "ratio": 4.877,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_8026229d"
+      }
+    },
+    {
+      "name": "2e254a2827d8/bf1cc8fb",
+      "ph": "X",
+      "ts": 11339.82,
+      "dur": 1341.34,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 32,
+        "key": [
+          "2e254a2827d8",
+          "bf1cc8fb"
+        ],
+        "us": 1341.34,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "2e254a2827d8/bf1cc8fb (oracle)",
+      "ph": "X",
+      "ts": 11339.82,
+      "dur": 91.14,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_2e254a2827d8",
+        "order_index": 32,
+        "pattern_hash": "2e254a2827d8",
+        "shape_hash": "bf1cc8fb",
+        "oracle_us": 91.14,
+        "matched_compile_us": 1341.34,
+        "node_real_compile_us": 1341.34,
+        "ratio": 14.718,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_2e254a2827d8",
+        "point_key": "mobilenetv2_100_bf1cc8fb"
+      }
+    },
+    {
+      "name": "5a22dd21d88e/a23acbed",
+      "ph": "X",
+      "ts": 12681.16,
+      "dur": 11.97,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 33,
+        "key": [
+          "5a22dd21d88e",
+          "a23acbed"
+        ],
+        "us": 11.97,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "5a22dd21d88e/a23acbed (oracle)",
+      "ph": "X",
+      "ts": 12681.16,
+      "dur": 12.58,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 33,
+        "pattern_hash": "5a22dd21d88e",
+        "shape_hash": "a23acbed",
+        "oracle_us": 12.58,
+        "matched_compile_us": 11.97,
+        "node_real_compile_us": 11.97,
+        "ratio": 0.952,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_5a22dd21d88e",
+        "point_key": "mobilenetv2_100_a23acbed"
+      }
+    },
+    {
+      "name": "5a22dd21d88e/691fac28",
+      "ph": "X",
+      "ts": 12693.13,
+      "dur": 26.27,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 34,
+        "key": [
+          "5a22dd21d88e",
+          "691fac28"
+        ],
+        "us": 26.27,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "5a22dd21d88e/691fac28 (oracle)",
+      "ph": "X",
+      "ts": 12693.13,
+      "dur": 15.1,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 34,
+        "pattern_hash": "5a22dd21d88e",
+        "shape_hash": "691fac28",
+        "oracle_us": 15.1,
+        "matched_compile_us": 26.27,
+        "node_real_compile_us": 26.27,
+        "ratio": 1.739,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_5a22dd21d88e",
+        "point_key": "mobilenetv2_100_691fac28"
+      }
+    },
+    {
+      "name": "5a22dd21d88e/200ea7ae",
+      "ph": "X",
+      "ts": 12719.4,
+      "dur": 21.28,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 35,
+        "key": [
+          "5a22dd21d88e",
+          "200ea7ae"
+        ],
+        "us": 21.28,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "5a22dd21d88e/200ea7ae (oracle)",
+      "ph": "X",
+      "ts": 12719.4,
+      "dur": 13.02,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 35,
+        "pattern_hash": "5a22dd21d88e",
+        "shape_hash": "200ea7ae",
+        "oracle_us": 13.02,
+        "matched_compile_us": 21.28,
+        "node_real_compile_us": 21.28,
+        "ratio": 1.634,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_5a22dd21d88e",
+        "point_key": "mobilenetv2_100_200ea7ae"
+      }
+    },
+    {
+      "name": "5a22dd21d88e/dadcc8c4",
+      "ph": "X",
+      "ts": 12740.68,
+      "dur": 33.86,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 36,
+        "key": [
+          "5a22dd21d88e",
+          "dadcc8c4"
+        ],
+        "us": 33.86,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "5a22dd21d88e/dadcc8c4 (oracle)",
+      "ph": "X",
+      "ts": 12740.68,
+      "dur": 14.18,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 36,
+        "pattern_hash": "5a22dd21d88e",
+        "shape_hash": "dadcc8c4",
+        "oracle_us": 14.18,
+        "matched_compile_us": 33.86,
+        "node_real_compile_us": 33.86,
+        "ratio": 2.388,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_5a22dd21d88e",
+        "point_key": "mobilenetv2_100_dadcc8c4"
+      }
+    },
+    {
+      "name": "5a22dd21d88e/f2c648cf",
+      "ph": "X",
+      "ts": 12774.54,
+      "dur": 104.32,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 37,
+        "key": [
+          "5a22dd21d88e",
+          "f2c648cf"
+        ],
+        "us": 104.32,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "5a22dd21d88e/f2c648cf (oracle)",
+      "ph": "X",
+      "ts": 12774.54,
+      "dur": 25.22,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_5a22dd21d88e",
+        "order_index": 37,
+        "pattern_hash": "5a22dd21d88e",
+        "shape_hash": "f2c648cf",
+        "oracle_us": 25.22,
+        "matched_compile_us": 104.32,
+        "node_real_compile_us": 104.32,
+        "ratio": 4.137,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_5a22dd21d88e",
+        "point_key": "mobilenetv2_100_f2c648cf"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/a8a74e41",
+      "ph": "X",
+      "ts": 12878.86,
+      "dur": 23.1,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 38,
+        "key": [
+          "7a2ac1c4841d",
+          "a8a74e41"
+        ],
+        "us": 23.1,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/a8a74e41 (oracle)",
+      "ph": "X",
+      "ts": 12878.86,
+      "dur": 14.82,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 38,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "a8a74e41",
+        "oracle_us": 14.82,
+        "matched_compile_us": 23.1,
+        "node_real_compile_us": 23.1,
+        "ratio": 1.559,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_a8a74e41"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/97fb8c65",
+      "ph": "X",
+      "ts": 12901.96,
+      "dur": 16.93,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 39,
+        "key": [
+          "7a2ac1c4841d",
+          "97fb8c65"
+        ],
+        "us": 16.93,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/97fb8c65 (oracle)",
+      "ph": "X",
+      "ts": 12901.96,
+      "dur": 11.97,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 39,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "97fb8c65",
+        "oracle_us": 11.97,
+        "matched_compile_us": 16.93,
+        "node_real_compile_us": 16.93,
+        "ratio": 1.414,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_97fb8c65"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/62c751f1",
+      "ph": "X",
+      "ts": 12918.89,
+      "dur": 29.44,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 40,
+        "key": [
+          "7a2ac1c4841d",
+          "62c751f1"
+        ],
+        "us": 29.44,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/62c751f1 (oracle)",
+      "ph": "X",
+      "ts": 12918.89,
+      "dur": 16.42,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 40,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "62c751f1",
+        "oracle_us": 16.42,
+        "matched_compile_us": 29.44,
+        "node_real_compile_us": 29.44,
+        "ratio": 1.793,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_62c751f1"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/a20aa279",
+      "ph": "X",
+      "ts": 12948.33,
+      "dur": 26.37,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 41,
+        "key": [
+          "7a2ac1c4841d",
+          "a20aa279"
+        ],
+        "us": 26.37,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/a20aa279 (oracle)",
+      "ph": "X",
+      "ts": 12948.33,
+      "dur": 14.91,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 41,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "a20aa279",
+        "oracle_us": 14.91,
+        "matched_compile_us": 26.37,
+        "node_real_compile_us": 26.37,
+        "ratio": 1.768,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_a20aa279"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/b5e847de",
+      "ph": "X",
+      "ts": 12974.7,
+      "dur": 67.33,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 42,
+        "key": [
+          "7a2ac1c4841d",
+          "b5e847de"
+        ],
+        "us": 67.33,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/b5e847de (oracle)",
+      "ph": "X",
+      "ts": 12974.7,
+      "dur": 16.96,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 42,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "b5e847de",
+        "oracle_us": 16.96,
+        "matched_compile_us": 67.33,
+        "node_real_compile_us": 67.33,
+        "ratio": 3.97,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_b5e847de"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/5c7c7725",
+      "ph": "X",
+      "ts": 13042.03,
+      "dur": 234.98,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 43,
+        "key": [
+          "7a2ac1c4841d",
+          "5c7c7725"
+        ],
+        "us": 234.98,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/5c7c7725 (oracle)",
+      "ph": "X",
+      "ts": 13042.03,
+      "dur": 27.97,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 43,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "5c7c7725",
+        "oracle_us": 27.97,
+        "matched_compile_us": 234.98,
+        "node_real_compile_us": 234.98,
+        "ratio": 8.402,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_5c7c7725"
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/75c62b73",
+      "ph": "X",
+      "ts": 13277.01,
+      "dur": 1284.93,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 44,
+        "key": [
+          "7a2ac1c4841d",
+          "75c62b73"
+        ],
+        "us": 1284.93,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "7a2ac1c4841d/75c62b73 (oracle)",
+      "ph": "X",
+      "ts": 13277.01,
+      "dur": 49.06,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_7a2ac1c4841d",
+        "order_index": 44,
+        "pattern_hash": "7a2ac1c4841d",
+        "shape_hash": "75c62b73",
+        "oracle_us": 49.06,
+        "matched_compile_us": 1284.93,
+        "node_real_compile_us": 1284.93,
+        "ratio": 26.193,
+        "status": "GOOD",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_7a2ac1c4841d",
+        "point_key": "mobilenetv2_100_75c62b73"
+      }
+    },
+    {
+      "name": "1f7174490c38/86b98b1a",
+      "ph": "X",
+      "ts": 14561.94,
+      "dur": 21.28,
+      "pid": 1,
+      "tid": 1,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_mean_1f7174490c38",
+        "order_index": 45,
+        "key": [
+          "1f7174490c38",
+          "86b98b1a"
+        ],
+        "us": 21.28,
+        "has_real_us": true
+      }
+    },
+    {
+      "name": "1f7174490c38/86b98b1a (oracle)",
+      "ph": "X",
+      "ts": 14561.94,
+      "dur": 20.35,
+      "pid": 1,
+      "tid": 3,
+      "args": {
+        "kind": "fusible",
+        "graph": "full_graph_proof",
+        "node_name": "var_mean_mean_1f7174490c38",
+        "order_index": 45,
+        "pattern_hash": "1f7174490c38",
+        "shape_hash": "86b98b1a",
+        "oracle_us": 20.35,
+        "matched_compile_us": 21.28,
+        "node_real_compile_us": 21.28,
+        "ratio": 1.046,
+        "status": "AT_FLOOR",
+        "has_oracle": true,
+        "miss_reason": null,
+        "family": "var_mean_mean_1f7174490c38",
+        "point_key": "mobilenetv2_100_86b98b1a"
+      }
+    }
+  ],
+  "displayTimeUnit": "ns"
+}

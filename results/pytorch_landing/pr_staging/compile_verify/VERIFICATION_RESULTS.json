@@ -1,0 +1,41 @@
+{
+  "verified": "2026-07-15",
+  "method": "PYTHONPATH shadow of base-rooted branch over prebuilt HEAD .so at /tmp/pytorch-work (torch 2.13.0a0+gitdaa79cd, CUDA on B200). base..HEAD diff is 0 non-.py files, all torch/_inductor pure-python. GPU 0 under scripts/with_gpu_lock.py.",
+  "branches": {
+    "pr/rsqrt-clean": {
+      "import": "OK",
+      "repro": "repros/canonical/pointwise_2c331ef4f17f (repvgg reciprocal(sqrt) BN pattern)",
+      "compile": "GOOD",
+      "feature_fired": "generated kernel emits libdevice.rsqrt (pass fired; reciprocal+sqrt -> rsqrt)",
+      "numerics": "finite, within bf16 rsqrt.approx tolerance (max_abs=1.25e-1 bf16, mean_abs=1.4e-3) on realistic BN inputs; matches documented marginal precision loss vs software sqrt+div",
+      "blocker": null
+    },
+    "pr/ce-hoist-clean": {
+      "import": "OK — cross_entropy_loss_online prim, CrossEntropyOnlineReduction (ir), online_softmax config all resolve; CrossEntropyOnlineReduction import removed from lowering (Path B, 0 refs)",
+      "repro": "repros/models/genai/static/CrossEntropyForward/full_graph_000.py (8192x262144)",
+      "compile": "GOOD",
+      "feature_fired": "single fused online_softmax_reduce kernel; target-logit gather HOISTED OUT of the reduction loop (loaded once after online_softmax_reduce, not per-iteration) — Path B loop-invariant hoist",
+      "numerics": "EXACT (max_abs=0.0) vs eager",
+      "blocker": null
+    },
+    "pr/online-softmax-clean": {
+      "import": "OK — online_softmax_fast_combine + scalar_reduction_accumulators configs, _online_softmax_fast_max, _rewrite_masked_load_other_neg_inf all resolve",
+      "repro": "repros/canonical/amax_sum_02064a1e60ac (softmax)",
+      "compile": "GOOD",
+      "feature_fired": "A/B: flag OFF uses triton_helpers.max2 (0 fast lines); flag ON uses tl.max(tl.where(...,-inf)) native fast path (1 fast line, 0 max2)",
+      "numerics": "EXACT (max_abs=0.0) both flag states",
+      "blocker": null
+    },
+    "pr/scalar-acc-clean": {
+      "import": "OK — scalar_reduction_accumulators, scalar_acc_configs_without_cd, use_scalar_acc, MAX_R0_BLOCK all resolve",
+      "repro": "repros/models/genai/static/SoftmaxForward/full_graph_000.py (8192x262144) + synthetic num_load boundary",
+      "compile": "GOOD",
+      "feature_fired": "A/B: flag OFF vector accumulator tl.full([XBLOCK,R0_BLOCK]); flag ON scalar accumulator tl.full([XBLOCK]). GATE PROVEN both ways: num_load<=3 -> scalar path; num_load>3 -> vector fallback.",
+      "numerics": "valid: SoftmaxForward max_abs=4.8e-7 (within bf16); synthetic max_abs<=1.2e-4",
+      "gate_note": "shipped gate text is `num_load <= 3` (commit TITLE says <=4; doc discrepancy, not a functional gap). Gate exercised both directions.",
+      "blocker": null
+    }
+  },
+  "overall": "4/4 import clean, compile a representative repro to a numerics-valid result, and fire the intended codegen. No blockers.",
+  "pytorch_head_untouched": "daa79cd25ca (work2)"
+}

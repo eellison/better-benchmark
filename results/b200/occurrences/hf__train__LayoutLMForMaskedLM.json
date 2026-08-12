@@ -1,0 +1,376 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "08d044dd173f": {
+      "4b47cbc0": 1
+    },
+    "7cb726f1f92d": {
+      "6925c38d": 1
+    },
+    "52fe1925ccda": {
+      "2e6d9a9a": 1
+    },
+    "21faaccf749d": {
+      "ca0eabd2": 1
+    },
+    "8bb40810003c": {
+      "f5f85987": 49,
+      "ae9f1068": 12,
+      "44a2434c": 12
+    },
+    "31d568179350": {
+      "243d7832": 1
+    },
+    "ccd411f2a45d": {
+      "726421b1": 61,
+      "7a1c483f": 12
+    },
+    "826ea0b5f6e4": {
+      "92efc45e": 12
+    },
+    "1c8a151acad6": {
+      "243d7832": 1
+    },
+    "e87d6ebc9ded": {
+      "c6b0f684": 12
+    },
+    "52aa132fd273": {
+      "d20f46e2": 24
+    },
+    "0ec44ac10279": {
+      "279c055a": 1
+    },
+    "1e6f46231554": {
+      "d20f46e2": 12
+    },
+    "77263211d169": {
+      "243d7832": 1
+    },
+    "6a7f72eec85a": {
+      "243d7832": 1
+    },
+    "98dd9cb433ce": {
+      "279c055a": 1
+    },
+    "890c673522ec": {
+      "243d7832": 1
+    },
+    "5140dfbeba32": {
+      "243d7832": 1
+    },
+    "7a1b8aec6077": {
+      "279c055a": 1
+    },
+    "a158b001a93f": {
+      "243d7832": 1
+    },
+    "b193afd50ebd": {
+      "243d7832": 1
+    },
+    "50e98af7b82f": {
+      "279c055a": 1
+    },
+    "292acd4e7428": {
+      "243d7832": 1
+    },
+    "47eaf3cbeb9b": {
+      "243d7832": 1
+    },
+    "0fdc40421199": {
+      "279c055a": 1
+    },
+    "38f166201359": {
+      "243d7832": 1
+    },
+    "2da2cb2a9aeb": {
+      "243d7832": 1
+    },
+    "dc2cfaa9c1cb": {
+      "279c055a": 1
+    },
+    "414d63e6d542": {
+      "243d7832": 1
+    },
+    "bdf875eb35d3": {
+      "243d7832": 1
+    },
+    "7de69635670c": {
+      "279c055a": 1
+    },
+    "11df982f906b": {
+      "243d7832": 1
+    },
+    "ad769fcbdaca": {
+      "243d7832": 1
+    },
+    "20f548adfc44": {
+      "279c055a": 1
+    },
+    "331f3c87e4d8": {
+      "243d7832": 1
+    },
+    "23294968b555": {
+      "243d7832": 1
+    },
+    "80cdfb3610b6": {
+      "279c055a": 1
+    },
+    "3260131881b0": {
+      "243d7832": 1
+    },
+    "8799151bd693": {
+      "243d7832": 1
+    },
+    "00b1a5ec08e7": {
+      "279c055a": 1
+    },
+    "b52cf3fd9807": {
+      "243d7832": 1
+    },
+    "d8be325d48fc": {
+      "243d7832": 1
+    },
+    "f394b5666305": {
+      "279c055a": 1
+    },
+    "a678817dc522": {
+      "243d7832": 1
+    },
+    "106cb6ed6885": {
+      "243d7832": 1
+    },
+    "99661ef23d1d": {
+      "279c055a": 1
+    },
+    "13c233a8b548": {
+      "88deb8b3": 1
+    },
+    "ecce309d13e3": {
+      "1bcea4a2": 1
+    },
+    "04d85912d998": {
+      "2ddc1bad": 49,
+      "6393d8ae": 12,
+      "5a62163f": 12
+    },
+    "2f4a2365eba8": {
+      "c6b0f684": 24
+    },
+    "35b8acdece58": {
+      "17865e49": 12
+    },
+    "983bc7365627": {
+      "03fa1c14": 12
+    },
+    "c0d19d490a2f": {
+      "d20f46e2": 12
+    },
+    "260a107eaf32": {
+      "9846b7f2": 12
+    },
+    "139a3020e8bf": {
+      "05a5e903": 12
+    },
+    "4a1fb62e29b0": {
+      "c1e38d67": 11
+    },
+    "d0cb44a92f6d": {
+      "dca7eb09": 1
+    },
+    "199240d27571": {
+      "02c9dc6d": 1
+    },
+    "85ee747617a6": {
+      "7eef06a5": 1
+    },
+    "c8d23ac4414d": {
+      "cd997de8": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "570612514809",
+      "count": 49,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 22.23999984562397,
+      "branch_us": 22.23999984562397
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "13bb113049b5",
+      "count": 12,
+      "sig": "((T([384, 512, 64],torch.bfloat16,[32768, 64, 1]),T([384, 64, 512],torch.bfloat16,[32768, 512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 43.935999274253845,
+      "branch_us": 43.935999274253845
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "82a9e90b106d",
+      "count": 12,
+      "sig": "((T([384, 512, 512],torch.bfloat16,[262144, 512, 1]),T([384, 512, 64],torch.bfloat16,[32768, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 49.984000623226166,
+      "branch_us": 49.984000623226166
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "199b1770013c",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 50.87999999523163,
+      "branch_us": 50.87999999523163
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ec3c06b9ce24",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 57.21599981188774,
+      "branch_us": 57.21599981188774
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "24042f7bff27",
+      "count": 1,
+      "sig": "((T([30528],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 30528],torch.bfloat16,[30528, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm_73",
+      "baseline_us": 485.1840138435364,
+      "branch_us": 485.1840138435364
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "783f0bc761ed",
+      "count": 1,
+      "sig": "((T([16384, 30528],torch.bfloat16,[30528, 1]),T([30528, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 487.39200830459595,
+      "branch_us": 487.39200830459595
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "436c080a40dd",
+      "count": 1,
+      "sig": "((T([30522, 16384],torch.bfloat16,[1, 30522]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 2737.1199131011963,
+      "branch_us": 2737.1199131011963
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0ae1cdfa8630",
+      "count": 49,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 22.048000246286392,
+      "branch_us": 22.048000246286392
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d2d83a56efdc",
+      "count": 49,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 28.192000463604927,
+      "branch_us": 28.192000463604927
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ef862f961114",
+      "count": 12,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_4",
+      "baseline_us": 50.81599950790405,
+      "branch_us": 50.81599950790405
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2f3ed20bf89d",
+      "count": 12,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_5",
+      "baseline_us": 54.27199974656105,
+      "branch_us": 54.27199974656105
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "203209dc6807",
+      "count": 12,
+      "sig": "((T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_6",
+      "baseline_us": 58.9120015501976,
+      "branch_us": 58.9120015501976
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0685871ab71c",
+      "count": 12,
+      "sig": "((T([3072, 16384],torch.bfloat16,[1, 3072]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 55.07199838757515,
+      "branch_us": 55.07199838757515
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "85263356dd77",
+      "count": 12,
+      "sig": "((T([384, 512, 512],torch.bfloat16,[262144, 1, 512]),T([384, 512, 64],torch.bfloat16,[32768, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "bmm",
+      "baseline_us": 48.96000027656555,
+      "branch_us": 48.96000027656555
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "a9b9fb6f055d",
+      "count": 12,
+      "sig": "((T([384, 512, 64],torch.bfloat16,[32768, 64, 1]),T([384, 64, 512],torch.bfloat16,[32768, 1, 64])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "bmm_1",
+      "baseline_us": 44.704001396894455,
+      "branch_us": 44.704001396894455
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "05a3386b8860",
+      "count": 12,
+      "sig": "((T([384, 64, 512],torch.bfloat16,[32768, 1, 64]),T([384, 512, 512],torch.bfloat16,[262144, 512, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "bmm_2",
+      "baseline_us": 48.86399954557419,
+      "branch_us": 48.86399954557419
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "571778a664b5",
+      "count": 12,
+      "sig": "((T([384, 512, 512],torch.bfloat16,[262144, 512, 1]),T([384, 512, 64],torch.bfloat16,[32768, 1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/LayoutLMForMaskedLM/full_graph_001.py",
+      "node": "bmm_3",
+      "baseline_us": 50.75199902057648,
+      "branch_us": 50.75199902057648
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "train",
+  "model": "LayoutLMForMaskedLM"
+}

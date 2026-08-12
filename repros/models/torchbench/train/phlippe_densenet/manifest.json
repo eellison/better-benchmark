@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "phlippe_densenet",
+  "patterns": [
+    "00d72974c5fe",
+    "04d85912d998",
+    "057287685232",
+    "0c9cec267360",
+    "100a39b686e3",
+    "150c6ef298e6",
+    "1ae53b59df19",
+    "2b33da3550b0",
+    "3690c31a5a51",
+    "42fad1ece813",
+    "47b68e6603ba",
+    "48f6a6fbbd3e",
+    "59c5b1609d60",
+    "643db2887a01",
+    "65ef503caa31",
+    "7b53f7309dbe",
+    "8bb40810003c",
+    "9b7fd1c0bb67",
+    "9f65eda818b1",
+    "a65a0afcc157",
+    "aa601b4d2732",
+    "b58d306002be",
+    "ba4e73ab2deb",
+    "c2bf513c1ebf",
+    "c3d3da9339e4",
+    "c94d2f06e30b",
+    "ccd411f2a45d",
+    "e889c9d3e84e",
+    "f9d7470ca796"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

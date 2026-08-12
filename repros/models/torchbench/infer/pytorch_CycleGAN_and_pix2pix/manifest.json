@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "pytorch_CycleGAN_and_pix2pix",
+  "patterns": [
+    "02476d05a5a4",
+    "129ad79a9b02",
+    "247c7d9796c4",
+    "3a0c8f02d6d5",
+    "6ae114110db5",
+    "933891a45f41",
+    "bc789056cbad",
+    "edfab1af9465"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

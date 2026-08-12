@@ -1,5 +1,14 @@
 # Better Benchmark - Corpus Invariant Validation
 
+## README changes require human sign-off
+
+Never commit or push a change to `README.md` (on any branch, especially main)
+without a non-agent human explicitly reviewing the exact diff first. Agents —
+including subagents — must stage README edits and present the diff for
+approval, not land them. This applies to content edits of any size; it exists
+because the README is the repo's public face and judgment calls about what
+belongs there are the maintainer's, not an agent's.
+
 ## Validating the repro corpus
 
 Before committing changes that touch `repros/`, run:

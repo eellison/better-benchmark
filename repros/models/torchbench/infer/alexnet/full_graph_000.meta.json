@@ -1,267 +1,27 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        64,
-        3,
-        11,
-        11
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        64
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg2_1",
-      "shape": [
-        1024,
-        3,
-        224,
-        224
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg3_1",
-      "shape": [
-        192,
-        64,
-        5,
-        5
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg4_1",
-      "shape": [
-        192
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg5_1",
-      "shape": [
-        384,
-        192,
-        3,
-        3
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg6_1",
-      "shape": [
-        384
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg7_1",
-      "shape": [
-        256,
-        384,
-        3,
-        3
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg8_1",
-      "shape": [
-        256
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg9_1",
-      "shape": [
-        256,
-        256,
-        3,
-        3
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg10_1",
-      "shape": [
-        256
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg11_1",
-      "shape": [
-        4096,
-        9216
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg12_1",
-      "shape": [
-        4096
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg13_1",
-      "shape": [
-        4096,
-        4096
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg14_1",
-      "shape": [
-        4096
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg15_1",
-      "shape": [
-        1000,
-        4096
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg16_1",
-      "shape": [
-        1000
-      ],
-      "dtype": "float16",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[64,3,11,11],"bf16",{"n":"arg0_1"}],
+    [[64],"bf16",{"n":"arg1_1"}],
+    [[128,3,224,224],"bf16",{"n":"arg2_1"}],
+    [[192,64,5,5],"bf16",{"n":"arg3_1"}],
+    [[192],"bf16",{"n":"arg4_1"}],
+    [[384,192,3,3],"bf16",{"n":"arg5_1"}],
+    [[384],"bf16",{"n":"arg6_1"}],
+    [[256,384,3,3],"bf16",{"n":"arg7_1"}],
+    [[256],"bf16",{"n":"arg8_1"}],
+    [[256,256,3,3],"bf16",{"n":"arg9_1"}],
+    [[256],"bf16",{"n":"arg10_1"}],
+    [[4096,9216],"bf16",{"n":"arg11_1"}],
+    [[4096],"bf16",{"n":"arg12_1"}],
+    [[4096,4096],"bf16",{"n":"arg13_1"}],
+    [[4096],"bf16",{"n":"arg14_1"}],
+    [[1000,4096],"bf16",{"n":"arg15_1"}],
+    [[1000],"bf16",{"n":"arg16_1"}]
   ],
-  "outputs": [],
+  "outputs": [
+    [[128,1000],"bf16",{"n":"output_0"}]
+  ],
   "tensor_attrs": {},
   "graph": "full_graph_000.py",
   "source": {
@@ -270,5 +30,30 @@
     "mode": "infer",
     "model": "alexnet",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 26,
+    "counts": {
+      "fusible_in_partition": 15,
+      "fusible_unpartitioned": 3,
+      "non_fusible": 8
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "_operator.getitem": 3,
+        "aten._adaptive_avg_pool2d.default": 1,
+        "aten.relu.default": 7,
+        "aten.reshape.default": 1,
+        "prims._low_memory_max_pool_with_offsets.default": 3
+      },
+      "fusible_unpartitioned": {
+        "aten.permute.default": 3
+      },
+      "non_fusible": {
+        "aten.addmm.default": 3,
+        "aten.convolution.default": 5
+      }
+    }
+  },
+  "roundtrip": "ok"
 }

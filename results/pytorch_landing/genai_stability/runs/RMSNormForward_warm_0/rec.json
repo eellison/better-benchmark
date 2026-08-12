@@ -1,0 +1,22 @@
+{
+ "bench": "RMSNormForward",
+ "mode": "warm",
+ "trial": 0,
+ "rc": 0,
+ "wall_s": 9.2,
+ "compiled_us": 343.84000301361084,
+ "coord_descent_us": 344.0000116825104,
+ "n_kernels": 1,
+ "best_configs": [
+  {
+   "XBLOCK": 2,
+   "num_warps": 1,
+   "num_stages": 1,
+   "configs_hash": "cd4f7b11056da5d219bb00da20cd25cf077aef51e8a687359cb4ab3693e08253",
+   "found_by_coordesc": true,
+   "time_taken_ms": 434,
+   "triton_cache_hash": null,
+   "_file": "23de748e4def12048df61617ca75f93a0d95febdc2f1c7e85683545f504ace3d.best_config"
+  }
+ ]
+}

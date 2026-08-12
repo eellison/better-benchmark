@@ -1,0 +1,83 @@
+{
+  "repro": "amax_sum_528a3c274a41",
+  "point": "79c25467",
+  "model": "hf/infer/AllenaiLongformerBase",
+  "date": "2026-06-18",
+  "gpu": "B200",
+  "harness_fix_4ca6d532b_present": true,
+  "isolation": {
+    "worktree": "/tmp/scratch_space/pytorch-longformer-impl (git worktree off /tmp/pytorch-work HEAD daa79cd25ca)",
+    "method": "worktree torch/_inductor edited; built .so/_C/lib/bin/version.py symlinked from shared tree; PYTHONPATH-shadowed",
+    "import_resolves_to_worktree": true,
+    "removed_after": true
+  },
+  "patch": "results/longformer_amax_sum/IMPL/scatter_chain_fold.patch (torch/_inductor/{lowering,config,graph}.py)",
+
+  "status": "PARTIALLY_CLOSED_core_mechanism_proven_blocked_on_one_edge_case",
+  "gap_closed_on_target": false,
+
+  "measured_compile_us": {
+    "baseline_unpatched": 786.05,
+    "patched_fold_on_target": 786.14,
+    "oracle_us": 319.36,
+    "ratio_unchanged": 2.46,
+    "delta_us": "~0 (no regression, no improvement on the target)",
+    "note": "On THE TARGET the patch is perf-inert: the fold builds the chain but index-unification BAILS (Longformer write sources are constant_pad_nd conditional loads, not pure single-buffer loads), so the lowering keeps its original nested-where codegen -> identical compile time. By design the fold only changes codegen when it strictly collapses the source loads."
+  },
+
+  "band_materialization": {
+    "baseline_band_buffers_513dim": 6,
+    "patched_band_buffers_513dim": 6,
+    "triton_kernels_both": 12,
+    "note": "100MB band NOT eliminated on the target (fold inert there). The proven gather target (296us, prior _gather_compile.py) remains the ceiling."
+  },
+
+  "numerics_check_with_patch": {
+    "target_amax_sum_528a3c274a41_79c25467": "PASS max_diff=0.00e+00 (bit-exact)",
+    "official_check": true
+  },
+
+  "core_mechanism_proven": {
+    "what": "Lever A's load-bearing piece: collapse a chain of slice_scatter/select_scatter over a constant full() into ONE masked affine indirect load (a gather), via per-write source-index unification + where-selected index, with last-writer-wins.",
+    "evidence_direct_chain_synthetic": {
+      "test": "results/longformer_amax_sum/IMPL/unify_direct_test.py",
+      "tl_load_count_fold_off": 16,
+      "tl_load_count_fold_on": 3,
+      "triton_kernels": 1,
+      "fold_fires": 14,
+      "result": "DECISIVE: a 16-deep disjoint scatter-chain-over-full collapses from 16 source loads to ~1 shared load (gather). Inductor's existing codegen compiles it to 1 fused kernel."
+    },
+    "evidence_correctness": {
+      "test": "results/longformer_amax_sum/IMPL/unify_exact_correctness_test.py",
+      "fp32_disjoint_chain": "max_diff=0.0, torch.equal=True (bit-exact vs eager)",
+      "fp32_OVERLAPPING_last_writer": "max_diff=0.0, torch.equal=True (last-writer-wins resolved correctly via where-fold first->last)"
+    }
+  },
+
+  "ima_bug_found_and_fixed": {
+    "symptom": "fold ON on demucs (sum_1e8a518eb72e, single slice_scatter over full) -> CUDA illegal memory access (cudaErrorIllegalAddress).",
+    "cause": "unified indirect load ops.load(buf, sel_idx) is evaluated UNCONDITIONALLY (then where-masked); at UNCOVERED output positions sel_idx is out of bounds -> IMA. This is exactly the constant_pad_nd clamp trap from the design doc, surfacing in the indirect-load form.",
+    "fix": "clamp sel_idx into [0, numel-1] before indirect_indexing (mirrors the proven gather-rewrite's index .clamp()); the final where still discards the clamped value at uncovered positions. After fix: demucs check PASS, no IMA, codegen identical to baseline (2 kernels, 4 loads)."
+  },
+
+  "why_inert_on_target_root_cause_pinned": {
+    "mechanism": "The chain self-breaks at realization BEFORE the band assembles. Interleaved fold/realize trace (realize_interleave_trace.py): FOLD nwrites=1 -> FOLD nwrites=2 -> REALIZE shape=(96,4,256,513) in_chain_table=True. The 2-write chain's inner_fn opcount is ~40 (each write src is a ~18-op pad+permute+view chain), which trips has_large_inner_fn (>30) and realizes; subsequent scatters then read the realized ComputedBuffer, not the chain, so folding cannot continue.",
+    "why_unification_does_not_save_it": "Index-unification (the only thing that drops opcount enough to stay lazy) BAILS on Longformer because each write's source is NOT a pure single-buffer load: probe_src_pad_pattern.py shows the source op sequence is [ge,lt, masked{load:arg1_1}, ge,lt, masked{constant}, where] = the constant_pad_nd boundary (pad the bmm by 1 row). It is where(pad_bounds, masked_load(arg1_1), pad_const), a CONDITIONAL load, which the pure-load probe (correctly) rejects.",
+    "fully_lazy_is_not_the_fix": "Re-confirmed in this tree (threshold_sweep): all-thresholds=inf removes all 6 band buffers but is ~4x SLOWER (8468us vs 2078us wall) because the fully-lazy nested-where tower recomputes O(depth) selection with 273 loads / 5057 ops per element and no flat index. The win REQUIRES the unified single-load form, not just laziness."
+  },
+
+  "remaining_hard_part_precise": "Extend index-unification to recognize a constant_pad_nd-style CONDITIONAL source: where(pad_bounds, masked_load(buf, idx), pad_const). Must (a) structurally extract (buf, idx_expr, pad_bounds_predicate, pad_const) from the where/masked/ge/lt op tree (a symbolic-value probe that tracks which produced value is the load result through the where, not just flag ops); (b) in the unified emit, fold pad_bounds into the per-write coverage mask and substitute pad_const where the pad is out of bounds (distinct from the band base fill); (c) keep the clamp so the unconditional load never IMAs. This is per-write src structure recognition + correct multi-fill recomposition. Also still needed: thread the chain through ReinterpretView/PermuteView/View readbacks (SliceView/squeeze already threaded) so the FULL band assembles as one chain before the realize decision; today the chain reaches only ~2 writes before realization breaks it (which the opcount drop from unification would itself prevent).",
+
+  "regression_spot_check": {
+    "all_fold_on": "bit-exact (--check True) on: amax_sum_528a3c274a41 (target, Longformer infer), pointwise_76e48e105773 (timm mobilevit, non-Longformer, 3 scatters), sum_1e8a518eb72e (torchbench demucs, non-Longformer, single scatter), amax_sum_7303c49b6018 (Longformer train, 55 scatters), amax_sum_bf7830302e6d (Longformer train).",
+    "compile_us_fold_off_vs_on": {
+      "amax_sum_528a3c274a41": "784.1 -> 786.1 (noise)",
+      "pointwise_76e48e105773": "8.1 -> 8.8 (noise, tiny kernel)",
+      "sum_1e8a518eb72e_demucs": "~35 -> ~43 (within the 28-43 run-to-run variance seen in BOTH configs; codegen identical: 2 kernels/4 loads fold on==off)",
+      "amax_sum_7303c49b6018_train": "863.0 -> 861.9 (no change)"
+    },
+    "verdict": "No correctness regression anywhere; no structural perf regression (fold is no-op-equivalent codegen when unification bails, which is every non-pure-load chain incl. all Longformer points)."
+  },
+
+  "remaining_effort_estimate": "1-2 weeks for a correct, safely-bailing version. The load-bearing index-unification core is BUILT and proven bit-exact (incl. overlap + IMA clamp). What remains: (1) the constant_pad_nd conditional-source extractor + multi-fill recompose (~1 wk, correctness-sensitive: the -3.39e38 key-bias vs -inf invalid-key fill vs pad-0 fill must stay distinct) and (2) ReinterpretView/PermuteView/View readback threading (~2-4 days; SliceView/squeeze done). Once the source-extractor handles the pad, the opcount drops below 30, the chain stops self-realizing, threading lets it complete, and the existing-codegen gather (proven 296us) should fall out. This is materially less than the multi-week FX-pattern-match path (no diagonal_skew_elimination ordering fight, no all-consumers-rewritability proof) AND now de-risked by a working core."
+}

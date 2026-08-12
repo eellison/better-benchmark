@@ -1,0 +1,98 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "c94a0970300f": {
+      "ab0881e7": 1
+    },
+    "ee167627f636": {
+      "e4faf4aa": 1
+    },
+    "3abc926270f6": {
+      "d05618d1": 12
+    },
+    "49afc8635b79": {
+      "f401aecd": 12
+    },
+    "95ed2ef35da9": {
+      "07bfd41e": 12
+    },
+    "3ad14c3d031f": {
+      "e4faf4aa": 11
+    },
+    "802def73cfd7": {
+      "d7517139": 1
+    },
+    "fbc9e58f2e01": {
+      "801db743": 1
+    },
+    "3db3fa64fd30": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "617758ab5ed3",
+      "count": 1,
+      "sig": "((T([4, 2048],torch.float32,[2048, 1]),1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/OPTForCausalLM/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 10.015999898314476,
+      "branch_us": 10.015999898314476
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b0b76a4e5fa5",
+      "count": 48,
+      "sig": "((T([768],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/OPTForCausalLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 16.16000011563301,
+      "branch_us": 16.16000011563301
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "12f3829bc204",
+      "count": 12,
+      "sig": "((T([4, 12, 2048, 64],torch.bfloat16,[1572864, 64, 768, 1]),T([4, 12, 2048, 64],torch.bfloat16,[1572864, 64, 768, 1]),T([4, 12, 2048, 64],torch.bfloat16,[1572864, 64, 768, 1]),T([4, 1, 2048, 2048],torch.bfloat16,[4194304, 4194304, 2048, 1]),False),{scale:1.0})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/OPTForCausalLM/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 206.496000289917,
+      "branch_us": 206.496000289917
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ed49a0e34fe5",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([8192, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/OPTForCausalLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 30.33600002527237,
+      "branch_us": 30.33600002527237
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "228429ca499a",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([8192, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/OPTForCausalLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 35.74400022625923,
+      "branch_us": 35.74400022625923
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "351df2f48f3a",
+      "count": 1,
+      "sig": "((T([8192, 768],torch.bfloat16,[768, 1]),T([768, 50272],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/OPTForCausalLM/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 388.89598846435547,
+      "branch_us": 388.89598846435547
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "OPTForCausalLM"
+}

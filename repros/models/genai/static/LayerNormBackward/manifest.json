@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "genai",
+  "model": "LayerNormBackward",
+  "patterns": [
+    "3cac3bbf4e8f",
+    "53c829d32b0c"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "static"
+}

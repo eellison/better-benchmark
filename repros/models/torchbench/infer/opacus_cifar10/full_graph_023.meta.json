@@ -1,24 +1,14 @@
 {
   "schema_version": 2,
   "inputs": [
-    ["I",512,"s67"],
-    [[64,"s67",1,1],"f32",{"n":"arg1_1","st":["s67",1,1,1]}]
+    ["sym",512],
+    [[64,512,1,1],"bf16",{"n":"arg1_1"}],
+    [[64,512,1,1],"bf16",{"n":"arg2_1"}]
   ],
   "outputs": [
-    [[64,"s67"],"f32",{"n":"output_0","st":["s67",1]}]
+    [[64,512,1,1],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
-  "symbols": {
-    "s67": {
-      "hint": 512,
-      "range": [
-        2,
-        null
-      ]
-    }
-  },
-  "guards": [],
-  "captured_dynamic": true,
   "graph": "full_graph_023.py",
   "source": {
     "kind": "model",
@@ -28,24 +18,21 @@
     "graph": "full_graph_023.py"
   },
   "node_accounting": {
-    "total_call_functions": 2,
+    "total_call_functions": 3,
     "counts": {
-      "fusible_in_partition": 2,
+      "fusible_in_partition": 3,
       "fusible_unpartitioned": 0,
       "non_fusible": 0
     },
     "ops": {
       "fusible_in_partition": {
-        "aten.mean.dim": 1,
-        "aten.reshape.default": 1
+        "aten.add.Tensor": 1,
+        "aten.copy_.default": 1,
+        "aten.relu.default": 1
       },
       "fusible_unpartitioned": {},
       "non_fusible": {}
     }
   },
-  "roundtrip": "ok",
-  "roundtrip_spelling_notes": [
-    "missing 67992e7acf17 (ops ['aten.mean.dim', 'aten.reshape.default'] match a partition on the other side under a different view-op spelling)",
-    "extra 12e84f3f91ca (ops ['aten.mean.dim', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
-  ]
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg1_1 dim 0: 512 != 32"
 }

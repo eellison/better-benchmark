@@ -1,0 +1,45 @@
+{
+  "unit": "U25_movers_recheck",
+  "n_points": 4,
+  "kernel_geomean_abl_over_ctrl": 0.8067772743807456,
+  "n_help": 1,
+  "n_hurt": 3,
+  "rows": [
+    {
+      "repro": "pointwise_07c6ea330ab4",
+      "shape": "AllenaiLongformerBase_5fa3702b",
+      "control_us": 17.12,
+      "ablated_us": 23.33,
+      "ratio_ablated_over_control": 1.3626,
+      "control_nk": 1,
+      "ablated_nk": 2
+    },
+    {
+      "repro": "sum_02fe2c82b1fd",
+      "shape": "GPTNeoForCausalLM_c5abdf2a",
+      "control_us": 30.3,
+      "ablated_us": 23.33,
+      "ratio_ablated_over_control": 0.7698,
+      "control_nk": 2,
+      "ablated_nk": 3
+    },
+    {
+      "repro": "sum_68fcffe5c7fb",
+      "shape": "XGLMForCausalLM_8da16745",
+      "control_us": 30.43,
+      "ablated_us": 19.97,
+      "ratio_ablated_over_control": 0.6562,
+      "control_nk": 1,
+      "ablated_nk": 1
+    },
+    {
+      "repro": "any_amax_amax_af50781fc699",
+      "shape": "XLNetLMHeadModel_99deda8b",
+      "control_us": 169.63,
+      "ablated_us": 104.42,
+      "ratio_ablated_over_control": 0.6155,
+      "control_nk": 1,
+      "ablated_nk": 1
+    }
+  ]
+}

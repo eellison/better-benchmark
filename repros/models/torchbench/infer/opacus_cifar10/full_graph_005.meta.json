@@ -1,32 +1,14 @@
 {
   "schema_version": 2,
   "inputs": [
-    ["I",8,"s89"],
-    ["I",8,"s39"],
-    [[64,64,"s89","s39"],"f32",{"n":"arg2_1","st":["64*s39*s89","s39*s89","s39",1]}]
+    ["sym",8],
+    ["sym",8],
+    [[64,64,8,8],"bf16",{"n":"arg2_1"}]
   ],
   "outputs": [
-    [[64,64,"s89","s39"],"f32",{"n":"output_0","st":["64*s39*s89","s39*s89","s39",1]}]
+    [[64,64,8,8],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
-  "symbols": {
-    "s89": {
-      "hint": 8,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s39": {
-      "hint": 8,
-      "range": [
-        2,
-        null
-      ]
-    }
-  },
-  "guards": [],
-  "captured_dynamic": true,
   "graph": "full_graph_005.py",
   "source": {
     "kind": "model",
@@ -51,5 +33,5 @@
       "non_fusible": {}
     }
   },
-  "roundtrip": "ok"
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg2_1 dim 0: 4096 != 64"
 }

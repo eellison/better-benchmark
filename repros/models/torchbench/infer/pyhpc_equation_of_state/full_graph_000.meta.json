@@ -1,56 +1,13 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "arg0_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg1_1",
-      "shape": [
-        204,
-        204,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "arg2_1",
-      "shape": [
-        1,
-        1,
-        26
-      ],
-      "dtype": "float64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[204,204,26],"bf16",{"n":"arg0_1"}],
+    [[204,204,26],"bf16",{"n":"arg1_1"}],
+    [[1,1,26],"bf16",{"n":"arg2_1"}]
   ],
-  "outputs": [],
+  "outputs": [
+    [[204,204,26],"bf16",{"n":"output_0"}]
+  ],
   "tensor_attrs": {},
   "graph": "full_graph_000.py",
   "source": {
@@ -59,5 +16,28 @@
     "mode": "infer",
     "model": "pyhpc_equation_of_state",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 372,
+    "counts": {
+      "fusible_in_partition": 372,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 115,
+        "aten.div.Tensor": 8,
+        "aten.log.default": 2,
+        "aten.mul.Tensor": 203,
+        "aten.pow.Tensor_Scalar": 5,
+        "aten.reciprocal.default": 6,
+        "aten.sqrt.default": 2,
+        "aten.sub.Tensor": 31
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

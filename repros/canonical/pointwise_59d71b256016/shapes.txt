@@ -1,6 +1,0 @@
-torchbench_timm_nfnet_infer_000_dd96b30f: (T([128, 768, 6, 6], f16))
-torchbench_timm_nfnet_infer_000_5951afc8: (T([128, 256, 24, 24], f16))
-torchbench_timm_nfnet_infer_000_902b327b: (T([128, 32, 96, 96], f16))
-torchbench_timm_nfnet_infer_000_98f1b841: (T([128, 16, 96, 96], f16))
-torchbench_timm_nfnet_infer_000_aeec4977: (T([128, 128, 48, 48], f16))
-torchbench_timm_nfnet_infer_000_cd1fbb78: (T([128, 768, 12, 12], f16))

@@ -1,0 +1,16 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "4325c394b077": {
+      "4ac62a08": 1
+    },
+    "4fd6e4019857": {
+      "74d25999": 1
+    }
+  },
+  "extern": [],
+  "trace_errors": [],
+  "suite": "genai",
+  "mode": "static",
+  "model": "SoftmaxBackward"
+}

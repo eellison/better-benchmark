@@ -1,0 +1,11 @@
+### u30-branch torch=/tmp/pt-verify-wt/mor-finalize/torch/__init__.py
+### u30-branch COUNTER layout_transform_store_sinking=0
+### u30-branch CODEGEN njit=10 mor_finalize_defs=4 n_code_files=6
+### u30-branch NUMERICS max_abs=3.906e-03 mean_abs=6.311e-06 max_rel=1.633e-02 nan_eager=False nan_compiled=False shape=(8, 1024, 1024)
+### u30-branch NUMERICS out[0] max_abs=3.906e-03
+### u30-branch NUMERICS out[1] max_abs=1.221e-04
+### u30-branch NUMERICS out[2] max_abs=8.106e-05
+### u30-branch NUMERICS out[3] max_abs=2.560e+02
+### u30-branch NUMERICS out[4] max_abs=2.560e+02
+### u30-branch NUMERICS out[5] max_abs=2.487e+03
+### u30-branch DONE

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "pytorch_unet",
+  "patterns": [
+    "04d85912d998",
+    "06e60cb12bee",
+    "0db891d3a1f0",
+    "100a39b686e3",
+    "12f47639e40c",
+    "1a0060cd26d5",
+    "301d492a313d",
+    "356a447e6f97",
+    "42fad1ece813",
+    "5545b90ce598",
+    "5fe194ed50d0",
+    "60a418792eff",
+    "9ab0961d1fd9",
+    "b49510ed25fe",
+    "be6b9442c621",
+    "ca662cf33758",
+    "ccd411f2a45d",
+    "ec9057741b2d",
+    "ef836df37d2d",
+    "f5be9899ede5"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

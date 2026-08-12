@@ -1,0 +1,171 @@
+{
+  "unit": "U07",
+  "n_points": 18,
+  "kernel_geomean_abl_over_ctrl": 1.006692159897789,
+  "n_help": 3,
+  "n_hurt": 5,
+  "rows": [
+    {
+      "repro": "pointwise_656833e29d89",
+      "shape": "pyhpc_isoneutral_mixing_b115bb1f",
+      "control_us": 243.58,
+      "ablated_us": 323.49,
+      "ratio_ablated_over_control": 1.328,
+      "control_nk": 30,
+      "ablated_nk": 61
+    },
+    {
+      "repro": "amax_sum_99e031979c34",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 951.55,
+      "ablated_us": 1011.42,
+      "ratio_ablated_over_control": 1.0629,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_abc117528ea8",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 952.03,
+      "ablated_us": 1008.42,
+      "ratio_ablated_over_control": 1.0592,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_7303c49b6018",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1009.44,
+      "ablated_us": 1011.39,
+      "ratio_ablated_over_control": 1.0019,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_884c406c2df8",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1009.41,
+      "ablated_us": 1009.44,
+      "ratio_ablated_over_control": 1.0,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "sum_b011c33c656b",
+      "shape": "AllenaiLongformerBase_c623eb69",
+      "control_us": 1105.86,
+      "ablated_us": 1105.89,
+      "ratio_ablated_over_control": 1.0,
+      "control_nk": 6,
+      "ablated_nk": 6
+    },
+    {
+      "repro": "amax_sum_e24ce795856b",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1011.39,
+      "ablated_us": 1011.33,
+      "ratio_ablated_over_control": 0.9999,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_f812d7f85634",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1008.58,
+      "ablated_us": 1008.48,
+      "ratio_ablated_over_control": 0.9999,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_8f72f9914b96",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 951.46,
+      "ablated_us": 951.2,
+      "ratio_ablated_over_control": 0.9997,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_79b08bfeb860",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1009.34,
+      "ablated_us": 1008.42,
+      "ratio_ablated_over_control": 0.9991,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "sum_444779f98932",
+      "shape": "AllenaiLongformerBase_47e7063f",
+      "control_us": 1059.78,
+      "ablated_us": 1058.82,
+      "ratio_ablated_over_control": 0.9991,
+      "control_nk": 6,
+      "ablated_nk": 6
+    },
+    {
+      "repro": "amax_sum_bf0fd469b53e",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1010.59,
+      "ablated_us": 1009.44,
+      "ratio_ablated_over_control": 0.9989,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "sum_7ba9dcb96142",
+      "shape": "AllenaiLongformerBase_39dafa96",
+      "control_us": 1108.9,
+      "ablated_us": 1105.66,
+      "ratio_ablated_over_control": 0.9971,
+      "control_nk": 21,
+      "ablated_nk": 21
+    },
+    {
+      "repro": "amax_sum_528a3c274a41",
+      "shape": "AllenaiLongformerBase_79c25467",
+      "control_us": 857.82,
+      "ablated_us": 822.05,
+      "ratio_ablated_over_control": 0.9583,
+      "control_nk": 12,
+      "ablated_nk": 12
+    },
+    {
+      "repro": "amax_sum_bf7830302e6d",
+      "shape": "AllenaiLongformerBase_50ff733e",
+      "control_us": 1144.67,
+      "ablated_us": 1089.41,
+      "ratio_ablated_over_control": 0.9517,
+      "control_nk": 19,
+      "ablated_nk": 19
+    },
+    {
+      "repro": "amax_sum_31d85970adb2",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1008.48,
+      "ablated_us": 952.03,
+      "ratio_ablated_over_control": 0.944,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "amax_sum_14cb1ca39cba",
+      "shape": "AllenaiLongformerBase_b64f0e8a",
+      "control_us": 1008.54,
+      "ablated_us": 949.92,
+      "ratio_ablated_over_control": 0.9419,
+      "control_nk": 7,
+      "ablated_nk": 7
+    },
+    {
+      "repro": "pointwise_43588d3e9780",
+      "shape": "pyhpc_turbulent_kinetic_energy_f2c38fe6",
+      "control_us": 337.79,
+      "ablated_us": 315.49,
+      "ratio_ablated_over_control": 0.934,
+      "control_nk": 91,
+      "ablated_nk": 87
+    }
+  ]
+}

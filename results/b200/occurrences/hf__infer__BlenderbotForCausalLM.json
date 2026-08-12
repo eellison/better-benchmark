@@ -1,0 +1,82 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "4779980113db": {
+      "bba6ebb5": 1
+    },
+    "0ada225c0a04": {
+      "c4bf51cc": 1
+    },
+    "826ea0b5f6e4": {
+      "c2111490": 24
+    },
+    "f4578c128d74": {
+      "c4bf51cc": 24
+    },
+    "b19e82f2a47b": {
+      "c4bf51cc": 23
+    },
+    "a767fed3fde5": {
+      "d7517139": 1
+    },
+    "4c1b6e6ef03f": {
+      "fa552165": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "97d60eaa2b08",
+      "count": 96,
+      "sig": "((T([2560],torch.bfloat16,[1]),T([4096, 2560],torch.bfloat16,[2560, 1]),T([2560, 2560],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForCausalLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 38.72000053524971,
+      "branch_us": 38.72000053524971
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "417f95ae9643",
+      "count": 24,
+      "sig": "((T([32, 32, 128, 80],torch.bfloat16,[327680, 80, 2560, 1]),T([32, 32, 128, 80],torch.bfloat16,[327680, 80, 2560, 1]),T([32, 32, 128, 80],torch.bfloat16,[327680, 80, 2560, 1]),T([32, 1, 128, 128],torch.bfloat16,[16384, 16384, 128, 1]),False),{scale:0.11180339887498948})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForCausalLM/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 66.46399945020676,
+      "branch_us": 66.46399945020676
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "acd952825ef0",
+      "count": 24,
+      "sig": "((T([10240],torch.bfloat16,[1]),T([4096, 2560],torch.bfloat16,[2560, 1]),T([2560, 10240],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForCausalLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 122.72000312805176,
+      "branch_us": 122.72000312805176
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "e3303c7841aa",
+      "count": 24,
+      "sig": "((T([2560],torch.bfloat16,[1]),T([4096, 10240],torch.bfloat16,[10240, 1]),T([10240, 2560],torch.bfloat16,[1, 10240])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForCausalLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 134.94400680065155,
+      "branch_us": 134.94400680065155
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "04d88731edb4",
+      "count": 1,
+      "sig": "((T([4096, 2560],torch.bfloat16,[2560, 1]),T([2560, 8008],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForCausalLM/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 109.47199910879135,
+      "branch_us": 109.47199910879135
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "BlenderbotForCausalLM"
+}

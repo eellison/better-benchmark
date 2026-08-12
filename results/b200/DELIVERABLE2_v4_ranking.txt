@@ -1,0 +1,45 @@
+# Oracle source: results/oracle_floors_2026-06-18_v4/all_oracle_timings_v4.json
+# 1149 patterns in floor file
+
+===== LARGEST REMAINING HEADROOM (branch-consistent — what to work on next) =====
+  model                                               %  recov_us orac_cov
+  hf/infer/AllenaiLongformerBase                  37.4%      5634    15/21
+  torchbench/train/tts_angular                    12.8%         2      2/2
+  timm/infer/swin_base_patch4_window7_224          9.2%      1268    23/39
+  torchbench/train/vgg16                           6.9%       936    53/54
+  hf/train/RobertaForCausalLM                      4.9%      1604    61/69
+  hf/train/ElectraForCausalLM                      4.5%      1016    64/75
+  hf/train/MBartForCausalLM                        4.5%       226    28/31
+  timm/train/adv_inception_v3                      4.3%       999  120/134
+  timm/train/inception_v3                          4.3%       999  120/134
+  hf/train/BartForCausalLM                         4.3%       214    29/32
+  timm/train/ghostnet_100                          4.1%      1524  214/258
+  hf/train/PegasusForCausalLM                      3.8%       328    25/28
+  torchbench/infer/squeezenet1_1                   3.8%        30    11/12
+  hf/train/MobileBertForMaskedLM                   3.7%      1910    57/70
+  hf/train/TrOCRForCausalLM                        3.6%       314    34/39
+  median 0.4% mean 1.3% max 37.4% over 152 models
+
+  >100% (should be 0 if arm-consistent): 0  []
+
+===== LARGEST ORIGINAL OPPORTUNITY (baseline-consistent) =====
+  model                                               %  recov_us orac_cov
+  hf/infer/AllenaiLongformerBase                  28.8%      3974    15/21
+  timm/infer/swin_base_patch4_window7_224         18.3%      2790    23/39
+  hf/train/TrOCRForCausalLM                       16.1%      1734    34/39
+  hf/train/PegasusForCausalLM                     15.1%      1585    25/28
+  hf/infer/MT5ForConditionalGeneration            11.8%       629    15/20
+  torchbench/train/tts_angular                    10.9%         1      2/2
+  torchbench/train/resnet18                       10.8%       281    45/52
+  torchbench/train/resnet50                        7.8%       613    71/80
+  hf/train/M2M100ForConditionalGeneration          7.3%       752    36/46
+  torchbench/train/vgg16                           7.1%       961    53/54
+  hf/infer/TrOCRForCausalLM                        6.8%       722     7/13
+  hf/train/MBartForCausalLM                        6.0%       320    28/31
+  hf/train/PLBartForCausalLM                       5.8%       646    29/32
+  hf/infer/M2M100ForConditionalGeneration          5.2%       686    10/17
+  hf/train/BartForCausalLM                         5.2%       277    29/32
+  median 0.6% mean 2.0% max 28.8% over 152 models
+
+  >100% (should be 0 if arm-consistent): 0  []
+

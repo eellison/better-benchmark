@@ -1,0 +1,16 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "60b7c9e320b2": {
+      "e5ae55b5": 1
+    },
+    "2cd99e5eb23e": {
+      "cbc6f48e": 1
+    }
+  },
+  "extern": [],
+  "trace_errors": [],
+  "suite": "genai",
+  "mode": "static",
+  "model": "RMSNormBackward"
+}

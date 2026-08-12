@@ -1,0 +1,286 @@
+{
+  "n_graphs": 4,
+  "fusible": {
+    "52fe1925ccda": {
+      "b1ba703d": 1
+    },
+    "952857910fc0": {
+      "a352047a": 1
+    },
+    "ccd411f2a45d": {
+      "726421b1": 12,
+      "7a1c483f": 6,
+      "f55c0682": 6
+    },
+    "47bdc8c7c0cd": {
+      "92efc45e": 6
+    },
+    "4042d49bf67b": {
+      "44a2434c": 6,
+      "ae9f1068": 6,
+      "f5f85987": 6,
+      "774eab0e": 6
+    },
+    "9b4501cc7b35": {
+      "a352047a": 1
+    },
+    "d5a413a2c233": {
+      "74f1c5d9": 6
+    },
+    "75fe8662cbb9": {
+      "a352047a": 1
+    },
+    "97fd1a9318ef": {
+      "a352047a": 1
+    },
+    "1b3981f4d189": {
+      "a352047a": 1
+    },
+    "b5aeecfb82a3": {
+      "a352047a": 1
+    },
+    "c4177f8f8203": {
+      "a352047a": 1
+    },
+    "05643331629f": {
+      "a352047a": 1
+    },
+    "f574b8ec0222": {
+      "a352047a": 1
+    },
+    "700e0afd67fd": {
+      "a352047a": 1
+    },
+    "06edf7b2c05f": {
+      "a352047a": 1
+    },
+    "96b55483e3cf": {
+      "a352047a": 1
+    },
+    "6d75f431992b": {
+      "9210619b": 1
+    },
+    "4a268d7c766e": {
+      "5ffeb263": 1
+    },
+    "fb4ae0eb915f": {
+      "c1ee6cd0": 1
+    },
+    "1bd9fae13cde": {
+      "ceaa9c1c": 1
+    },
+    "79c321089383": {
+      "e66c92a5": 1
+    },
+    "04d85912d998": {
+      "0f69674d": 6,
+      "2ddc1bad": 6,
+      "5a62163f": 6,
+      "6393d8ae": 6
+    },
+    "e93685de7228": {
+      "1a3ec418": 6
+    },
+    "e7781939b0a2": {
+      "9846b7f2": 11
+    },
+    "03788f40c42f": {
+      "05a5e903": 6
+    },
+    "ed793bcaf7cf": {
+      "9846b7f2": 1
+    },
+    "c8d23ac4414d": {
+      "cb779bb6": 1
+    },
+    "7551a58e5d34": {
+      "846b3407": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "47442c977a6b",
+      "count": 1,
+      "sig": "((T([32, 512],torch.bool,[512, 1]),-1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 15.231999568641186,
+      "branch_us": 15.231999568641186
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "4ee7f4369123",
+      "count": 6,
+      "sig": "((T([2304],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 2304],torch.bfloat16,[2304, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 41.05599969625473,
+      "branch_us": 41.05599969625473
+    },
+    {
+      "target": "aten._scaled_dot_product_efficient_attention.default",
+      "shape_hash": "87b24d6ee75c",
+      "count": 6,
+      "sig": "((T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 512],torch.bfloat16,[262144, 0, 512, 1]),True,0.1),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "_scaled_dot_product_efficient_attention",
+      "baseline_us": 478.2400131225586,
+      "branch_us": 478.2400131225586
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "a27a5b48420c",
+      "count": 6,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 22.143999114632607,
+      "branch_us": 22.143999114632607
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "5871b24e6b2c",
+      "count": 6,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 50.11200159788132,
+      "branch_us": 50.11200159788132
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "5e42afb903c6",
+      "count": 6,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 57.0559985935688,
+      "branch_us": 57.0559985935688
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0f02e040318f",
+      "count": 1,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 50264],torch.bfloat16,[50264, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 970.687985420227,
+      "branch_us": 970.687985420227
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "1b95ab38d634",
+      "count": 1,
+      "sig": "((T([50264, 16384],torch.bfloat16,[16384, 1]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm",
+      "baseline_us": 781.3439965248108,
+      "branch_us": 781.3439965248108
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ac4b2a20453e",
+      "count": 1,
+      "sig": "((T([16384, 50264],torch.bfloat16,[50264, 1]),T([50264, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_1",
+      "baseline_us": 821.2159872055054,
+      "branch_us": 821.2159872055054
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "fff0908523f2",
+      "count": 6,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_2",
+      "baseline_us": 60.15999987721443,
+      "branch_us": 60.15999987721443
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0685871ab71c",
+      "count": 6,
+      "sig": "((T([3072, 16384],torch.bfloat16,[1, 3072]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_3",
+      "baseline_us": 55.07199838757515,
+      "branch_us": 55.07199838757515
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "50e653e01522",
+      "count": 6,
+      "sig": "((T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_4",
+      "baseline_us": 57.21599981188774,
+      "branch_us": 57.21599981188774
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "2f3ed20bf89d",
+      "count": 6,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 3072],torch.bfloat16,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_5",
+      "baseline_us": 54.27199974656105,
+      "branch_us": 54.27199974656105
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d95eaedf1973",
+      "count": 6,
+      "sig": "((T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_6",
+      "baseline_us": 21.536000072956085,
+      "branch_us": 21.536000072956085
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d2d83a56efdc",
+      "count": 6,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 768],torch.bfloat16,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_7",
+      "baseline_us": 28.192000463604927,
+      "branch_us": 28.192000463604927
+    },
+    {
+      "target": "aten._scaled_dot_product_efficient_attention_backward.default",
+      "shape_hash": "f90acf0e54c5",
+      "count": 6,
+      "sig": "((T([32, 12, 512, 64],torch.bfloat16,[393216, 64, 768, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 64],torch.bfloat16,[1179648, 64, 2304, 1]),T([32, 12, 512, 512],torch.bfloat16,[262144, 0, 512, 1]),T([32, 12, 512, 64],torch.bfloat16,[393216, 64, 768, 1]),T([32, 12, 512],torch.float32,[6144, 512, 1]),T([],torch.int64,[]),T([],torch.int64,[]),0.1,[True,True,True,False]),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "_scaled_dot_product_efficient_attention_backward",
+      "baseline_us": 1055.7440519332886,
+      "branch_us": 1055.7440519332886
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f7bbbbf3c28d",
+      "count": 6,
+      "sig": "((T([16384, 2304],torch.bfloat16,[2304, 1]),T([2304, 768],torch.bfloat16,[1, 2304])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_8",
+      "baseline_us": 44.79999840259552,
+      "branch_us": 44.79999840259552
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "d49b52d02ae7",
+      "count": 6,
+      "sig": "((T([768, 16384],torch.bfloat16,[1, 768]),T([16384, 2304],torch.bfloat16,[2304, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/DistillGPT2/full_graph_003.py",
+      "node": "mm_9",
+      "baseline_us": 46.911999583244324,
+      "branch_us": 46.911999583244324
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "train",
+  "model": "DistillGPT2"
+}

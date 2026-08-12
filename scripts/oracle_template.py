@@ -165,6 +165,10 @@ def main():
                         help="Disable auto-detection and skipping of stochastic outputs")
     parser.add_argument("--all-shapes", action="store_true",
                         help="Benchmark across all shapes from shapes.txt")
+    parser.add_argument("--disable-gpu-lock", action="store_true",
+                        help="Skip the exclusive GPU bench lock (ON by "
+                        "default). An INDUCTOR_GPU_BENCH_LOCK=1 env var "
+                        "force-enables the lock even with this flag set.")
     parser.add_argument("--show-hw", action="store_true",
                         help="Print GPU hardware info and exit")
     args = parser.parse_args()
@@ -206,6 +210,7 @@ def main():
             results = bench_oracle_all_shapes(
                 oracle_forward, REPRO_DIR, REPRO_ID,
                 warmup=args.warmup, rep=args.rep,
+                disable_gpu_lock=args.disable_gpu_lock,
             )
             for result in results:
                 if result["status"] == "BAD_ORACLE":
@@ -221,6 +226,7 @@ def main():
                 REPRO_ID,
                 warmup=args.warmup,
                 rep=args.rep,
+                disable_gpu_lock=args.disable_gpu_lock,
             )
             if result["status"] == "BAD_ORACLE":
                 print(f"WARNING: oracle is slower than compile "

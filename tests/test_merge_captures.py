@@ -1,0 +1,394 @@
+"""Focused tests for merge_captures.py.
+
+Usage:
+    python scripts/test_merge_captures.py
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from merge_captures import merge_one_capture, temporary_capture_for_merge
+
+
+def _write_capture(
+    root: Path,
+    name: str,
+    *,
+    pattern_hash: str,
+    reduction_types: list[str],
+) -> Path:
+    capture_dir = root / name
+    capture_dir.mkdir(parents=True, exist_ok=True)
+    (capture_dir / "index.json").write_text(
+        json.dumps(
+            [
+                {
+                    "pattern_hash": pattern_hash,
+                    "shape_hash": name,
+                    "kind": "reduction",
+                    "reduction_types": reduction_types,
+                    "n_ops": 1,
+                    "origin_ops": ["aten.sum.default"],
+                    "file": str(root / f"missing_{name}.py"),
+                }
+            ]
+        )
+        + "\n"
+    )
+    return capture_dir
+
+
+def _write_dynamic_capture(
+    root: Path,
+    name: str,
+    *,
+    pattern_hash: str,
+    shape_hash: str,
+    split_factor: int,
+    hint: int,
+    guards: list[str],
+    inputs: list | None = None,
+) -> Path:
+    """A synthetic DYNAMIC capture: one region whose emitted graph bakes
+    `split_factor` into a reshape (the constant pattern_hash cannot see) and
+    carries symbols/guards. Mirrors the opacus GroupNorm over-merge shape:
+    same ops+wiring for every split_factor, different emitted graph. Like the
+    real emitter, every assignment is annotated with the HINT-CONCRETIZED
+    shape — the family identity must ignore those (they differ between two
+    bindings of one family)."""
+    capture_dir = root / name
+    capture_dir.mkdir(parents=True, exist_ok=True)
+    src = capture_dir / f"{name}.py"
+    ann = f"f32[64, 32, {split_factor}, {hint * hint}]"
+    src.write_text(
+        "_repro_version = 2\n"
+        "import torch\n"
+        "\n"
+        "\n"
+        "class Repro(torch.nn.Module):\n"
+        f"    def forward(self, arg0_1: \"f32[64, 64, {hint}, {hint}]\"):\n"
+        f"        view: \"{ann}\" = torch.ops.aten.reshape.default("
+        f"arg0_1, [64, 32, {split_factor}, -1])\n"
+        f"        mul: \"{ann}\" = torch.ops.aten.mul.Tensor(view, 2)\n"
+        "        return (mul,)\n"
+    )
+    entry = {
+        "pattern_hash": pattern_hash,
+        "shape_hash": shape_hash,
+        "kind": "pointwise",
+        "reduction_types": [],
+        "n_ops": 2,
+        "origin_ops": ["aten.reshape.default", "aten.mul.Tensor"],
+        "file": str(src),
+        "signature": "(T([64, 64, s0, s0], f32),)",
+        "inputs": inputs if inputs is not None else [[[64, 64, "s0", "s0"], "f32"]],
+        "symbols": {"s0": {"hint": hint, "range": [2, None]}},
+        "guards": guards,
+        "captured_dynamic": True,
+        "occurrences": 1,
+    }
+    (capture_dir / "index.json").write_text(
+        json.dumps({"captured": [entry], "dropped": []}) + "\n"
+    )
+    return capture_dir
+
+
+class MergeCapturesTests(unittest.TestCase):
+    def test_same_pattern_hash_reuses_existing_canonical_dir(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            pattern_hash = "abcdef123456"
+            first = _write_capture(
+                root,
+                "first",
+                pattern_hash=pattern_hash,
+                reduction_types=["amax", "sum"],
+            )
+            second = _write_capture(
+                root,
+                "second",
+                pattern_hash=pattern_hash,
+                reduction_types=["sum", "amax"],
+            )
+
+            merge_one_capture(first, output, "ModelA", suite="hf", mode="train")
+            merge_one_capture(second, output, "ModelB", suite="hf", mode="train")
+
+            kept = output / "canonical" / f"amax_sum_{pattern_hash}"
+            duplicate = output / "canonical" / f"sum_amax_{pattern_hash}"
+            self.assertTrue(kept.exists())
+            self.assertFalse(duplicate.exists())
+
+            meta = json.loads((kept / "meta.json").read_text())
+            self.assertEqual(meta["pattern_hash"], pattern_hash)
+            # Model keys are fully qualified as suite/mode/model (matches the
+            # shapes.json "models" keying); the bare-name form is retired.
+            self.assertEqual(meta["models"], ["hf/train/ModelA", "hf/train/ModelB"])
+
+    def test_temporary_capture_for_merge_removes_raw_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            pattern_hash = "deadbeef1234"
+
+            with temporary_capture_for_merge(
+                output,
+                "ModelA",
+                suite="hf",
+                mode="infer",
+                prefix="test_capture_",
+            ) as capture:
+                raw_dir = capture.capture_dir
+                _write_capture(
+                    raw_dir.parent,
+                    raw_dir.name,
+                    pattern_hash=pattern_hash,
+                    reduction_types=["sum"],
+                )
+
+                self.assertEqual(capture.merge(), 1)
+                self.assertTrue(raw_dir.exists())
+
+            repro_dir = output / "canonical" / f"sum_{pattern_hash}"
+            manifest = output / "models" / "hf" / "infer" / "ModelA" / "manifest.json"
+
+            self.assertFalse(raw_dir.exists())
+            self.assertTrue(repro_dir.exists())
+            self.assertTrue(manifest.exists())
+            self.assertFalse((output / "captures").exists())
+
+    def test_temporary_capture_for_merge_requires_explicit_merge(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+
+            with temporary_capture_for_merge(
+                output,
+                "ModelA",
+                suite="hf",
+                mode="infer",
+                prefix="test_capture_",
+            ) as capture:
+                raw_dir = capture.capture_dir
+                _write_capture(
+                    raw_dir.parent,
+                    raw_dir.name,
+                    pattern_hash="cafebabe1234",
+                    reduction_types=["sum"],
+                )
+
+            self.assertFalse(raw_dir.exists())
+            self.assertFalse((output / "canonical").exists())
+
+    def test_graph_only_capture_writes_manifest(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            capture_dir = root / "empty_capture"
+            capture_dir.mkdir()
+            model_dir = output / "models" / "hf" / "infer" / "ModelA"
+            model_dir.mkdir(parents=True)
+            (model_dir / "full_graph_000.py").write_text("# graph\n")
+            (model_dir / "full_graph_000.meta.json").write_text("{}\n")
+
+            merged = merge_one_capture(capture_dir, output, "ModelA", suite="hf", mode="infer")
+
+            manifest = json.loads((model_dir / "manifest.json").read_text())
+            self.assertEqual(merged, 0)
+            self.assertEqual(manifest["patterns"], [])
+            self.assertEqual(manifest["graphs"], ["full_graph_000.py"])
+            self.assertEqual(
+                manifest["graph_metadata"],
+                {"full_graph_000.py": "full_graph_000.meta.json"},
+            )
+
+    def test_dynamic_divergent_graphs_split_dirs(self):
+        """Two dynamic captures with the SAME pattern_hash but DIFFERENT
+        emitted graphs (a baked reshape split factor) must land in separate
+        canonical dirs — each with its own repro.py and its own guards. The
+        over-merge regression: one dir froze point-0's repro.py onto siblings
+        and pooled their contradictory guards."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            pattern_hash = "feedface0001"
+            cap_a = _write_dynamic_capture(
+                root, "dyn_a", pattern_hash=pattern_hash,
+                shape_hash="aaaa1111", split_factor=2, hint=16,
+                guards=["Eq(Mod(s0, 2), 0)"],
+            )
+            cap_b = _write_dynamic_capture(
+                root, "dyn_b", pattern_hash=pattern_hash,
+                shape_hash="bbbb2222", split_factor=4, hint=16,
+                guards=["Eq(Mod(s0, 4), 0)"],
+            )
+
+            merge_one_capture(cap_a, output, "ModelA", suite="hf", mode="train")
+            merge_one_capture(cap_b, output, "ModelB", suite="hf", mode="train")
+
+            primary = output / "canonical" / f"pointwise_{pattern_hash}"
+            split = output / "canonical" / f"pointwise_{pattern_hash}__2"
+            self.assertTrue(primary.exists())
+            self.assertTrue(split.exists())
+
+            # Each family keeps ITS OWN emitted graph.
+            self.assertIn("[64, 32, 2, -1]", (primary / "repro.py").read_text())
+            self.assertIn("[64, 32, 4, -1]", (split / "repro.py").read_text())
+
+            # Guards are NOT pooled across families.
+            shapes_a = json.loads((primary / "shapes.json").read_text())
+            shapes_b = json.loads((split / "shapes.json").read_text())
+            self.assertEqual(shapes_a["guards"], ["Eq(Mod(s0, 2), 0)"])
+            self.assertEqual(shapes_b["guards"], ["Eq(Mod(s0, 4), 0)"])
+            self.assertEqual(len(shapes_a["points"]), 1)
+            self.assertEqual(len(shapes_b["points"]), 1)
+
+            # Both dirs carry the shared pattern_hash in meta.json.
+            for d in (primary, split):
+                meta = json.loads((d / "meta.json").read_text())
+                self.assertEqual(meta["pattern_hash"], pattern_hash)
+
+            # Idempotence: re-merging capture A joins its existing family —
+            # no third dir, no new point.
+            merge_one_capture(cap_a, output, "ModelA", suite="hf", mode="train")
+            self.assertFalse(
+                (output / "canonical" / f"pointwise_{pattern_hash}__3").exists()
+            )
+            shapes_a2 = json.loads((primary / "shapes.json").read_text())
+            self.assertEqual(len(shapes_a2["points"]), 1)
+            self.assertEqual(shapes_a2["guards"], ["Eq(Mod(s0, 2), 0)"])
+
+    def test_dynamic_same_graph_different_binding_merges_as_points(self):
+        """Two dynamic captures of the SAME family at different bindings
+        (hints) must still merge into ONE dir as two points — the identity
+        hash covers the graph body, not the per-point hint."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            pattern_hash = "feedface0002"
+            cap_a = _write_dynamic_capture(
+                root, "dyn_p16", pattern_hash=pattern_hash,
+                shape_hash="cccc3333", split_factor=2, hint=16,
+                guards=["Eq(Mod(s0, 2), 0)"],
+            )
+            cap_b = _write_dynamic_capture(
+                root, "dyn_p32", pattern_hash=pattern_hash,
+                shape_hash="dddd4444", split_factor=2, hint=32,
+                guards=["Eq(Mod(s0, 2), 0)"],
+            )
+
+            merge_one_capture(cap_a, output, "ModelA", suite="hf", mode="train")
+            merge_one_capture(cap_b, output, "ModelB", suite="hf", mode="train")
+
+            primary = output / "canonical" / f"pointwise_{pattern_hash}"
+            self.assertTrue(primary.exists())
+            self.assertFalse(
+                (output / "canonical" / f"pointwise_{pattern_hash}__2").exists()
+            )
+
+            shapes = json.loads((primary / "shapes.json").read_text())
+            self.assertEqual(len(shapes["points"]), 2)
+            bindings = sorted(p["bindings"]["s0"] for p in shapes["points"])
+            self.assertEqual(bindings, [16, 32])
+            self.assertEqual(shapes["guards"], ["Eq(Mod(s0, 2), 0)"])
+
+    def test_dynamic_same_body_different_symbolization_splits(self):
+        """Two dynamic captures whose forward BODIES are identical but whose
+        symbolic INPUT structure differs ([64,64,s0,s0] vs [64,s0,s1,s2])
+        must split — a pointwise body references no shapes, so the input
+        signature is the only thing telling the families apart. This is the
+        opacus e129 collision: two different families whose hint-concretized
+        shapes coincide."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            pattern_hash = "feedface0004"
+            cap_a = _write_dynamic_capture(
+                root, "dyn_chan_static", pattern_hash=pattern_hash,
+                shape_hash="eeee5555", split_factor=2, hint=8,
+                guards=["Eq(Mod(s0, 2), 0)"],
+            )
+            cap_b = _write_dynamic_capture(
+                root, "dyn_chan_dynamic", pattern_hash=pattern_hash,
+                shape_hash="ffff6666", split_factor=2, hint=8,
+                guards=["Eq(Mod(s0, 2), 0)"],
+                inputs=[[[64, "s0", "s1", "s2"], "f32"]],
+            )
+
+            merge_one_capture(cap_a, output, "ModelA", suite="hf", mode="train")
+            merge_one_capture(cap_b, output, "ModelB", suite="hf", mode="train")
+
+            primary = output / "canonical" / f"pointwise_{pattern_hash}"
+            split = output / "canonical" / f"pointwise_{pattern_hash}__2"
+            self.assertTrue(primary.exists())
+            self.assertTrue(split.exists())
+            shapes_a = json.loads((primary / "shapes.json").read_text())
+            shapes_b = json.loads((split / "shapes.json").read_text())
+            self.assertEqual(len(shapes_a["points"]), 1)
+            self.assertEqual(len(shapes_b["points"]), 1)
+            self.assertEqual(shapes_a["points"][0]["shape_hash"], "eeee5555")
+            self.assertEqual(shapes_b["points"][0]["shape_hash"], "ffff6666")
+
+    def test_static_capture_grouping_unchanged_by_dynamic_split(self):
+        """Static captures (no symbols/guards) stay on the pattern-hash-only
+        path: same pattern_hash -> same dir, even when their (missing-file)
+        sources cannot be identity-hashed."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            pattern_hash = "feedface0003"
+            first = _write_capture(
+                root, "static_one", pattern_hash=pattern_hash,
+                reduction_types=["sum"],
+            )
+            second = _write_capture(
+                root, "static_two", pattern_hash=pattern_hash,
+                reduction_types=["sum"],
+            )
+
+            merge_one_capture(first, output, "ModelA", suite="hf", mode="train")
+            merge_one_capture(second, output, "ModelB", suite="hf", mode="train")
+
+            kept = output / "canonical" / f"sum_{pattern_hash}"
+            self.assertTrue(kept.exists())
+            self.assertEqual(
+                len(list((output / "canonical").iterdir())), 1
+            )
+            meta = json.loads((kept / "meta.json").read_text())
+            self.assertEqual(meta["models"], ["hf/train/ModelA", "hf/train/ModelB"])
+
+    def test_explicit_suite_preserves_prefixed_model_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            capture_dir = root / "empty_capture"
+            capture_dir.mkdir()
+            model_dir = output / "models" / "hf" / "train" / "hf_Foo_train"
+            model_dir.mkdir(parents=True)
+            (model_dir / "full_graph_000.py").write_text("# graph\n")
+
+            merge_one_capture(
+                capture_dir,
+                output,
+                "hf_Foo_train",
+                suite="hf",
+                mode="train",
+            )
+
+            self.assertTrue((model_dir / "manifest.json").exists())
+            self.assertFalse(
+                (output / "models" / "hf" / "train" / "Foo" / "manifest.json").exists()
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

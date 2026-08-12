@@ -46,6 +46,12 @@ from full_graph_harness import (
     symbolic_block_from_value as _symbolic_block_from_value,
     harvest_shape_env as _harvest_shape_env,
 )
+# Single source of truth for the emitted version marker: the generated repro
+# template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
+# future format bump (changing only the constant) can never leave this writer
+# stamping a stale version -- the exact bug the v3 migration hit when it
+# bumped the template but not repro_harness.CURRENT_REPRO_VERSION.
+from repro_harness import CURRENT_REPRO_VERSION
 
 
 # ============================================================================
@@ -1595,7 +1601,7 @@ from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
-_repro_version = 3
+_repro_version = {CURRENT_REPRO_VERSION}
 # Input shapes/strides/dtypes live in the sibling shapes.json (structured,
 # one entry per point); forward()'s annotations document the default shapes
 # inline. Default inputs = the first shapes.json point.

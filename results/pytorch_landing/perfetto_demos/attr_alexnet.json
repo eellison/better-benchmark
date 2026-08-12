@@ -1,0 +1,209 @@
+{
+  "_launch_floor_us": 4.87,
+  "_launch_slope_us": 1.538,
+  "_device": "NVIDIA B200",
+  "models": {
+    "alexnet": {
+      "e2e_us": 773.0,
+      "e2e_complete": true,
+      "n_e2e_graphs_ok": 1,
+      "sum_fusible_us": 108.7,
+      "sum_extern_us": 1213.2,
+      "sum_parts_us": 1321.9,
+      "corrected_parts_us": 1253.7,
+      "ratio_raw": 1.71,
+      "ratio_corrected": 1.622,
+      "n_graphs": 1,
+      "n_fusible_occurrences": 7,
+      "n_fusible_points": 6,
+      "n_extern_occurrences": 8,
+      "n_extern_points": 8,
+      "fusible_unmatched": [],
+      "extern_unmatched": [],
+      "extern_bench_failures": [],
+      "e2e_bench_failures": [],
+      "per_node": [
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution",
+          "order_index": 17,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 3, 224, 224],torch.bfloat16,[150528, 50176, 224, 1]),T([64, 3, 11, 11],torch.bfloat16,[363, 121, 11, 1]),T([64],torch.bfloat16,[1]),[4,4],[2,2],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 799.6159791946411,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "getitem_1",
+          "order_index": 21,
+          "kind": "fusible",
+          "key": [
+            "eff4b8c521ae",
+            "9594e3d9"
+          ],
+          "us": 35.93600168824196,
+          "label": "eff4b8c521ae/9594e3d9"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_1",
+          "order_index": 22,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 64, 27, 27],torch.bfloat16,[46656, 729, 27, 1]),T([192, 64, 5, 5],torch.bfloat16,[1600, 25, 5, 1]),T([192],torch.bfloat16,[1]),[1,1],[2,2],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 131.99999928474426,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "getitem_3",
+          "order_index": 26,
+          "kind": "fusible",
+          "key": [
+            "eff4b8c521ae",
+            "27e7b058"
+          ],
+          "us": 26.43200010061264,
+          "label": "eff4b8c521ae/27e7b058"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_2",
+          "order_index": 27,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 192, 13, 13],torch.bfloat16,[32448, 169, 13, 1]),T([384, 192, 3, 3],torch.bfloat16,[1728, 9, 3, 1]),T([384],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 77.53600180149078,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "relu_2",
+          "order_index": 28,
+          "kind": "fusible",
+          "key": [
+            "3abc926270f6",
+            "a831c950"
+          ],
+          "us": 11.359999887645245,
+          "label": "3abc926270f6/a831c950"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_3",
+          "order_index": 29,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 384, 13, 13],torch.bfloat16,[64896, 169, 13, 1]),T([256, 384, 3, 3],torch.bfloat16,[3456, 9, 3, 1]),T([256],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 81.727996468544,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "relu_3",
+          "order_index": 30,
+          "kind": "fusible",
+          "key": [
+            "3abc926270f6",
+            "a8ee30c6"
+          ],
+          "us": 9.664000011980534,
+          "label": "3abc926270f6/a8ee30c6"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "convolution_4",
+          "order_index": 31,
+          "kind": "extern",
+          "key": [
+            "aten.convolution.default",
+            "((T([128, 256, 13, 13],torch.bfloat16,[43264, 169, 13, 1]),T([256, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),T([256],torch.bfloat16,[1]),[1,1],[1,1],[1,1],False,[0,0],1),{})"
+          ],
+          "us": 67.9360032081604,
+          "label": "aten.convolution.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "view",
+          "order_index": 37,
+          "kind": "fusible",
+          "key": [
+            "76ffbcc3b8af",
+            "a8ee30c6"
+          ],
+          "us": 11.231999844312668,
+          "label": "76ffbcc3b8af/a8ee30c6"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "addmm",
+          "order_index": 39,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([4096],torch.bfloat16,[1]),T([128, 9216],torch.bfloat16,[9216, 1]),T([9216, 4096],torch.bfloat16,[1, 9216])),{})"
+          ],
+          "us": 26.367999613285065,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "relu_5",
+          "order_index": 40,
+          "kind": "fusible",
+          "key": [
+            "3abc926270f6",
+            "18290e58"
+          ],
+          "us": 7.040000054985285,
+          "label": "3abc926270f6/18290e58"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "addmm_1",
+          "order_index": 42,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([4096],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 4096],torch.bfloat16,[1, 4096])),{})"
+          ],
+          "us": 15.968000516295433,
+          "label": "aten.addmm.default"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "relu_6",
+          "order_index": 43,
+          "kind": "fusible",
+          "key": [
+            "3abc926270f6",
+            "18290e58"
+          ],
+          "us": 7.040000054985285,
+          "label": "3abc926270f6/18290e58"
+        },
+        {
+          "graph_name": "full_graph_000",
+          "node_name": "addmm_2",
+          "order_index": 45,
+          "kind": "extern",
+          "key": [
+            "aten.addmm.default",
+            "((T([1000],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 1000],torch.bfloat16,[1, 4096])),{})"
+          ],
+          "us": 12.032000347971916,
+          "label": "aten.addmm.default"
+        }
+      ]
+    }
+  }
+}

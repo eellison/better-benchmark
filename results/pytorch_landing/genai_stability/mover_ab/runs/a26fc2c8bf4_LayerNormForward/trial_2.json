@@ -1,0 +1,96 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "ecf1955002c2aadddb188585841d718971bb4848",
+    "pytorch_commit": "a26fc2c8bf45dd402c95814a3aebb3656bef35c7",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-06-23T04:03:11Z",
+    "n_repros": 1,
+    "n_results": 1,
+    "workload_kind": "full_graph"
+  },
+  "repros/models/genai/static/LayerNormForward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/static/LayerNormForward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "static/LayerNormForward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              512,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              512
+            ],
+            "dtype": "float32",
+            "stride": [
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ],
+        "tensor_attrs": {},
+        "outputs": [
+          {
+            "kind": "tensor",
+            "name": "output_0",
+            "shape": [
+              1152000,
+              512
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              512,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ]
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 342.9439961910248,
+      "coord_descent_us": 343.9359962940216,
+      "memcopy_sol_us": null,
+      "input_bytes": 1179650048,
+      "output_bytes": 1179648000,
+      "naive_io_bytes": 2359298048,
+      "n_kernels": 1,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 1,
+    "ok": 1,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 6.63633394241333
+  }
+}

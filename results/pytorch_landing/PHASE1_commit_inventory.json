@@ -1,0 +1,315 @@
+{
+  "meta": {
+    "repo": "/tmp/pytorch-work",
+    "branch": "tmp_work",
+    "head": "daa79cd25ca9a80bfd65799394cf4255d6be75a6",
+    "ab_baseline_given": "244fdb379d11d5925da5610b22e1466222c4afb9",
+    "discovered_upstream_tip": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+    "topology": "LINEAR: baseline(244fdb) -> [56 upstream PRs] -> upstream_tip(5e2ab) -> [81 perf commits + 2 base-update merges] -> HEAD(daa79cd)",
+    "counts": {
+      "rev_list_count_baseline_to_head": 139,
+      "nonmerge_baseline_to_head": 137,
+      "merges_baseline_to_head": 2,
+      "upstream_prs_baseline_to_upstreamtip": 56,
+      "perf_nonmerge_upstreamtip_to_head": 81,
+      "perf_merges_upstreamtip_to_head": 2
+    }
+  },
+  "classification_summary": {
+    "perf_commits_total": 83,
+    "ghstack_plumbing": 7,
+    "revert_commits": 6,
+    "reverted_commits": 6,
+    "superseded": 3,
+    "substantive_surviving": 61,
+    "note_benchmarking": "benchmarking.py net +47/-1 survives but lives in the 'Update' plumbing commits (1 extra surviving infra unit not counted in 61)",
+    "note_mislabeled_revert": "f74a7f13723 'Revert realize_reads_threshold' ALSO adds 28 surviving lines to memory.py (substantive, hidden under a Revert subject)"
+  },
+  "revert_pairs": [
+    {
+      "reverted": "1a824e0747a",
+      "reverted_subject": "[inductor] Raise realize_reads_threshold from 4 to 30",
+      "revert": "f74a7f13723"
+    },
+    {
+      "reverted": "9ae68049a93",
+      "reverted_subject": "[inductor] Smart realize_hint: don't materialize broadcast-dominated producers (pointwise_e26de, 1.52x->1.0x)",
+      "revert": "282760481f8"
+    },
+    {
+      "reverted": "caa0b614314",
+      "reverted_subject": "[inductor] Tune num_stages for memory-bound pointwise kernels (pointwise_fc46ae4ec316)",
+      "revert": "f0b54e1aa1f"
+    },
+    {
+      "reverted": "d2cd52d3117",
+      "reverted_subject": "[inductor] Raise persistent reduction threshold for INNER reductions (1024->8192)",
+      "revert": "62f27911a59"
+    },
+    {
+      "reverted": "84a2a5cf6ae",
+      "reverted_subject": "[inductor] Degenerate dropout elimination pass (var_mean_81e1858d9aa4, 1.76x->0.99x)",
+      "revert": "f654a5d3a0b"
+    },
+    {
+      "reverted": "13cbc75b516",
+      "reverted_subject": "[inductor] Degenerate dropout elimination pass (var_mean_7b0bd4f35599, 1.63x->1.0x)",
+      "revert": "1787656f21b"
+    }
+  ],
+  "reconstruction_crosscheck": {
+    "product_diff_files_upstreamtip_to_head": 36,
+    "files_covered_by_surviving_commits": 34,
+    "unexplained_files": [
+      "torch/_inductor/memory.py",
+      "torch/_inductor/runtime/benchmarking.py"
+    ],
+    "unexplained_resolution": {
+      "torch/_inductor/memory.py": "introduced by f74a7f13723 (mislabeled Revert) - substantive surviving",
+      "torch/_inductor/runtime/benchmarking.py": "net change carried by the 5 'Update' ghstack plumbing commits - surviving infra"
+    },
+    "extra_files": []
+  },
+  "feature_units": {
+    "scheduler heuristics (inline_recomputable_producers / realize / mutation_renames / MOR fusion)": {
+      "n": 10,
+      "commits": [
+        "14b0254f8a9",
+        "905450a5a5d",
+        "846f6be7015",
+        "12e839eb0fc",
+        "7be29e49d9e",
+        "c465f1751c6",
+        "ec674714f38",
+        "054c68b5e15",
+        "a6e9664fb72",
+        "2b40e059b84"
+      ]
+    },
+    "triton codegen (evict_first / scalar_acc / online-softmax combine / CE hoisting)": {
+      "n": 7,
+      "commits": [
+        "ca8f961d6b0",
+        "52d4cadfac0",
+        "f6ae31e6984",
+        "e45f846f8d1",
+        "60431eca431",
+        "e9a67c98a8c",
+        "a26fc2c8bf4"
+      ]
+    },
+    "split-reduction cost model (choices.py: undersaturation split / aggressive split factor)": {
+      "n": 7,
+      "commits": [
+        "2b35f4ee83a",
+        "2fbbe401871",
+        "5d4ce5df93b",
+        "d75864dea06",
+        "ab46039c492",
+        "bdc289b3644",
+        "a85d79a900a"
+      ]
+    },
+    "scatter_reduce_fusion (scatter_add/scatter_reduce -> gather/fusion family)": {
+      "n": 6,
+      "commits": [
+        "e034b931eab",
+        "290b0f22d9a",
+        "4427bfd553c",
+        "e6d89ca0b31",
+        "edbd4b67279",
+        "5489b8c2bb9"
+      ]
+    },
+    "lowering (clamp embedding / pointwise_cat guard / CE hoisting)": {
+      "n": 3,
+      "commits": [
+        "ab29345d82d",
+        "aa83bc1951c",
+        "d95f59fb1bc"
+      ]
+    },
+    "dedupe_graph_outputs": {
+      "n": 3,
+      "commits": [
+        "30cc64e2343",
+        "60dd3839913",
+        "daa79cd25ca"
+      ]
+    },
+    "ir (materialize-on-reuse / indirect-index)": {
+      "n": 3,
+      "commits": [
+        "b1e8a30af15",
+        "715c6fc42ac",
+        "d85ab5508e3"
+      ]
+    },
+    "slice_output_compaction": {
+      "n": 3,
+      "commits": [
+        "bbf37d454c2",
+        "3b746fce660",
+        "3bf69043be0"
+      ]
+    },
+    "select_scatter_sparsity": {
+      "n": 2,
+      "commits": [
+        "94ad050dee0",
+        "f595e0cac3a"
+      ]
+    },
+    "slice_scatter_elision": {
+      "n": 2,
+      "commits": [
+        "9b4edfffc15",
+        "2199f90f782"
+      ]
+    },
+    "triton_heuristics (persistent-reduction configs / low-warp / rnumel ceiling)": {
+      "n": 2,
+      "commits": [
+        "44802547aa9",
+        "9dde2c59a51"
+      ]
+    },
+    "as_strided_scatter_elision": {
+      "n": 1,
+      "commits": [
+        "97385fb3273"
+      ]
+    },
+    "index_through_norm": {
+      "n": 1,
+      "commits": [
+        "afc3d5956d5"
+      ]
+    },
+    "core-other (joint_graph.py,post_grad.py)": {
+      "n": 1,
+      "commits": [
+        "565695da70b"
+      ]
+    },
+    "post_grad registration/glue": {
+      "n": 1,
+      "commits": [
+        "a73d1583b34"
+      ]
+    },
+    "cat_through_reduction": {
+      "n": 1,
+      "commits": [
+        "6fdaadaa2c0"
+      ]
+    },
+    "bn_affine_folding": {
+      "n": 1,
+      "commits": [
+        "86c5451e197"
+      ]
+    },
+    "diagonal_skew_elimination (Longformer scatter-read bypass)": {
+      "n": 1,
+      "commits": [
+        "d8e9914094a"
+      ]
+    },
+    "expand_sum_elision": {
+      "n": 1,
+      "commits": [
+        "c33b0e78618"
+      ]
+    },
+    "core-other (joint_graph.py)": {
+      "n": 1,
+      "commits": [
+        "3e627768c9f"
+      ]
+    },
+    "one_hot_reduction_elimination": {
+      "n": 1,
+      "commits": [
+        "049d1229d84"
+      ]
+    },
+    "core-other (config.py,post_grad.py)": {
+      "n": 1,
+      "commits": [
+        "6703f38fa2d"
+      ]
+    },
+    "rotate_half_gather (RoPE)": {
+      "n": 1,
+      "commits": [
+        "1406552b9d3"
+      ]
+    },
+    "structured_scatter_decode (affine-iota index_put overlap-add)": {
+      "n": 1,
+      "commits": [
+        "56959375c33"
+      ]
+    }
+  },
+  "pass_file_origin": {
+    "created_by_mega_commit_97385": [
+      "scatter_reduce_fusion",
+      "scatter_reduce_gather",
+      "slice_scatter_elision",
+      "as_strided_scatter_elision",
+      "linear_reduction_elimination",
+      "layout_transform_store_sinking",
+      "reduction_chaining"
+    ],
+    "created_by_later_standalone_commit": {
+      "structured_scatter_decode": "56959375c33",
+      "select_scatter_sparsity": "94ad050dee0",
+      "slice_output_compaction": "bbf37d454c2",
+      "diagonal_skew_elimination": "d8e9914094a",
+      "one_hot_reduction_elimination": "049d1229d84",
+      "expand_sum_elision": "c33b0e78618",
+      "cat_through_reduction": "6fdaadaa2c0",
+      "rotate_half_gather": "1406552b9d3",
+      "index_through_norm": "afc3d5956d5",
+      "bn_affine_folding": "86c5451e197",
+      "dedupe_graph_outputs": "30cc64e2343"
+    },
+    "shared_registration_seam": {
+      "file": "torch/_inductor/fx_passes/post_grad.py",
+      "touched_by_n_commits": 20,
+      "note": "every new FX pass registers here; mega-commit seeds it; couples ordering not logic"
+    }
+  },
+  "known_effects_mapping": {
+    "branch_net": "+2.18% median / +4.84% geomean (given)",
+    "aa_noise_floor": "~0.82%",
+    "R1_pytorch_unet_minus20": {
+      "unit": "scheduler heuristics / inline_recomputable_producers + materialize-on-reuse",
+      "commits": [
+        "97385fb3273(seed)",
+        "905450a5a5d",
+        "12e839eb0fc",
+        "ec674714f38",
+        "2b40e059b84",
+        "a6e9664fb72",
+        "be6874e5fa2",
+        "715c6fc42ac",
+        "b1e8a30af15",
+        "9ae68049a93(reverted by 282760481f8)"
+      ]
+    },
+    "R3_longformer_minus9p4": {
+      "unit": "diagonal_skew_elimination",
+      "commits": [
+        "d8e9914094a"
+      ],
+      "note": "also edits scatter_reduce_fusion.py +13/-2 (small dep on mega-commit scatter infra)"
+    },
+    "pyhpc_minus12": {
+      "unit": "(diffuse - not attributable to a single commit by subject)",
+      "commits": []
+    }
+  }
+}

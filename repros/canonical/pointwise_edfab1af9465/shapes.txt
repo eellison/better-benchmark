@@ -1,4 +1,0 @@
-inductor_torchbench_perf-6-6-linux.aws.a100_graph30_1e7e7c93: (T([256, 1], f32))
-torchbench_pytorch_cyclegan_and_pix2pix_infer_000_25f363be: (T([1, 3, 256, 256], f32))
-torchbench_lennard_jones_infer_000_0a019d11: (T([1000, 16], f32))
-torchbench_lennard_jones_train_000_0a019d11: (T([1000, 16], f32))

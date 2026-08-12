@@ -1,35 +1,15 @@
 {
   "schema_version": 2,
   "inputs": [
-    [[256,256,3,3],"f32",{"n":"arg0_1"}],
-    ["I",2,"s16"],
-    ["I",2,"s82"],
-    [[64,256,"s16","s82"],"f32",{"n":"arg3_1","st":["256*s16*s82","s16*s82","s82",1]}]
+    ["sym",256],
+    ["sym",2],
+    ["sym",2],
+    [[64,256,2,2],"bf16",{"n":"arg3_1"}]
   ],
   "outputs": [
-    [[64,256,"s16","s82"],"f32",{"n":"output_0","st":["256*s16*s82","s16*s82","s82",1]}]
+    [[64,256,2,2],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
-  "symbols": {
-    "s16": {
-      "hint": 2,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s82": {
-      "hint": 2,
-      "range": [
-        2,
-        null
-      ]
-    }
-  },
-  "guards": [
-    "256*s16*s82 <= 2147483647"
-  ],
-  "captured_dynamic": true,
   "graph": "full_graph_016.py",
   "source": {
     "kind": "model",
@@ -39,19 +19,20 @@
     "graph": "full_graph_016.py"
   },
   "node_accounting": {
-    "total_call_functions": 1,
+    "total_call_functions": 2,
     "counts": {
-      "fusible_in_partition": 0,
+      "fusible_in_partition": 2,
       "fusible_unpartitioned": 0,
-      "non_fusible": 1
+      "non_fusible": 0
     },
     "ops": {
-      "fusible_in_partition": {},
+      "fusible_in_partition": {
+        "aten.copy_.default": 1,
+        "aten.relu.default": 1
+      },
       "fusible_unpartitioned": {},
-      "non_fusible": {
-        "aten.convolution.default": 1
-      }
+      "non_fusible": {}
     }
   },
-  "roundtrip": "ok"
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg3_1 dim 0: 1024 != 39"
 }

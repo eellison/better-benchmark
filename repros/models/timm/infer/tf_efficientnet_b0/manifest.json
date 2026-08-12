@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "tf_efficientnet_b0",
+  "patterns": [
+    "182f6f9450b9",
+    "46ffe591b5ee",
+    "498fa7e126b8",
+    "795cdbe23b17",
+    "818c3aa59952",
+    "88bffcefddc4",
+    "9017f526fe31",
+    "e6ddc8e897ec",
+    "f30674e2e5ee",
+    "fa289c1b737a"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

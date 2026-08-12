@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "inception_v3",
+  "patterns": [
+    "04d85912d998",
+    "052b3bc6efa8",
+    "06b536dc906d",
+    "0e86f1318633",
+    "100a39b686e3",
+    "164269af8770",
+    "1d1822e90ccc",
+    "2d8146dc520a",
+    "302622e401f9",
+    "42fad1ece813",
+    "643db2887a01",
+    "6a8cdea856dd",
+    "72ccaeb6654a",
+    "77aa028cea27",
+    "77f93c745c34",
+    "7bfe496f3aa5",
+    "7d7f5082453e",
+    "7ea3cfe27698",
+    "8a8261a3607b",
+    "8bb40810003c",
+    "8d5cb645d3bf",
+    "92943d6eae4c",
+    "bb06617cadbd",
+    "c2bf513c1ebf",
+    "ccd411f2a45d",
+    "f34efcbb8bb7"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

@@ -1,0 +1,100 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "93ab7097e9e5": {
+      "4b47cbc0": 1
+    },
+    "644fa7675014": {
+      "cd997de8": 1
+    },
+    "af505388b035": {
+      "5428f51a": 1
+    },
+    "647d3ac3f711": {
+      "bcb2f702": 1
+    },
+    "96edf0542ecd": {
+      "63bebcf6": 1
+    },
+    "826ea0b5f6e4": {
+      "92efc45e": 12
+    },
+    "da5aa7a47091": {
+      "63bebcf6": 12
+    },
+    "b89a1eb0b38d": {
+      "9fbac4b8": 12
+    },
+    "320d8d15d623": {
+      "d20f46e2": 36
+    },
+    "393456b916a6": {
+      "63bebcf6": 11
+    },
+    "d0ae6f6e894f": {
+      "771dc86a": 1
+    },
+    "035e4d7f5117": {
+      "d7517139": 1
+    },
+    "9375aeadb8d3": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "570612514809",
+      "count": 49,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 22.23999984562397,
+      "branch_us": 22.23999984562397
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "913d4d838dc8",
+      "count": 12,
+      "sig": "((T([32, 12, 512, 64],torch.bfloat16,[393216, 32768, 64, 1]),T([32, 12, 512, 64],torch.bfloat16,[393216, 32768, 64, 1]),T([32, 12, 512, 64],torch.bfloat16,[393216, 32768, 64, 1]),None,False),{scale:0.125})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 47.10400104522705,
+      "branch_us": 47.10400104522705
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "199b1770013c",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 50.87999999523163,
+      "branch_us": 50.87999999523163
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "ec3c06b9ce24",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([16384, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 57.21599981188774,
+      "branch_us": 57.21599981188774
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "24042f7bff27",
+      "count": 1,
+      "sig": "((T([30528],torch.bfloat16,[1]),T([16384, 768],torch.bfloat16,[768, 1]),T([768, 30528],torch.bfloat16,[30528, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/LayoutLMForMaskedLM/full_graph_000.py",
+      "node": "addmm_73",
+      "baseline_us": 485.1840138435364,
+      "branch_us": 485.1840138435364
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "LayoutLMForMaskedLM"
+}

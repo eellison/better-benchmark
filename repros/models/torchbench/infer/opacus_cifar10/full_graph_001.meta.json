@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
   "inputs": [
-    [[64],"f32",{"n":"arg0_1"}],
-    [[64],"f32",{"n":"arg1_1"}],
-    [[64,64,16,16],"f32",{"n":"arg2_1"}]
+    [[64],"bf16",{"n":"arg0_1"}],
+    [[64],"bf16",{"n":"arg1_1"}],
+    [[64,64,16,16],"bf16",{"n":"arg2_1"}]
   ],
   "outputs": [
-    [[64,64,16,16],"f32",{"n":"output_0"}]
+    [[64,64,16,16],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_001.py",
@@ -18,9 +18,9 @@
     "graph": "full_graph_001.py"
   },
   "node_accounting": {
-    "total_call_functions": 17,
+    "total_call_functions": 19,
     "counts": {
-      "fusible_in_partition": 17,
+      "fusible_in_partition": 19,
       "fusible_unpartitioned": 0,
       "non_fusible": 0
     },
@@ -33,7 +33,8 @@
         "aten.rsqrt.default": 1,
         "aten.sub.Tensor": 1,
         "aten.unsqueeze.default": 6,
-        "aten.var_mean.correction": 1
+        "aten.var_mean.correction": 1,
+        "prims.convert_element_type.default": 2
       },
       "fusible_unpartitioned": {},
       "non_fusible": {}

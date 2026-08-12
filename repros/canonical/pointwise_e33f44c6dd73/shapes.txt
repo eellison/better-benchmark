@@ -1,8 +1,0 @@
-torchbench_alexnet_train_5258fd28: (T([1024, 192, 27, 27], f32))
-torchbench_alexnet_train_aeb305d3: (T([1024, 64, 55, 55], f32))
-alexnet_5258fd28: (T([1024, 192, 27, 27], f32))
-alexnet_aeb305d3: (T([1024, 64, 55, 55], f32))
-torchbench_alexnet_infer_000_34d41de6: (T([1024, 192, 27, 27], f16))
-torchbench_alexnet_infer_000_b807ba46: (T([1024, 64, 55, 55], f16))
-torchbench_alexnet_train_000_5258fd28: (T([1024, 192, 27, 27], f32))
-torchbench_alexnet_train_000_aeb305d3: (T([1024, 64, 55, 55], f32))

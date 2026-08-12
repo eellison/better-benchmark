@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MT5ForConditionalGeneration",
+  "patterns": [
+    "035e4d7f5117",
+    "0a49dc00cbaf",
+    "0aaf589f7fad",
+    "301cf5a13527",
+    "41e8bba10b8b",
+    "426e2409482e",
+    "4779980113db",
+    "630822b58781",
+    "8818e35b12aa",
+    "979a0af8f7a7",
+    "9ebf0de28bbb",
+    "9f7dce7fb407",
+    "a07e50c2fb69",
+    "bf2ed36e56df",
+    "c35490c8001a",
+    "c3d0c3208b3d",
+    "e40852a34050",
+    "e87d6ebc9ded",
+    "f08c75b5f21f",
+    "fa4cc85fe5ad"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "AllenaiLongformerBase",
+  "patterns": [
+    "035e4d7f5117",
+    "07c6ea330ab4",
+    "1918882eece2",
+    "2b567494bf14",
+    "403020d93ad2",
+    "528a3c274a41",
+    "57dd467b4a45",
+    "644fa7675014",
+    "647d3ac3f711",
+    "80e7ff4dee7f",
+    "822c7c06b882",
+    "826ea0b5f6e4",
+    "8352994b2efb",
+    "9375aeadb8d3",
+    "a80af1a259ac",
+    "af505388b035",
+    "bb07b717c0ae",
+    "c0f1f15a4e49",
+    "cf6bcfd335d5",
+    "d13382187963",
+    "fbfc0104897d"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json"
+  },
+  "mode": "infer"
+}

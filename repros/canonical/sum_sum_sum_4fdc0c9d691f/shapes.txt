@@ -1,1 +1,0 @@
-torchbench_timm_vision_transformer_train_001_2d7d570f: (T([32, 384], f32), T([384], f32), T([32, 197, 384], f32), T([32, 197, 1], f32), S([6304, 384]), S([384]))

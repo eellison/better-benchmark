@@ -1,0 +1,78 @@
+
+== PR5 U10 layout-sinking vs base (18 shape points) ==
+repro                                        shape                          base_us branch_us  speedup nk b->h
+pointwise_00475df23925                       shufflenet_v2_x1_0_46084af7       14.0      10.8     1.30x 2->1
+pointwise_3c17f0120a71                       shufflenet_v2_x1_0_f47c0655       22.1      19.4     1.14x 2->1
+pointwise_41944c71d2d8                       shufflenet_v2_x1_0_1e6a9948       16.1      13.1     1.23x 2->1
+pointwise_41944c71d2d8                       shufflenet_v2_x1_0_46084af7       13.9      11.0     1.26x 2->1
+pointwise_41944c71d2d8                       shufflenet_v2_x1_0_ef47f5e1       22.1      17.8     1.24x 2->1
+pointwise_666951cd0da5                       shufflenet_v2_x1_0_1e6a9948       16.1      13.1     1.23x 2->1
+pointwise_7308e0024674                       shufflenet_v2_x1_0_cff026d0       38.8      29.6     1.31x 4->1
+pointwise_99e028e77568                       shufflenet_v2_x1_0_5e3665ee       17.2      13.7     1.26x 2->1
+pointwise_ba25986618ef                       shufflenet_v2_x1_0_ef47f5e1       27.4      18.0     1.53x 4->1
+var_mean_33d24326eae6                        shufflenet_v2_x1_0_00e34431       32.3      19.3     1.67x 2->2
+var_mean_33d24326eae6                        shufflenet_v2_x1_0_99b3b05e       77.8      67.2     1.16x 2->2
+var_mean_33d24326eae6                        shufflenet_v2_x1_0_b0183d97       21.4      15.0     1.42x 2->2
+var_mean_b12103db1177                        shufflenet_v2_x1_0_b0183d97       22.2      15.4     1.44x 2->2
+var_mean_e67fddfba074                        shufflenet_v2_x1_0_00e34431       31.8      19.8     1.61x 2->2
+var_mean_fd789e584775                        shufflenet_v2_x1_0_99b3b05e       87.1      76.6     1.14x 4->4
+var_mean_var_mean_74b57fcc4507               shufflenet_v2_x1_0_ce5d17b1      159.6     133.0     1.20x 6->4
+var_mean_var_mean_92c45aff3580               shufflenet_v2_x1_0_55c2f021       57.1      24.1     2.37x 4->2
+var_mean_var_mean_e642e2ea37a3               shufflenet_v2_x1_0_24b29630       34.7      19.5     1.78x 4->2
+GEOMEAN speedup (base/branch): 1.3786x  min=1.14 max=2.37
+
+== PR5 branch run1 vs run2 (noise) (18 shape points) ==
+repro                                        shape                          base_us branch_us  speedup nk b->h
+pointwise_00475df23925                       shufflenet_v2_x1_0_46084af7       10.8      11.0     0.98x 1->1
+pointwise_3c17f0120a71                       shufflenet_v2_x1_0_f47c0655       19.4      19.1     1.02x 1->1
+pointwise_41944c71d2d8                       shufflenet_v2_x1_0_1e6a9948       13.1      14.0     0.94x 1->1
+pointwise_41944c71d2d8                       shufflenet_v2_x1_0_46084af7       11.0      10.9     1.01x 1->1
+pointwise_41944c71d2d8                       shufflenet_v2_x1_0_ef47f5e1       17.8      17.5     1.02x 1->1
+pointwise_666951cd0da5                       shufflenet_v2_x1_0_1e6a9948       13.1      14.0     0.93x 1->1
+pointwise_7308e0024674                       shufflenet_v2_x1_0_cff026d0       29.6      29.6     1.00x 1->1
+pointwise_99e028e77568                       shufflenet_v2_x1_0_5e3665ee       13.7      14.0     0.98x 1->1
+pointwise_ba25986618ef                       shufflenet_v2_x1_0_ef47f5e1       18.0      18.0     1.00x 1->1
+var_mean_33d24326eae6                        shufflenet_v2_x1_0_00e34431       19.3      20.0     0.96x 2->2
+var_mean_33d24326eae6                        shufflenet_v2_x1_0_99b3b05e       67.2      67.4     1.00x 2->2
+var_mean_33d24326eae6                        shufflenet_v2_x1_0_b0183d97       15.0      15.2     0.99x 2->2
+var_mean_b12103db1177                        shufflenet_v2_x1_0_b0183d97       15.4      15.1     1.02x 2->2
+var_mean_e67fddfba074                        shufflenet_v2_x1_0_00e34431       19.8      19.7     1.00x 2->2
+var_mean_fd789e584775                        shufflenet_v2_x1_0_99b3b05e       76.6      76.6     1.00x 4->4
+var_mean_var_mean_74b57fcc4507               shufflenet_v2_x1_0_ce5d17b1      133.0     144.2     0.92x 4->4
+var_mean_var_mean_92c45aff3580               shufflenet_v2_x1_0_55c2f021       24.1      23.9     1.01x 2->2
+var_mean_var_mean_e642e2ea37a3               shufflenet_v2_x1_0_24b29630       19.5      19.2     1.01x 2->2
+GEOMEAN speedup (base/branch): 0.9875x  min=0.92 max=1.02
+
+== PR6 U30 mor-finalize vs base (13 shape points) ==
+repro                                        shape                          base_us branch_us  speedup nk b->h
+sum_sum_sum_0703a79bc871                     mobilevit_s_0c9dc299              28.2      27.2     1.04x 5->5
+sum_sum_sum_0703a79bc871                     mobilevit_s_1c6da2dd             118.7     101.2     1.17x 2->2
+sum_sum_sum_0703a79bc871                     mobilevit_s_30b03cad             203.5     183.2     1.11x 2->2
+sum_sum_sum_11d45d703ba6                     XLNetLMHeadModel_8bec5e94         61.3      42.6     1.44x 1->1
+sum_sum_sum_2261b2f5694a                     MobileBertForMaskedLM_81eeb2b9      64.8      49.0     1.32x 4->4
+sum_sum_sum_260a107eaf32                     BartForCausalLM_540cb101          69.1      48.8     1.42x 3->3
+sum_sum_sum_260a107eaf32                     BertForMaskedLM_9846b7f2          88.1      74.6     1.18x 3->3
+sum_sum_sum_260a107eaf32                     DebertaV2ForMaskedLM_75b78b2c      56.2      48.8     1.15x 3->3
+sum_sum_sum_260a107eaf32                     ElectraForCausalLM_f51dabe2       63.5      46.8     1.36x 3->3
+sum_sum_sum_260a107eaf32                     PLBartForCausalLM_102da4dd        89.8      74.7     1.20x 3->3
+sum_sum_sum_260a107eaf32                     TrOCRForCausalLM_7f0c11fc         95.2      79.7     1.19x 3->3
+sum_sum_sum_907cbb3d9f19                     GoogleFnet_356087b1              102.2      87.8     1.16x 2->2
+sum_sum_sum_ecce309d13e3                     LayoutLMForMaskedLM_1bcea4a2     330.6     462.0     0.72x 15->15
+GEOMEAN speedup (base/branch): 1.1737x  min=0.72 max=1.44
+
+== PR6 branch run1 vs run2 (noise) (13 shape points) ==
+repro                                        shape                          base_us branch_us  speedup nk b->h
+sum_sum_sum_0703a79bc871                     mobilevit_s_0c9dc299              27.2      27.5     0.99x 5->5
+sum_sum_sum_0703a79bc871                     mobilevit_s_1c6da2dd             101.2     102.0     0.99x 2->2
+sum_sum_sum_0703a79bc871                     mobilevit_s_30b03cad             183.2     183.2     1.00x 2->2
+sum_sum_sum_11d45d703ba6                     XLNetLMHeadModel_8bec5e94         42.6      42.4     1.00x 1->1
+sum_sum_sum_2261b2f5694a                     MobileBertForMaskedLM_81eeb2b9      49.0      48.4     1.01x 4->4
+sum_sum_sum_260a107eaf32                     BartForCausalLM_540cb101          48.8      48.8     1.00x 3->3
+sum_sum_sum_260a107eaf32                     BertForMaskedLM_9846b7f2          74.6      74.7     1.00x 3->3
+sum_sum_sum_260a107eaf32                     DebertaV2ForMaskedLM_75b78b2c      48.8      48.8     1.00x 3->3
+sum_sum_sum_260a107eaf32                     ElectraForCausalLM_f51dabe2       46.8      46.8     1.00x 3->3
+sum_sum_sum_260a107eaf32                     PLBartForCausalLM_102da4dd        74.7      75.3     0.99x 3->3
+sum_sum_sum_260a107eaf32                     TrOCRForCausalLM_7f0c11fc         79.7      79.6     1.00x 3->3
+sum_sum_sum_907cbb3d9f19                     GoogleFnet_356087b1               87.8      87.9     1.00x 2->2
+sum_sum_sum_ecce309d13e3                     LayoutLMForMaskedLM_1bcea4a2     462.0     386.9     1.19x 15->15
+GEOMEAN speedup (base/branch): 1.0132x  min=0.99 max=1.19

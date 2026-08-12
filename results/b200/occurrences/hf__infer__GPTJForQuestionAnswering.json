@@ -1,0 +1,111 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "9ff2f9544913": {
+      "eb172ec5": 1
+    },
+    "3efb2d7c03c8": {
+      "d9611874": 1
+    },
+    "2d969ac9ad59": {
+      "7b14189f": 28
+    },
+    "e87d6ebc9ded": {
+      "c6cb1dd8": 28
+    },
+    "7bdfc869f56b": {
+      "030f75c1": 27
+    },
+    "1c9e8dc48812": {
+      "51251d0a": 27
+    },
+    "eac408f45b9d": {
+      "d9611874": 27
+    },
+    "ccbdc7f5ab12": {
+      "94a9fea0": 1
+    },
+    "0e23e54703ef": {
+      "42922299": 1
+    },
+    "f3d797c5c146": {
+      "4553b7e1": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "bcacf4442260",
+      "count": 112,
+      "sig": "((T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 4096],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 16.095999628305435,
+      "branch_us": 16.095999628305435
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "e16f1ea01a2b",
+      "count": 28,
+      "sig": "((T([16, 128, 256],torch.float32,[256, 4096, 1]),T([16, 256, 128],torch.float32,[256, 1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 13.952000066637993,
+      "branch_us": 13.952000066637993
+    },
+    {
+      "target": "aten.cumsum.default",
+      "shape_hash": "e9c4fe13cddd",
+      "count": 1,
+      "sig": "((T([1, 128],torch.bool,[128, 1]),-1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "cumsum",
+      "baseline_us": 9.02399979531765,
+      "branch_us": 9.02399979531765
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "fd3f873b8233",
+      "count": 28,
+      "sig": "((T([16, 128, 128],torch.bfloat16,[16384, 128, 1]),T([16, 128, 256],torch.bfloat16,[256, 4096, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 6.976000033318996,
+      "branch_us": 6.976000033318996
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "f7df43c744bb",
+      "count": 28,
+      "sig": "((T([16384],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 16384],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 36.320000886917114,
+      "branch_us": 36.320000886917114
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "88262c068434",
+      "count": 28,
+      "sig": "((T([4096],torch.bfloat16,[1]),T([128, 16384],torch.bfloat16,[16384, 1]),T([16384, 4096],torch.bfloat16,[1, 16384])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 39.5519994199276,
+      "branch_us": 39.5519994199276
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b2c907e4bb17",
+      "count": 1,
+      "sig": "((T([2],torch.bfloat16,[1]),T([128, 4096],torch.bfloat16,[4096, 1]),T([4096, 2],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/GPTJForQuestionAnswering/full_graph_000.py",
+      "node": "addmm_56",
+      "baseline_us": 22.143999114632607,
+      "branch_us": 22.143999114632607
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "GPTJForQuestionAnswering"
+}

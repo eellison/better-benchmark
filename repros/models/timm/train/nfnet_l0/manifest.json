@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "nfnet_l0",
+  "patterns": [
+    "04d85912d998",
+    "108c41706eb6",
+    "1a7b8d26a98e",
+    "3893725b5152",
+    "3abc926270f6",
+    "407f0323586d",
+    "48a1ad6d548e",
+    "4a4493837e6e",
+    "54f7ee896ad5",
+    "78f580611c3f",
+    "795cdbe23b17",
+    "7aed0e0a804f",
+    "7cfdb80c54c5",
+    "894e623ad263",
+    "8bb40810003c",
+    "a72724ce25f0",
+    "ab77134ec783",
+    "ae776f663178",
+    "b2700cd0ebd1",
+    "b37e1065b3a0",
+    "c17d298e608e",
+    "c2bf513c1ebf",
+    "c9e1a8113328",
+    "ccd411f2a45d",
+    "d227dc0811d2",
+    "d6239b8319dc",
+    "f7f800689be3",
+    "fb4ca2518d23"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

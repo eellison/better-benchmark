@@ -1,0 +1,39 @@
+CANONICAL PER-COMMIT ATTRIBUTION — per-MODEL-e2e (fusible+extern denominator, rollup.py formula)
+genai-excluded, geomean over models. This is the HONEST model-impact (kernel-geomean overstated ~2-3x).
+==============================================================================
+  pos 0-> 1 47aafe246e1  -0.15pp  Update
+  pos 1-> 2 ac93f5b2845  +0.15pp  Update (base update)
+  pos 2-> 3 aa798f9f052  +0.07pp  Update
+  pos 3-> 4 9c296b0e9b4  +0.20pp  Update
+  pos 4-> 5 a1c8cd8e1c9  +0.02pp  Update
+  pos 5-> 6 111efb8724a  -0.07pp  Update
+  pos 6-> 7 97385fb3273  +0.71pp  [inductor] All kernel optimization improvements (Jun
+  pos 7-> 8 ab29345d82d  +0.54pp  [inductor] CE loop-invariant hoisting: realize gathe
+  pos 8-> 9 f9493caabcd  +0.06pp  [inductor] Relax pointwise_cat guard: allow view/rea
+  pos 9->10 ca8f961d6b0  +0.18pp  [inductor] Gate scalar_acc on num_load <= 4 (fix 14-
+  pos10->11 94ad050dee0  +0.02pp  [inductor] Add select_scatter_sparsity pass + split_
+  pos11->12 1a824e0747a  +0.41pp  [inductor] Raise realize_reads_threshold from 4 to 3
+  pos12->13 f74a7f13723  -0.37pp  Revert "[inductor] Raise realize_reads_threshold fro
+  pos13->14 afc3d5956d5  -0.05pp  [inductor] Elide constant-index bounds checks + spli
+  pos14->21 905450a5a5d  +0.20pp  [inductor] WIP: scheduler-level inline_recomputable_
+  pos21->22 f595e0cac3a  +0.15pp  [inductor] Fix topological ordering bug in select_sc
+  pos22->23 a73d1583b34  +2.11pp  [inductor] Canonicalize reciprocal(sqrt(x)) to rsqrt
+  pos23->26 86c5451e197  -0.29pp  [inductor] BN-inference affine folding FX pass (poin
+  pos26->27 f0b54e1aa1f  +0.12pp  Revert "[inductor] Tune num_stages for memory-bound 
+  pos27->28 d2cd52d3117  +0.04pp  [inductor] Raise persistent reduction threshold for 
+  pos28->29 62f27911a59  -0.05pp  Revert "[inductor] Raise persistent reduction thresh
+  pos29->30 b1e8a30af15  -0.05pp  [inductor] Materialize multi-user transcendental nod
+  pos30->35 4427bfd553c  +0.16pp  [inductor] Extend scatter_add_into_fusion to handle 
+  pos35->37 d8e9914094a  +0.03pp  [inductor] Add scatter read bypass pass for Longform
+  pos37->40 d95f59fb1bc  +0.02pp  [inductor] Fix pointwise_cat shared reads heuristic 
+  pos40->61 44802547aa9  -0.00pp  [inductor] Fix assertion crash in _get_nd_reduction_
+  pos61->66 1406552b9d3  +0.08pp  [inductor] Rotate-half gather pass: RoPE rotation as
+  pos66->69 5489b8c2bb9  -0.07pp  [inductor] Eliminate scatter_add feeding full reduct
+  pos69->71 bdc289b3644  -0.07pp  [inductor] Split partially-saturated multi-output re
+  pos71->76 e9a67c98a8c  +0.07pp  [inductor] Restrict evict_first drop to kernels whos
+  pos76->77 a26fc2c8bf4  +0.33pp  [inductor] Fast combine for online-softmax loops (am
+  pos77->78 60dd3839913  +0.01pp  [inductor] dedupe_graph_outputs: pick earliest node 
+  pos78->79 56959375c33  +0.01pp  [inductor] Decode affine-iota overlapping-window ind
+  pos79->80 a85d79a900a  +0.16pp  [inductor] Segment-aligned split introduction (sum_0
+  pos80->81 9dde2c59a51  +0.06pp  [inductor] Ungate scalar-acc configs from CD + raise
+  pos81->82 daa79cd25ca  +0.02pp  [inductor] dedupe_graph_outputs: iterative structura

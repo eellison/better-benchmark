@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MBartForCausalLM",
+  "patterns": [
+    "0ada225c0a04",
+    "0dd15b92dc70",
+    "644fa7675014",
+    "822c7c06b882",
+    "826ea0b5f6e4",
+    "b19e82f2a47b",
+    "ef7896396d78",
+    "f4578c128d74"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

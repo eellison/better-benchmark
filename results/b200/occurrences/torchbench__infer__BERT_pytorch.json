@@ -1,0 +1,123 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "1f95724cbf96": {
+      "00ba3519": 1
+    },
+    "644fa7675014": {
+      "ba1b8f0f": 1
+    },
+    "647d3ac3f711": {
+      "ff177488": 1
+    },
+    "d5c5da805704": {
+      "de033194": 1
+    },
+    "81981d13665a": {
+      "043f71e9": 1
+    },
+    "826ea0b5f6e4": {
+      "e73010dd": 12
+    },
+    "83ed19c04171": {
+      "1c404995": 12
+    },
+    "e87d6ebc9ded": {
+      "fb089404": 12
+    },
+    "301cf5a13527": {
+      "631b8e39": 24
+    },
+    "4506a84dfa49": {
+      "b762f7d9": 11
+    },
+    "0aaf589f7fad": {
+      "631b8e39": 12
+    },
+    "da6a65f031d5": {
+      "1c404995": 11
+    },
+    "68ce17870caf": {
+      "1972aff7": 1
+    },
+    "75f17d2ac9eb": {
+      "a655df0f": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "e8e23a308ea3",
+      "count": 48,
+      "sig": "((T([768],torch.bfloat16,[1]),T([2048, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 10.015999898314476,
+      "branch_us": 10.015999898314476
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "7ead2dc83097",
+      "count": 12,
+      "sig": "((T([192, 128, 64],torch.bfloat16,[8192, 64, 1]),T([192, 64, 128],torch.bfloat16,[8192, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 8.991999551653862,
+      "branch_us": 8.991999551653862
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "7b868d7e24ef",
+      "count": 12,
+      "sig": "((T([192, 128, 128],torch.bfloat16,[16384, 128, 1]),T([192, 128, 64],torch.bfloat16,[8192, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 9.920000098645687,
+      "branch_us": 9.920000098645687
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "37919abd94d2",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([2048, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 15.135999768972397,
+      "branch_us": 15.135999768972397
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "8a4996ff76ac",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([2048, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 15.168000012636185,
+      "branch_us": 15.168000012636185
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2f3459ea476f",
+      "count": 1,
+      "sig": "((T([2],torch.bfloat16,[1]),T([16, 768],torch.bfloat16,[98304, 1]),T([768, 2],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "addmm_72",
+      "baseline_us": 10.400000028312206,
+      "branch_us": 10.400000028312206
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b001a60a1a12",
+      "count": 1,
+      "sig": "((T([20008],torch.bfloat16,[1]),T([2048, 768],torch.bfloat16,[768, 1]),T([768, 20008],torch.bfloat16,[20008, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/BERT_pytorch/full_graph_000.py",
+      "node": "addmm_73",
+      "baseline_us": 50.944000482559204,
+      "branch_us": 50.944000482559204
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "infer",
+  "model": "BERT_pytorch"
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "shufflenet_v2_x1_0",
+  "patterns": [
+    "04d85912d998",
+    "100a39b686e3",
+    "183b124c731f",
+    "19ffdb35cc67",
+    "1ec65e499477",
+    "33d24326eae6",
+    "3a61ea52bbe0",
+    "41826392af68",
+    "42fad1ece813",
+    "456d637a9bc7",
+    "4b4d0668d167",
+    "563676e3726c",
+    "643db2887a01",
+    "74b57fcc4507",
+    "77f6be69be60",
+    "789f08ef70ab",
+    "7a2ac1c4841d",
+    "8bb40810003c",
+    "92c45aff3580",
+    "b12103db1177",
+    "b1354c2a333b",
+    "b925d072e497",
+    "c2bf513c1ebf",
+    "ccd411f2a45d",
+    "e642e2ea37a3",
+    "e67fddfba074",
+    "ed4730568670",
+    "f9e4c9d243d2",
+    "fd789e584775"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

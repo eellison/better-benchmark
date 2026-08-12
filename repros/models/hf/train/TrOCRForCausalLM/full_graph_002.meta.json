@@ -1,0 +1,40 @@
+{
+  "schema_version": 2,
+  "inputs": [],
+  "outputs": [
+    [[64,1,256,256],"f32",{"n":"output_0"}]
+  ],
+  "tensor_attrs": {
+    "_tensor_constant0": [[],"f32",{"data":[0.0]}]
+  },
+  "graph": "full_graph_002.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "TrOCRForCausalLM",
+    "graph": "full_graph_002.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 15,
+    "counts": {
+      "fusible_in_partition": 15,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 2,
+        "aten.expand.default": 1,
+        "aten.full.default": 2,
+        "aten.le.Tensor": 1,
+        "aten.unsqueeze.default": 6,
+        "aten.where.self": 1,
+        "prims.iota.default": 2
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

@@ -1,0 +1,132 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "5e142a842c9e": {
+      "05e1a070": 1
+    },
+    "0ada225c0a04": {
+      "7f824027": 1
+    },
+    "826ea0b5f6e4": {
+      "befcb921": 26
+    },
+    "f4578c128d74": {
+      "7f824027": 50
+    },
+    "e87d6ebc9ded": {
+      "07e248d7": 26
+    },
+    "301cf5a13527": {
+      "bd432928": 26
+    },
+    "e232f7a3d0d8": {
+      "e6f344ac": 26
+    },
+    "f2a03dbd04dd": {
+      "bd432928": 26
+    },
+    "a18f3869022f": {
+      "bd432928": 26
+    },
+    "035e4d7f5117": {
+      "d7517139": 26
+    },
+    "0a49dc00cbaf": {
+      "d7517139": 52
+    },
+    "b19e82f2a47b": {
+      "7f824027": 24
+    },
+    "2bd313f3c17f": {
+      "7f824027": 1
+    },
+    "a767fed3fde5": {
+      "d7517139": 1
+    },
+    "4c1b6e6ef03f": {
+      "cd33d4f9": 1
+    },
+    "e40852a34050": {
+      "d7517139": 2
+    },
+    "f7b8ee7f7654": {
+      "cd33d4f9": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "5d657cebf216",
+      "count": 200,
+      "sig": "((T([2560],torch.bfloat16,[1]),T([2048, 2560],torch.bfloat16,[2560, 1]),T([2560, 2560],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 24.383999407291412,
+      "branch_us": 24.383999407291412
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "74e778742e10",
+      "count": 26,
+      "sig": "((T([512, 128, 80],torch.bfloat16,[10240, 80, 1]),T([512, 80, 128],torch.bfloat16,[10240, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 12.319999746978283,
+      "branch_us": 12.319999746978283
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "dc201e0e1eb2",
+      "count": 26,
+      "sig": "((T([512, 128, 128],torch.bfloat16,[16384, 128, 1]),T([512, 128, 80],torch.bfloat16,[10240, 80, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 13.824000023305416,
+      "branch_us": 13.824000023305416
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "b0142b7158b4",
+      "count": 26,
+      "sig": "((T([10240],torch.bfloat16,[1]),T([2048, 2560],torch.bfloat16,[2560, 1]),T([2560, 10240],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 69.43999975919724,
+      "branch_us": 69.43999975919724
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "92d827ad87a7",
+      "count": 26,
+      "sig": "((T([2560],torch.bfloat16,[1]),T([2048, 10240],torch.bfloat16,[10240, 1]),T([10240, 2560],torch.bfloat16,[1, 10240])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 73.44000041484833,
+      "branch_us": 73.44000041484833
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "6c3d0025c8d2",
+      "count": 24,
+      "sig": "((T([16, 32, 128, 80],torch.bfloat16,[327680, 80, 2560, 1]),T([16, 32, 128, 80],torch.bfloat16,[327680, 80, 2560, 1]),T([16, 32, 128, 80],torch.bfloat16,[327680, 80, 2560, 1]),T([16, 1, 128, 128],torch.bfloat16,[16384, 16384, 128, 1]),False),{scale:0.11180339887498948})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 37.79200091958046,
+      "branch_us": 37.79200091958046
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "bf8875273afd",
+      "count": 1,
+      "sig": "((T([2048, 2560],torch.bfloat16,[2560, 1]),T([2560, 8008],torch.bfloat16,[1, 2560])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/BlenderbotForConditionalGeneration/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 62.55999952554703,
+      "branch_us": 62.55999952554703
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "BlenderbotForConditionalGeneration"
+}

@@ -1,0 +1,10 @@
+### u10vm-base torch=/tmp/pt-verify-wt/base/torch/__init__.py
+### u10vm-base COUNTER layout_transform_store_sinking=0
+### u10vm-base CODEGEN njit=4 mor_finalize_defs=0 n_code_files=3
+### u10vm-base NUMERICS max_abs=1.024e-08 mean_abs=2.540e-09 max_rel=8.149e-06 nan_eager=False nan_compiled=False shape=(1, 232, 1, 1)
+### u10vm-base NUMERICS out[0] max_abs=1.024e-08
+### u10vm-base NUMERICS out[1] max_abs=1.192e-07
+### u10vm-base NUMERICS out[2] max_abs=2.441e-04
+### u10vm-base NUMERICS out[3] max_abs=0.000e+00
+### u10vm-base NUMERICS out[4] max_abs=0.000e+00
+### u10vm-base DONE

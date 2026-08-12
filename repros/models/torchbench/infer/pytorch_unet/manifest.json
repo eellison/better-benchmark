@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "pytorch_unet",
+  "patterns": [
+    "05ee034feb4c",
+    "457ec7dce9c1",
+    "783d1118b332",
+    "7899d74e0838",
+    "7ebac70550be",
+    "87cb1a76ed86"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,145 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "ecf1955002c2aadddb188585841d718971bb4848",
+    "pytorch_commit": "9dde2c59a519c8f92480131f5d743117d13e2198",
+    "pytorch_ref": "DETACHED",
+    "timestamp": "2026-06-23T03:52:38Z",
+    "n_repros": 1,
+    "n_results": 1,
+    "workload_kind": "full_graph"
+  },
+  "repros/models/genai/static/CrossEntropyBackward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/static/CrossEntropyBackward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "static/CrossEntropyBackward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              262144,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "arg1_1",
+            "shape": [
+              8192
+            ],
+            "dtype": "int64",
+            "stride": [
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0,
+            "gen": {
+              "kind": "index",
+              "low": 0,
+              "high": 262144
+            },
+            "generator": {
+              "kind": "index",
+              "low": 0,
+              "high": 262144
+            },
+            "constraint_source": "graph_inference",
+            "observed": {
+              "min": 23,
+              "max": 262084,
+              "n_unique": 8060
+            }
+          }
+        ],
+        "tensor_attrs": {},
+        "outputs": [
+          {
+            "kind": "tensor",
+            "name": "output_0",
+            "shape": [],
+            "dtype": "bfloat16",
+            "stride": [],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "output_1",
+            "shape": [
+              8192,
+              1
+            ],
+            "dtype": "float32",
+            "stride": [
+              1,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          },
+          {
+            "kind": "tensor",
+            "name": "output_2",
+            "shape": [
+              8192,
+              1
+            ],
+            "dtype": "float32",
+            "stride": [
+              1,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ]
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 716.6079878807068,
+      "coord_descent_us": 716.543972492218,
+      "memcopy_sol_us": null,
+      "input_bytes": 4295032832,
+      "output_bytes": 65538,
+      "naive_io_bytes": 4295098370,
+      "n_kernels": 2,
+      "num_inputs": 2,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "__failures__": {
+    "repros/models/genai/static/CrossEntropyBackward/full_graph_001.py": {
+      "status": "skipped",
+      "category": "unsafe_integer_input",
+      "repro": "repros/models/genai/static/CrossEntropyBackward/full_graph_001.py",
+      "reason": "integer tensor input 'arg1_1' lacks graph-inferred index/permutation constraints",
+      "hint": "Recapture with metadata sidecars or pass --allow-unsafe-full-graphs for exploratory runs."
+    }
+  },
+  "__summary__": {
+    "total": 2,
+    "ok": 1,
+    "failed": 0,
+    "skipped": 1,
+    "elapsed_s": 8.206584453582764
+  }
+}

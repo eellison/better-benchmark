@@ -65,6 +65,7 @@ import argparse
 import json
 import multiprocessing as mp
 import os
+import subprocess
 import sys
 import tempfile
 import time
@@ -86,6 +87,213 @@ _SHARED_CACHE_DIR = os.environ.get(
 _RESERVED_TOP_LEVEL_KEYS = {"_metadata", "__failures__", "__summary__"}
 _RESERVED_RESULT_LABELS = {"__graph__"}
 
+# Separator used to encode a (dir, shape_label) task key for --oracles
+# --all-shapes sharding. The task unit becomes one (dir, shape) point so a
+# many-shape dir spreads across all GPUs instead of pinning one worker. The
+# parent regroups results back under their dir before aggregation, preserving
+# the per-dir output contract that model_graph_accounting consumes.
+_SHAPE_TASK_SEP = "::SHAPE::"
+# Label used for the single point of a dir with no shape configs.
+_DEFAULT_SHAPE_TOKEN = "__default__"
+
+
+def _make_shape_task_key(dir_path: str, shape_label: str) -> str:
+    """Encode a (dir, shape_label) sharded oracle task key."""
+    return f"{dir_path}{_SHAPE_TASK_SEP}{shape_label}"
+
+
+def _split_shape_task_key(task_key: str) -> tuple[str, str | None]:
+    """Decode a sharded task key into (dir_path, shape_label).
+
+    A plain dir path (no separator) returns (dir_path, None) so callers can
+    treat un-sharded tasks transparently.
+    """
+    if _SHAPE_TASK_SEP in task_key:
+        dir_path, label = task_key.rsplit(_SHAPE_TASK_SEP, 1)
+        return dir_path, label
+    return task_key, None
+
+
+def _expand_oracle_shape_tasks(dirs: list[Path]) -> list[str]:
+    """Expand oracle dirs into (dir, shape_label) task keys for sharding.
+
+    Each dir's shapes.json points become individual tasks so the worker pool
+    spreads them across all GPUs. A dir with no shape configs yields a single
+    ``<dir>::SHAPE::__default__`` task. The numerics gate + fresh static
+    compile (the per-shape dynamo reset, commit 4ca6d532b) still run once per
+    task, so sharding does NOT reintroduce cross-shape dynamo reuse.
+    """
+    from repro_harness import load_shape_configs
+
+    tasks: list[str] = []
+    for d in dirs:
+        repro_file = d / "repro.py"
+        try:
+            configs = load_shape_configs(str(repro_file))
+        except Exception:
+            configs = None
+        if configs:
+            for label in configs:
+                tasks.append(_make_shape_task_key(str(d), label))
+        else:
+            tasks.append(_make_shape_task_key(str(d), _DEFAULT_SHAPE_TOKEN))
+    return tasks
+
+
+def _expand_repro_shape_tasks(repros: list[Path]) -> list[str]:
+    """Expand repro.py files into (repro, shape_label) task keys for sharding.
+
+    The repro --all-shapes equivalent of ``_expand_oracle_shape_tasks``: each
+    repro.py's shapes.json points become individual tasks so the worker pool
+    spreads them across all GPUs, instead of one worker looping every shape of a
+    big dir serially while peers idle. A repro with no shape configs yields a
+    single ``<repro.py>::SHAPE::__default__`` task (one default point, same as
+    the un-sharded all_shapes=False/empty-configs branch).
+
+    The task key wraps the repro.py file path (NOT the dir): the repro path
+    output JSON, --update-perf, and --merge-into are all keyed by the bare
+    repro.py path, so the worker benches one shape and the parent regroups the
+    per-shape payloads back under that bare path (see
+    ``_regroup_sharded_repro_results``). The worker still does a fresh
+    torch._dynamo.reset() + compile per shape — sharding changes only the task
+    GRANULARITY, never WHAT is measured.
+    """
+    from repro_harness import load_shape_configs
+
+    tasks: list[str] = []
+    for repro_file in repros:
+        try:
+            configs = load_shape_configs(str(repro_file))
+        except Exception:
+            configs = None
+        if configs:
+            for label in configs:
+                tasks.append(_make_shape_task_key(str(repro_file), label))
+        else:
+            tasks.append(_make_shape_task_key(str(repro_file), _DEFAULT_SHAPE_TOKEN))
+    return tasks
+
+
+def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
+    """Order sharded (path, shape) tasks so the biggest dirs drain first.
+
+    Shared by the oracle and repro sharded paths. Groups a path's shape tasks
+    contiguously but places the paths with the most shapes first: the worker
+    pool pulls round-robin, so emitting the big paths' points up front lets all
+    workers chew them in parallel from the start; the small single-shape paths
+    drain at the end (cheap, no straggler tail).
+    """
+    from collections import Counter
+
+    dir_task_count = Counter(_split_shape_task_key(t)[0] for t in tasks)
+    return sorted(
+        tasks,
+        key=lambda k: (
+            -dir_task_count[_split_shape_task_key(k)[0]],
+            _split_shape_task_key(k)[0],
+        ),
+    )
+
+
+def _regroup_sharded_repro_results(all_results: dict) -> dict:
+    """Regroup per-(repro, shape) sharded payloads back under their repro.py path.
+
+    With repro --all-shapes sharding the task unit is one
+    ``<repro.py>::SHAPE::<label>`` key, and each worker returns a single-shape
+    payload ``{<shape_label>: {compiled_us, ...}}``. Downstream consumers (the
+    --output JSON schema, --update-perf, --merge-into, the gap roll-up) all
+    expect ONE payload per repro.py keyed by the bare path, with every shape
+    label merged inside it — byte-identical to the un-sharded in-worker-loop
+    output. This merges all of a repro's shape payloads back into that shape.
+
+    Bare repro.py keys (un-sharded, e.g. all_shapes=False) pass through
+    unchanged: one key per repro, no separator.
+    """
+    merged: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        repro_path, _label = _split_shape_task_key(str(task_key))
+        bucket = merged.setdefault(repro_path, {})
+        if isinstance(results, dict):
+            for label, point in results.items():
+                bucket[label] = point
+    return merged
+
+
+def _regroup_sharded_repro_failures(all_results: dict, failures: dict) -> dict:
+    """Collapse per-(repro, shape) worker failures back under their repro.py path.
+
+    A worker exception fails ONE (repro, shape) task keyed
+    ``<repro.py>::SHAPE::<label>`` rather than the whole repro. The repro path's
+    failure map is keyed by repro.py path, so fold each sharded failure back.
+
+    Two cases, neither of which alters a SUCCEEDING repro's payload (the
+    success schema stays byte-identical to the un-sharded path):
+      - No shape of this repro succeeded (bare path absent from ``all_results``):
+        record ONE failure entry under the bare repro.py path, annotated with
+        the failed shape labels.
+      - At least one shape succeeded: that repro's success payload is left
+        untouched; the failed shapes are recorded under the SHAPE-qualified task
+        key so they are accounted (resumable) without colliding with — or
+        mutating — the bare-path success entry.
+    """
+    succeeded = set(all_results)
+    regrouped: dict[str, dict] = {}
+    for task_key, failure in failures.items():
+        repro_path, label = _split_shape_task_key(str(task_key))
+        # Un-sharded failure (no ::SHAPE:: suffix): pass through untouched.
+        if label is None:
+            regrouped[task_key] = failure
+            continue
+        if repro_path in succeeded:
+            # Some shape(s) of this repro succeeded — keep the success payload
+            # byte-identical; record this shape's failure under its own key.
+            regrouped[str(task_key)] = failure
+            continue
+        # No shape of this repro succeeded: collapse to one entry per repro,
+        # annotated with which shape labels failed.
+        existing = regrouped.get(repro_path)
+        if existing is None:
+            entry = dict(failure) if isinstance(failure, dict) else {"error": str(failure)}
+            entry["failed_shapes"] = [label]
+            regrouped[repro_path] = entry
+        else:
+            existing.setdefault("failed_shapes", []).append(label)
+    return regrouped
+
+
+def _regroup_sharded_oracle_failures(sharded_failures: dict) -> dict:
+    """Regroup per-(dir,shape) WORKER EXCEPTIONS back under their dir name.
+
+    With per-shape sharding a worker exception fails ONE (dir,shape) task
+    (keyed ``<dir>::SHAPE::<label>``) rather than the whole dir. A raised shape
+    would otherwise vanish from the per-dir timings file. This returns
+    ``{dir_name -> {failed_shapes:[...], n_failed_shapes, example_error}}`` so
+    the oracle output can account for every queued shape. The CALLER decides
+    whether each dir is still priced (then the record is an annotation) or
+    has no valid floor (then it folds into ``__failures__``), using the
+    aggregator's authoritative priced-dir set rather than guessing here.
+
+    Note: numerics/CUDAGraph-warning/no-oracle statuses are RETURNED by
+    bench_oracle (not raised), so they already appear as invalid-status points
+    in all_results and are handled by the aggregator; only genuine Python
+    exceptions reach sharded_failures and this function.
+    """
+    by_dir: dict[str, dict] = {}
+    for task_key, failure in sharded_failures.items():
+        dir_path, label = _split_shape_task_key(str(task_key))
+        dir_name = _oracle_dir_name(dir_path)
+        entry = by_dir.setdefault(dir_name, {
+            "failed_shapes": [],
+            "n_failed_shapes": 0,
+            "example_error": None,
+        })
+        if label is not None:
+            entry["failed_shapes"].append(label)
+        entry["n_failed_shapes"] += 1
+        if entry["example_error"] is None and isinstance(failure, dict):
+            entry["example_error"] = failure.get("error") or failure.get("reason")
+    return by_dir
+
 
 def find_repros(paths: list[Path]) -> list[Path]:
     """Resolve paths to individual repro.py files."""
@@ -96,6 +304,41 @@ def find_repros(paths: list[Path]) -> list[Path]:
         elif p.is_dir():
             repros.extend(sorted(p.rglob("repro.py")))
     return repros
+
+
+def find_oracle_dirs(paths: list[Path]) -> list[Path]:
+    """Resolve paths to canonical dirs that contain an oracle (oracle*.py).
+
+    In --oracles mode the worker loads the oracle module from the canonical
+    *directory* (via oracle_harness._load_oracle_module), so the task unit is
+    the directory, not a repro.py file. We pass the directory path itself.
+    """
+    dirs: list[Path] = []
+    seen: set[str] = set()
+
+    def _has_oracle(d: Path) -> bool:
+        return (d / "oracle.py").exists() or bool(list(d.glob("oracle_*.py")))
+
+    for p in paths:
+        if p.is_dir():
+            # A canonical dir directly, or a parent containing many of them.
+            if _has_oracle(p):
+                candidates = [p]
+            else:
+                candidates = [c.parent for c in sorted(p.rglob("oracle.py"))]
+                candidates += [
+                    c.parent for c in sorted(p.rglob("oracle_*.py"))
+                ]
+        elif p.is_file() and p.name == "repro.py":
+            candidates = [p.parent]
+        else:
+            continue
+        for c in candidates:
+            key = str(c.resolve())
+            if key not in seen and _has_oracle(c):
+                seen.add(key)
+                dirs.append(c)
+    return dirs
 
 
 def find_full_graphs(paths: list[Path]) -> list[Path]:
@@ -124,9 +367,18 @@ def find_full_graphs(paths: list[Path]) -> list[Path]:
 
 
 def _task_display_name(task_path: str) -> str:
+    # Sharded oracle task keys carry a ::SHAPE::<label> suffix; show dir[label].
+    dir_part, shape_label = _split_shape_task_key(str(task_path))
+    if shape_label is not None:
+        base = Path(dir_part).name
+        if shape_label == _DEFAULT_SHAPE_TOKEN:
+            return base
+        return f"{base}[{shape_label}]"
     path = Path(task_path)
     if path.name == "repro.py":
         return path.parent.name
+    if path.is_dir():
+        return path.name
     if path.name.startswith("full_graph_") and path.suffix == ".py":
         try:
             from full_graph_harness import infer_full_graph_source
@@ -197,12 +449,146 @@ def _filter_gpus(gpus: list[dict[str, str]], selected: str | None) -> list[dict[
     return [gpu for gpu in gpus if gpu["index"] in wanted]
 
 
+# --- GPU clock locking -----------------------------------------------------
+#
+# WHY: GPU SM-clock boost/ramp variance is a benchmark-noise source. It inflates
+# per-kernel/per-point spread; min-of-N timing + per-model rollup absorb most of
+# it, but pinning the SM clock removes the variance at the source — most valuable
+# for the per-kernel and genai-micro numbers where there's no rollup to smooth it.
+#
+# Empirically verified (2026-06-23, 4x B200):
+#   - `sudo nvidia-smi -pm 1` (persistence) + `sudo nvidia-smi -lgc <min>,<max>`
+#     works (passwordless sudo present on this box).
+#   - 1965 MHz is a valid bin but an OPPORTUNISTIC boost the B200 CANNOT sustain
+#     under load: even locked to 1965,1965 the achieved clock under load is 1852.
+#     The highest SUSTAINABLE bin is 1852 MHz — locked to 1852,1852 the clock
+#     holds a rock-steady 1852 under sustained load on all 4 GPUs (throttle reason
+#     0x00). Hence the DEFAULT lock target is 1852, NOT the max boost bin.
+#   - Reset with `sudo nvidia-smi -rgc`.
+#
+# NON-BLOCKING CONTRACT (critical): clock locking is a best-effort optimization,
+# never a hard dependency. ANY failure (no sudo, permission denied, nvidia-smi
+# missing, non-NVIDIA box, a GPU rejecting the set, CI) must emit a stderr WARNING
+# and let the sweep continue with default clocks. Nothing here ever raises,
+# aborts, or sys.exits. We use `sudo -n` (non-interactive) so a password prompt
+# fails fast rather than hanging the sweep.
+#
+# VERIFY via the set-command's own returncode/stderr, NOT --query-gpu: the lock
+# fields read N/A / deprecated on this driver. The reliable success signal is the
+# `-lgc` returncode + stderr ("GPU clocks set to ..." vs "does not have
+# permission"). We do NOT treat a low sampled idle clock as failure — idle GPUs
+# float down; the lock governs the under-load clock.
+
+def _run_clock_cmd(cmd: list[str]) -> subprocess.CompletedProcess | None:
+    """Run a sudo/nvidia-smi command non-interactively, never raising.
+
+    Returns the CompletedProcess on success-or-controlled-failure, or None if the
+    command could not even be launched (e.g. sudo/nvidia-smi missing). Callers
+    inspect .returncode / .stderr; a None or non-zero return is a warn-and-continue
+    signal, never an error.
+    """
+    try:
+        return subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=30,
+        )
+    except Exception as exc:  # FileNotFoundError, TimeoutExpired, OSError, ...
+        print(
+            f"[clock-lock] WARNING: command failed to launch ({' '.join(cmd)}): "
+            f"{type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        return None
+
+
+def _lock_gpu_clocks(indices: list[str], mhz: int) -> set[str]:
+    """Best-effort lock the SM clock of the given GPU indices to ``mhz``.
+
+    Returns the set of indices we successfully locked (possibly empty). NEVER
+    raises and NEVER aborts the process: every failure path only warns to stderr.
+    """
+    if not indices:
+        return set()
+
+    # Persistence mode once (keeps the driver loaded so the lock sticks). A
+    # failure here is non-fatal — try the per-GPU lock anyway and let it report.
+    pm = _run_clock_cmd(["sudo", "-n", "nvidia-smi", "-pm", "1"])
+    if pm is None or pm.returncode != 0:
+        detail = (pm.stderr or "").strip() if pm is not None else "could not launch sudo/nvidia-smi"
+        print(
+            "[clock-lock] WARNING: could not enable persistence mode "
+            f"(-pm 1): {detail or 'non-zero exit'}",
+            file=sys.stderr,
+        )
+
+    locked: set[str] = set()
+    for idx in indices:
+        # Per-GPU -i is safest: one rejecting GPU doesn't block the others.
+        res = _run_clock_cmd(
+            ["sudo", "-n", "nvidia-smi", "-lgc", f"{mhz},{mhz}", "-i", str(idx)]
+        )
+        if res is not None and res.returncode == 0:
+            # Success signal is the returncode (stderr message wording varies by
+            # driver; "GPU clocks set to ..." goes to stdout on this box).
+            locked.add(str(idx))
+        else:
+            detail = (res.stderr or res.stdout or "").strip() if res is not None else "could not launch sudo/nvidia-smi"
+            print(
+                f"[clock-lock] WARNING: failed to lock GPU {idx} to {mhz}MHz: "
+                f"{detail or 'non-zero exit'}",
+                file=sys.stderr,
+            )
+
+    if locked:
+        print(
+            f"[clock-lock] locked {len(locked)}/{len(indices)} GPUs to {mhz}MHz",
+            file=sys.stderr,
+        )
+    else:
+        print(
+            "[clock-lock] unavailable (no sudo / permission) — running with "
+            "default clocks; per-kernel variance will be higher",
+            file=sys.stderr,
+        )
+    return locked
+
+
+def _reset_gpu_clocks(indices: set[str]) -> None:
+    """Best-effort reset (un-lock) the SM clock of the given GPU indices.
+
+    Only call with indices we actually locked. NEVER raises; reset failure only
+    warns so a teardown problem can't mask the sweep's real result.
+    """
+    if not indices:
+        return
+    reset_ok = 0
+    for idx in sorted(indices):
+        res = _run_clock_cmd(["sudo", "-n", "nvidia-smi", "-rgc", "-i", str(idx)])
+        if res is not None and res.returncode == 0:
+            reset_ok += 1
+        else:
+            detail = (res.stderr or res.stdout or "").strip() if res is not None else "could not launch sudo/nvidia-smi"
+            print(
+                f"[clock-lock] WARNING: failed to reset GPU {idx} clocks: "
+                f"{detail or 'non-zero exit'}",
+                file=sys.stderr,
+            )
+    print(
+        f"[clock-lock] reset {reset_ok}/{len(indices)} GPUs to default clocks",
+        file=sys.stderr,
+    )
+
+
 def _compute_worker_count(
     *,
     num_repros: int,
     num_gpus: int,
     max_workers: int | None,
     workers_per_gpu: int | None,
+    workload_kind: str | None = None,
 ) -> tuple[int, int]:
     """Return (worker_count, effective_workers_per_gpu)."""
     if num_gpus <= 0:
@@ -216,7 +602,24 @@ def _compute_worker_count(
 
     if workers_per_gpu is None:
         if max_workers is None:
-            effective_workers_per_gpu = 1
+            # Default: parallelize compilation across workers. Timing serializes
+            # on the per-GPU lock, but COMPILING workers still allocate GPU memory
+            # (tracing / autotune / intermediates), so the safe default depends on
+            # per-worker memory:
+            #   - repro/oracle kernels: tiny footprint -> pack several per GPU,
+            #     bounded by CPU cores (the real ceiling on compile parallelism).
+            #   - full model graphs: a single compile can hold large GPU memory;
+            #     N concurrent model compiles can co-resident-OOM -> stay conservative.
+            #     (A memory-aware packer that measures per-graph footprint is future work.)
+            if workload_kind == "full_graph":
+                effective_workers_per_gpu = 1
+            else:
+                try:
+                    n_cores = len(os.sched_getaffinity(0))
+                except AttributeError:
+                    n_cores = os.cpu_count() or num_gpus
+                cores_per_gpu = max(1, n_cores // num_gpus)
+                effective_workers_per_gpu = max(1, min(4, cores_per_gpu))
         else:
             effective_workers_per_gpu = max(1, (max_workers + num_gpus - 1) // num_gpus)
     else:
@@ -306,19 +709,101 @@ def _infer_workload_kind_from_payload(
     return None
 
 
-def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
+def _git_query(args: list[str], *, cwd: str | None = None) -> str | None:
+    """Run a read-only ``git`` query, returning stripped stdout or None.
+
+    Fully defensive: any failure (git missing, not a repo, timeout, non-zero
+    exit) returns None so a metadata helper never crashes a bench run. These are
+    pure reads (``rev-parse`` / ``symbolic-ref``); they never mutate the repo.
+    """
     import subprocess
 
-    commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        capture_output=True,
-        text=True,
-        timeout=5,
-    ).stdout.strip()
+    try:
+        proc = subprocess.run(
+            ["git", *args],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            cwd=cwd,
+        )
+    except Exception:
+        return None
+    if proc.returncode != 0:
+        return None
+    out = proc.stdout.strip()
+    return out or None
+
+
+def _pytorch_provenance() -> tuple[str | None, str | None]:
+    """Resolve (pytorch_commit, pytorch_ref) for the torch being benchmarked.
+
+    Strategy:
+      1. Locate the pytorch source tree via ``torch.__file__`` and ask git for
+         HEAD (the exact commit) and the branch/ref it is on. ``git`` walks up to
+         the enclosing ``.git`` automatically, so running it from the torch
+         package dir resolves a source checkout (e.g. /tmp/pytorch-work/torch ->
+         /tmp/pytorch-work/.git).
+      2. Detached HEAD: ``symbolic-ref`` fails, so the ref is recorded as
+         ``"DETACHED"`` (the commit is still captured).
+      3. Installed wheel (no git checkout): fall back to
+         ``torch.version.git_version`` for the commit and ``pytorch_ref = None``.
+      4. torch not importable at all: return ``(None, None)``.
+
+    Never raises — this feeds run metadata and must not abort a bench.
+    """
+    try:
+        import torch
+    except Exception:
+        return None, None
+
+    torch_file = getattr(torch, "__file__", None)
+    torch_src = None
+    if torch_file:
+        try:
+            from pathlib import Path as _Path
+
+            torch_src = str(_Path(torch_file).resolve().parent)
+        except Exception:
+            torch_src = None
+
+    commit = None
+    ref = None
+    if torch_src:
+        commit = _git_query(["rev-parse", "HEAD"], cwd=torch_src)
+        if commit is not None:
+            # It's a git checkout. Resolve the branch/ref. abbrev-ref returns
+            # the literal "HEAD" when detached; treat that (and a failed
+            # symbolic-ref) as a detached HEAD.
+            ref = _git_query(["symbolic-ref", "--short", "-q", "HEAD"], cwd=torch_src)
+            if ref is None:
+                abbrev = _git_query(["rev-parse", "--abbrev-ref", "HEAD"], cwd=torch_src)
+                ref = "DETACHED" if (abbrev is None or abbrev == "HEAD") else abbrev
+
+    if commit is None:
+        # Not a git checkout (installed wheel) — fall back to the SHA baked into
+        # the wheel by the build, with no branch context.
+        commit = getattr(getattr(torch, "version", None), "git_version", None) or None
+        ref = None
+
+    return commit, ref
+
+
+def _run_metadata(*, workload_kind: str | None, n_results: int) -> dict:
+    commit = _git_query(["rev-parse", "HEAD"]) or ""
+    pytorch_commit, pytorch_ref = _pytorch_provenance()
     metadata = {
         "schema_version": 1,
         "tool": "scripts/bench_parallel.py",
+        # better-benchmark repo commit (the bench tooling). Kept as "commit" for
+        # back-compat with existing _metadata consumers (results/b200/_stamp.py,
+        # the merge path, and tests). The pytorch provenance is separate below.
         "commit": commit,
+        # The pytorch under test: commit (exact SHA) + ref (branch/tag the commit
+        # was HEAD of — disambiguates a MOVING branch, since a SHA alone becomes
+        # an orphan hash once the branch advances). null when torch is an
+        # installed wheel / not a git checkout.
+        "pytorch_commit": pytorch_commit,
+        "pytorch_ref": pytorch_ref,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "n_repros": n_results,
         "n_results": n_results,
@@ -384,6 +869,220 @@ def _write_results_output(
             _run_metadata(workload_kind=workload_kind, n_results=len(all_results)),
         ),
     )
+
+
+def _oracle_dir_name(task_key: str) -> str:
+    """Canonical dir basename for an oracle task key (a dir path).
+
+    Tolerates a sharded ``::SHAPE::<label>`` suffix (results are regrouped to
+    bare dir paths before aggregation, but strip defensively).
+    """
+    dir_part, _label = _split_shape_task_key(str(task_key))
+    path = Path(dir_part)
+    return path.parent.name if path.name == "repro.py" else path.name
+
+
+def _median(values: list[float]) -> float:
+    """Median of a non-empty numeric list."""
+    s = sorted(values)
+    n = len(s)
+    mid = n // 2
+    if n % 2:
+        return s[mid]
+    return (s[mid - 1] + s[mid]) / 2.0
+
+
+def _aggregate_oracle_timings(all_results: dict) -> dict:
+    """Flatten per-dir oracle bench results into the model-tool timings schema.
+
+    model_graph_accounting.py --timings consumes {dir_name -> {...}}. Each
+    point is keyed by SHAPE HASH (the trailing underscore token of the result
+    label, which is ``<model>_<shape_hash[:8]>``) so the model tool can match
+    each occurrence to the oracle timing for ITS shape. A dir's shape points
+    can span ~144x (e.g. 7us..1069us), so booking every occurrence at a single
+    per-dir number badly mis-prices the roll-up.
+
+    Emits per dir:
+      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us, status,
+        ratio, fallback}} — the authoritative per-shape data the roll-up uses.
+      - ``points``: the original {label -> {...}} dict (back-compat).
+      - ``oracle_us`` / ``compile_us``: representative MEDIAN across valid
+        points (fallback only, used when an occurrence's shape_hash has no
+        timed point; NOT the floor for matched occurrences).
+
+    Floor validity excludes ``_INVALID_STATUSES`` AND ``BAD_ORACLE`` (an oracle
+    slower than compile is not a valid floor). Dirs with no valid point are
+    NOT silently dropped: they are recorded under the top-level ``__failures__``
+    key with a reason, so the file accounts for every processed dir.
+    """
+    from oracle_harness import _INVALID_STATUSES
+
+    # Local exclusion set; do not mutate the shared frozenset.
+    floor_excluded = _INVALID_STATUSES | {"BAD_ORACLE"}
+
+    # Sharding pre-pass: per-(dir,shape) tasks produce many result payloads
+    # that map to the SAME dir. Merge their per-shape label entries into one
+    # payload per dir BEFORE pricing, so each dir is aggregated once (a plain
+    # ``flat[dir]=entry`` would otherwise let the last shape clobber the rest).
+    # Bare dir keys (un-sharded) pass through unchanged: one key per dir.
+    merged: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        dir_name = _oracle_dir_name(str(task_key))
+        bucket = merged.setdefault(dir_name, {})
+        if isinstance(results, dict):
+            for label, point in results.items():
+                # Copy only per-shape metric entries (dict-valued labels), the
+                # same items _metric_result_items downstream will price.
+                if isinstance(point, dict):
+                    bucket[label] = point
+    all_results = merged
+
+    flat: dict[str, dict] = {}
+    failures: dict[str, dict] = {}
+    for task_key, results in all_results.items():
+        dir_name = _oracle_dir_name(str(task_key))
+        points: dict[str, dict] = {}
+        points_by_shape: dict[str, dict] = {}
+        valid_us: list[float] = []
+        valid_compile: list[float] = []
+        n_total_points = 0
+        n_bad_oracle = 0
+        for label, point in _metric_result_items(results):
+            n_total_points += 1
+            status = point.get("status")
+            us = point.get("oracle_us")
+            compile_us = point.get("compile_us")
+            ratio = point.get("ratio")
+            # dispatch.fallback marks a cross-hardware fallback (no matching
+            # tuned impl for the running GPU); preserve it for visibility.
+            fallback = None
+            dispatch = point.get("dispatch")
+            if isinstance(dispatch, dict):
+                fallback = dispatch.get("fallback")
+            points[label] = {
+                "oracle_us": us,
+                "compile_us": compile_us,
+                "ratio": ratio,
+                "status": status,
+            }
+            # Key per-shape data by the trailing shape-hash token of the label.
+            shape_hash = label.rsplit("_", 1)[-1]
+            shape_entry = {
+                "oracle_us": us,
+                "compile_us": compile_us,
+                "ratio": ratio,
+                "status": status,
+                "fallback": fallback,
+            }
+            existing = points_by_shape.get(shape_hash)
+            # If two labels collapse to the same shape_hash, keep the valid /
+            # faster oracle point (prefer a usable floor over a bad one).
+            if existing is None or _prefer_shape_point(shape_entry, existing,
+                                                        floor_excluded):
+                points_by_shape[shape_hash] = shape_entry
+            if status == "BAD_ORACLE":
+                n_bad_oracle += 1
+            if status not in floor_excluded and isinstance(us, (int, float)):
+                valid_us.append(us)
+                if isinstance(compile_us, (int, float)):
+                    valid_compile.append(compile_us)
+        if not valid_us:
+            # Account for the dir instead of dropping it.
+            if n_total_points == 0:
+                reason = "no_points"
+            elif n_bad_oracle == n_total_points:
+                reason = "all_bad_oracle"
+            else:
+                reason = "no_valid_point"
+            failures[dir_name] = {
+                "reason": reason,
+                "n_points": n_total_points,
+                "n_bad_oracle": n_bad_oracle,
+                "points": points,
+            }
+            continue
+        entry = {
+            # Representative fallback value: MEDIAN (not min) of valid points.
+            "oracle_us": round(_median(valid_us), 2),
+            "n_points": len(valid_us),
+            "points": points,
+            "points_by_shape": points_by_shape,
+        }
+        if valid_compile:
+            entry["compile_us"] = round(_median(valid_compile), 2)
+        flat[dir_name] = entry
+    if failures:
+        flat["__failures__"] = failures
+    return flat
+
+
+def _prefer_shape_point(candidate: dict, existing: dict, floor_excluded) -> bool:
+    """True if ``candidate`` is a better per-shape point than ``existing``.
+
+    Prefer a floor-valid point over an invalid one; among two valid points
+    prefer the faster oracle (the achievable floor for that shape).
+    """
+    cand_us = candidate.get("oracle_us")
+    exist_us = existing.get("oracle_us")
+    cand_valid = (candidate.get("status") not in floor_excluded
+                  and isinstance(cand_us, (int, float)))
+    exist_valid = (existing.get("status") not in floor_excluded
+                   and isinstance(exist_us, (int, float)))
+    if cand_valid != exist_valid:
+        return cand_valid
+    if cand_valid and exist_valid:
+        return cand_us < exist_us
+    # Both invalid: keep whichever has a numeric oracle_us, else keep existing.
+    return isinstance(cand_us, (int, float)) and not isinstance(exist_us, (int, float))
+
+
+def _write_oracle_timings_output(
+    output_path: Path, all_results: dict, failures: dict | None = None
+) -> dict:
+    """Write flat {dir_name -> {oracle_us,...}} for model_graph_accounting.
+
+    ``failures`` (per-shape worker exceptions, keyed by sharded task key) are
+    regrouped per dir so the file accounts for every queued shape: dirs that
+    lost some shapes keep their priced entry with a ``shape_failures`` note;
+    dirs that lost ALL shapes are added to ``__failures__``.
+    """
+    timed = _aggregate_oracle_timings(all_results)
+    if failures:
+        shape_fail = _regroup_sharded_oracle_failures(failures)
+        # Authoritative "still priced?" signal: a dir that produced a valid
+        # floor is a top-level non-reserved key in the aggregator output. A dir
+        # only present under __failures__ (no valid point) is NOT priced — its
+        # raised shapes must still be accounted, never dropped.
+        priced_dirs = {
+            k for k in timed if k not in _RESERVED_TOP_LEVEL_KEYS
+        }
+        agg_failures = timed.setdefault("__failures__", {})
+        for dir_name, entry in shape_fail.items():
+            note = {
+                "n_failed_shapes": entry["n_failed_shapes"],
+                "failed_shapes": entry["failed_shapes"],
+                "example_error": entry["example_error"],
+            }
+            if dir_name in priced_dirs:
+                # Dir still priced from its surviving valid shapes — annotate.
+                timed[dir_name]["shape_failures"] = note
+            else:
+                # Dir has no valid floor. FOLD the raised-shape accounting into
+                # whatever failure entry exists (the aggregator may already
+                # record no_valid_point/all_bad_oracle for invalid-status
+                # points) so the count never vanishes; create one otherwise.
+                existing = agg_failures.get(dir_name)
+                if existing is None:
+                    agg_failures[dir_name] = {
+                        "reason": "all_shapes_failed",
+                        **note,
+                    }
+                else:
+                    existing.setdefault("shape_failures", note)
+        if not agg_failures:
+            timed.pop("__failures__", None)
+    _atomic_write_json(output_path, timed)
+    return timed
 
 
 def _is_integer_non_bool_dtype_name(dtype_name: object) -> bool:
@@ -544,13 +1243,10 @@ def _merge_into_baseline_locked(
     workload_kind: str | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
-    import subprocess as _sp
-
     if not baseline_path.exists():
         print(f"[merge-into] {baseline_path} does not exist, writing fresh")
-        commit = _sp.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
-        ).stdout.strip()
+        commit = _git_query(["rev-parse", "HEAD"]) or ""
+        pytorch_commit, pytorch_ref = _pytorch_provenance()
         failed_count, skipped_count = _failure_status_counts(new_failures)
         payload = _results_payload(
             new_results, new_failures,
@@ -564,6 +1260,8 @@ def _merge_into_baseline_locked(
                 "schema_version": 1,
                 "tool": "scripts/bench_parallel.py",
                 "commit": commit,
+                "pytorch_commit": pytorch_commit,
+                "pytorch_ref": pytorch_ref,
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "n_repros": len(new_results),
                 "n_results": len(new_results),
@@ -608,10 +1306,13 @@ def _merge_into_baseline_locked(
         old_failures[repro_path] = failure
         existing.pop(repro_path, None)
 
-    commit = _sp.run(
-        ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
-    ).stdout.strip()
+    commit = _git_query(["rev-parse", "HEAD"]) or ""
+    pytorch_commit, pytorch_ref = _pytorch_provenance()
     old_meta["commit"] = commit
+    # Refresh pytorch provenance too: a re-merge re-measures against the current
+    # torch, and the ref (e.g. tmp_work) may now point at a newer commit.
+    old_meta["pytorch_commit"] = pytorch_commit
+    old_meta["pytorch_ref"] = pytorch_ref
     old_meta["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
     old_meta.setdefault("schema_version", 1)
     old_meta.setdefault("tool", "scripts/bench_parallel.py")
@@ -642,10 +1343,10 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
     import torch
     import torch._dynamo
     import torch._inductor.config as inductor_config
-    from triton.testing import do_bench
     import importlib.util
     import math
     from byte_accounting import count_bytes_effective
+    from repro_harness import timed_min_us
 
     def load_and_bench(repro_path: str, all_shapes: bool, no_cd: bool,
                        n_warmup: int, n_rep: int) -> dict:
@@ -693,27 +1394,27 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             copy_elems = max(total_bytes // (2 * 4), 256)
             src = torch.empty(copy_elems, dtype=torch.float32, device="cuda")
             dst = torch.empty_like(src)
-            sol_us = do_bench(
+            sol_us = timed_min_us(
                 lambda: torch.add(src, 1, out=dst),
                 warmup=n_warmup,
                 rep=n_rep,
-                return_mode="min",
-            ) * 1000
+                use_cudagraph=False,
+            )
             del src, dst
 
-            # Compiled
+            # Compiled (no CUDAGraph in this legacy path — direct calls)
             torch._dynamo.reset()
             compiled = torch.compile(instance)
             with torch.no_grad():
                 for _ in range(3):
                     compiled(*inputs)
                 torch.cuda.synchronize()
-            compiled_us = do_bench(
+            compiled_us = timed_min_us(
                 lambda: compiled(*inputs),
                 warmup=n_warmup,
                 rep=n_rep,
-                return_mode="min",
-            ) * 1000
+                use_cudagraph=False,
+            )
 
             # Coord descent
             cd_us = None
@@ -725,12 +1426,12 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                     for _ in range(3):
                         compiled_cd(*inputs)
                     torch.cuda.synchronize()
-                cd_us = do_bench(
+                cd_us = timed_min_us(
                     lambda: compiled_cd(*inputs),
                     warmup=n_warmup,
                     rep=n_rep,
-                    return_mode="min",
-                ) * 1000
+                    use_cudagraph=False,
+                )
                 inductor_config.coordinate_descent_tuning = False
 
             results[label] = {
@@ -783,6 +1484,13 @@ def main():
     parser = argparse.ArgumentParser(description="Parallel GPU benchmark runner")
     parser.add_argument("paths", nargs="*", type=Path,
                         help="repro.py files or directories to benchmark")
+    parser.add_argument("--oracles", action="store_true",
+                        help="Benchmark migrated v2 oracles (oracle.py per canonical "
+                             "dir) instead of the torch.compile path. Mirrors "
+                             "`python -m oracle_harness <dir> --bench`: runs the "
+                             "numerics check gate, then bench_oracle per shape point. "
+                             "With --output writes a flat {dir_name -> {oracle_us,...}} "
+                             "mapping consumable by model_graph_accounting.py --timings.")
     parser.add_argument("--full-graphs", action="store_true",
                         help="Benchmark saved repros/models full_graph_*.py files "
                              "instead of partition repro.py files")
@@ -798,10 +1506,14 @@ def main():
     parser.add_argument("--gpus", default=None,
                         help="Comma-separated physical GPU indices to use, e.g. '0' or '0,1'")
     parser.add_argument("--max-workers", type=int, default=None,
-                        help="Max parallel workers (default: one per matching GPU)")
+                        help="Max parallel workers (default: workers-per-gpu x matching GPUs)")
     parser.add_argument("--workers-per-gpu", type=int, default=None,
-                        help="Max persistent worker subprocesses per matching GPU "
-                             "(default: 1, or enough to satisfy --max-workers)")
+                        help="Max persistent worker subprocesses per matching GPU. "
+                             "Default is workload-aware: min(4, cores/gpus) for "
+                             "repro/oracle kernels (tiny footprint, compile-bound), "
+                             "but 1 for --full-graphs (a model compile can hold large "
+                             "GPU memory; concurrent compiles can OOM). Override "
+                             "explicitly to pack more, or via --max-workers.")
     parser.add_argument("--all-shapes", action="store_true",
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
@@ -832,6 +1544,19 @@ def main():
                         help="Write all results to a JSON file")
     parser.add_argument("--merge-into", type=Path, default=None,
                         help="Merge results into an existing baseline JSON (updates only the benchmarked repros)")
+    parser.add_argument("--lock-clocks", action=argparse.BooleanOptionalAction, default=True,
+                        help="Lock the SM clock of the sweep's GPUs to a sustainable bin before "
+                             "timing to remove boost/ramp variance (best-effort, non-blocking — "
+                             "warns and continues if sudo/nvidia-smi is unavailable). "
+                             "Use --no-lock-clocks to disable. (default: enabled)")
+    parser.add_argument("--lock-clocks-mhz", type=int, default=1852,
+                        help="SM clock bin (MHz) to lock to when --lock-clocks is enabled. "
+                             "Default 1852 = highest SUSTAINABLE B200 bin (1965 is an "
+                             "opportunistic boost that drops to 1852 under load).")
+    parser.add_argument("--no-reset-clocks", dest="reset_clocks", action="store_false", default=True,
+                        help="Leave the SM clock pinned on exit instead of resetting it "
+                             "(useful for back-to-back sweeps). By default we reset on exit any "
+                             "GPUs we locked. Only the GPUs we actually locked are ever reset.")
     args = parser.parse_args()
 
     # Compare mode: just read existing perf.json and diff
@@ -846,11 +1571,38 @@ def main():
         parser.error("--benchmark-set selects canonical repros and cannot be used with --full-graphs")
     if args.full_graphs and args.update_perf:
         parser.error("--update-perf writes repro perf.json files and is not supported with --full-graphs")
+    if args.oracles and args.full_graphs:
+        parser.error("--oracles and --full-graphs are mutually exclusive")
+    if args.oracles and args.update_perf:
+        parser.error("--update-perf writes repro perf.json files and is not supported with --oracles")
+    if args.oracles and args.benchmark_set:
+        parser.error("--benchmark-set is not supported with --oracles")
 
     # Load benchmark set if specified
     benchmark_entries = None
-    workload_kind = "full_graph" if args.full_graphs else "repro"
-    if args.full_graphs:
+    if args.oracles:
+        workload_kind = "oracle"
+    elif args.full_graphs:
+        workload_kind = "full_graph"
+    else:
+        workload_kind = "repro"
+    oracle_n_dirs = None
+    if args.oracles:
+        oracle_paths = args.paths or [Path("repros/canonical")]
+        oracle_dirs = find_oracle_dirs(oracle_paths)
+        oracle_n_dirs = len(oracle_dirs)
+        # Oracle bench is per shape point internally; --all-shapes is implied.
+        args.all_shapes = True
+        # SHARDING: make the task unit a (dir, shape) point rather than a whole
+        # dir, so a big multi-shape dir (e.g. 469 shapes) spreads across all
+        # GPUs instead of pinning ONE worker that compiles them serially while
+        # peers idle. Order biggest-dirs-first so any residual tail is small.
+        # Each task still runs the numerics gate + fresh static compile per
+        # shape (commit 4ca6d532b); sharding is purely a scheduling change.
+        repros = _sort_shape_tasks_big_dirs_first(
+            _expand_oracle_shape_tasks(oracle_dirs)
+        )
+    elif args.full_graphs:
         graph_paths = args.paths or [args.models_root]
         repros = find_full_graphs(graph_paths)
     elif args.benchmark_set:
@@ -866,11 +1618,29 @@ def main():
         repros = find_repros([Path("repros/canonical")])
 
     if not repros:
-        if args.full_graphs:
+        if args.oracles:
+            print("No oracle.py dirs found.")
+        elif args.full_graphs:
             print("No full_graph_*.py files found.")
         else:
             print("No repro.py files found.")
         return
+
+    # SHARDING (repro --all-shapes path): make the task unit a (repro, shape)
+    # point rather than a whole repro.py, so a big multi-shape dir (e.g. the
+    # 469-shape pointwise_04d85912d998) spreads across all GPUs instead of
+    # pinning ONE worker that loops them serially while peers idle — the exact
+    # straggler the oracle sharding fix (commit 1b3c9c330) killed, here applied
+    # to the plain repro path. The worker benches ONE shape per task with its
+    # own torch._dynamo.reset() + compile (unchanged methodology); the parent
+    # regroups the per-shape payloads back under each bare repro.py path so the
+    # output JSON / perf.json / merge schema is byte-identical to the
+    # un-sharded in-worker-loop path. Only granularity changes, not the numbers.
+    shard_repros = not args.oracles and not args.full_graphs and args.all_shapes
+    if shard_repros:
+        repros = _sort_shape_tasks_big_dirs_first(
+            _expand_repro_shape_tasks(repros)
+        )
 
     total_requested = len(repros)
     preflight_failures: dict[str, dict] = {}
@@ -916,19 +1686,42 @@ def main():
             return
 
     gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
+
+    # Lock the SM clock of exactly the GPUs this sweep uses (best-effort, never
+    # fatal — see _lock_gpu_clocks for the non-blocking contract). Reset on exit
+    # via atexit so the node isn't left pinned regardless of how main() returns
+    # (normal exit, worker-death break, or an unexpected exception). We only ever
+    # reset the GPUs we actually locked. atexit reset is itself non-blocking.
+    if args.lock_clocks:
+        locked_indices = _lock_gpu_clocks(
+            [g["index"] for g in gpus], args.lock_clocks_mhz
+        )
+        if locked_indices and args.reset_clocks:
+            import atexit
+            atexit.register(_reset_gpu_clocks, locked_indices)
+
     try:
         n_workers, workers_per_gpu = _compute_worker_count(
             num_repros=len(repros),
             num_gpus=len(gpus),
             max_workers=args.max_workers,
             workers_per_gpu=args.workers_per_gpu,
+            workload_kind=workload_kind,
         )
     except ValueError as exc:
         parser.error(str(exc))
 
-    task_label = "full graphs" if args.full_graphs else "repros"
-    task_unit = "graph" if args.full_graphs else "repro"
-    print(f"Benchmarking {len(repros)} {task_label} across {n_workers} workers on {len(gpus)} GPUs")
+    if args.oracles:
+        task_label, task_unit = "oracle shape-points", "point"
+    elif args.full_graphs:
+        task_label, task_unit = "full graphs", "graph"
+    else:
+        task_label, task_unit = "repros", "repro"
+    if args.oracles:
+        print(f"Benchmarking {len(repros)} {task_label} from {oracle_n_dirs} dirs "
+              f"across {n_workers} workers on {len(gpus)} GPUs (sharded per shape)")
+    else:
+        print(f"Benchmarking {len(repros)} {task_label} across {n_workers} workers on {len(gpus)} GPUs")
     gpu_labels = [f"{g['index']}:{g['kind']}" for g in gpus]
     print(f"  GPUs: {', '.join(gpu_labels)}")
     print(f"  Workers per GPU cap: {workers_per_gpu}")
@@ -958,6 +1751,12 @@ def main():
         "multi_kernel": args.multi_kernel,
         "workload_kind": workload_kind,
     }
+
+    if args.oracles:
+        # Reuse all the existing orchestration (task queue, GPU round-robin,
+        # workers-per-gpu, INDUCTOR_GPU_BENCH_LOCK) — only swap the per-worker
+        # subprocess script for the oracle check+bench loop.
+        args_dict["_persistent_worker_script_factory"] = _oracle_worker_script
 
     # Use threads — the actual GPU work is in subprocess.Popen children,
     # so GIL isn't a bottleneck (threads just do pipe I/O).
@@ -1006,14 +1805,25 @@ def main():
         repro_name = _task_display_name(result["repro"])
         if result["status"] == "ok":
             done += 1
-            best_gap = None
-            for label, r in _metric_result_items(result["results"]):
-                gap = r.get("gap_cd") or r.get("gap_default")
-                if gap and (best_gap is None or gap > best_gap):
-                    best_gap = gap
-            gap_str = f"{best_gap:.2f}x" if best_gap else "?"
+            if args.oracles:
+                from oracle_harness import _INVALID_STATUSES
+                best_us = None
+                for label, r in _metric_result_items(result["results"]):
+                    us = r.get("oracle_us")
+                    if (r.get("status") not in _INVALID_STATUSES
+                            and isinstance(us, (int, float))
+                            and (best_us is None or us < best_us)):
+                        best_us = us
+                metric_str = f"oracle={best_us:.1f}us" if best_us else "no-valid-point"
+            else:
+                best_gap = None
+                for label, r in _metric_result_items(result["results"]):
+                    gap = r.get("gap_cd") or r.get("gap_default")
+                    if gap and (best_gap is None or gap > best_gap):
+                        best_gap = gap
+                metric_str = f"gap={best_gap:.2f}x" if best_gap else "gap=?"
             print(f"  [{done+failed}/{len(repros)}] OK  gpu={result['gpu']}  "
-                  f"{result['elapsed']:.1f}s  gap={gap_str}  {repro_name}", flush=True)
+                  f"{result['elapsed']:.1f}s  {metric_str}  {repro_name}", flush=True)
             all_results[result["repro"]] = result["results"]
         else:
             failed += 1
@@ -1033,11 +1843,21 @@ def main():
                   f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}", flush=True)
 
         # Incremental save every 50 results
-        if args.output and (done + failed) % 50 == 0:
+        if args.output and args.oracles and (done + failed) % 50 == 0:
+            _write_oracle_timings_output(args.output, all_results, failures)
+        elif args.output and (done + failed) % 50 == 0:
+            # Regroup sharded (repro, shape) keys back to bare repro.py paths so
+            # the incremental snapshot uses the same schema as the final write
+            # (a no-op on un-sharded keys).
+            if shard_repros:
+                snap_results = _regroup_sharded_repro_results(all_results)
+                snap_failures = _regroup_sharded_repro_failures(snap_results, failures)
+            else:
+                snap_results, snap_failures = all_results, failures
             _write_results_output(
                 args.output,
-                all_results,
-                failures,
+                snap_results,
+                snap_failures,
                 total=total_requested,
                 done=done,
                 failed=failed + preflight_failed,
@@ -1061,6 +1881,29 @@ def main():
     total_failed = failed + preflight_failed
     print(f"\nDone: {done} ok, {total_failed} failed, {skipped} skipped in {elapsed_total:.1f}s "
           f"({elapsed_total/max(done+failed,1):.1f}s/{task_unit} effective)")
+
+    # REGROUP (repro sharding): collapse the per-(repro, shape) sharded payloads
+    # — keyed by "<repro.py>::SHAPE::<label>", each carrying one shape — back
+    # under their bare repro.py path with every shape merged inside, so the
+    # output JSON / perf.json / merge schema is identical to the un-sharded
+    # in-worker-loop path. A no-op on bare repro keys (un-sharded). Failures are
+    # likewise folded back per repro.py path.
+    if shard_repros:
+        all_results = _regroup_sharded_repro_results(all_results)
+        failures = _regroup_sharded_repro_failures(all_results, failures)
+        # The summary counts were tallied per shape-task; restate them per
+        # repro (the regrouped unit) so __summary__ reflects repros, not shards.
+        # A failure key that is a SHAPE-qualified task key belongs to a repro
+        # that has surviving shapes in all_results (already counted as done), so
+        # it must NOT also count as a failed repro — only bare-path failures do.
+        done = len(all_results)
+        failed = sum(
+            1 for k, f in failures.items()
+            if _split_shape_task_key(str(k))[1] is None
+            and not (isinstance(f, dict) and f.get("status") == "skipped")
+        )
+        total_failed = failed + preflight_failed
+        total_requested = done + failed + skipped + preflight_failed
 
     # Save perf.json per repro
     if args.update_perf and all_results:
@@ -1106,7 +1949,14 @@ def main():
             print(f"  At SOL (<=1.1x): {at_sol}/{len(gaps)} ({at_sol*100//len(gaps)}%)")
 
     # Optional JSON output — include metadata for staleness detection
-    if args.output:
+    if args.output and args.oracles:
+        timed = _write_oracle_timings_output(args.output, all_results, failures)
+        n_priced = sum(1 for k in timed if not k.startswith("_"))
+        n_failed = len(timed.get("__failures__", {}))
+        print(f"[output] Wrote {args.output} "
+              f"({n_priced} oracle dirs with valid oracle_us, "
+              f"{n_failed} unpriced)")
+    elif args.output:
         _write_results_output(
             args.output,
             all_results,
@@ -1121,7 +1971,11 @@ def main():
         print(f"[output] Wrote {args.output}")
 
     # Merge into existing baseline
-    if args.merge_into:
+    if args.merge_into and args.oracles:
+        print("[merge-into] not supported in --oracles mode "
+              "(flat timings schema differs from the path-keyed baseline); "
+              "skipped.")
+    elif args.merge_into:
         _merge_into_baseline(
             args.merge_into,
             all_results,
@@ -1380,6 +2234,193 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
         _kill_worker(proc)
 
 
+def _oracle_worker_script(gpu_idx: str, args_dict: dict) -> str:
+    """Persistent worker that benchmarks v2 oracles, one canonical dir per line.
+
+    Mirrors the `python -m oracle_harness <dir> --bench` CLI loop in
+    oracle_harness._runner_main (check first, then bench_oracle per shape
+    point, gated on the per-point numerics check). Reuses bench_oracle, which
+    already honors INDUCTOR_GPU_BENCH_LOCK via _gpu_exclusive_lock — the env
+    var is set by _locked_worker, so the per-GPU exclusive timing lock is
+    respected with no extra wiring here.
+
+    The result JSON per dir is:
+        {
+          "<label>": {"oracle_us": float, "compile_us": float,
+                      "ratio": float, "status": str},
+          ...,
+          "_repro": "<dir path>",   # parent-side alignment check
+        }
+    Invalid/failing points carry a "status" in oracle_harness._INVALID_STATUSES
+    and no oracle_us, so the aggregator excludes them.
+
+    Uses the same fd-isolation as _persistent_worker_script: bench_oracle and
+    check_oracle_all_shapes print progress/JSON to stdout; we redirect fd 1 to
+    stderr so only our result JSON reaches the parent's result pipe.
+    """
+    skip_check = bool(args_dict.get("oracle_skip_check", False))
+    return f'''
+import sys, json, os, io
+os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
+
+import torch  # noqa: F401  (init CUDA in this subprocess)
+from pathlib import Path
+from oracle_harness import (
+    _load_oracle_module,
+    check_oracle_all_shapes,
+    bench_oracle,
+    get_inputs,
+    get_repro_instance,
+    _INVALID_STATUSES,
+)
+from repro_harness import load_shape_configs, make_inputs_from_config
+
+WARMUP = {args_dict["n_warmup"]}
+REP = {args_dict["n_rep"]}
+SKIP_CHECK = {skip_check}
+SHAPE_SEP = {_SHAPE_TASK_SEP!r}
+DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
+
+# Isolate the result pipe from any stdout pollution (bench_oracle /
+# check_oracle_all_shapes print JSON + progress to fd 1). Keep a private dup of
+# the original stdout for results; point fd 1 (and python stdout) at stderr.
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+
+def bench_oracle_point(canonical_dir, shape_label):
+    """Bench ONE (dir, shape) point — the sharded task unit.
+
+    Runs the numerics gate for just this shape (check_oracle_all_shapes
+    point=...) then bench_oracle for it. bench_oracle does its own per-shape
+    torch._dynamo.reset() + fresh static compile (commit 4ca6d532b), so a
+    single-shape task is identical in measurement to that shape's iteration of
+    the per-dir loop — sharding never reuses dynamo state across shapes.
+
+    Returns {{label: <point result>}} so the parent can regroup all of a dir's
+    shape points into one per-dir payload identical to the un-sharded path.
+    """
+    mod, fn, d = _load_oracle_module(canonical_dir)
+    repro_id = d.name
+    repro_file = d / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    if shape_label == DEFAULT_SHAPE_TOKEN or not configs:
+        # Dir with no shape configs: single default point.
+        check = {{}}
+        if not SKIP_CHECK:
+            check = check_oracle_all_shapes(fn, d, repro_id, skip_stochastic=True)
+        passed = True
+        if not SKIP_CHECK:
+            passed = all(v not in ("fail", False) for v in check.values())
+        if passed:
+            inputs = get_inputs(d)
+            instance = get_repro_instance(d)
+            return {{"default": bench_oracle(
+                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP)}}
+        return {{"default": {{"repro_id": repro_id,
+                             "status": "UNVERIFIED_NUMERICS"}}}}
+
+    if shape_label not in configs:
+        return {{shape_label: {{"repro_id": repro_id + "_" + shape_label,
+                               "status": "NO_ORACLE_FOR_SHAPE"}}}}
+
+    config = configs[shape_label]
+    point_id = repro_id + "_" + shape_label
+    passed = True
+    if not SKIP_CHECK:
+        # Narrow the numerics gate to just this shape point.
+        check = check_oracle_all_shapes(
+            fn, d, repro_id, skip_stochastic=True, point=shape_label)
+        passed = all(v not in ("fail", False) for v in check.values())
+    if passed:
+        inputs = make_inputs_from_config(config)
+        instance = get_repro_instance(d)
+        return {{shape_label: bench_oracle(
+            fn, instance, inputs, point_id, warmup=WARMUP, rep=REP)}}
+    return {{shape_label: {{"repro_id": point_id,
+                           "status": "UNVERIFIED_NUMERICS"}}}}
+
+def bench_oracle_dir(canonical_dir):
+    mod, fn, d = _load_oracle_module(canonical_dir)
+    repro_id = d.name
+    repro_file = d / "repro.py"
+    configs = load_shape_configs(str(repro_file))
+
+    # Numerics check gate (mirror CLI: --bench implies --check).
+    check = {{}}
+    if not SKIP_CHECK:
+        check = check_oracle_all_shapes(fn, d, repro_id, skip_stochastic=True)
+
+    results = {{}}
+    if not configs:
+        passed = True
+        if not SKIP_CHECK:
+            passed = all(v not in ("fail", False) for v in check.values())
+        if passed:
+            inputs = get_inputs(d)
+            instance = get_repro_instance(d)
+            results["default"] = bench_oracle(
+                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP)
+        else:
+            results["default"] = {{"repro_id": repro_id,
+                                   "status": "UNVERIFIED_NUMERICS"}}
+        return results
+
+    for label, config in configs.items():
+        point_id = f"{{repro_id}}_{{label}}"
+        passed = True
+        if not SKIP_CHECK:
+            passed = check.get(label) not in ("fail", False)
+        if passed:
+            inputs = make_inputs_from_config(config)
+            instance = get_repro_instance(d)
+            results[label] = bench_oracle(
+                fn, instance, inputs, point_id, warmup=WARMUP, rep=REP)
+        else:
+            results[label] = {{"repro_id": point_id,
+                               "status": "UNVERIFIED_NUMERICS"}}
+    return results
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line or line == "EXIT":
+        break
+    if line.startswith("PREFETCH:"):
+        # No-op for oracles: per-dir module load is cheap relative to bench.
+        continue
+    try:
+        # Sharded task key: "<dir>::SHAPE::<label>" -> bench ONE shape point.
+        # A bare dir path (no separator) falls back to the whole-dir loop.
+        if SHAPE_SEP in line:
+            canonical_dir, shape_label = line.rsplit(SHAPE_SEP, 1)
+            results = bench_oracle_point(canonical_dir, shape_label)
+        else:
+            results = bench_oracle_dir(line)
+        results["_repro"] = line
+        _result_file.write(json.dumps(results, default=str) + "\\n")
+        _result_file.flush()
+    except Exception as e:
+        if "CUDA" in str(e) or "device-side assert" in str(e):
+            _result_file.write(f"CUDA_ERROR: {{str(e)[:1000]}}\\n")
+            _result_file.flush()
+            sys.exit(1)
+        _result_file.write(json.dumps({{
+            "_repro": line,
+            "__error__": {{
+                "status": "failed",
+                "category": "runtime_error",
+                "exception_type": type(e).__name__,
+                "error": str(e)[:1000],
+                "reason": "oracle worker failed while benchmarking dir/point",
+                "hint": "Run `python -m oracle_harness <dir> --bench` directly.",
+            }},
+        }}) + "\\n")
+        _result_file.flush()
+'''
+
+
 def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     """Script for a persistent worker that reads repro paths from stdin.
 
@@ -1392,6 +2433,15 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     to detect and recover from stdout pipeline misalignment (e.g., if a
     prefetch thread or module import prints to stdout, shifting the result
     stream).
+
+    NOTE on timing: the generated script's do_bench calls (inside this
+    string template) deliberately do NOT go through
+    repro_harness.timed_min_us — the worker interleaves capture / lock
+    upgrade / timing under its own shared/exclusive lock protocol
+    (gpu_setup_lock / gpu_bench_lock via INDUCTOR_GPU_BENCH_LOCK), and the
+    same recipe (do_bench return_mode='min' * 1000) is inlined to keep the
+    worker protocol self-contained. Keep it byte-equivalent to
+    timed_min_us(..., use_cudagraph=False, lock=None).
     """
     return f'''
 import builtins, contextlib, fcntl, io, re, sys, json, os, tempfile, threading, time
@@ -1408,6 +2458,18 @@ from full_graph_harness import load_full_graph_definition, load_full_graph, resu
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
 WORKLOAD_KIND = {args_dict.get("workload_kind", "repro")!r}
+# (repro, shape) sharding: a task key may be "<repro.py>::SHAPE::<label>",
+# meaning bench ONLY that one shape. A bare path (no separator) benches all
+# shapes as before (un-sharded fallback).
+SHAPE_SEP = {_SHAPE_TASK_SEP!r}
+DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
+
+def _split_task_key(task_key):
+    \"\"\"(repro_path, shape_label|None) from a possibly-sharded task key.\"\"\"
+    if SHAPE_SEP in task_key:
+        path, label = task_key.rsplit(SHAPE_SEP, 1)
+        return path, label
+    return task_key, None
 
 # Extra inductor config knobs
 if {args_dict.get("combo_kernels", False)}:
@@ -1604,6 +2666,10 @@ def _prefetch_module(repro_path):
     any print statements in the loaded module from polluting the JSON result
     stream on stdout (which would cause result misalignment in the parent).
     """
+    # Cache by the FULL task key (so a sharded "<repro.py>::SHAPE::<label>" key
+    # round-trips through _get_or_load_module unchanged), but load the module
+    # from the bare repro.py path with the shape suffix stripped.
+    file_path, _shape_label = _split_task_key(repro_path)
     try:
         # Redirect stdout in this thread to prevent pollution of the result pipe.
         # stderr is fine (parent drains it separately).
@@ -1611,18 +2677,18 @@ def _prefetch_module(repro_path):
         sys.stdout = io.StringIO()
         try:
             if WORKLOAD_KIND == "full_graph":
-                definition = load_full_graph_definition(repro_path)
+                definition = load_full_graph_definition(file_path)
                 with _prefetch_lock:
                     _prefetch_cache[repro_path] = definition
                 return
-            spec = importlib.util.spec_from_file_location("repro_prefetch", repro_path)
+            spec = importlib.util.spec_from_file_location("repro_prefetch", file_path)
             mod = importlib.util.module_from_spec(spec)
             mod.device = torch.device
             mod.inf = math.inf
             mod.nan = math.nan
             spec.loader.exec_module(mod)
             instance = mod.Repro()
-            configs = load_shape_configs(repro_path)
+            configs = load_shape_configs(file_path)
             with _prefetch_lock:
                 _prefetch_cache[repro_path] = (mod, instance, configs)
         finally:
@@ -1631,26 +2697,32 @@ def _prefetch_module(repro_path):
         pass  # prefetch failure is non-fatal; bench_one will load normally
 
 def _get_or_load_module(repro_path):
-    """Get module from prefetch cache, or load synchronously."""
+    """Get module from prefetch cache, or load synchronously.
+
+    ``repro_path`` is the FULL task key, possibly carrying a ::SHAPE:: suffix;
+    the module is loaded from the bare repro.py path with the suffix stripped.
+    """
     with _prefetch_lock:
         cached = _prefetch_cache.pop(repro_path, None)
     if cached is not None:
         return cached
+    file_path, _shape_label = _split_task_key(repro_path)
     # Synchronous fallback
-    spec = importlib.util.spec_from_file_location("repro", repro_path)
+    spec = importlib.util.spec_from_file_location("repro", file_path)
     mod = importlib.util.module_from_spec(spec)
     mod.device = torch.device
     mod.inf = math.inf
     mod.nan = math.nan
     spec.loader.exec_module(mod)
     instance = mod.Repro()
-    configs = load_shape_configs(repro_path)
+    configs = load_shape_configs(file_path)
     return (mod, instance, configs)
 
 def _get_or_load_full_graph(repro_path):
+    file_path, _shape_label = _split_task_key(repro_path)
     with _prefetch_lock:
         cached = _prefetch_cache.pop(repro_path, None)
-    definition = cached if cached is not None else load_full_graph_definition(repro_path)
+    definition = cached if cached is not None else load_full_graph_definition(file_path)
     instance, inputs, definition = load_full_graph(definition, default_device="cuda")
     return instance, inputs, definition
 
@@ -1769,10 +2841,27 @@ def bench_one(repro_path):
     if WORKLOAD_KIND == "full_graph":
         return bench_full_graph_one(repro_path)
 
+    # Decode a possibly-sharded "<repro.py>::SHAPE::<label>" task key. When a
+    # shape label is present, bench ONLY that shape (the sharded unit); the
+    # per-shape body below is byte-identical to that shape's iteration of the
+    # un-sharded all-shapes loop (same dynamo reset + fresh compile). The
+    # parent regroups all of a repro's per-shape payloads back under its bare
+    # repro.py path, so the output is unchanged.
+    _file_path, shape_label = _split_task_key(repro_path)
     mod, instance, configs = _get_or_load_module(repro_path)
 
     all_shapes = {args_dict["all_shapes"]}
-    if all_shapes and configs:
+    if shape_label is not None and shape_label != DEFAULT_SHAPE_TOKEN:
+        # Sharded: a specific named shape point.
+        if not configs or shape_label not in configs:
+            raise KeyError(
+                f"shape {{shape_label!r}} not found in configs for {{_file_path}}"
+            )
+        shape_items = [(shape_label, configs[shape_label])]
+    elif shape_label == DEFAULT_SHAPE_TOKEN:
+        # Sharded: the single default point of a repro with no shape configs.
+        shape_items = [(None, None)]
+    elif all_shapes and configs:
         shape_items = list(configs.items())
     else:
         shape_items = [(None, None)]
@@ -1926,7 +3015,15 @@ for line in sys.stdin:
 
 
 def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
-    """Generate a self-contained benchmark script for one repro."""
+    """Generate a self-contained benchmark script for one repro.
+
+    NOTE on timing: like _persistent_worker_script, the do_bench calls here
+    live inside a generated-source string and stay inlined (not routed
+    through repro_harness.timed_min_us) to keep the one-shot script
+    self-contained; the recipe must stay byte-equivalent to
+    timed_min_us(..., use_cudagraph=False, lock=None) under the worker's
+    own lock protocol.
+    """
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"

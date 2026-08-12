@@ -1,0 +1,56 @@
+{
+  "task": "U30 (MOR triton_mor_finalize_sum) per-model-e2e contribution -- fills the blank landing-table cell",
+  "date": "2026-07-14",
+  "method": {
+    "arms": "FULL-corpus A/B, BOTH arms benched fresh under identical conditions (same session, clocks locked 1852MHz, GPU lock on, fresh TORCHINDUCTOR_CACHE_DIR per arm). Old A1 HEAD state JSON (2026-06-22) NOT reused -- machine state changed (clock locking now default), so mixing arms would confound.",
+    "arm_A_stock": "/tmp/scratch_space/u30_e2e/armA_stock.json (HEAD daa79cd25ca, U30 ON), 1727 repros / 4977 shape points, one bench_parallel invocation, ~33min",
+    "arm_B_reverted": "/tmp/scratch_space/u30_e2e/armB_reverted.json (HEAD with U30 reverted: use_triton_finalize forced False in torch/_inductor/codegen/simd.py, identical to the prior CORE_REVERT agent's one-line revert), 1727 repros, one invocation, ~34min",
+    "revert_verification": "Codegen probe on sum_sum_sum_260a107eaf32 BEFORE benching: stock marker triton_mor_finalize_sum=14, njit=5; reverted marker=0, njit=3 -- exact match to CORE_REVERT_RESULTS.json's documented flip (14->0, 5->3).",
+    "torch": "PYTHONPATH shadow worktrees of /tmp/pytorch-work @ daa79cd25ca (u30_wt_stock / u30_wt_revert), prebuilt .so symlinked; pytorch-work checkout never modified (HEAD verified before/after).",
+    "rollup": "perf_ab_rollup.py (from origin/main) --base reverted --head stock --occdir results/perf_ab/occurrences; positive = U30 helps."
+  },
+  "per_model_e2e": {
+    "full_ab_genai_excl": {"n": 158, "median_pp": 0.125, "mean_pp": 0.247, "geomean_pp": 0.251},
+    "full_ab_genai_incl": {"n": 166, "median_pp": 0.124, "mean_pp": 0.333, "geomean_pp": 0.342},
+    "attribution_isolated_genai_excl": {
+      "note": "delta restricted to the 52 affected sum_sum_sum partition hashes only (removes cross-corpus timing noise from the other ~1675 unaffected repros)",
+      "n": 158, "median_pp": 0.0, "mean_pp": 0.151, "geomean_pp": 0.152
+    },
+    "touched_models_only": {
+      "note": "the 29 models whose occurrence accounting contains >=1 affected hash (28 non-genai + genai LayerNormBackward)",
+      "n": 29, "median_pp": 0.998, "mean_pp": 0.939, "geomean_pp": 0.951
+    },
+    "model_noise_floor_pp": 0.82
+  },
+  "top_movers_isolated": [
+    {"model": "genai/static/LayerNormBackward", "pp": 3.347, "surface_frac_pct": 59.07},
+    {"model": "hf/train/ElectraForCausalLM", "pp": 2.387, "surface_frac_pct": 8.20},
+    {"model": "timm/train/beit_base_patch16_224", "pp": 1.751, "surface_frac_pct": 11.55},
+    {"model": "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k", "pp": 1.725, "surface_frac_pct": 5.35},
+    {"model": "hf/train/DebertaV2ForMaskedLM", "pp": 1.498, "surface_frac_pct": 8.38},
+    {"model": "hf/train/MegatronBertForCausalLM", "pp": 1.457, "surface_frac_pct": 6.30},
+    {"model": "hf/train/GPTNeoForSequenceClassification", "pp": 1.426, "surface_frac_pct": 4.88},
+    {"model": "hf/train/GPTNeoForCausalLM", "pp": 1.327, "surface_frac_pct": 4.91},
+    {"model": "hf/train/GPT2ForSequenceClassification", "pp": 1.301, "surface_frac_pct": 5.22},
+    {"model": "hf/train/LayoutLMForMaskedLM", "pp": 1.274, "surface_frac_pct": 8.25},
+    {"model": "hf/train/XLNetLMHeadModel", "pp": 1.207, "surface_frac_pct": 4.82},
+    {"model": "hf/train/BertForMaskedLM", "pp": 1.205, "surface_frac_pct": 8.14}
+  ],
+  "top_movers_full_ab_caveat": "The raw full-A/B top/bottom movers include tts_angular at +3.74% (infer) AND -2.93% (train) -- a model with NO affected hashes appearing symmetrically at both extremes, i.e. cross-corpus timing noise. No touched model regresses in the isolated view (min +0.006pp); the full-A/B negatives (T5 -2.7pp etc.) are all on untouched surfaces = noise.",
+  "kernel_geomean_consistency_check": {
+    "prior_finding": {"geomean_on_over_off": 0.8814, "speedup": "1.135x", "source": "CORE_REVERT_RESULTS.json U30 (2026-06-23)"},
+    "this_run_per_repro": {"geomean_on_over_off": 0.8771, "speedup": "1.140x", "n_repros": 52},
+    "this_run_all_shape_points": {"geomean_on_over_off": 0.8722, "speedup": "1.147x", "n_points": 82},
+    "coord_descent": {"geomean_on_over_off": 0.8142, "speedup": "1.228x"},
+    "per_repro_distribution": "48/52 help >2%, 0 hurt, 4 at floor; best 1.46x (sum_sum_sum_11d45d703ba6 XLNet 62->43us); median repro speedup 1.134x",
+    "verdict": "REPRODUCES (1.140x vs prior 1.135x, well within noise; distribution identical: 48/52 help, 0 hurt)"
+  },
+  "landing_table_cell": "+0.25pp e2e geomean (genai-excl, n=158; isolated-attribution +0.15pp) -- sub-floor corpus-wide (floor ±0.82pp), but concentrated and consistent: the 29 touched transformer/timm TRAIN models gain ~+0.95pp geomean (median +1.0pp, up to +2.4pp Electra, 0 regress). Kernel win re-confirmed at 1.140x geomean over the 52 sum_sum_sum repros (prior 1.135x).",
+  "verdict": "LAND-worthy, unchanged from CORE_REVERT. Real, structural, reproducible kernel win (1.14x geomean, 48/52 help, none hurt). Per-model-e2e contribution is +0.25pp corpus geomean -- below the ±0.82pp per-model floor in aggregate, but the touched-model subset shows a coherent ~+1pp with zero regressions, which is signal, not noise (uniform sign across 28 independent models). Present as: kernel-codegen improvement with a modest, positive, transformer-TRAIN-concentrated e2e contribution.",
+  "provenance": {
+    "pytorch_work_head": "daa79cd25ca9a80bfd65799394cf4255d6be75a6, untouched (verified before and after)",
+    "worktrees": "u30_wt_stock + u30_wt_revert created, removed after benching",
+    "commits": "none",
+    "artifacts": "/tmp/scratch_space/u30_e2e/{armA_stock.json,armB_reverted.json,rollup.json,rollup_stdout.txt,isolated_rollup.json,kernel_check.json,RESULT.json}"
+  }
+}

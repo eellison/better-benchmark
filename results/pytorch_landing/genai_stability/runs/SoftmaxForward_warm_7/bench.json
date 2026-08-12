@@ -1,0 +1,83 @@
+{
+  "_metadata": {
+    "schema_version": 1,
+    "tool": "scripts/bench_parallel.py",
+    "commit": "ecf1955002c2aadddb188585841d718971bb4848",
+    "pytorch_commit": "daa79cd25ca9a80bfd65799394cf4255d6be75a6",
+    "pytorch_ref": "work2",
+    "timestamp": "2026-06-23T03:04:09Z",
+    "n_repros": 1,
+    "n_results": 1,
+    "workload_kind": "full_graph"
+  },
+  "repros/models/genai/static/SoftmaxForward/full_graph_000.py": {
+    "__graph__": {
+      "schema_version": 1,
+      "path": "repros/models/genai/static/SoftmaxForward/full_graph_000.py",
+      "source": {
+        "kind": "microbenchmark",
+        "suite": "genai",
+        "mode": null,
+        "model": "static/SoftmaxForward",
+        "graph": "full_graph_000.py"
+      },
+      "constraints": {
+        "inputs": [
+          {
+            "kind": "tensor",
+            "name": "arg0_1",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              262144,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ],
+        "tensor_attrs": {},
+        "outputs": [
+          {
+            "kind": "tensor",
+            "name": "output_0",
+            "shape": [
+              8192,
+              262144
+            ],
+            "dtype": "bfloat16",
+            "stride": [
+              262144,
+              1
+            ],
+            "device": "cuda",
+            "storage_offset": 0
+          }
+        ]
+      },
+      "constraints_source": "sidecar"
+    },
+    "default": {
+      "compiled_us": 1918.9120531082153,
+      "coord_descent_us": 1924.8640537261963,
+      "memcopy_sol_us": null,
+      "input_bytes": 4294967296,
+      "output_bytes": 4294967296,
+      "naive_io_bytes": 8589934592,
+      "n_kernels": 1,
+      "num_inputs": 1,
+      "gap_default": null,
+      "gap_cd": null
+    }
+  },
+  "__summary__": {
+    "total": 1,
+    "ok": 1,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_s": 6.736876010894775
+  }
+}

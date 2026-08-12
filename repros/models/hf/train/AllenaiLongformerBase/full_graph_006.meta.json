@@ -1,155 +1,22 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "primals_1",
-      "shape": [
-        8,
-        1024
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 50265
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 50265
-      },
-      "constraint_source": "graph_inference"
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_5",
-      "shape": [
-        768
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "full_default",
-      "shape": [
-        8,
-        1024
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 1
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 1
-      },
-      "constraint_source": "graph_inference"
-    },
-    {
-      "kind": "tensor",
-      "name": "add",
-      "shape": [
-        8,
-        1024
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 4098
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 4098
-      },
-      "constraint_source": "graph_inference"
-    },
-    {
-      "kind": "tensor",
-      "name": "mul_2",
-      "shape": [
-        8,
-        1024,
-        768
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "gt",
-      "shape": [
-        8,
-        1024,
-        768
-      ],
-      "dtype": "bool",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randint",
-        "low": 0,
-        "high": 2
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "div",
-      "shape": [
-        8,
-        1024,
-        1
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "tangents_1",
-      "shape": [
-        8,
-        1024,
-        768
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    }
+    [[8,1024],"i64",{"n":"primals_1","gen":["index",0,1024],"x":{"constraint_source":"default_unobserved"}}],
+    [[768],"f32",{"n":"primals_5"}],
+    [[8,1024],"i64",{"n":"full_default","gen":["index",0,1024],"x":{"constraint_source":"default_unobserved"}}],
+    [[8,1024],"i64",{"n":"add","gen":["index",0,1024],"x":{"constraint_source":"default_unobserved"}}],
+    [[8,1024,768],"f32",{"n":"mul_2"}],
+    [[8,1024,768],"b8",{"n":"gt","gen":["randint",0,2],"x":{"constraint_source":"default_unobserved"}}],
+    [[8,1024,1],"f32",{"n":"div"}],
+    [[8,1024,1],"b8",{"n":"unsqueeze_4","gen":["index",0,50265],"x":{"constraint_source":"observed","observed":{"min":3,"max":50264,"n_unique":7525}}}],
+    [[8,1024,768],"f32",{"n":"tangents_1"}]
+  ],
+  "outputs": [
+    [[50265,768],"f32",{"n":"output_1"}],
+    [[4098,768],"f32",{"n":"output_2"}],
+    [[1,768],"f32",{"n":"output_3"}],
+    [[768],"f32",{"n":"output_4"}],
+    [[768],"f32",{"n":"output_5"}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_006.py",
@@ -159,5 +26,31 @@
     "mode": "train",
     "model": "AllenaiLongformerBase",
     "graph": "full_graph_006.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 28,
+    "counts": {
+      "fusible_in_partition": 28,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten._unsafe_masked_index_put_accumulate.default": 3,
+        "aten.bitwise_and.Tensor": 2,
+        "aten.full.default": 4,
+        "aten.ge.Scalar": 1,
+        "aten.lt.Scalar": 1,
+        "aten.mul.Tensor": 8,
+        "aten.ne.Scalar": 1,
+        "aten.sub.Tensor": 2,
+        "aten.sum.dim_IntList": 4,
+        "aten.unsqueeze.default": 1,
+        "prims.convert_element_type.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

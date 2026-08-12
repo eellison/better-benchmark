@@ -1,4 +1,0 @@
-timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000_43306ecb: (T([128, 640, 28, 28], f32), T([640], f32), T([640], f32))
-timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000_6cae5324: (T([128, 1280, 14, 14], f32), T([1280], f32), T([1280], f32))
-timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000_7a39551d: (T([128, 2560, 7, 7], f32), T([2560], f32), T([2560], f32))
-timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000_a72225d4: (T([128, 320, 56, 56], f32), T([320], f32), T([320], f32))

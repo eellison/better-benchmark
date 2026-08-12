@@ -1,0 +1,252 @@
+{
+  "n_graphs": 2,
+  "fusible": {
+    "f77445bf16f4": {
+      "a49a430b": 1
+    },
+    "445ed11aad0a": {
+      "95772c51": 1
+    },
+    "f9d8faf2bd9a": {
+      "3a80a44f": 1
+    },
+    "2d969ac9ad59": {
+      "8f687505": 12
+    },
+    "fd39a3b3f5fd": {
+      "98ade792": 12
+    },
+    "087d5b4f064d": {
+      "3a80a44f": 1
+    },
+    "c977e7f52b49": {
+      "3a80a44f": 1
+    },
+    "49c7455398cd": {
+      "3a80a44f": 1
+    },
+    "3bc311a8676a": {
+      "3a80a44f": 1
+    },
+    "a4c92b1bdab7": {
+      "3a80a44f": 1
+    },
+    "a7b32508693f": {
+      "3a80a44f": 1
+    },
+    "5361f6c9de6c": {
+      "3a80a44f": 1
+    },
+    "978d6d771932": {
+      "3a80a44f": 1
+    },
+    "f0fb76589ff6": {
+      "3a80a44f": 1
+    },
+    "f13145f53165": {
+      "3a80a44f": 1
+    },
+    "69ffe374d494": {
+      "3a80a44f": 1
+    },
+    "584a8c609627": {
+      "ec769da9": 1
+    },
+    "ef83fb4a9dbc": {
+      "9a73f5a0": 1
+    },
+    "ed482d857957": {
+      "f69e9b69": 1
+    },
+    "1ba47c0de2b0": {
+      "bdff4e84": 1
+    },
+    "907cbb3d9f19": {
+      "356087b1": 11
+    },
+    "2ba0992ca00b": {
+      "94cc1ac5": 12
+    },
+    "4cd246989343": {
+      "3847e61c": 11
+    },
+    "66b9baf8b40f": {
+      "5297937a": 1
+    },
+    "be519a2435f2": {
+      "0d0b1d4e": 1
+    },
+    "d9612b876341": {
+      "930536e2": 1
+    },
+    "f1989c7d123c": {
+      "8c80d3e5": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "598796256151",
+      "count": 2,
+      "sig": "((T([768],torch.float32,[1]),T([16384, 768],torch.float32,[768, 1]),T([768, 768],torch.float32,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 410.46398878097534,
+      "branch_us": 410.46398878097534
+    },
+    {
+      "target": "aten._fft_c2c.default",
+      "shape_hash": "91b335f406a9",
+      "count": 12,
+      "sig": "((T([32, 512, 768],torch.complex64,[393216, 768, 1]),[1,2],0,True),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_000.py",
+      "node": "_fft_c2c",
+      "baseline_us": 104.22399640083313,
+      "branch_us": 104.22399640083313
+    },
+    {
+      "target": "aten.view_as_real.default",
+      "shape_hash": "159284ff45c6",
+      "count": 24,
+      "sig": "((T([32, 512, 768],torch.complex64,[393216, 768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_000.py",
+      "node": "view_as_real",
+      "baseline_us": 2.9120000544935465,
+      "branch_us": 2.9120000544935465
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2244be0984be",
+      "count": 12,
+      "sig": "((T([3072],torch.float32,[1]),T([16384, 768],torch.float32,[768, 1]),T([768, 3072],torch.float32,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 1521.440029144287,
+      "branch_us": 1521.440029144287
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "f050e87d3037",
+      "count": 12,
+      "sig": "((T([768],torch.float32,[1]),T([16384, 3072],torch.float32,[3072, 1]),T([3072, 768],torch.float32,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 1507.2640180587769,
+      "branch_us": 1507.2640180587769
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "cbeaa097ab73",
+      "count": 1,
+      "sig": "((T([32000],torch.float32,[1]),T([16384, 768],torch.float32,[768, 1]),T([768, 32000],torch.float32,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_000.py",
+      "node": "addmm_26",
+      "baseline_us": 14696.44832611084,
+      "branch_us": 14696.44832611084
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0e1f616e2094",
+      "count": 1,
+      "sig": "((T([16384, 32000],torch.float32,[32000, 1]),T([32000, 768],torch.float32,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm",
+      "baseline_us": 13146.112442016602,
+      "branch_us": 13146.112442016602
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "22ee1bcf2e03",
+      "count": 1,
+      "sig": "((T([32000, 16384],torch.float32,[1, 32000]),T([16384, 768],torch.float32,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_1",
+      "baseline_us": 13723.648071289062,
+      "branch_us": 13723.648071289062
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "1349aef19847",
+      "count": 2,
+      "sig": "((T([16384, 768],torch.float32,[768, 1]),T([768, 768],torch.float32,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_2",
+      "baseline_us": 370.36800384521484,
+      "branch_us": 370.36800384521484
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "f29d13b6c121",
+      "count": 2,
+      "sig": "((T([768, 16384],torch.float32,[1, 768]),T([16384, 768],torch.float32,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_3",
+      "baseline_us": 345.7919955253601,
+      "branch_us": 345.7919955253601
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "43fd18775d01",
+      "count": 12,
+      "sig": "((T([16384, 768],torch.float32,[768, 1]),T([768, 3072],torch.float32,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_4",
+      "baseline_us": 1278.656005859375,
+      "branch_us": 1278.656005859375
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "dc6e83af4992",
+      "count": 12,
+      "sig": "((T([768, 16384],torch.float32,[1, 768]),T([16384, 3072],torch.float32,[3072, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_5",
+      "baseline_us": 1167.1040058135986,
+      "branch_us": 1167.1040058135986
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "732ef600c3d0",
+      "count": 12,
+      "sig": "((T([16384, 3072],torch.float32,[3072, 1]),T([3072, 768],torch.float32,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_6",
+      "baseline_us": 1283.776044845581,
+      "branch_us": 1283.776044845581
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "152334b26a3e",
+      "count": 12,
+      "sig": "((T([3072, 16384],torch.float32,[1, 3072]),T([16384, 768],torch.float32,[768, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "mm_7",
+      "baseline_us": 1227.4880409240723,
+      "branch_us": 1227.4880409240723
+    },
+    {
+      "target": "aten.view_as_complex.default",
+      "shape_hash": "34306e787ffd",
+      "count": 12,
+      "sig": "((T([32, 512, 768, 2],torch.float32,[786432, 1536, 2, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "view_as_complex",
+      "baseline_us": 2.9440000653266907,
+      "branch_us": 2.9440000653266907
+    },
+    {
+      "target": "aten._fft_c2c.default",
+      "shape_hash": "2abe64c1d1e4",
+      "count": 12,
+      "sig": "((T([32, 512, 768],torch.complex64,[393216, 768, 1]),[1,2],0,False),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/GoogleFnet/full_graph_001.py",
+      "node": "_fft_c2c",
+      "baseline_us": 104.35199737548828,
+      "branch_us": 104.35199737548828
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "train",
+  "model": "GoogleFnet"
+}

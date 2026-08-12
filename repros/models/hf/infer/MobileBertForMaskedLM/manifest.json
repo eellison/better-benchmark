@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MobileBertForMaskedLM",
+  "patterns": [
+    "035e4d7f5117",
+    "0a49dc00cbaf",
+    "18acdd25ec9e",
+    "1bce79493ef1",
+    "1d3ecc85e538",
+    "301cf5a13527",
+    "36787f0bfc90",
+    "435f6504efa7",
+    "5c3762c611b3",
+    "5f698ae9321b",
+    "8ae98a8e9539",
+    "a18f3869022f",
+    "b2b66f70d626",
+    "b79cf7b4f823",
+    "e232f7a3d0d8",
+    "e40852a34050",
+    "e87d6ebc9ded",
+    "edd2629dfab3",
+    "f2a03dbd04dd"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

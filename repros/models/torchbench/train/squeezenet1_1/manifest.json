@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "squeezenet1_1",
+  "patterns": [
+    "03624e225234",
+    "04d85912d998",
+    "1c9e61a3de47",
+    "2a13f6e9f02f",
+    "3abc926270f6",
+    "634d8dfaedb5",
+    "68ad640449a8",
+    "70679a552198",
+    "7155d62f36cd",
+    "86d6491425a2",
+    "b089f1ca0d13",
+    "c274639dbaf9",
+    "c5765737e761",
+    "c9b37dbc088b",
+    "ccd411f2a45d",
+    "cf864ca94168",
+    "dc963d04f8e4",
+    "de64dd044945"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

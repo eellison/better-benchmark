@@ -1,4 +1,0 @@
-torchbench_hf_bart_infer_005_90333c50: (T([50265, 768], f16))
-torchbench_hf_gpt2_infer_000_359e2975: (T([50257, 768], f16))
-torchbench_hf_gpt2_large_infer_000_3721296a: (T([50257, 1280], f16))
-torchbench_hf_longformer_infer_003_90333c50: (T([50265, 768], f16))

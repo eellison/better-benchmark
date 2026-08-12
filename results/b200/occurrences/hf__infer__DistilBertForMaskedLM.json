@@ -1,0 +1,122 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "93ab7097e9e5": {
+      "c9d2e15a": 1
+    },
+    "644fa7675014": {
+      "cd997de8": 1
+    },
+    "af505388b035": {
+      "f4120204": 1
+    },
+    "647d3ac3f711": {
+      "bcb2f702": 1
+    },
+    "96edf0542ecd": {
+      "82b81ff3": 1
+    },
+    "826ea0b5f6e4": {
+      "5d3406ab": 6
+    },
+    "da5aa7a47091": {
+      "82b81ff3": 6
+    },
+    "e87d6ebc9ded": {
+      "471d82af": 6
+    },
+    "301cf5a13527": {
+      "1a8eaeba": 6
+    },
+    "e232f7a3d0d8": {
+      "2fe3efd1": 6
+    },
+    "f2a03dbd04dd": {
+      "1a8eaeba": 6
+    },
+    "a18f3869022f": {
+      "1a8eaeba": 6
+    },
+    "393456b916a6": {
+      "82b81ff3": 5
+    },
+    "035e4d7f5117": {
+      "d7517139": 6
+    },
+    "0a49dc00cbaf": {
+      "d7517139": 12
+    },
+    "8314454e86eb": {
+      "5095537f": 1
+    },
+    "e40852a34050": {
+      "d7517139": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "d48c19bdeb6b",
+      "count": 25,
+      "sig": "((T([768],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistilBertForMaskedLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 34.20799970626831,
+      "branch_us": 34.20799970626831
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "c2cdbd064ce3",
+      "count": 6,
+      "sig": "((T([3072, 128, 64],torch.bfloat16,[8192, 64, 1]),T([3072, 64, 128],torch.bfloat16,[8192, 128, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistilBertForMaskedLM/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 38.495998829603195,
+      "branch_us": 38.495998829603195
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "5e8ce8db890a",
+      "count": 6,
+      "sig": "((T([3072, 128, 128],torch.bfloat16,[16384, 128, 1]),T([3072, 128, 64],torch.bfloat16,[8192, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistilBertForMaskedLM/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 36.768000572919846,
+      "branch_us": 36.768000572919846
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "7dffa442958d",
+      "count": 6,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistilBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 93.88799965381622,
+      "branch_us": 93.88799965381622
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "a60a467eb646",
+      "count": 6,
+      "sig": "((T([768],torch.bfloat16,[1]),T([32768, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistilBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 110.30399799346924,
+      "branch_us": 110.30399799346924
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "744adf5e5614",
+      "count": 1,
+      "sig": "((T([30528],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 30528],torch.bfloat16,[30528, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/DistilBertForMaskedLM/full_graph_000.py",
+      "node": "addmm_37",
+      "baseline_us": 971.4879989624023,
+      "branch_us": 971.4879989624023
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "DistilBertForMaskedLM"
+}

@@ -140,6 +140,10 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     import torch._dynamo
     import torch._inductor.config as inductor_config
     from byte_accounting import count_bytes_effective, count_bytes_naive
+    # NOT ported to repro_harness.timed_min_us: these do_bench calls use the
+    # triton default return_mode='mean' (no return_mode kwarg), which differs
+    # from the canonical min-of-rep recipe. Behavior is preserved as-is; the
+    # timed region is covered by the gpu_lock acquired in main().
     from triton.testing import do_bench
 
     mod, inputs = load_repro(repro_path)

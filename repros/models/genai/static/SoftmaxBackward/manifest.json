@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "genai",
+  "model": "SoftmaxBackward",
+  "patterns": [
+    "4325c394b077",
+    "4fd6e4019857"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "static"
+}

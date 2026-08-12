@@ -1,6 +1,0 @@
-torchbench_hf_reformer_train_004_46afd36c: (T([2], i64), T([32768, 256], f32), T([8, 4096, 256], f32), S([8, 4096, 256]))
-torchbench_hf_reformer_train_006_46afd36c: (T([2], i64), T([32768, 256], f32), T([8, 4096, 256], f32), S([8, 4096, 256]))
-torchbench_hf_reformer_train_008_46afd36c: (T([2], i64), T([32768, 256], f32), T([8, 4096, 256], f32), S([8, 4096, 256]))
-torchbench_hf_reformer_train_003_46afd36c: (T([2], i64), T([32768, 256], f32), T([8, 4096, 256], f32), S([8, 4096, 256]))
-torchbench_hf_reformer_train_005_46afd36c: (T([2], i64), T([32768, 256], f32), T([8, 4096, 256], f32), S([8, 4096, 256]))
-torchbench_hf_reformer_train_007_46afd36c: (T([2], i64), T([32768, 256], f32), T([8, 4096, 256], f32), S([8, 4096, 256]))

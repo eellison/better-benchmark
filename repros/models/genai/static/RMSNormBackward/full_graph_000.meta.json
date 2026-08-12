@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [[1152000,512],"bf16",{"n":"arg0_1"}],
+    [[512],"f32",{"n":"arg1_1"}]
+  ],
+  "outputs": [
+    [[],"bf16",{"n":"output_0"}],
+    [[1152000,1],"f32",{"n":"output_1"}]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_000.py",
+  "source": {
+    "kind": "microbenchmark",
+    "suite": "genai",
+    "mode": null,
+    "model": "static/RMSNormBackward",
+    "graph": "full_graph_000.py"
+  },
+  "node_accounting": {
+    "total_call_functions": 9,
+    "counts": {
+      "fusible_in_partition": 9,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.add.Tensor": 1,
+        "aten.mean.dim": 1,
+        "aten.mul.Tensor": 2,
+        "aten.pow.Tensor_Scalar": 1,
+        "aten.rsqrt.default": 1,
+        "aten.sum.default": 1,
+        "prims.convert_element_type.default": 2
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
+}

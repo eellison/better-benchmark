@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "repvgg_a2",
+  "patterns": [
+    "2c331ef4f17f",
+    "9128d8745e42",
+    "dc61a7b3b5a3"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

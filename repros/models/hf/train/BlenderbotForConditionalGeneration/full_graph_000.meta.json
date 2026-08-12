@@ -1,44 +1,12 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "inputs": [
-    {
-      "kind": "tensor",
-      "name": "primals_1",
-      "shape": [
-        8008,
-        2560
-      ],
-      "dtype": "float32",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "randn"
-      }
-    },
-    {
-      "kind": "tensor",
-      "name": "primals_2",
-      "shape": [
-        16,
-        128
-      ],
-      "dtype": "int64",
-      "stride": null,
-      "device": null,
-      "storage_offset": 0,
-      "generator": {
-        "kind": "index",
-        "low": 0,
-        "high": 8008
-      },
-      "gen": {
-        "kind": "index",
-        "low": 0,
-        "high": 8008
-      },
-      "constraint_source": "graph_inference"
-    }
+    [[8008,2560],"f32",{"n":"primals_1"}],
+    [[16,128],"i64",{"n":"primals_2","gen":["index",0,8008],"x":{"constraint_source":"graph_inference","observed":{"min":0,"max":7997,"n_unique":1811}}}]
+  ],
+  "outputs": [
+    [[16,128,2560],"f32",{"n":"output_0"}],
+    [[16,128],"i64",{"n":"output_1","gen":["index",0,128],"x":{"constraint_source":"dtype_shape_default"}}]
   ],
   "tensor_attrs": {},
   "graph": "full_graph_000.py",
@@ -48,5 +16,22 @@
     "mode": "train",
     "model": "BlenderbotForConditionalGeneration",
     "graph": "full_graph_000.py"
-  }
+  },
+  "node_accounting": {
+    "total_call_functions": 2,
+    "counts": {
+      "fusible_in_partition": 2,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.embedding.default": 1,
+        "aten.mul.Tensor": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  },
+  "roundtrip": "ok"
 }

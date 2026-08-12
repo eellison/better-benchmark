@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "TrOCRForCausalLM",
+  "patterns": [
+    "0ada225c0a04",
+    "20ccc18dda60",
+    "35ecf6633bb0",
+    "4425f695fc68",
+    "45f7dfd4a983",
+    "644fa7675014",
+    "733dafce05a6",
+    "822c7c06b882",
+    "826ea0b5f6e4",
+    "c0d19d490a2f",
+    "c30c6c7569c8",
+    "c3ea8f7ce5c6",
+    "e87d6ebc9ded"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

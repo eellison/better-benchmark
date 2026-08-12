@@ -1,34 +1,16 @@
 {
   "schema_version": 2,
   "inputs": [
-    [[128],"f32",{"n":"arg0_1"}],
-    [[128],"f32",{"n":"arg1_1"}],
-    ["I",4,"s16"],
-    ["I",4,"s82"],
-    [[64,128,"s16","s82"],"f32",{"n":"arg4_1","st":["128*s16*s82","s16*s82","s82",1]}]
+    [[128],"bf16",{"n":"arg0_1"}],
+    [[128],"bf16",{"n":"arg1_1"}],
+    ["sym",4],
+    ["sym",4],
+    [[64,128,4,4],"bf16",{"n":"arg4_1"}]
   ],
   "outputs": [
-    [[64,128,"s16","s82"],"f32",{"n":"output_0","st":["128*s16*s82","s16*s82","s82",1]}]
+    [[64,128,4,4],"bf16",{"n":"output_0"}]
   ],
   "tensor_attrs": {},
-  "symbols": {
-    "s16": {
-      "hint": 4,
-      "range": [
-        2,
-        null
-      ]
-    },
-    "s82": {
-      "hint": 4,
-      "range": [
-        2,
-        null
-      ]
-    }
-  },
-  "guards": [],
-  "captured_dynamic": true,
   "graph": "full_graph_008.py",
   "source": {
     "kind": "model",
@@ -38,9 +20,9 @@
     "graph": "full_graph_008.py"
   },
   "node_accounting": {
-    "total_call_functions": 18,
+    "total_call_functions": 20,
     "counts": {
-      "fusible_in_partition": 17,
+      "fusible_in_partition": 19,
       "fusible_unpartitioned": 0,
       "non_fusible": 1
     },
@@ -53,7 +35,8 @@
         "aten.rsqrt.default": 1,
         "aten.sub.Tensor": 1,
         "aten.unsqueeze.default": 6,
-        "aten.var_mean.correction": 1
+        "aten.var_mean.correction": 1,
+        "prims.convert_element_type.default": 2
       },
       "fusible_unpartitioned": {},
       "non_fusible": {
@@ -61,9 +44,5 @@
       }
     }
   },
-  "roundtrip": "ok",
-  "roundtrip_spelling_notes": [
-    "missing 3a40eaee0716 (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.reshape.default', 'aten.reshape.default', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.var_mean.correction'] match a partition on the other side under a different view-op spelling)",
-    "extra 663c5e3067ba (ops ['<built-in function getitem>', '<built-in function getitem>', 'aten.add.Tensor', 'aten.add.Tensor', 'aten.mul.Tensor', 'aten.mul.Tensor', 'aten.rsqrt.default', 'aten.sub.Tensor', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.unsqueeze.default', 'aten.var_mean.correction', 'aten.view.default', 'aten.view.default'] match a partition on the other side under a different view-op spelling)"
-  ]
+  "roundtrip": "failed: A: load_full_graph_definition: ValueError: full graph sidecar tensor stride does not match forward annotations for arg4_1 dim 0: 2048 != 128"
 }

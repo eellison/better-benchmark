@@ -1,1 +1,0 @@
-torchbench_timm_efficientnet_infer_000_8fc1dbf0: (T([1280], f16), T([64, 1280, 7, 7], f16), T([1280], f16), T([1280], f16), T([1280], f16), S([64, 1280]))

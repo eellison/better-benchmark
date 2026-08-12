@@ -1,0 +1,107 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "c94a0970300f": {
+      "92fc17b6": 1
+    },
+    "0ada225c0a04": {
+      "f2e11670": 1
+    },
+    "826ea0b5f6e4": {
+      "d87997ca": 24
+    },
+    "f4578c128d74": {
+      "f2e11670": 24
+    },
+    "e87d6ebc9ded": {
+      "14c0be85": 24
+    },
+    "c0d19d490a2f": {
+      "4fa33397": 24
+    },
+    "69008a1fbe7e": {
+      "87c3ffc0": 23
+    },
+    "35ecf6633bb0": {
+      "4fa33397": 24
+    },
+    "733dafce05a6": {
+      "4fa33397": 24
+    },
+    "b19e82f2a47b": {
+      "f2e11670": 23
+    },
+    "ac21f557e1ce": {
+      "e6f344ac": 1
+    },
+    "476d7b53369e": {
+      "a587b5e7": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "0c3d1afbab67",
+      "count": 96,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([4096, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/XGLMForCausalLM/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 14.047999866306782,
+      "branch_us": 14.047999866306782
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "6d8be66835fb",
+      "count": 24,
+      "sig": "((T([512, 128, 64],torch.bfloat16,[8192, 64, 1]),T([512, 64, 128],torch.bfloat16,[8192, 1, 64])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/XGLMForCausalLM/full_graph_000.py",
+      "node": "bmm",
+      "baseline_us": 11.807999573647976,
+      "branch_us": 11.807999573647976
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "c82a0af5ed23",
+      "count": 24,
+      "sig": "((T([512, 128, 128],torch.bfloat16,[16384, 128, 1]),T([512, 128, 64],torch.bfloat16,[8192, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/XGLMForCausalLM/full_graph_000.py",
+      "node": "bmm_1",
+      "baseline_us": 13.311999849975109,
+      "branch_us": 13.311999849975109
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "d278b99be657",
+      "count": 24,
+      "sig": "((T([4096],torch.bfloat16,[1]),T([4096, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/XGLMForCausalLM/full_graph_000.py",
+      "node": "addmm_4",
+      "baseline_us": 28.384000062942505,
+      "branch_us": 28.384000062942505
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "83251877a76b",
+      "count": 24,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([4096, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/XGLMForCausalLM/full_graph_000.py",
+      "node": "addmm_5",
+      "baseline_us": 29.56799976527691,
+      "branch_us": 29.56799976527691
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "da79953b1fc8",
+      "count": 1,
+      "sig": "((T([4096, 1024],torch.bfloat16,[1024, 1]),T([1024, 256008],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/infer/XGLMForCausalLM/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 1348.5759496688843,
+      "branch_us": 1348.5759496688843
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "infer",
+  "model": "XGLMForCausalLM"
+}

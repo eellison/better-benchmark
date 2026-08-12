@@ -1,0 +1,153 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "b138a1e42dbc": {
+      "187a2d53": 1
+    },
+    "7899d74e0838": {
+      "7fd9f949": 2,
+      "2b7370d5": 2,
+      "6ff82f3b": 2,
+      "f50736b8": 2
+    },
+    "2c331ef4f17f": {
+      "e4b64a12": 1,
+      "1fa31355": 1,
+      "5e705d74": 1
+    },
+    "81485f33f5b9": {
+      "fd6e1886": 1,
+      "cd893d5b": 1,
+      "28e6bebb": 2
+    },
+    "ef561a2def29": {
+      "e4de5f8d": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "a93d5ba498c0",
+      "count": 1,
+      "sig": "((T([8, 3, 224, 224],torch.bfloat16,[150528, 50176, 224, 1]),T([64, 3, 7, 7],torch.bfloat16,[147, 49, 7, 1]),None,[2,2],[3,3],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 98.01600128412247,
+      "branch_us": 98.01600128412247
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "0c5b9bf45112",
+      "count": 4,
+      "sig": "((T([8, 64, 56, 56],torch.bfloat16,[200704, 3136, 56, 1]),T([64, 64, 3, 3],torch.bfloat16,[576, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_1",
+      "baseline_us": 25.536000728607178,
+      "branch_us": 25.536000728607178
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "8ee8b181faef",
+      "count": 1,
+      "sig": "((T([8, 64, 56, 56],torch.bfloat16,[200704, 3136, 56, 1]),T([128, 64, 3, 3],torch.bfloat16,[576, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_5",
+      "baseline_us": 22.175999358296394,
+      "branch_us": 22.175999358296394
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c88c8b61f723",
+      "count": 3,
+      "sig": "((T([8, 128, 28, 28],torch.bfloat16,[100352, 784, 28, 1]),T([128, 128, 3, 3],torch.bfloat16,[1152, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_6",
+      "baseline_us": 21.503999829292297,
+      "branch_us": 21.503999829292297
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "fff1933f8792",
+      "count": 1,
+      "sig": "((T([8, 64, 56, 56],torch.bfloat16,[200704, 3136, 56, 1]),T([128, 64, 1, 1],torch.bfloat16,[64, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_7",
+      "baseline_us": 19.168000668287277,
+      "branch_us": 19.168000668287277
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1d9a4f166bfe",
+      "count": 1,
+      "sig": "((T([8, 128, 28, 28],torch.bfloat16,[100352, 784, 28, 1]),T([256, 128, 3, 3],torch.bfloat16,[1152, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_10",
+      "baseline_us": 21.63200080394745,
+      "branch_us": 21.63200080394745
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "e6520507333a",
+      "count": 3,
+      "sig": "((T([8, 256, 14, 14],torch.bfloat16,[50176, 196, 14, 1]),T([256, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_11",
+      "baseline_us": 23.423999547958374,
+      "branch_us": 23.423999547958374
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "8630472e2d86",
+      "count": 1,
+      "sig": "((T([8, 128, 28, 28],torch.bfloat16,[100352, 784, 28, 1]),T([256, 128, 1, 1],torch.bfloat16,[128, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_12",
+      "baseline_us": 16.00000075995922,
+      "branch_us": 16.00000075995922
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "c76c69522e61",
+      "count": 1,
+      "sig": "((T([8, 256, 14, 14],torch.bfloat16,[50176, 196, 14, 1]),T([512, 256, 3, 3],torch.bfloat16,[2304, 9, 3, 1]),None,[2,2],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_15",
+      "baseline_us": 27.55199931561947,
+      "branch_us": 27.55199931561947
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "1179be685e03",
+      "count": 3,
+      "sig": "((T([8, 512, 7, 7],torch.bfloat16,[25088, 49, 7, 1]),T([512, 512, 3, 3],torch.bfloat16,[4608, 9, 3, 1]),None,[1,1],[1,1],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_16",
+      "baseline_us": 35.74400022625923,
+      "branch_us": 35.74400022625923
+    },
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "d8b4a39fced8",
+      "count": 1,
+      "sig": "((T([8, 256, 14, 14],torch.bfloat16,[50176, 196, 14, 1]),T([512, 256, 1, 1],torch.bfloat16,[256, 1, 1, 1]),None,[2,2],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "convolution_17",
+      "baseline_us": 16.1920003592968,
+      "branch_us": 16.1920003592968
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "325ac297b849",
+      "count": 1,
+      "sig": "((T([1000],torch.bfloat16,[1]),T([8, 512],torch.bfloat16,[512, 1]),T([512, 1000],torch.bfloat16,[1, 512])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/torchbench/infer/resnet18/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 7.7760000713169575,
+      "branch_us": 7.7760000713169575
+    }
+  ],
+  "trace_errors": [],
+  "suite": "torchbench",
+  "mode": "infer",
+  "model": "resnet18"
+}

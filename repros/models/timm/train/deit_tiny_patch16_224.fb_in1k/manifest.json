@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_tiny_patch16_224.fb_in1k",
+  "patterns": [
+    "04d85912d998",
+    "0931873d4f42",
+    "139a3020e8bf",
+    "2b21beb0932e",
+    "38fe02d3252c",
+    "51b3bd5aa388",
+    "5b2567b5fdd7",
+    "6d68a671ec4a",
+    "826ea0b5f6e4",
+    "8bb40810003c",
+    "a42e20fae37b",
+    "c2bf513c1ebf",
+    "ccd411f2a45d",
+    "e2ecdbc22ad9"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

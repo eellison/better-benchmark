@@ -1,4 +1,0 @@
-torchbench_functorch_dp_cifar10_infer_000_2e3dbba9: (T([64, 256, 2, 2], f32), T([256], f32), T([256], f32), S([64, 32, 8, 4]), S([64, 256, 2, 2]))
-torchbench_functorch_dp_cifar10_infer_000_90159c73: (T([64, 512, 1, 1], f32), T([512], f32), T([512], f32), S([64, 32, 16, 1]), S([64, 512, 1, 1]))
-torchbench_functorch_dp_cifar10_infer_000_98154fb6: (T([64, 64, 8, 8], f32), T([64], f32), T([64], f32), S([64, 32, 2, 64]), S([64, 64, 8, 8]))
-torchbench_functorch_dp_cifar10_infer_000_9b43ee34: (T([64, 128, 4, 4], f32), T([128], f32), T([128], f32), S([64, 32, 4, 16]), S([64, 128, 4, 4]))

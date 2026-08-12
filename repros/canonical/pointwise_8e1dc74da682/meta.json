@@ -6,22 +6,13 @@
   "origin_ops": [
     "aten.add.Tensor"
   ],
-  "n_models": 15,
+  "n_models": 6,
   "models": [
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer",
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_000",
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train",
-    "timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_000",
-    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_infer_infer_000",
-    "timm_timm_convnextv2_nano.fcmae_ft_in22k_in1k_train_train_000",
-    "timm_timm_visformer_small_infer_infer_000",
-    "timm_timm_visformer_small_train_train_000",
-    "timm_visformer_small_infer",
-    "timm_visformer_small_infer_000",
-    "timm_visformer_small_train",
-    "timm_visformer_small_train_000",
-    "torchbench_demucs_infer_002",
-    "torchbench_demucs_train_002",
-    "torchbench_hf_Reformer_infer_004"
+    "timm/infer/convnextv2_nano.fcmae_ft_in22k_in1k",
+    "timm/infer/visformer_small",
+    "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k",
+    "timm/train/visformer_small",
+    "torchbench/infer/demucs",
+    "torchbench/train/demucs"
   ]
 }

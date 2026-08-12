@@ -1,0 +1,43 @@
+base 5e2ab3055de1: 1727 patterns, 158 models
+
+ # commit         state  vs-base gm      seg  matched-models
+ 1 5e2ab3055de1     OK      +0.00%           156
+ 2 97385fb32737     OK      +1.93%  +1.93pp  156
+ 3 afc3d5956d59     OK      +3.75%  +1.79pp  156
+ 4 905450a5a5df     OK      +4.05%  +0.29pp  156
+ 5 b1e8a30af150     OK      +9.96%  +5.67pp  156
+ 6 4427bfd553cb     OK     +10.34%  +0.35pp  156
+ 7 d8e9914094a1     OK     +10.53%  +0.17pp  156
+ 8 d95f59fb1bc6     OK     +10.46%  -0.07pp  156
+ 9 12e839eb0fc4PARTIAL  (ok=1132/1727, skip)
+10 c465f1751c6fPARTIAL  (ok=830/1727, skip)
+11 d85ab5508e36PARTIAL  (ok=831/1727, skip)
+12 44802547aa9c     OK     +10.18%  -0.25pp  156
+13 1406552b9d3c     OK     +10.59%  +0.37pp  156
+14 5489b8c2bb9e     OK     +10.41%  -0.16pp  156
+15 bdc289b36441     OK     +10.26%  -0.14pp  156
+16 e9a67c98a8c2     OK     +10.33%  +0.06pp  156
+17 9dde2c59a519     OK     +12.05%  +1.56pp  156
+18 daa79cd25ca9PARTIAL  (ok=1150/1727, skip)
+
+=== READING (interim, coarse pass, kernel-fusible geomean vs 5e2ab base) ===
+Win is CONCENTRATED, not spread. Movers:
+  +5.67pp  seg 4->5 (905450a5..b1e8a30a) -- BIGGEST. 9-commit bundle; real candidates:
+           b1e8a30a "Materialize multi-user transcendental nodes" (realize-on-reuse) <- prime #1 PR suspect
+           + 86c5451e BN-affine-fold, 6fdaadaa cat-through-reduction, a73d1583 rsqrt-canon
+           (2 revert-pairs in the gap net to zero) -> NEEDS REFINEMENT to split
+  +1.93pp  mega-commit 97385fb (CORE bundle) -- real but modest; the 6-feature grab-bag
+  +1.79pp  seg ->3 (afc3d5956d59)
+  +1.56pp  seg 16->17 (9dde2c59) -- scalar-acc ungate + segment-split + online-softmax-combine + scatter-decode
+FLAT MIDDLE: states 6-16 move <0.4pp each (~11 commits) -> DROP/bundle candidates for landing.
+NOTE: kernel-fusible geomean (~+12% cumulative) is steeper than model-level +4.51% (not extern-diluted); ratios are what matter for attribution.
+
+=== OPEN QUESTION on the #1 result (2026-06-23) — DO NOT cite as settled ===
+a73d1583b34 (rsqrt canonicalization, 45-line peephole) shows +5.64pp geomean, concentrated
+in ~27 BN-heavy conv-inference models (repvgg +122%, mobilenetv2/inception +85%, ...).
+VERIFIED real (not noise): repvgg fusible_us steps 1825->843 exactly at pos23 and HOLDS for
+60 commits (noise wobbles ±3%, doesn't latch). BUT the 2.2x MAGNITUDE from a pure algebraic
+peephole is implausible on its face — the "rsqrt unlocks a BN-epilogue fusion" mechanism is
+an UNVERIFIED hypothesis. STILL OWED before citing: dump before/after Triton for one repvgg
+conv-BN kernel (pos22 vs pos23), confirm a fusion/materialization actually changed (vs autotune
+config swing / measurement quirk). CPU-cheap. Until then: step is real, magnitude unexplained.

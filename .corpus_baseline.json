@@ -1,6 +1,6 @@
 {
-  "min_repro_count": 1482,
-  "min_shapes_files": 1483,
-  "min_shape_entries": 5299,
-  "expected_suites": ["hf", "timm", "torchbench", "vllm", "genai"]
+  "min_repro_count": 1727,
+  "min_shapes_files": 1727,
+  "min_shape_entries": 4977,
+  "expected_suites": ["hf", "timm", "torchbench", "genai"]
 }

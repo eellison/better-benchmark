@@ -177,6 +177,21 @@ Example:
     # (T([512], bf16), T([128,512,7,7], bf16, stride=(25088,1,3584,512)))
     def oracle_forward(inputs, *, BLOCK, num_warps): ...
 
+### Autotuning is encouraged — a single non-autotuning oracle is a non-goal
+
+The per-point dispatch mechanism does NOT preclude autotuning. Two equally
+good patterns:
+
+- Multi-dispatch to the SAME kernel that still autotunes over a config grid —
+  this is more robust, even though vastly different shapes may reasonably
+  settle on different config sets.
+- Register DIFFERENT implementations for different shapes, allowing different
+  kernel code, autotuning configs, etc.
+
+Either way, having a single oracle that does NOT autotune is a non-goal. It is
+fine — expected — to carry multiple configs; don't collapse to one fixed
+`BLOCK`/`num_warps` just because the registration lets you.
+
 ## Inputs: structured, never parsed
 
 New-corpus shapes.json points carry structured `inputs` (compact codec:
@@ -345,6 +360,29 @@ n_points, status, old_oracle_candidates, owner, notes).
 - The queue row carries per-point measured numbers, not estimates.
 - For big closures: the composability check (AGENT_INSTRUCTIONS rule 6) —
   read the source model's full graph before claiming model-level impact.
+
+## Numerics: flag, do not block
+
+Bad numerics are NON-BLOCKING. An oracle whose output drifts from the
+reference at the precision level — accumulation order, rounding, ULP-scale
+diffs, fp64-anchor artifacts — is FLAGGED for investigation, not sent back
+to needs_work. Keep the row as a measured oracle and record a numerics flag
+in its note; the drift is a thing to look at later, not a gate failure.
+
+Corollary: do NOT hand-tune an oracle to slip under the numerics gate, and
+do not prescribe a specific rounding order or tolerance per oracle — the
+reference may itself be stricter than real Inductor output, so gate
+strictness is resolved centrally, not patched pattern-by-pattern.
+
+The ONE exception that still blocks: bench-hacking. Computing the answer two
+ways and selecting per-element whichever lands inside the tolerance
+(`tl.where(abs(a-b) <= tol, ...)`, clamp-to-reference, etc.) is not a
+numerics issue — it fabricates a pass and goes back to needs_work regardless
+of whether the gate is green.
+
+What still blocks (correctness/integrity, not precision): wrong math,
+subset scope (not a full floor), CUDAGraph-invalid measurements, format
+violations, missing oracle.py.
 
 ## What you do NOT do
 

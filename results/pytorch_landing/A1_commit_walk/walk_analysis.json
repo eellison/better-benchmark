@@ -1,0 +1,315 @@
+{
+  "base_sha": "5e2ab3055de1bc4bffe2e7feffe1fc7ff7af8b10",
+  "n_benched_states": 6,
+  "final_state_vs_base": {
+    "geomean": 3.9265,
+    "median": 1.6221,
+    "n": 158
+  },
+  "per_segment_deltas_in_order": [
+    {
+      "order": 0,
+      "sha": "97385fb3273",
+      "subject": "[inductor] All kernel optimization improvements (June 2026 session)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U07:slice_scatter_elision",
+        "U08:as_strided_scatter_elision",
+        "U09:linear_reduction_elimination",
+        "U10:layout_transform_store_sinking",
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils",
+        "U30:MOR",
+        "U31:CE gather-into-softmax",
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ],
+      "segment_commits": 1,
+      "cum_geomean_vs_base": 0.7131,
+      "cum_median_vs_base": 0.0512,
+      "delta_geomean": 0.7131,
+      "delta_median": 0.0512,
+      "single_commit": true
+    },
+    {
+      "order": 5,
+      "sha": "afc3d5956d5",
+      "subject": "[inductor] Elide constant-index bounds checks + split-reductions-for-fusion + index-through-norm",
+      "a0_features": [
+        "U16:index_through_norm",
+        "U24:split_multilayer_second_step + split_reductions_for_fusion"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 1.489,
+      "cum_median_vs_base": 0.3556,
+      "delta_geomean": 0.7759,
+      "delta_median": 0.3044,
+      "single_commit": false
+    },
+    {
+      "order": 10,
+      "sha": "905450a5a5d",
+      "subject": "[inductor] WIP: scheduler-level inline_recomputable_producers pass",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 1.6855,
+      "cum_median_vs_base": 0.424,
+      "delta_geomean": 0.1965,
+      "delta_median": 0.0684,
+      "single_commit": false
+    },
+    {
+      "order": 15,
+      "sha": "b1e8a30af15",
+      "subject": "[inductor] Materialize multi-user transcendental nodes to avoid broadcast recomputation (sum_51d2ed69e698, 2.19x->1.27x)",
+      "a0_features": [
+        "U26:ir realize-on-reuse: materialize heavy transcendentals + indirect-indexed nodes"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 3.7292,
+      "cum_median_vs_base": 1.1154,
+      "delta_geomean": 2.0437,
+      "delta_median": 0.6914,
+      "single_commit": false
+    },
+    {
+      "order": 20,
+      "sha": "4427bfd553c",
+      "subject": "[inductor] Extend scatter_add_into_fusion to handle dtype cast variant (sum_sum_ceb449ea29e4, 2.18x->0.87x)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U03:scatter_add_into_fusion"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 3.8966,
+      "cum_median_vs_base": 1.3741,
+      "delta_geomean": 0.1674,
+      "delta_median": 0.2587,
+      "single_commit": false
+    },
+    {
+      "order": 22,
+      "sha": "d8e9914094a",
+      "subject": "[inductor] Add scatter read bypass pass for Longformer attention (8->5 kernels)",
+      "a0_features": [
+        "U11:diagonal_skew_elimination"
+      ],
+      "segment_commits": 2,
+      "cum_geomean_vs_base": 3.9265,
+      "cum_median_vs_base": 1.6221,
+      "delta_geomean": 0.0299,
+      "delta_median": 0.248,
+      "single_commit": false
+    }
+  ],
+  "ranked_by_abs_geomean_delta": [
+    {
+      "order": 15,
+      "sha": "b1e8a30af15",
+      "subject": "[inductor] Materialize multi-user transcendental nodes to avoid broadcast recomputation (sum_51d2ed69e698, 2.19x->1.27x)",
+      "a0_features": [
+        "U26:ir realize-on-reuse: materialize heavy transcendentals + indirect-indexed nodes"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 3.7292,
+      "cum_median_vs_base": 1.1154,
+      "delta_geomean": 2.0437,
+      "delta_median": 0.6914,
+      "single_commit": false
+    },
+    {
+      "order": 5,
+      "sha": "afc3d5956d5",
+      "subject": "[inductor] Elide constant-index bounds checks + split-reductions-for-fusion + index-through-norm",
+      "a0_features": [
+        "U16:index_through_norm",
+        "U24:split_multilayer_second_step + split_reductions_for_fusion"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 1.489,
+      "cum_median_vs_base": 0.3556,
+      "delta_geomean": 0.7759,
+      "delta_median": 0.3044,
+      "single_commit": false
+    },
+    {
+      "order": 0,
+      "sha": "97385fb3273",
+      "subject": "[inductor] All kernel optimization improvements (June 2026 session)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U07:slice_scatter_elision",
+        "U08:as_strided_scatter_elision",
+        "U09:linear_reduction_elimination",
+        "U10:layout_transform_store_sinking",
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils",
+        "U30:MOR",
+        "U31:CE gather-into-softmax",
+        "U33:triton_heuristics: persistent-reduction-threshold raise"
+      ],
+      "segment_commits": 1,
+      "cum_geomean_vs_base": 0.7131,
+      "cum_median_vs_base": 0.0512,
+      "delta_geomean": 0.7131,
+      "delta_median": 0.0512,
+      "single_commit": true
+    },
+    {
+      "order": 10,
+      "sha": "905450a5a5d",
+      "subject": "[inductor] WIP: scheduler-level inline_recomputable_producers pass",
+      "a0_features": [
+        "U25:scheduler inline_recomputable_producers + inline_cheap_producers_into_stencils"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 1.6855,
+      "cum_median_vs_base": 0.424,
+      "delta_geomean": 0.1965,
+      "delta_median": 0.0684,
+      "single_commit": false
+    },
+    {
+      "order": 20,
+      "sha": "4427bfd553c",
+      "subject": "[inductor] Extend scatter_add_into_fusion to handle dtype cast variant (sum_sum_ceb449ea29e4, 2.18x->0.87x)",
+      "a0_features": [
+        "U01:scatter_reduce_fusion",
+        "U03:scatter_add_into_fusion"
+      ],
+      "segment_commits": 5,
+      "cum_geomean_vs_base": 3.8966,
+      "cum_median_vs_base": 1.3741,
+      "delta_geomean": 0.1674,
+      "delta_median": 0.2587,
+      "single_commit": false
+    },
+    {
+      "order": 22,
+      "sha": "d8e9914094a",
+      "subject": "[inductor] Add scatter read bypass pass for Longformer attention (8->5 kernels)",
+      "a0_features": [
+        "U11:diagonal_skew_elimination"
+      ],
+      "segment_commits": 2,
+      "cum_geomean_vs_base": 3.9265,
+      "cum_median_vs_base": 1.6221,
+      "delta_geomean": 0.0299,
+      "delta_median": 0.248,
+      "single_commit": false
+    }
+  ],
+  "xcheck_trajectories": {
+    "torchbench/infer/pytorch_unet": [
+      {
+        "order": -1,
+        "sha": "5e2ab3055de",
+        "pct_vs_base": null
+      },
+      {
+        "order": 0,
+        "sha": "97385fb3273",
+        "pct_vs_base": -0.49562764886095295
+      },
+      {
+        "order": 5,
+        "sha": "afc3d5956d5",
+        "pct_vs_base": 0.20223869407497308
+      },
+      {
+        "order": 10,
+        "sha": "905450a5a5d",
+        "pct_vs_base": -0.49847643690393834
+      },
+      {
+        "order": 15,
+        "sha": "b1e8a30af15",
+        "pct_vs_base": 4.355256987666236
+      },
+      {
+        "order": 20,
+        "sha": "4427bfd553c",
+        "pct_vs_base": 4.653392775735516
+      },
+      {
+        "order": 22,
+        "sha": "d8e9914094a",
+        "pct_vs_base": 4.6211103108482785
+      }
+    ],
+    "hf/infer/AllenaiLongformerBase": [
+      {
+        "order": -1,
+        "sha": "5e2ab3055de",
+        "pct_vs_base": null
+      },
+      {
+        "order": 0,
+        "sha": "97385fb3273",
+        "pct_vs_base": 6.917443708083101
+      },
+      {
+        "order": 5,
+        "sha": "afc3d5956d5",
+        "pct_vs_base": 6.68543518003489
+      },
+      {
+        "order": 10,
+        "sha": "905450a5a5d",
+        "pct_vs_base": 7.031218950617611
+      },
+      {
+        "order": 15,
+        "sha": "b1e8a30af15",
+        "pct_vs_base": 7.061555129008563
+      },
+      {
+        "order": 20,
+        "sha": "4427bfd553c",
+        "pct_vs_base": 6.884204062900791
+      },
+      {
+        "order": 22,
+        "sha": "d8e9914094a",
+        "pct_vs_base": -7.123802439165824
+      }
+    ],
+    "torchbench/infer/pyhpc_turbulent_kinetic_energy": [
+      {
+        "order": -1,
+        "sha": "5e2ab3055de",
+        "pct_vs_base": null
+      },
+      {
+        "order": 0,
+        "sha": "97385fb3273",
+        "pct_vs_base": -5.246764664012432
+      },
+      {
+        "order": 5,
+        "sha": "afc3d5956d5",
+        "pct_vs_base": -10.389751791253106
+      },
+      {
+        "order": 10,
+        "sha": "905450a5a5d",
+        "pct_vs_base": -10.874072636781639
+      },
+      {
+        "order": 15,
+        "sha": "b1e8a30af15",
+        "pct_vs_base": -7.437721714915494
+      },
+      {
+        "order": 20,
+        "sha": "4427bfd553c",
+        "pct_vs_base": -9.594090280843966
+      },
+      {
+        "order": 22,
+        "sha": "d8e9914094a",
+        "pct_vs_base": -10.885603921676575
+      }
+    ]
+  },
+  "noise_floor_pp": 0.82
+}

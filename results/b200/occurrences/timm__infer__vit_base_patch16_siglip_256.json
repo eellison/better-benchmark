@@ -1,0 +1,159 @@
+{
+  "n_graphs": 1,
+  "fusible": {
+    "d572db383c8a": {
+      "3acce8ec": 1
+    },
+    "826ea0b5f6e4": {
+      "6942db17": 1,
+      "5d3406ab": 12
+    },
+    "99472cd8aaf2": {
+      "53185b1e": 1
+    },
+    "93756b266db9": {
+      "a6d7e457": 1
+    },
+    "176e8f2b992e": {
+      "cbc8ee1c": 1
+    },
+    "0ada225c0a04": {
+      "9801ab6a": 1
+    },
+    "f4578c128d74": {
+      "9801ab6a": 23
+    },
+    "a42e20fae37b": {
+      "5bfb1085": 12
+    },
+    "84afcf996095": {
+      "3eee3489": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.convolution.default",
+      "shape_hash": "f288398448a0",
+      "count": 1,
+      "sig": "((T([128, 3, 256, 256],torch.bfloat16,[196608, 1, 768, 3]),T([768, 3, 16, 16],torch.bfloat16,[768, 1, 48, 3]),T([768],torch.bfloat16,[1]),[16,16],[0,0],[1,1],False,[0,0],1),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "convolution",
+      "baseline_us": 1028.0640125274658,
+      "branch_us": 1028.0640125274658
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "474dae3cd14d",
+      "count": 12,
+      "sig": "((T([2304],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 2304],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm",
+      "baseline_us": 71.42399996519089,
+      "branch_us": 71.42399996519089
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "ede5535ddf1f",
+      "count": 12,
+      "sig": "((T([128, 12, 256, 64],torch.bfloat16,[589824, 64, 2304, 1]),T([128, 12, 256, 64],torch.bfloat16,[589824, 64, 2304, 1]),T([128, 12, 256, 64],torch.bfloat16,[589824, 64, 2304, 1]),None,False),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention",
+      "baseline_us": 57.11999908089638,
+      "branch_us": 57.11999908089638
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "d48c19bdeb6b",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_1",
+      "baseline_us": 34.20799970626831,
+      "branch_us": 34.20799970626831
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "7dffa442958d",
+      "count": 12,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_2",
+      "baseline_us": 93.88799965381622,
+      "branch_us": 93.88799965381622
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "a60a467eb646",
+      "count": 12,
+      "sig": "((T([768],torch.bfloat16,[1]),T([32768, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_3",
+      "baseline_us": 110.30399799346924,
+      "branch_us": 110.30399799346924
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "14a0a5d87309",
+      "count": 1,
+      "sig": "((T([1536],torch.bfloat16,[1]),T([32768, 768],torch.bfloat16,[768, 1]),T([768, 1536],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_48",
+      "baseline_us": 50.81599950790405,
+      "branch_us": 50.81599950790405
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "8f7d490f60a3",
+      "count": 1,
+      "sig": "((T([128, 768],torch.bfloat16,[0, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "mm",
+      "baseline_us": 9.983999654650688,
+      "branch_us": 9.983999654650688
+    },
+    {
+      "target": "aten._scaled_dot_product_cudnn_attention.default",
+      "shape_hash": "b8e99e2267b4",
+      "count": 1,
+      "sig": "((T([128, 12, 1, 64],torch.bfloat16,[768, 64, 768, 1]),T([128, 12, 256, 64],torch.bfloat16,[393216, 64, 1536, 1]),T([128, 12, 256, 64],torch.bfloat16,[393216, 64, 1536, 1]),None,False),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "_scaled_dot_product_cudnn_attention_12",
+      "baseline_us": 30.33600002527237,
+      "branch_us": 30.33600002527237
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "3d0cf6d45025",
+      "count": 1,
+      "sig": "((T([768],torch.bfloat16,[1]),T([128, 768],torch.bfloat16,[768, 1]),T([768, 768],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_49",
+      "baseline_us": 7.648000027984381,
+      "branch_us": 7.648000027984381
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "7adb428b7351",
+      "count": 1,
+      "sig": "((T([3072],torch.bfloat16,[1]),T([128, 768],torch.bfloat16,[768, 1]),T([768, 3072],torch.bfloat16,[1, 768])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_50",
+      "baseline_us": 9.119999594986439,
+      "branch_us": 9.119999594986439
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "6db4e1ffc06d",
+      "count": 1,
+      "sig": "((T([768],torch.bfloat16,[1]),T([128, 3072],torch.bfloat16,[3072, 1]),T([3072, 768],torch.bfloat16,[1, 3072])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/timm/infer/vit_base_patch16_siglip_256/full_graph_000.py",
+      "node": "addmm_51",
+      "baseline_us": 11.455999687314034,
+      "branch_us": 11.455999687314034
+    }
+  ],
+  "trace_errors": [],
+  "suite": "timm",
+  "mode": "infer",
+  "model": "vit_base_patch16_siglip_256"
+}

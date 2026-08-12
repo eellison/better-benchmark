@@ -1,0 +1,36 @@
+{
+  "question": "Does the R1 inline-profitability patch fix ONLY the pytorch_unet stencil regression (class A), or ALSO the transformer reduction regressions (class B)?",
+  "answer": "NO — R1 covers class A only. Class-B codegen is BYTE-IDENTICAL under the patch (modulo cache-path comments); timings are within noise of stock. U25 needs an additional cost-model term for the nk-unchanged case before landing.",
+  "provenance": {
+    "date": "2026-07-14",
+    "hardware": "4x B200, SM clocks locked 1852MHz (bench_parallel --lock-clocks default on)",
+    "torch_head": "daa79cd25ca (tmp/pytorch-work, checkout untouched)",
+    "method": "PYTHONPATH shadow worktrees at HEAD daa79cd25ca: wt_stock (pristine), wt_r1 (HEAD + R1_inline_profitability_gate_fix.patch), wt_off (HEAD + inline_recomputable_producers=False). Built .so/lib/bin/version.py symlinked from /tmp/pytorch-work. One bench_parallel invocation per arm, --all-shapes --gpus 0,1,2,3, fresh TORCHINDUCTOR_CACHE_DIR per arm. Codegen comparison + R1_DEBUG decision trace via results/regression_investigation/bench_repro_arm.py (locked tool).",
+    "arm_files": ["arm_stock.json", "arm_stock_repeat.json", "arm_r1.json", "arm_off.json"],
+    "note_env_var": "TORCHINDUCTOR_INLINE_RECOMPUTABLE_PRODUCERS env var does NOT override the config (verified); arm_stock_repeat.json is that run, kept as a stock repeatability check (matches arm_stock within 0.1-0.8us).",
+    "worktrees": "removed after run"
+  },
+  "results_coord_descent_us": {
+    "pointwise_457ec7dce9c1": {"class": "A (unet stencil, patch control)", "model": "pytorch_unet", "stock": 737.2, "r1": 217.0, "off": 216.3, "r1_over_stock": 0.294, "nk_stock_r1_off": [2, 3, 3], "codegen_changed_under_r1": true, "verdict": "FIXED by R1 (3.40x, = pass-off level); confirms patch was applied and active"},
+    "any_amax_amax_af50781fc699": {"class": "B (XLNet)", "stock": 144.2, "r1": 144.2, "off": 108.4, "r1_over_stock": 1.000, "off_over_stock": 0.752, "nk_stock_r1_off": [1, 1, 1], "codegen_changed_under_r1": false, "verdict": "NOT fixed; regression (1.33x vs off) fully intact under R1"},
+    "sum_68fcffe5c7fb": {"class": "B (XGLM)", "stock": 28.3, "r1": 28.4, "off": 19.8, "r1_over_stock": 1.005, "off_over_stock": 0.701, "nk_stock_r1_off": [1, 1, 1], "codegen_changed_under_r1": false, "verdict": "NOT fixed; regression (1.43x vs off) fully intact under R1"},
+    "sum_02fe2c82b1fd": {"class": "B (GPTNeo)", "stock": 29.5, "r1": 30.1, "off": 22.2, "r1_over_stock": 1.022, "off_over_stock": 0.755, "nk_stock_r1_off": [2, 2, 3], "codegen_changed_under_r1": false, "verdict": "NOT fixed; regression (1.33x vs off) fully intact under R1"},
+    "pointwise_07c6ea330ab4": {"class": "win control (Longformer)", "stock": 15.1, "r1": 15.2, "off": 19.2, "r1_over_stock": 1.004, "off_over_stock": 1.268, "nk_stock_r1_off": [1, 1, 2], "codegen_changed_under_r1": false, "verdict": "win PRESERVED under R1 (still inlines, 1.27x faster than pass-off)"}
+  },
+  "codegen_identity_check": "grep -v '# kernel path:' md5sum: stock vs r1 content-identical for all three class-B repros; the only diff lines are tempdir cache paths in comments.",
+  "why_r1_cannot_reach_class_B": {
+    "evidence": "R1_DEBUG trace of _is_inline_profitable in the patched arm (dbg/DBG_*).",
+    "mechanism": "R1 prices replayed producer-input loads as extra_loads = consumer_numel * stencil_reads - producer_numel. Every class-B inline decision has stencil_reads = 1 (the consumer reads the producer buffer at exactly ONE position — no stencil), and for the full-size consumer consumer_numel == producer_numel, so extra_loads = 0 and the R1 term adds nothing. For the reduction consumer, consumer_numel (post-reduction, e.g. 131072) << producer_numel (67108864), so extra_loads is clamped to 0. Every class-B decision still returns inline=True with identical costs to stock.",
+    "traced_decisions": {
+      "any_amax_amax_af50781fc699": "buf0(prod 67.1M, ops 6, nbr 2) and buf8(prod 67.1M, ops 29, nbr 2) each inlined into 2 consumers (reduction cons=131072 and full-size epilogue cons=67.1M), all stencil_reads=1, all inline=True under R1",
+      "sum_68fcffe5c7fb": "buf0(prod 8.39M, ops 19, nbr 4) into cons 65536 + cons 8.39M; buf2(ops 15) into cons 8.39M; all stencil_reads=1, inline=True",
+      "sum_02fe2c82b1fd": "buf2(prod 524288 -> cons 8.39M, nbr 0) and buf3(prod 8.39M, nbr 1) into cons 65536 + 8.39M; stencil_reads=1, inline=True"
+    }
+  },
+  "what_distinguishes_class_B_from_the_wins": {
+    "structure": "Class B inlines a full-size producer into a REDUCTION consumer that also has a full-size post-reduction epilogue re-reading the same producer. Two independent damage channels, both unpriced by R1: (1) multi-consumer recompute — the producer is inlined into >=2 consumers (the reduction accumulator AND the epilogue), so its full-size input loads are duplicated once per consumer; _is_inline_profitable evaluates each consumer in isolation and credits the full write+read memory_saved to each decision, though the buffer is eliminated only once. (2) persistent->looped reduction downgrade — with the producer materialized (pass off), the fused reduction compiles as a single-pass persistent_reduction (XLNet: triton_per, num_load=2; XGLM: triton_per, num_load=7); with it inlined, the kernel becomes a multi-pass triton_red (XLNet: 3 r0 loops, num_load=6; XGLM: 2 r0 loops, num_load=10) that re-streams the full-size inputs once per r0 pass. Same kernel count, ~1.3-1.4x more HBM traffic.",
+    "win_contrast": "The Longformer win (pointwise_07c6ea330ab4) inlines a producer into a single pointwise-style consumer pass: one consumer body, no reduction-loop replay, so eliminating the 75MB intermediate is a pure save (19.2 -> 15.1us).",
+    "suggested_cost_terms": "For U25 to land: (a) price producer input re-loads per r0 pass when the consumer is a non-persistent reduction (or when inlining pushes it over the persistent-reduction threshold — the XGLM kernel flipped per->red exactly because of the inline), and (b) account multi-consumer inlining: divide memory_saved across consumers (buffer eliminated once) and sum the recompute/reload cost across all consumers of the producer."
+  },
+  "bottom_line": "R1 covers class B: NO. Verdict for U25: NOT 'apply R1 and land'. R1 is necessary (fixes class A 3.4x, preserves the wins) but not sufficient — landing needs an additional cost-model term for the nk-unchanged reduction case (multi-consumer + persistent-reduction-loss pricing, per above)."
+}

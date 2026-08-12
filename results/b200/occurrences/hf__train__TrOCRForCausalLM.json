@@ -1,0 +1,278 @@
+{
+  "n_graphs": 9,
+  "fusible": {
+    "a4aa707cd2f4": {
+      "835de63c": 1
+    },
+    "645fb123c324": {
+      "59aa3e3a": 1
+    },
+    "9c4f8abf00ac": {
+      "d7517139": 1
+    },
+    "f4b9805af13f": {
+      "c77d0efc": 1
+    },
+    "8bb40810003c": {
+      "19d8a989": 1,
+      "17dcd71b": 1,
+      "c4cfc269": 4
+    },
+    "ccd411f2a45d": {
+      "3dd2d471": 5,
+      "c2b1a89d": 1
+    },
+    "826ea0b5f6e4": {
+      "67d3fea7": 1
+    },
+    "dc4abd356145": {
+      "042c38d1": 1
+    },
+    "e87d6ebc9ded": {
+      "a3cab238": 1
+    },
+    "02064a1e60ac": {
+      "19ef62d0": 1
+    },
+    "5dab5f6dd93f": {
+      "b642f4d6": 1
+    },
+    "c509446d4a84": {
+      "b642f4d6": 1
+    },
+    "783b3f21ba50": {
+      "b642f4d6": 1
+    },
+    "36f727d981e4": {
+      "0a855bca": 2
+    },
+    "3f000d9caa57": {
+      "e195ea0d": 1
+    },
+    "52fe1925ccda": {
+      "03ae85fd": 1
+    },
+    "00686ee773b3": {
+      "b642f4d6": 1
+    },
+    "c8d23ac4414d": {
+      "6883fad3": 1
+    },
+    "fa1cc97c6cfd": {
+      "0473776d": 1
+    },
+    "81b4fd73f8d1": {
+      "393d4aa1": 1
+    },
+    "04d85912d998": {
+      "a9384bfb": 4,
+      "4fa33397": 1,
+      "2d6ceca7": 1
+    },
+    "ee05f315ed84": {
+      "61418aa9": 1
+    },
+    "e8fb8b021cdf": {
+      "a3cab238": 1
+    },
+    "3759dcabdc6f": {
+      "2c5b25cf": 1
+    },
+    "2f4a2365eba8": {
+      "a3cab238": 1
+    },
+    "75456ad2c2c7": {
+      "b0ff1d38": 1
+    },
+    "c0d19d490a2f": {
+      "b642f4d6": 1
+    },
+    "260a107eaf32": {
+      "7f0c11fc": 1
+    },
+    "139a3020e8bf": {
+      "6a0c3b2c": 1
+    },
+    "00a35e7a9bcb": {
+      "bb79344b": 1
+    },
+    "eb86a17deab9": {
+      "0a855bca": 1
+    },
+    "7a3340d935e9": {
+      "f4eac48c": 1
+    },
+    "86c81d3b330e": {
+      "79ee2993": 1
+    },
+    "c86183d31ca1": {
+      "79ee2993": 1
+    }
+  },
+  "extern": [
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "c8a3fb7dfd64",
+      "count": 4,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([16384, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_003.py",
+      "node": "addmm",
+      "baseline_us": 31.71199932694435,
+      "branch_us": 31.71199932694435
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "4fe465a28f46",
+      "count": 2,
+      "sig": "((T([1024, 256, 64],torch.bfloat16,[16384, 64, 1]),T([1024, 64, 256],torch.bfloat16,[16384, 1, 64])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_003.py",
+      "node": "bmm",
+      "baseline_us": 36.51199862360954,
+      "branch_us": 36.51199862360954
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "337adf424b1d",
+      "count": 2,
+      "sig": "((T([1024, 256, 256],torch.bfloat16,[65536, 256, 1]),T([1024, 256, 64],torch.bfloat16,[16384, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_003.py",
+      "node": "bmm_1",
+      "baseline_us": 38.656000047922134,
+      "branch_us": 38.656000047922134
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "047f92179464",
+      "count": 1,
+      "sig": "((T([4096],torch.bfloat16,[1]),T([16384, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[1, 1024])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_003.py",
+      "node": "addmm_4",
+      "baseline_us": 80.83199709653854,
+      "branch_us": 80.83199709653854
+    },
+    {
+      "target": "aten.addmm.default",
+      "shape_hash": "2b11d48789bc",
+      "count": 1,
+      "sig": "((T([1024],torch.bfloat16,[1]),T([16384, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1, 4096])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_003.py",
+      "node": "addmm_5",
+      "baseline_us": 96.96000069379807,
+      "branch_us": 96.96000069379807
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "4eba4284adab",
+      "count": 1,
+      "sig": "((T([16384, 1024],torch.bfloat16,[1024, 1]),T([1024, 50272],torch.bfloat16,[50272, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_004.py",
+      "node": "mm",
+      "baseline_us": 1051.360011100769,
+      "branch_us": 1051.360011100769
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "56b4b5217ed5",
+      "count": 1,
+      "sig": "((T([50272, 16384],torch.bfloat16,[16384, 1]),T([16384, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_005.py",
+      "node": "mm",
+      "baseline_us": 1056.8000078201294,
+      "branch_us": 1056.8000078201294
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "69611bf64cc5",
+      "count": 1,
+      "sig": "((T([16384, 50272],torch.bfloat16,[50272, 1]),T([50272, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_005.py",
+      "node": "mm_1",
+      "baseline_us": 1052.5439977645874,
+      "branch_us": 1052.5439977645874
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "a411f214645d",
+      "count": 1,
+      "sig": "((T([16384, 1024],torch.bfloat16,[1024, 1]),T([1024, 4096],torch.bfloat16,[4096, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "mm",
+      "baseline_us": 81.727996468544,
+      "branch_us": 81.727996468544
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "8bde8acb8c2c",
+      "count": 1,
+      "sig": "((T([1024, 16384],torch.bfloat16,[1, 1024]),T([16384, 4096],torch.bfloat16,[4096, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "mm_1",
+      "baseline_us": 85.7279971241951,
+      "branch_us": 85.7279971241951
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "801ed180d8d7",
+      "count": 1,
+      "sig": "((T([16384, 4096],torch.bfloat16,[4096, 1]),T([4096, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "mm_2",
+      "baseline_us": 95.93600034713745,
+      "branch_us": 95.93600034713745
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "0e652876afe8",
+      "count": 1,
+      "sig": "((T([4096, 16384],torch.bfloat16,[1, 4096]),T([16384, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "mm_3",
+      "baseline_us": 91.839998960495,
+      "branch_us": 91.839998960495
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "c05d4a147e43",
+      "count": 4,
+      "sig": "((T([16384, 1024],torch.bfloat16,[1024, 1]),T([1024, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "mm_4",
+      "baseline_us": 30.400000512599945,
+      "branch_us": 30.400000512599945
+    },
+    {
+      "target": "aten.mm.default",
+      "shape_hash": "ed0d57700b79",
+      "count": 4,
+      "sig": "((T([1024, 16384],torch.bfloat16,[1, 1024]),T([16384, 1024],torch.bfloat16,[1024, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "mm_5",
+      "baseline_us": 40.70400074124336,
+      "branch_us": 40.70400074124336
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "3a4643d23ffc",
+      "count": 1,
+      "sig": "((T([1024, 256, 256],torch.bfloat16,[65536, 1, 256]),T([1024, 256, 64],torch.bfloat16,[16384, 64, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "bmm",
+      "baseline_us": 38.656000047922134,
+      "branch_us": 38.656000047922134
+    },
+    {
+      "target": "aten.bmm.default",
+      "shape_hash": "94726fc82ce1",
+      "count": 1,
+      "sig": "((T([1024, 64, 256],torch.bfloat16,[16384, 1, 64]),T([1024, 256, 256],torch.bfloat16,[65536, 256, 1])),{})",
+      "graph": "/tmp/scratch_space/better_benchmark/repros/models/hf/train/TrOCRForCausalLM/full_graph_006.py",
+      "node": "bmm_2",
+      "baseline_us": 38.59199956059456,
+      "branch_us": 38.59199956059456
+    }
+  ],
+  "trace_errors": [],
+  "suite": "hf",
+  "mode": "train",
+  "model": "TrOCRForCausalLM"
+}
