@@ -2563,6 +2563,68 @@ def test_sympify_expr_rejects_code_injection(tmp_path):
         _sympify_expr(good, syms)  # must NOT raise
 
 
+def test_shape_config_rejects_code_injection(tmp_path):
+    """SECURITY: the T()/S() shape-config strings (shapes.txt, _shapes_config,
+    shapes.json compact entries) are parsed by raw eval() in the harnesses under
+    __builtins__: {}. Those strings are DATA — a poisoned corpus artifact must
+    NOT run code when a repro instantiates its inputs. The empty-builtins guard
+    alone is escapable (the ().__class__.__base__.__subclasses__() gadget walks
+    to os.system without naming a builtin), so a structural AST allowlist gates
+    every eval site. Every injection form must raise ValueError with no side
+    effect — checked BOTH at the gate and through the live entry points
+    (parse_shapes_config, _eval_signature) which raise before eval/allocation;
+    every legitimate config (incl. torch.<dtype>, gen=Index, stride=) survives."""
+    import pytest
+    from input_codec import _assert_safe_shape_config
+    from repro_harness import parse_shapes_config, _eval_signature
+
+    canary = tmp_path / "pwned"
+    payloads = [
+        f"__import__('os').system('touch {canary}')",           # dunder + str + attr
+        "().__class__.__base__.__subclasses__()[0]",            # subclass-walk gadget
+        "[c for c in ().__class__.__base__.__subclasses__()]",  # + comprehension
+        f"getattr(__import__('os'), 'system')('touch {canary}')",
+        f"open('{canary}', 'w')",                               # bare non-constructor call
+        "breakpoint()",
+        "exit()",
+        "eval('1')",
+        "S.__class__",                                          # attribute off a name
+        "T[0]",                                                # subscript
+        "S(**{'dims': []})",                                   # **kwargs splat
+        "lambda: 1",                                            # lambda
+        # probe the narrow torch.<dtype> exception for reopened escapes:
+        "torch.__class__",                                     # dunder attr on torch
+        f"torch.load('{canary}')",                             # call via attribute target
+        "torch.jit.load",                                      # multi-level attribute
+        "notorch.complex64",                                   # base name is not 'torch'
+        "torch.complex64.__class__.__base__",                  # chain off torch.<attr>
+    ]
+    for p in payloads:
+        with pytest.raises(ValueError):
+            _assert_safe_shape_config(p)
+        # Same payload through the two live eval entry points — must raise
+        # BEFORE eval/allocation (the gate runs first), never exec.
+        with pytest.raises(ValueError):
+            parse_shapes_config(p)
+        with pytest.raises(ValueError):
+            _eval_signature(p)
+    assert not canary.exists(), "code executed — shape-config injection guard failed"
+
+    # Every legitimate config form must survive the gate unchanged.
+    for good in [
+        "()",
+        "(S([1, 4096]))",
+        "(S([32, -1, 128, 128]), S([32, 32, 128, 128]))",
+        "(T([192], f32), T([768], f16), S([128, 768, 196]))",
+        "(T([128, 192, 14, 14], f32, stride=(37632, 1, 2688, 192)),)",
+        "(T([32, 128], i64, gen=Index(32)),)",
+        "(T([32], i64, gen=Index(2, low=0)),)",
+        "(T([2048, 32], torch.complex64), S([1, 32, 1, 32]))",  # torch.<dtype> attribute
+        "(T([], f32),)",
+    ]:
+        _assert_safe_shape_config(good)  # must NOT raise
+
+
 def test_distinct_dynamic_bindings_respects_guards(tmp_path):
     """R4 Finding 3+pre-warm: warmup bindings must be INTERNALLY distinct
     (no square unification) for an uncoupled family, but EQUAL-magnitude

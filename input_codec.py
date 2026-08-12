@@ -428,6 +428,83 @@ def _assert_safe_expr(text: str) -> None:
                     f"expr {text!r}")
 
 
+# The other data-channel eval boundary. Shape-config strings (the T()/S() forms
+# in shapes.txt / _shapes_config / shapes.json compact entries) are parsed by
+# raw eval() in the harnesses with a fixed namespace of data constructors
+# (T/S/Index/Perm) and dtype tokens, under __builtins__: {}. Those strings are
+# DATA — a poisoned corpus artifact must not run code when a repro loads its
+# inputs. The empty-builtins guard is NOT sufficient on its own: the
+# ().__class__.__base__.__subclasses__()[...] gadget walks from a bare literal
+# back to os.system without ever naming a builtin. So we structurally forbid the
+# pieces every escape needs — attribute access, subscripting, dunder names, and
+# calls to anything but the four data constructors. This is the config-grammar
+# analogue of _SAFE_EXPR_NODES; it is deliberately a DIFFERENT allowlist because
+# the grammar differs (data constructors with keyword args + list/tuple/str
+# literals, NOT a relational expression). Arithmetic nodes are permitted because
+# they are provably code-exec-free on validated numeric operands and cost
+# nothing — the boundary is the attribute/subscript/dunder/call-target bans.
+_SAFE_CONFIG_NODES = (
+    ast.Expression, ast.Tuple, ast.List, ast.Call, ast.keyword,
+    ast.Name, ast.Load, ast.Constant, ast.Attribute,
+    ast.UnaryOp, ast.BinOp,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow,
+    ast.USub, ast.UAdd,
+)
+
+# The ONLY callables reachable in a shape-config eval namespace. Restricting call
+# targets to these four means that even if a name somehow resolves, nothing but a
+# data constructor can be invoked.
+_SAFE_CONFIG_CALLS = frozenset({"T", "S", "Index", "Perm"})
+
+
+def _assert_safe_shape_config(text: str) -> None:
+    """Raise ValueError unless `text` is a shape-config expression — a tuple/list
+    of T()/S()/Index()/Perm() constructor calls over int/float/str literals and
+    dtype-token names. Fail-closed and LOUD, never silently strips. This is the
+    load-time code-injection boundary for the raw eval() sites that instantiate
+    repro inputs from shapes data. See _SAFE_CONFIG_NODES for the threat model."""
+    try:
+        tree = ast.parse(text, mode="eval")
+    except SyntaxError as e:
+        raise ValueError(f"shape config {text!r} is not a parseable expression: {e}")
+    for node in ast.walk(tree):
+        if not isinstance(node, _SAFE_CONFIG_NODES):
+            raise ValueError(
+                f"disallowed {type(node).__name__} in shape config {text!r} (only "
+                "T()/S()/Index()/Perm() constructor calls over numeric/string "
+                "literals and dtype names are permitted)")
+        if isinstance(node, ast.Constant) and not isinstance(
+                node.value, (int, float, str, type(None))):
+            # bool is an int subclass (ok); bytes/complex barred.
+            raise ValueError(
+                f"disallowed {type(node.value).__name__} literal in shape config {text!r}")
+        if isinstance(node, ast.Name) and "__" in node.id:
+            raise ValueError(f"dunder name {node.id!r} in shape config {text!r}")
+        if isinstance(node, ast.Attribute):
+            # Only `torch.<dtype>` (e.g. torch.complex64) — the sole attribute
+            # access real configs use, for dtypes without a short token. Require
+            # the base to be exactly the Name `torch` and the attr to be a
+            # non-dunder: this admits torch.float32/complex64/... and NOTHING
+            # else. The subclass-walk gadget (().__class__.__base__...) chains
+            # attributes off a literal/attribute, so its .value is never
+            # Name('torch') — it stays barred.
+            if not (isinstance(node.value, ast.Name) and node.value.id == "torch"):
+                raise ValueError(
+                    f"disallowed attribute access in shape config {text!r} "
+                    "(only torch.<dtype> is permitted)")
+            if "__" in node.attr:
+                raise ValueError(f"dunder attribute {node.attr!r} in shape config {text!r}")
+        if isinstance(node, ast.keyword) and node.arg is None:
+            raise ValueError(f"**kwargs splat not allowed in shape config {text!r}")
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name):
+                raise ValueError(f"non-name call target in shape config {text!r}")
+            if node.func.id not in _SAFE_CONFIG_CALLS:
+                raise ValueError(
+                    f"call to non-constructor {node.func.id!r} in shape config "
+                    f"{text!r} (only {sorted(_SAFE_CONFIG_CALLS)} permitted)")
+
+
 def _sympify_expr(text, symbols: dict | None = None):
     """Parse a captured expr string to a sympy expr. Two things make this
     faithful vs a bare sympy.sympify: (1) the torch-functions locals map

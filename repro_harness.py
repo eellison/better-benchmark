@@ -207,7 +207,9 @@ def _make_shape_eval_ns():
 
 def _eval_signature(expr: str) -> list:
     """Eval a T()/S() signature string and return a list of input specs."""
+    from input_codec import _assert_safe_shape_config
     ns = _make_shape_eval_ns()
+    _assert_safe_shape_config(expr)  # code-injection boundary: expr is DATA
     inputs = eval(expr, ns)  # noqa: S307
     if isinstance(inputs, tuple):
         inputs = list(inputs)
@@ -218,6 +220,7 @@ def _eval_signature(expr: str) -> list:
 
 def _parse_shapes_txt(shapes_path: Path) -> dict:
     """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
+    from input_codec import _assert_safe_shape_config
     _eval_ns = _make_shape_eval_ns()
 
     configs = {}
@@ -233,6 +236,7 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
         expr = line[colon + 1:].strip()
 
         try:
+            _assert_safe_shape_config(expr)  # code-injection boundary: expr is DATA
             inputs = eval(expr, _eval_ns)
             if isinstance(inputs, tuple):
                 inputs = list(inputs)
@@ -490,6 +494,8 @@ def parse_shapes_config(config_str: str) -> list:
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
             "b8": "b8", "u8": "u8"}
+    from input_codec import _assert_safe_shape_config
+    _assert_safe_shape_config(config_str)  # code-injection boundary: config_str is DATA
     inputs = eval(config_str, _ns)
     if isinstance(inputs, dict):
         inputs = [inputs]

@@ -113,6 +113,8 @@ def parse_compact_config(expr: str) -> list[dict[str, Any]]:
         "Perm": _perm_gen,
         **{name: name for name in _DTYPE_TO_TORCH},
     }
+    from input_codec import _assert_safe_shape_config
+    _assert_safe_shape_config(expr)  # code-injection boundary: expr is DATA
     value = eval(expr, ns)
     if (
         isinstance(value, tuple)

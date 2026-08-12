@@ -490,7 +490,9 @@ def parse_shapes_signature(shapes, *, with_dtypes=False):
     for d in ("f32", "f16", "bf16", "f64", "i64", "i32", "i16", "i8", "b8", "u8",
               "f8e4m3fn", "f8e5m2", "f8e4m3fnuz", "f8e5m2fnuz"):
         ns[d] = d
-    parsed = eval(shapes, ns)  # noqa: S307 - trusted repo-internal strings
+    from input_codec import _assert_safe_shape_config
+    _assert_safe_shape_config(shapes)  # code-injection boundary: shapes is DATA
+    parsed = eval(shapes, ns)  # noqa: S307 - safe-grammar-gated repo strings
 
     def is_entry(x):
         return (isinstance(x, tuple) and len(x) >= 2 and x[0] in ("T", "S")
