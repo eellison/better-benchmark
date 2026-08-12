@@ -216,8 +216,8 @@ Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can 
 | `memcopy_sol_us` | `torch.add(a, 1, out=b)` at same read+write bytes |
 | `gap_default` | `compiled_us / memcopy_sol_us` — 1.0x = at bandwidth ceiling |
 
-`compiled_nocudagraphs_us` is enabled by default. Pass
-`--no-compiled-nocudagraphs` to skip this measurement.
+`compiled_nocudagraphs_us` is off by default (direct-call timing is noisy).
+Pass `--compiled-nocudagraphs` to enable this measurement.
 
 </details>
 

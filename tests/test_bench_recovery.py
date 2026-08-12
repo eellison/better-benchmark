@@ -500,6 +500,7 @@ def test_generated_worker_reports_direct_compiled_timing():
         "root": str(ROOT),
         "all_shapes": False,
         "no_cd": True,
+        "compiled_nocudagraphs": True,
         "n_warmup": 1,
         "n_rep": 1,
         "strict_gpu_lock": False,
@@ -514,16 +515,16 @@ def test_generated_worker_reports_direct_compiled_timing():
             "# Compile coordinate descent"
         )
 
-    disabled = _persistent_worker_script("0", {
+    # Off by default (noisy direct-call timing is opt-in via --compiled-nocudagraphs).
+    default_off = _persistent_worker_script("0", {
         "root": str(ROOT),
         "all_shapes": False,
         "no_cd": True,
-        "compiled_nocudagraphs": False,
         "n_warmup": 1,
         "n_rep": 1,
         "strict_gpu_lock": False,
     })
-    assert "COMPILED_NOCUDAGRAPHS = False" in disabled
+    assert "COMPILED_NOCUDAGRAPHS = False" in default_off
 
 
 def test_strict_setup_lock_stress_does_not_deadlock(tmp_path):

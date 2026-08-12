@@ -2089,11 +2089,11 @@ def main():
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
     parser.add_argument(
-        "--no-compiled-nocudagraphs",
+        "--compiled-nocudagraphs",
         dest="compiled_nocudagraphs",
-        action="store_false",
-        default=True,
-        help="Skip compiled_nocudagraphs_us direct-call timing",
+        action="store_true",
+        default=False,
+        help="Also measure compiled_nocudagraphs_us via direct call (noisy; off by default)",
     )
     parser.add_argument("--inductor-config", action="append", metavar="NAME=VALUE",
                         default=None,
@@ -3172,7 +3172,7 @@ PROFILE_DETAILS = {args_dict.get("profile_details", False)}
 MEMORY_SNAPSHOT = {args_dict.get("memory_snapshot", False)}
 MEMORY_SNAPSHOT_DIR = {args_dict.get("memory_snapshot_dir", "memory_snapshots")!r}
 TAG = {args_dict.get("tag", "latest")!r}
-COMPILED_NOCUDAGRAPHS = {args_dict.get("compiled_nocudagraphs", True)}
+COMPILED_NOCUDAGRAPHS = {args_dict.get("compiled_nocudagraphs", False)}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
