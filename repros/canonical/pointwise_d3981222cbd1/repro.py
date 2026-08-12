@@ -1,6 +1,6 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_opacus_cifar10_infer
+Label: torchbench_infer_opacus_cifar10_full_graph_002
 Pattern hash: d3981222cbd1
 Shape hash: e3191313
 """

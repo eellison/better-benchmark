@@ -2,8 +2,9 @@
   "pattern_hash": "d3981222cbd1",
   "kind": "pointwise",
   "reduction_types": [],
-  "n_ops": 4,
+  "n_ops": 5,
   "origin_ops": [
+    "<built-in function getitem>",
     "<built-in function getitem>",
     "aten.copy_.default",
     "aten.relu.default",

@@ -1,8 +1,8 @@
 """
 Standalone repro captured via capture_hook.
-Label: torchbench_infer_opacus_cifar10_full_graph_023
-Pattern hash: 67992e7acf17
-Shape hash: a7a01247
+Label: torchbench_infer_opacus_cifar10_full_graph_021
+Pattern hash: e129f028e0b8
+Shape hash: 27b6c75e
 """
 import sys
 from pathlib import Path
@@ -21,11 +21,12 @@ _repro_version = 3
 # inline. Default inputs = the first shapes.json point.
 
 class Repro(torch.nn.Module):
-    def forward(self, arg1_1: "f32[64, 512, 1, 1]", arg0_1: "Sym(512)"):
+    def forward(self, arg0_1: "f32[64, 512, 1, 1]", arg1_1: "f32[64, 512, 1, 1]"):
         # No stacktrace found for following nodes
-        mean_dim: "f32[64, 512, 1, 1]" = torch.ops.aten.mean.dim(arg1_1, [-1, -2], True);  arg1_1 = None
-        view_default: "f32[64, 512]" = torch.ops.aten.view.default(mean_dim, [64, arg0_1]);  mean_dim = arg0_1 = None
-        return view_default
+        add: "f32[64, 512, 1, 1]" = torch.ops.aten.add.Tensor(arg0_1, arg1_1);  arg1_1 = None
+        relu: "f32[64, 512, 1, 1]" = torch.ops.aten.relu.default(add);  add = None
+        copy_: "f32[64, 512, 1, 1]" = torch.ops.aten.copy_.default(arg0_1, relu);  arg0_1 = relu = None
+        return copy_
 
 
 

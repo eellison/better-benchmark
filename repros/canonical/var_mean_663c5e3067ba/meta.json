@@ -12,8 +12,6 @@
     "aten.add.Tensor",
     "aten.mul.Tensor",
     "aten.mul.Tensor",
-    "aten.reshape.default",
-    "aten.reshape.default",
     "aten.rsqrt.default",
     "aten.sub.Tensor",
     "aten.unsqueeze.default",
@@ -22,7 +20,9 @@
     "aten.unsqueeze.default",
     "aten.unsqueeze.default",
     "aten.unsqueeze.default",
-    "aten.var_mean.correction"
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default"
   ],
   "n_models": 1,
   "models": [

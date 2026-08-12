@@ -7,7 +7,7 @@
   "n_ops": 2,
   "origin_ops": [
     "aten.mean.dim",
-    "aten.reshape.default"
+    "aten.view.default"
   ],
   "n_models": 1,
   "models": [
