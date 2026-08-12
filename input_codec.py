@@ -27,6 +27,7 @@ unchanged. The human-readable T()/S() string is a RENDERING of this data
 """
 from __future__ import annotations
 
+import ast
 from typing import Any
 
 SHORT_DTYPE = {
@@ -358,6 +359,75 @@ def _sympy_locals():
     return _TORCH_SYMPY_LOCALS
 
 
+# AST node types permitted in a captured shape/guard expr string. This is the
+# security boundary for _sympify_expr: sympy.sympify() eval()s its argument
+# (documented-unsafe on untrusted input), and these expr strings arrive from
+# DATA artifacts (shapes.json guards/dims/strides, full-graph annotations) that
+# are never otherwise executed as Python. A poisoned artifact must not run code
+# on load/merge/bench — so we validate the string against the pure
+# numeric/relational-expression grammar BEFORE sympify sees it. Barred:
+# attribute access, subscripting, string/bytes literals, dunder names, and
+# calls to anything outside the sympy/torch shape-function set — the pieces
+# every known escape needs (__import__('os').system(...) needs a str literal +
+# a dunder; the ().__class__.__subclasses__() gadget needs attribute + subscript
+# access). builtins-stripping alone is NOT enough (the subclass walk escapes an
+# empty-__builtins__ eval), which is why this is a structural allowlist.
+_SAFE_EXPR_NODES = (
+    ast.Expression, ast.BinOp, ast.UnaryOp, ast.BoolOp, ast.Compare, ast.Call,
+    ast.Name, ast.Load, ast.Constant,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow,
+    ast.USub, ast.UAdd, ast.Not, ast.Invert,
+    ast.And, ast.Or,
+    ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
+    ast.BitAnd, ast.BitOr, ast.BitXor,
+)
+
+
+def _call_name_is_allowed(name: str) -> bool:
+    """A call target is legitimate only if it is a torch shape-function class
+    (_sympy_locals) or a callable exported by the sympy package (Eq, Mod, Max,
+    Abs, floor, sqrt, And, ... — present and future, no hand-maintained list).
+    Rejects breakpoint/exit/open/system/etc. Combined with the str-literal,
+    attribute and subscript bans, even a sympy meta-function (sympify/lambdify)
+    can't be weaponized: they all need a string or attribute to bootstrap."""
+    if name in _sympy_locals():
+        return True
+    import sympy
+    obj = getattr(sympy, name, None)
+    return callable(obj) and getattr(obj, "__module__", "").split(".")[0] == "sympy"
+
+
+def _assert_safe_expr(text: str) -> None:
+    """Raise ValueError unless `text` is a pure numeric/relational expression
+    over symbols and sympy/torch shape functions. Fail-closed and LOUD — never
+    silently strips (that would be lossy). See _SAFE_EXPR_NODES for the why."""
+    try:
+        tree = ast.parse(text, mode="eval")
+    except SyntaxError as e:
+        raise ValueError(f"expr {text!r} is not a parseable expression: {e}")
+    for node in ast.walk(tree):
+        if not isinstance(node, _SAFE_EXPR_NODES):
+            raise ValueError(
+                f"disallowed {type(node).__name__} in expr {text!r} (only "
+                "arithmetic/relational expressions over symbols and sympy/torch "
+                "shape functions are permitted)")
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float)):
+            # bool is an int subclass (True/False ok); str/bytes/complex/None barred.
+            raise ValueError(
+                f"disallowed {type(node.value).__name__} literal in expr {text!r}")
+        if isinstance(node, ast.Name) and "__" in node.id:
+            raise ValueError(f"dunder name {node.id!r} in expr {text!r}")
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name):
+                raise ValueError(f"non-name call target in expr {text!r}")
+            if node.keywords:
+                raise ValueError(f"keyword args not allowed in expr {text!r}")
+            if not _call_name_is_allowed(node.func.id):
+                raise ValueError(
+                    f"call to non-whitelisted function {node.func.id!r} in "
+                    f"expr {text!r}")
+
+
 def _sympify_expr(text, symbols: dict | None = None):
     """Parse a captured expr string to a sympy expr. Two things make this
     faithful vs a bare sympy.sympify: (1) the torch-functions locals map
@@ -369,8 +439,15 @@ def _sympify_expr(text, symbols: dict | None = None):
     is WRONG for a zero-capable symbol (unbacked u0, range [0, ...]) — it
     folds Ne(u0,0)->True / Eq(u0,0)->False, dropping a guard / rejecting a
     valid 0 binding. `symbols` is the {name: {"range":[lo,hi]}} table; when
-    absent we assume nonnegative (the safe floor for any shape dim)."""
+    absent we assume nonnegative (the safe floor for any shape dim).
+
+    A STRING `text` is validated by _assert_safe_expr first: sympify() eval()s
+    it and these strings come from data artifacts, so the safe-grammar gate is
+    the load-time code-injection boundary (non-str input — a sympy expr/int —
+    skips the gate; sympify does not eval those)."""
     import sympy
+    if isinstance(text, str):
+        _assert_safe_expr(text)
     expr = sympy.sympify(text, rational=False, locals=_sympy_locals())
     free = getattr(expr, "free_symbols", None)
     if free:

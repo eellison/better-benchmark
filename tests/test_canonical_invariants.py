@@ -2507,6 +2507,48 @@ def test_binding_violation_predicate_matches_validate_bindings():
                 validate_bindings(syms, binding, guards)
 
 
+def test_sympify_expr_rejects_code_injection(tmp_path):
+    """SECURITY: _sympify_expr is the single chokepoint through which every
+    captured expr string (shapes.json guards/dims/strides, full-graph
+    annotations) reaches sympy.sympify — which eval()s its argument. Those
+    strings come from DATA artifacts that are never otherwise run as Python, so
+    a poisoned artifact must NOT execute code on load/merge/bench. The guard is
+    a structural AST allowlist (not builtins-stripping, which the subclass-walk
+    gadget escapes). Every injection form must raise ValueError and leave no
+    side effect; every legitimate shape expr must still parse."""
+    import pytest
+    from input_codec import _sympify_expr, binding_violation, _eval_dim
+
+    canary = tmp_path / "pwned"
+    payloads = [
+        f"__import__('os').system('touch {canary}')",           # dunder + str + attr
+        "().__class__.__base__.__subclasses__()[0]",            # subclass-walk gadget
+        f"getattr(__import__('os'), 'system')('touch {canary}')",
+        "breakpoint()",                                          # no-arg builtin
+        "exit()",
+        "eval('1')",
+        "s0.__class__",                                          # attribute access
+        f"open('{canary}', 'w')",                               # str literal + non-sympy call
+    ]
+    for p in payloads:
+        with pytest.raises(ValueError):
+            _sympify_expr(p)
+    # Same payloads through the two live DATA channels (guards, dim exprs).
+    with pytest.raises(ValueError):
+        binding_violation({"s0": {"range": [1, None]}}, {"s0": 8},
+                          [f"__import__('os').system('touch {canary}')"])
+    with pytest.raises(ValueError):
+        _eval_dim(f"__import__('os').system('touch {canary}')", {})
+    assert not canary.exists(), "code executed — injection guard failed"
+
+    # Legitimate shape/guard forms must survive the gate unchanged.
+    syms = {"s0": {"range": [1, None]}, "s1": {"range": [1, None]}}
+    for good in ["s0", "64*s0*s1", "s0**2", "Eq(s1, s0)", "Eq(Mod(s0, 128), 0)",
+                 "Max(1, s0//4)", "FloorDiv(s0, 8)", "Min(s0, s1)",
+                 "PythonMod(s0, 128)", "CeilToInt(s0/3)", "ModularIndexing(s0, 1, 128)"]:
+        _sympify_expr(good, syms)  # must NOT raise
+
+
 def test_distinct_dynamic_bindings_respects_guards(tmp_path):
     """R4 Finding 3+pre-warm: warmup bindings must be INTERNALLY distinct
     (no square unification) for an uncoupled family, but EQUAL-magnitude
