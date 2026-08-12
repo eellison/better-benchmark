@@ -2088,6 +2088,13 @@ def main():
                         help="Benchmark all shapes from shapes.txt")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
+    parser.add_argument(
+        "--compiled-nocudagraphs",
+        dest="compiled_nocudagraphs",
+        action="store_true",
+        default=False,
+        help="Also measure compiled_nocudagraphs_us via direct call (noisy; off by default)",
+    )
     parser.add_argument("--inductor-config", action="append", metavar="NAME=VALUE",
                         default=None,
                         help="Set an arbitrary torch._inductor.config.<NAME> for the "
@@ -2397,6 +2404,7 @@ def main():
         "root": root,
         "all_shapes": args.all_shapes,
         "no_cd": args.no_cd,
+        "compiled_nocudagraphs": args.compiled_nocudagraphs,
         "n_warmup": args.n_warmup,
         "n_rep": args.n_rep,
         "share_cache": args.share_cache,
@@ -3164,6 +3172,7 @@ PROFILE_DETAILS = {args_dict.get("profile_details", False)}
 MEMORY_SNAPSHOT = {args_dict.get("memory_snapshot", False)}
 MEMORY_SNAPSHOT_DIR = {args_dict.get("memory_snapshot_dir", "memory_snapshots")!r}
 TAG = {args_dict.get("tag", "latest")!r}
+COMPILED_NOCUDAGRAPHS = {args_dict.get("compiled_nocudagraphs", False)}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
@@ -3465,6 +3474,23 @@ def bench_full_graph_one(repro_path):
             graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
     n_kernels = inductor_metrics.generated_kernel_count
 
+    # Measure the default compiled artifact before CD resets Dynamo's cache.
+    compiled_nocudagraphs_us = None
+    if COMPILED_NOCUDAGRAPHS:
+        bench_default_nocudagraph = lambda: compiled(*inputs)
+        compiled_nocudagraphs_times = []
+        with gpu_bench_lock():
+            for _ in range(N_ROUNDS):
+                with torch.no_grad():
+                    t = do_bench(
+                        bench_default_nocudagraph,
+                        warmup={args_dict["n_warmup"]},
+                        rep={args_dict["n_rep"]},
+                        return_mode="min",
+                    ) * 1000
+                compiled_nocudagraphs_times.append(t)
+        compiled_nocudagraphs_us = min(compiled_nocudagraphs_times)
+
     # Opt-in: peak allocated memory of a direct compiled forward.
     peak_memory_bytes = None
     if {args_dict.get("peak_memory", False)}:
@@ -3594,6 +3620,8 @@ def bench_full_graph_one(repro_path):
             "gap_cd": None,
         }}
     }}
+    if COMPILED_NOCUDAGRAPHS:
+        result["default"]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
     if {args_dict.get("compile_time", False)}:
         result["default"]["compile_time_s"] = compile_time_s
     if {args_dict.get("peak_memory", False)}:
@@ -3648,6 +3676,18 @@ def bench_one(task_key):
             with torch.no_grad():
                 graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
         n_kernels = inductor_metrics.generated_kernel_count
+
+        # Measure the default compiled artifact before CD resets Dynamo's cache.
+        compiled_nocudagraphs_us = None
+        if COMPILED_NOCUDAGRAPHS:
+            bench_default_nocudagraph = lambda: compiled(*inputs)
+            compiled_nocudagraphs_times = []
+            with gpu_bench_lock():
+                for _ in range(N_ROUNDS):
+                    with torch.no_grad():
+                        t = do_bench(bench_default_nocudagraph, warmup={args_dict["n_warmup"]}, rep={args_dict["n_rep"]}, return_mode="min") * 1000
+                    compiled_nocudagraphs_times.append(t)
+            compiled_nocudagraphs_us = min(compiled_nocudagraphs_times)
 
         # Compile coordinate descent
         do_cd = not {args_dict["no_cd"]}
@@ -3709,6 +3749,8 @@ def bench_one(task_key):
             "gap_default": compiled_us / sol_us if sol_us > 0 else None,
             "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
         }}
+        if COMPILED_NOCUDAGRAPHS:
+            all_results[label]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
 
     return all_results
 
