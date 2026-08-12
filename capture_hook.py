@@ -915,6 +915,75 @@ def pattern_hash_for_subgraph(sub_gm) -> str:
     return hashlib.md5(json.dumps(dag_signature).encode()).hexdigest()[:12]
 
 
+def _canonical_symbolic_suffixes(placeholder_info: dict) -> dict:
+    """Per-placeholder canonical symbolic-structure suffix for shape_hash.
+
+    Returns {} for fully static captures (their hash input must stay
+    byte-identical to the historical scheme — the whole static corpus keys
+    on it). For dynamic captures, each symbolic placeholder gets a rendering
+    of its shape/stride exprs and symint expr with symbol names CANONICALIZED
+    by first appearance across placeholders in graph order (shape dims, then
+    strides, then the symint expr — the same slot discipline as
+    merge_captures._canonical_symbol_rename). Dynamo allocates names off a
+    global counter (s16/s82 one trace, s28/s31 the next), so raw names would
+    make the same family hash differently every capture."""
+    ordered: list = []
+    any_symbolic = False
+    for name, info in placeholder_info.items():
+        sym = info.get("symbolic") or {}
+        shape_exprs = sym.get("shape_exprs")
+        stride_exprs = sym.get("stride_exprs")
+        symint_expr = info.get("expr")
+        if shape_exprs or stride_exprs or symint_expr:
+            any_symbolic = True
+        ordered.append((name, shape_exprs, stride_exprs, symint_expr))
+    if not any_symbolic:
+        return {}
+
+    from merge_captures import _symbols_in_order
+    from input_codec import _sympify_expr
+    import sympy
+
+    first_seen: list = []
+    seen: set = set()
+
+    def note(text):
+        for nm in _symbols_in_order(text):
+            if nm not in seen:
+                seen.add(nm)
+                first_seen.append(nm)
+
+    for _, shape_exprs, stride_exprs, symint_expr in ordered:
+        for d in (shape_exprs or []):
+            note(d)
+        for s in (stride_exprs or []):
+            note(s)
+        note(symint_expr)
+
+    rename = {nm: sympy.Symbol(f"s{i}") for i, nm in enumerate(first_seen)}
+
+    def canon(e):
+        if not isinstance(e, str):
+            return e
+        expr = _sympify_expr(e)
+        # xreplace: exact-node, SIMULTANEOUS substitution — raw names may
+        # already be s0/s1 in permuted positions, where sequential subs
+        # would chain-corrupt (s1->s0 then s0->s1 round-trips s1 to itself).
+        sub = {s: rename[s.name] for s in expr.free_symbols if s.name in rename}
+        return str(expr.xreplace(sub)) if sub else e
+
+    suffixes = {}
+    for name, shape_exprs, stride_exprs, symint_expr in ordered:
+        if not (shape_exprs or stride_exprs or symint_expr):
+            continue
+        suffixes[name] = json.dumps([
+            [canon(d) for d in shape_exprs] if shape_exprs else None,
+            [canon(s) for s in stride_exprs] if stride_exprs else None,
+            canon(symint_expr) if symint_expr else None,
+        ])
+    return suffixes
+
+
 def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     """8-hex hash of the partition's input shapes+strides+dtypes (shape config id).
 
@@ -924,10 +993,20 @@ def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     inputs record stride=[] (placeholder_info construction), which is the
     canonical spelling for "contiguous", so the hash is stable across
     captures of the same layout.
+
+    For DYNAMIC captures the SYMBOLIZATION is part of the identity too
+    (Finding E, finding_e_identity_analysis.md): the concrete fields above
+    are hint-evaluated, so [64,128,s0,s1]@(4,4) and [64,s0,s1,s2]@(128,4,4)
+    would collide — two different symbolic families conflated into one
+    point (one absorbed the other's occurrence counts pre-fix). Symbolic
+    placeholders therefore append a canonical-symbol expr suffix; static
+    captures append nothing and hash exactly as they always have.
     """
+    suffixes = _canonical_symbolic_suffixes(placeholder_info)
     input_shapes = sorted(
         f"{info.get('shape', '?')}:{info.get('stride', [])}:{info.get('dtype', '?')}"
-        for info in placeholder_info.values()
+        + (f":{suffixes[name]}" if name in suffixes else "")
+        for name, info in placeholder_info.items()
     )
     return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
 
@@ -1235,9 +1314,12 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
         # dynamic kernel is a different kernel (the 2.6x premise). Dynamic
         # captures form their own identity namespace; the resolved scheme is a
         # canonical-symbol FAMILY hash (pattern + canonical symbolic structure
-        # + canonical guards) — see finding_e_identity_analysis.md. NOT wired
-        # into shape_hash yet (capture+bench ship first; identity+dispatch are
-        # the follow-up).
+        # + canonical guards) — see finding_e_identity_analysis.md. Wired in
+        # at BOTH levels now: shape_hash appends a canonical-symbol expr
+        # suffix for symbolic placeholders (point identity + per-graph dedup/
+        # occurrence key), and merge_one_capture groups dynamic captures into
+        # dirs by family identity (hint-blind body + hint-free input
+        # signature — merge_captures._entry_family_identity).
         "shape_env_block": shape_env_block,
     }
 

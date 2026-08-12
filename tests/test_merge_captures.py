@@ -338,6 +338,34 @@ class MergeCapturesTests(unittest.TestCase):
             self.assertEqual(shapes_a["points"][0]["shape_hash"], "eeee5555")
             self.assertEqual(shapes_b["points"][0]["shape_hash"], "ffff6666")
 
+    def test_canonicalize_symbols_covers_trace_internal_names(self):
+        """Symbols in the table that no input expr or guard references
+        (trace-internal) must canonicalize too — they used to keep their raw
+        dynamo names, leaking s31/s79 into bindings. Referenced symbols get
+        s0.. by slot appearance; leftovers follow, name-sorted; and the
+        result is a fixed point (idempotent)."""
+        from merge_captures import canonicalize_symbols
+
+        symbols = {
+            "s82": {"hint": 4, "range": [2, None]},   # referenced (dim)
+            "s99": {"hint": 7, "range": [2, None]},   # trace-internal
+            "s41": {"hint": 3, "range": [2, None]},   # trace-internal
+        }
+        inputs = [[[64, "s82"], "f32", {"st": ["s82", 1]}]]
+        guards = []
+
+        c_symbols, c_inputs, c_guards, _ = canonicalize_symbols(
+            symbols, inputs, guards)
+        self.assertEqual(set(c_symbols), {"s0", "s1", "s2"})
+        self.assertEqual(c_symbols["s0"]["hint"], 4)      # s82 -> s0 (slot)
+        self.assertEqual(c_symbols["s1"]["hint"], 3)      # s41 -> s1 (name-sorted)
+        self.assertEqual(c_symbols["s2"]["hint"], 7)      # s99 -> s2
+        self.assertEqual(c_inputs, [[[64, "s0"], "f32", {"st": ["s0", 1]}]])
+
+        again = canonicalize_symbols(c_symbols, c_inputs, c_guards)
+        self.assertEqual(again[0], c_symbols)
+        self.assertEqual(again[1], c_inputs)
+
     def test_static_capture_grouping_unchanged_by_dynamic_split(self):
         """Static captures (no symbols/guards) stay on the pattern-hash-only
         path: same pattern_hash -> same dir, even when their (missing-file)

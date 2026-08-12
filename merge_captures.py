@@ -68,7 +68,7 @@ def _symbols_in_order(text) -> list:
     return [s.name for s in sorted(expr.free_symbols, key=lambda s: s.sort_key())]
 
 
-def _canonical_symbol_rename(inputs, guards) -> dict:
+def _canonical_symbol_rename(inputs, guards, extra_names=None) -> dict:
     """Build {original_name -> 's0','s1',...} by FIRST APPEARANCE across the
     inputs (then guards), left-to-right — the same discipline as ordering
     outputs by definition order. Makes the saved symbolic structure stable
@@ -76,7 +76,10 @@ def _canonical_symbol_rename(inputs, guards) -> dict:
     one run, s7/s92 another). Walks the compact input entries in forward
     order, each slot left-to-right: tensor shape dims, then strides, then
     ['I',hint,expr] symint exprs and ['S',[dims]] shape-param dims; finally
-    guards. Returns {} if there is nothing to rename."""
+    guards. `extra_names` (the symbols-table keys) canonicalize LAST, name-
+    sorted: trace-internal symbols referenced by no input expr or guard used
+    to keep their raw names (s31/s79 leaking into bindings). Returns {} if
+    there is nothing to rename."""
     order: list[str] = []
     seen: set[str] = set()
 
@@ -104,6 +107,10 @@ def _canonical_symbol_rename(inputs, guards) -> dict:
                 note(d)
     for g in (guards or []):
         note(g)
+    for nm in sorted(extra_names or []):
+        if nm not in seen:
+            seen.add(nm)
+            order.append(nm)
 
     # Already canonical (s0,s1,... in order) -> empty rename (idempotent).
     target = [f"s{i}" for i in range(len(order))]
@@ -118,7 +125,8 @@ def canonicalize_symbols(symbols, inputs, guards, bindings=None):
     (symbols table, inputs exprs, guards, bindings) consistently via the
     sympy-based renamers (substring-safe, simultaneous). Returns the rewritten
     (symbols, inputs, guards, bindings). A no-op when already canonical."""
-    rename = _canonical_symbol_rename(inputs, guards)
+    rename = _canonical_symbol_rename(inputs, guards,
+                                      extra_names=(symbols or {}).keys())
     if not rename:
         return symbols, inputs, guards, bindings
     symbols = {rename.get(n, n): d for n, d in (symbols or {}).items()}
@@ -141,9 +149,13 @@ def _rename_symbols_in_expr(text, rename: dict) -> str:
     # Match free symbols BY NAME — _sympify_expr stamps assumptions
     # (integer/nonnegative) onto them, so a plain Symbol(old) won't compare
     # equal in a subs dict. Map the actual free symbols whose name is renamed.
+    # xreplace, not subs: subs(dict) applies rules SEQUENTIALLY, so a swap
+    # rename ({s1->s0, s0->s1}, possible when raw names are already sN in
+    # permuted positions) would chain-corrupt; xreplace is exact-node and
+    # simultaneous.
     sub = {s: sympy.Symbol(rename[s.name]) for s in expr.free_symbols
            if s.name in rename}
-    return str(expr.subs(sub)) if sub else text
+    return str(expr.xreplace(sub)) if sub else text
 
 
 def _rename_symbols_in_inputs(inputs, rename: dict):

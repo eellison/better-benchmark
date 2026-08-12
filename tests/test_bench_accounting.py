@@ -1047,6 +1047,45 @@ class _RecordingCaptureState(_CaptureState):
         return str(Path(self.output_dir) / filename)
 
 
+def test_shape_hash_symbolization_identity():
+    """shape_hash must (a) stay byte-stable for static captures — the whole
+    static corpus keys on it, (b) distinguish two symbolic FAMILIES whose
+    hint-concretized shapes coincide ([64,128,s0,s1]@(4,4) vs
+    [64,s0,s1,s2]@(128,4,4) — the opacus e129 conflation), and (c) be
+    invariant to the raw symbol names dynamo's global counter allocated."""
+    import hashlib as _hashlib
+    import json as _json
+    from capture_hook import shape_hash_for_placeholders
+
+    static = {
+        "arg0_1": {"shape": [64, 128, 4, 4], "stride": [], "dtype": "torch.float32"},
+        "arg1_1": {"shape": [64, 128, 4, 4], "stride": [], "dtype": "torch.float32"},
+    }
+    legacy = _hashlib.md5(_json.dumps(sorted(
+        f"{i.get('shape', '?')}:{i.get('stride', [])}:{i.get('dtype', '?')}"
+        for i in static.values()
+    )).encode()).hexdigest()[:8]
+    assert shape_hash_for_placeholders(static) == legacy  # (a) static unchanged
+
+    def _dyn(shape_exprs):
+        return {
+            "arg0_1": {"shape": [64, 128, 4, 4], "stride": [],
+                       "dtype": "torch.float32",
+                       "symbolic": {"shape_exprs": shape_exprs}},
+        }
+
+    chan_static = _dyn([None, None, "s16", "s82"])   # [64,128,s,s]
+    all_dynamic = _dyn([None, "s16", "s82", "s90"])  # [64,s,s,s]
+    renamed = _dyn([None, None, "s28", "s31"])       # same family, other trace
+
+    h_cs = shape_hash_for_placeholders(chan_static)
+    h_ad = shape_hash_for_placeholders(all_dynamic)
+    h_rn = shape_hash_for_placeholders(renamed)
+    assert h_cs != h_ad          # (b) same hints, different symbolization
+    assert h_cs == h_rn          # (c) raw trace names don't leak into identity
+    assert h_cs != legacy        # dynamic never collides with the static point
+
+
 def test_capture_hook_process_graph_splits_horizontal_fusion_regions():
     if not _partitioner_supports_skip_horizontal_fusion():
         print("Skipping horizontal fusion capture test; installed PyTorch lacks pytorch/pytorch#170191")
