@@ -260,7 +260,34 @@ def _specs_have_symbols(specs) -> bool:
     return False
 
 
-def _build_symbolic_inputs(specs, dev):
+def _sidecar_symbol_hints(graph_path: Path) -> dict:
+    """Per-symbol NATIVE hints recorded at capture time in the graph's sidecar
+    meta.json (full_graph_XXX.meta.json -> {"symbols": {"s16": {"hint": 4}}}).
+
+    The saved .py annotations are symbolic (Sym(s16)) and carry no hint, so
+    without the sidecar the re-trace seeds every symbol at a benign default.
+    The default is fine for FIDELITY (the symbol stays symbolic either way)
+    but not for the recorded POINT: the point's bindings become the default
+    bench binding and its shape_hash (which includes hints) is the join key
+    back to live-captured occurrence counts — a non-native hint times the
+    wrong problem size and orphans the accounting join. Missing/corrupt
+    sidecar -> {} (caller falls back to the default)."""
+    meta_path = graph_path.with_name(graph_path.stem + ".meta.json")
+    if not meta_path.exists():
+        return {}
+    try:
+        meta = json.loads(meta_path.read_text())
+    except Exception:
+        return {}
+    hints = {}
+    for name, defn in (meta.get("symbols") or {}).items():
+        hint = defn.get("hint") if isinstance(defn, dict) else None
+        if isinstance(hint, int):
+            hints[name] = hint
+    return hints
+
+
+def _build_symbolic_inputs(specs, dev, symbol_hints=None):
     """Rebuild the forward inputs for a dynamic saved graph with ONE shared
     ShapeEnv symbol per symbol NAME, so a symint input (arg2_1:Sym(s16)) and a
     tensor dynamic dim (arg4_1:[...,s16,...]) trace as the SAME symbol — the
@@ -276,12 +303,13 @@ def _build_symbolic_inputs(specs, dev):
     from torch._subclasses.fake_tensor import FakeTensorMode
     from torch._dynamo.source import LocalSource
 
-    # Collect symbol names + a hint per symbol. A symint spec gives the symbol
-    # its hint directly; a tensor dynamic dim that is a bare symbol with no
-    # symint hint gets a benign default (8). The hint only picks which concrete
-    # size make_fx traces at — the symbol stays symbolic regardless — so the
-    # exact value is immaterial to fidelity, only to which guards get exercised.
-    hints: dict[str, int] = {}
+    # Collect symbol names + a hint per symbol. Precedence: the sidecar
+    # meta.json's NATIVE hints (symbol_hints) first — they set the recaptured
+    # point's bindings and shape_hash, which must match the live capture —
+    # then a symint spec's own hint, then a benign default (8). The hint only
+    # picks which concrete size make_fx traces at — the symbol stays symbolic
+    # regardless — so the default is safe for structure, wrong for the point.
+    hints: dict[str, int] = dict(symbol_hints or {})
     for s in specs:
         if not isinstance(s, dict):
             continue
@@ -592,7 +620,8 @@ def load_graph_module(graph_path: Path):
         from full_graph_harness import parse_full_graph_inputs
         dyn_specs = parse_full_graph_inputs(content)
         if dyn_specs and _specs_have_symbols(dyn_specs):
-            sym_inputs = _build_symbolic_inputs(dyn_specs, dev)
+            sym_inputs = _build_symbolic_inputs(
+                dyn_specs, dev, _sidecar_symbol_hints(graph_path))
             if sym_inputs is not None:
                 fake_mode, inputs = sym_inputs
                 with fake_mode:

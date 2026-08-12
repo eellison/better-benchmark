@@ -11,6 +11,7 @@ Usage:
     python merge_captures.py /tmp/captures/model_a /tmp/captures/model_b --canonical-dir repros/
 """
 import argparse
+import ast
 from contextlib import contextmanager
 from dataclasses import dataclass
 import hashlib
@@ -544,6 +545,148 @@ def _find_existing_pattern_dir(canonical_path: Path, pattern_hash: str) -> Path 
     return None
 
 
+class _DropShapeAnnotations(ast.NodeTransformer):
+    """Rewrite AnnAssign -> Assign (drop bare annotations) so the dump of a
+    forward body is hint-blind. Emitted repro bodies annotate every assignment
+    with the HINT-CONCRETIZED shape ('f32[64, 128, 4, 4]'), which differs
+    between two bindings of the same family and can coincide between two
+    different families — the opposite of what a family identity needs."""
+
+    def visit_AnnAssign(self, node):
+        if node.value is None:
+            return None  # pure annotation: no computation, no structure
+        return ast.copy_location(
+            ast.Assign(targets=[node.target], value=node.value,
+                       type_comment=None),
+            node)
+
+
+def _forward_graph_dump(source_text: str) -> str | None:
+    """Hint-blind structural dump of a repro's forward graph — ops, wiring,
+    AND the baked constants (reshape targets, group split factors) that
+    pattern_hash deliberately omits.
+
+    pattern_hash is 'ops + wiring, IGNORING shapes', so two genuinely
+    different symbolic graphs collide under it — e.g. a GroupNorm reshape to
+    [64,32,2,mul] (channels=64) vs [64,32,4,mul] (channels=128). The dump
+    keeps those call-arg constants but strips everything hint-valued: the
+    forward's argument annotations AND the per-statement shape annotations
+    (both render the hint binding, which must not split a family). Returns
+    None when no forward is found."""
+    tree = ast.parse(source_text)
+    forward = next((n for n in ast.walk(tree)
+                    if isinstance(n, ast.FunctionDef) and n.name == "forward"),
+                   None)
+    if forward is None:
+        return None
+    body = [_DropShapeAnnotations().visit(stmt) for stmt in forward.body]
+    body = [stmt for stmt in body if stmt is not None]
+    if (body and isinstance(body[0], ast.Expr)
+            and isinstance(getattr(body[0], "value", None), ast.Constant)
+            and isinstance(body[0].value.value, str)):
+        body = body[1:]  # drop a leading docstring (documentation, not structure)
+    return "".join(ast.dump(stmt) for stmt in body)
+
+
+def _hintfree_inputs_signature(inputs) -> str:
+    """Canonical-symbol input structure with per-point hint values removed.
+
+    This is the second identity component: a pointwise region's forward BODY
+    references no shapes at all (only annotations do), so [64,128,s0,s1] and
+    [64,s0,s1,s2] emit byte-identical bodies. Their symbolic input structure
+    is what tells the families apart. ['I', hint, expr] symint entries drop
+    the hint slot (a binding value); tensor dims/strides are already exprs or
+    family-invariant ints."""
+    entries = []
+    for e in (inputs or []):
+        if isinstance(e, list) and e and e[0] == "I":
+            entries.append(["I", e[2] if len(e) > 2 else None])
+        else:
+            entries.append(e)
+    return json.dumps(entries, sort_keys=True)
+
+
+def _entry_family_identity(entry: dict, src_file: Path) -> str | None:
+    """Family identity of an incoming dynamic capture: hint-blind forward
+    body + canonical hint-free symbolic input signature. None when the source
+    is missing/has no forward (caller falls back to legacy grouping)."""
+    if not src_file.exists():
+        return None
+    dump = _forward_graph_dump(src_file.read_text())
+    if dump is None:
+        return None
+    symbols = entry.get("symbols")
+    inputs = entry.get("inputs")
+    guards = entry.get("guards")
+    if symbols:
+        symbols, inputs, guards, _ = canonicalize_symbols(symbols, inputs, guards)
+    sig = _hintfree_inputs_signature(inputs)
+    return hashlib.md5(f"{dump}||{sig}".encode()).hexdigest()[:12]
+
+
+def _dir_family_identity(repro_dir: Path) -> str | None:
+    """Family identity of an existing canonical dir, recomputed from its
+    repro.py + its first dynamic point's (already canonical) inputs. None for
+    static dirs (no dynamic point) — a dynamic capture never joins one, so an
+    oracle-bearing static dir keeps its name and dynamic families split off."""
+    repro_py = repro_dir / "repro.py"
+    shapes_path = repro_dir / "shapes.json"
+    if not repro_py.exists() or not shapes_path.exists():
+        return None
+    dump = _forward_graph_dump(repro_py.read_text())
+    if dump is None:
+        return None
+    try:
+        shapes = json.loads(shapes_path.read_text())
+    except Exception:
+        return None
+    for point in shapes.get("points", []):
+        if point.get("captured_dynamic"):
+            sig = _hintfree_inputs_signature(point.get("inputs"))
+            return hashlib.md5(f"{dump}||{sig}".encode()).hexdigest()[:12]
+    return None
+
+
+def _pattern_dirs(canonical_path: Path, pattern_hash: str) -> list[Path]:
+    """Every canonical dir recorded under this pattern_hash (sorted, stable)."""
+    dirs = []
+    for meta_path in sorted(canonical_path.glob("*/meta.json")):
+        try:
+            meta = json.loads(meta_path.read_text())
+        except Exception:
+            continue
+        if meta.get("pattern_hash") == pattern_hash:
+            dirs.append(meta_path.parent)
+    return dirs
+
+
+def _resolve_dynamic_family_dir(canonical_path: Path, pattern_hash: str,
+                                dir_name: str,
+                                entry_identity: str | None) -> Path:
+    """Pick the canonical dir for a DYNAMIC capture, splitting by graph identity.
+
+    A dynamic capture may only JOIN a pattern dir with the IDENTICAL family
+    identity (same symbolic graph — its points then differ only by binding).
+    A capture with a different identity (a baked constant or a different
+    input symbolization that pattern_hash can't see) gets its OWN dir:
+    `dir_name` if free, else `dir_name__2`, `__3`, ... The first family of a
+    pattern keeps the plain name, so an oracle-bearing dir stays put.
+    entry_identity=None (no source to hash) falls back to the first pattern
+    dir (legacy behaviour)."""
+    existing = _pattern_dirs(canonical_path, pattern_hash)
+    if entry_identity is None:
+        return existing[0] if existing else canonical_path / dir_name
+    for d in existing:
+        if _dir_family_identity(d) == entry_identity:
+            return d  # same family -> join as a point
+    candidate = canonical_path / dir_name
+    n = 2
+    while candidate in existing or candidate.exists():
+        candidate = canonical_path / f"{dir_name}__{n}"
+        n += 1
+    return candidate
+
+
 def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
     """Infer suite, mode, and clean name from a model label."""
     name = model_name
@@ -639,9 +782,23 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         reduction_types = entry.get("reduction_types", [])
         kind_label = "_".join(reduction_types[:3]) if reduction_types else kind
         dir_name = f"{kind_label}_{pattern_hash}"
-        repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
-        if repro_dir is None:
-            repro_dir = canonical_path / dir_name
+        # Dynamic captures need graph-identity-aware grouping: pattern_hash is
+        # shape-blind ("ops+wiring, IGNORING shapes"), so two symbolic graphs
+        # that differ only in a baked constant (a GroupNorm reshape split
+        # factor, a channel literal) collide under it. Merging them into one
+        # dir freezes point-0's repro.py onto its siblings and pools their
+        # contradictory guards. Route dynamic entries through identity-split;
+        # leave the static corpus on the unchanged pattern-hash path.
+        is_dynamic = bool(entry.get("captured_dynamic")
+                          or entry.get("symbols") or entry.get("guards"))
+        if is_dynamic:
+            entry_identity = _entry_family_identity(entry, Path(entry["file"]))
+            repro_dir = _resolve_dynamic_family_dir(
+                canonical_path, pattern_hash, dir_name, entry_identity)
+        else:
+            repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
+            if repro_dir is None:
+                repro_dir = canonical_path / dir_name
         repro_dir.mkdir(parents=True, exist_ok=True)
 
         # Update shapes.json. The signature travels as DATA in the index
