@@ -1114,8 +1114,11 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         # and rows 2+ would each recompile. Warm at guard-valid distinct
         # bindings (no square unification, no broken Eq/divisibility guards).
         if _marked:
-            warm_bindings = _distinct_dynamic_bindings(
-                repro_file, rows, dyn_dims, n=2)
+            if parsed.prewarm:
+                warm_bindings = parse_bind_args(parsed.prewarm)
+            else:
+                warm_bindings = _distinct_dynamic_bindings(
+                    repro_file, rows, dyn_dims, n=2)
             with torch.no_grad():
                 for wb in warm_bindings:
                     wcfg = next(iter(load_shape_configs(
@@ -1254,6 +1257,20 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                              "to 1 fused kernel here vs the model's 2; even the "
                              "inductor decomp table does not reconcile them). "
                              "See investigation_results/compile_fx_direct_finding.md.")
+    parser.add_argument("--prewarm", action="append", default=None,
+                        metavar="s0=2",
+                        help="Explicit --dynamic warm bindings, IN ORDER "
+                             "(repeatable; same format as --bind). Overrides "
+                             "the auto-picked two-distinct-shape warmup for "
+                             "compile-HISTORY experiments: the first warm "
+                             "binding is the hint inductor tunes the general "
+                             "kernel at, so '--prewarm s0=2 --prewarm s0=8' "
+                             "vs '--prewarm s0=8 --prewarm s0=16' isolates "
+                             "hint/order sensitivity at the timed --bind "
+                             "points. The sequence must still cover >=2 "
+                             "distinct values per symbol to generalize; a "
+                             "miss shows up as the per-row recompile "
+                             "warning.")
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
