@@ -363,6 +363,141 @@ def dynamic_dims_for_repro(repro_file: str) -> dict[int, list[int]] | None:
     return None
 
 
+def _symint_expr_evaluator(expr):
+    """Compile a sympy expr into a closure over {symbol_name: value}, built
+    from the CLOSED arithmetic grammar (Integer/Symbol/Add/Mul/Pow with a
+    non-negative int exponent). Evaluation uses plain Python operators so
+    torch SymInt values flow through and stay symbolic under dynamo tracing.
+    Returns None for any node outside the grammar (caller falls back to
+    passing the raw int)."""
+    import sympy
+
+    if isinstance(expr, sympy.Integer):
+        v = int(expr)
+        return lambda env: v
+    if isinstance(expr, sympy.Symbol):
+        name = expr.name
+        return lambda env: env[name]
+    parts = [_symint_expr_evaluator(a) for a in expr.args]
+    if any(p is None for p in parts):
+        return None
+    if isinstance(expr, sympy.Add):
+        def _add(env):
+            r = parts[0](env)
+            for p in parts[1:]:
+                r = r + p(env)
+            return r
+        return _add
+    if isinstance(expr, sympy.Mul):
+        def _mul(env):
+            r = parts[0](env)
+            for p in parts[1:]:
+                r = r * p(env)
+            return r
+        return _mul
+    if isinstance(expr, sympy.Pow) and isinstance(expr.exp, sympy.Integer) \
+            and int(expr.exp) >= 0:
+        base, e = parts[0], int(expr.exp)
+        return lambda env: base(env) ** e
+    return None
+
+
+def symint_derivations_for_repro(repro_file: str):
+    """Plan for re-DERIVING a repro's symint INPUTS from their source tensor
+    dims at --dynamic bench time. Returns (plan, kept_positions) or None.
+
+    A captured region often takes a symint input that the MODEL derived from
+    a tensor (arg2_1 = x.size(0)) — the compiled graph receives it already
+    coupled to the tensor's symbol. The standalone repro lifts it to a plain
+    Python int argument, and dynamo SPECIALIZES int args per compile; when a
+    shape op then ties the marked tensor dim to that constant (reshape ->
+    infer_size -> Eq(numel*s, const)), mark_dynamic hard-fails with
+    ConstraintViolationError at EVERY binding (single-dim pilot, GroupNorm
+    family). Restoring the derivation inside the traced forward — the symint
+    becomes tensor.size(d), the SAME symbol as the marked dim — makes the
+    bench kernel-faithful to what the model ran.
+
+    plan: list of (position, evaluator, {symbol_name: (src_pos, dim)}).
+    kept_positions: input positions the compiled callable still takes (all
+    tensors + any symint that could NOT be derived — those pass through as
+    ints, with a loud note)."""
+    from input_codec import _sympify_expr
+
+    repro_dir = Path(repro_file).parent
+    shapes_json = repro_dir / "shapes.json"
+    if not shapes_json.exists():
+        return None
+    data = json.loads(shapes_json.read_text())
+    for point in data.get("points", []):
+        if not point.get("captured_dynamic"):
+            continue
+        entries = point.get("inputs", [])
+        # Root symbols readable off a tensor input: bare-name dims.
+        sources: dict[str, tuple[int, int]] = {}
+        for pos, entry in enumerate(entries):
+            if (isinstance(entry, list) and entry
+                    and isinstance(entry[0], list)):
+                for d, dim in enumerate(entry[0]):
+                    if isinstance(dim, str) and dim.isidentifier():
+                        sources.setdefault(dim, (pos, d))
+        plan = []
+        for pos, entry in enumerate(entries):
+            if not (isinstance(entry, list) and entry and entry[0] == "I"):
+                continue
+            expr_str = entry[2] if len(entry) > 2 else None
+            if not isinstance(expr_str, str):
+                continue
+            expr = _sympify_expr(expr_str)
+            srcs = {}
+            for s in expr.free_symbols:
+                if s.name not in sources:
+                    srcs = None
+                    break
+                srcs[s.name] = sources[s.name]
+            if srcs is None:
+                print(f"[dynamic] NOTE: symint input at position {pos} "
+                      f"(expr {expr_str!r}) has no tensor source dim — "
+                      f"passed as a raw int; dynamo may specialize it")
+                continue
+            fn = _symint_expr_evaluator(expr)
+            if fn is None:
+                print(f"[dynamic] NOTE: symint input at position {pos} "
+                      f"(expr {expr_str!r}) uses ops outside the closed "
+                      f"arithmetic grammar — passed as a raw int")
+                continue
+            plan.append((pos, fn, srcs))
+        if not plan:
+            return None
+        derived = {pos for pos, _f, _s in plan}
+        kept = [i for i in range(len(entries)) if i not in derived]
+        return plan, kept
+    return None
+
+
+class DerivedSymintRepro(torch.nn.Module):
+    """Wrap a repro so its symint inputs are re-derived from source tensor
+    dims INSIDE the traced forward (see symint_derivations_for_repro). The
+    compiled callable takes only the KEPT inputs; dynamo inlines the
+    derivation, so the inner region receives real SymInts coupled to the
+    marked tensor dims — exactly the structure the enclosing model provided."""
+
+    def __init__(self, inner, n_args: int, plan, kept):
+        super().__init__()
+        self.inner = inner
+        self._n_args = n_args
+        self._plan = plan
+        self._kept = kept
+
+    def forward(self, *args):
+        full = [None] * self._n_args
+        for kept_pos, a in zip(self._kept, args):
+            full[kept_pos] = a
+        for pos, fn, srcs in self._plan:
+            env = {name: full[p].size(d) for name, (p, d) in srcs.items()}
+            full[pos] = fn(env)
+        return self.inner(*full)
+
+
 def symbols_and_guards_for_repro(repro_file: str) -> tuple[dict, list]:
     """(symbols_table, guards) from a dynamic repro's shapes.json, or ({}, [])
     for a static repro / shapes.txt. Used to validate perturbed warmup
@@ -1088,6 +1223,26 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         # the captured symbolic dims; mark_dynamic is sticky on the tensor,
         # so the same marked inputs drive both kernel-count and compile.
         _marked = _mark_dynamic(first_inputs)
+        # Symint INPUTS must be re-derived from their source tensor dims
+        # inside the traced forward (symint_derivations_for_repro): passed as
+        # raw ints they specialize per compile, and infer_size then pins the
+        # marked dim to that constant -> ConstraintViolationError at every
+        # binding. The wrapper's callable takes only the KEPT inputs.
+        derivations = (symint_derivations_for_repro(repro_file)
+                       if _marked else None)
+
+        def _model():
+            if derivations is None:
+                return repro_cls()
+            plan, kept = derivations
+            return DerivedSymintRepro(repro_cls(), len(first_inputs), plan, kept)
+
+        def _kept(inputs):
+            if derivations is None:
+                return inputs
+            _plan, kept = derivations
+            return [inputs[i] for i in kept]
+
         # Count kernels of the SAME artifact the bench measures: when dims are
         # marked, count under marks (dynamic=None honors them) invoked across
         # TWO shapes to force dynamo past 0/1/many specialization into the
@@ -1099,13 +1254,14 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             if second_inputs is not None:
                 _mark_dynamic(second_inputs)
             n_kernels, kernel_names = count_kernels(
-                repro_cls(), first_inputs, dynamic=None,
-                second_inputs=second_inputs)
+                _model(), _kept(first_inputs), dynamic=None,
+                second_inputs=(_kept(second_inputs)
+                               if second_inputs is not None else None))
         else:
             n_kernels, kernel_names = count_kernels(
                 repro_cls(), first_inputs, dynamic=True)
         torch._dynamo.reset()
-        compiled = torch.compile(repro_cls(), dynamic=None if _marked else True)
+        compiled = torch.compile(_model(), dynamic=None if _marked else True)
         # PRE-WARM to the GENERAL dynamic kernel before timing ANY row.
         # CRITICAL (R4): a single marked shape still specializes (0/1/many ->
         # triton_per_fused, 1 kernel); only a SECOND distinct shape forces the
@@ -1125,7 +1281,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                         repro_file, symbol_bindings=wb).values()))
                     winputs = _inputs_for(wb, wcfg)
                     _mark_dynamic(winputs)
-                    compiled(*winputs)
+                    compiled(*_kept(winputs))
                 torch.cuda.synchronize()
 
     for label, binding, cfg in rows:
@@ -1160,8 +1316,9 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             n_kernels, kernel_names = None, None
             recompiled = False
         else:
+            row_args = _kept(inputs)
             compiled_us = timed_min_us(
-                lambda: compiled(*inputs),
+                lambda: compiled(*row_args),
                 warmup=parsed.n_warmup, rep=parsed.n_rep)
             graphs_after = _unique_graph_count()
             # The two-shape pre-warm already drove the artifact to the GENERAL

@@ -1047,6 +1047,61 @@ class _RecordingCaptureState(_CaptureState):
         return str(Path(self.output_dir) / filename)
 
 
+def test_symint_derivation_plan_and_wrapper():
+    """Symint INPUTS re-derive from source tensor dims under --dynamic: the
+    plan maps ['I',hint,expr] slots to tensor .size() reads (root dims and
+    closed-arithmetic derived exprs), the wrapper reproduces the inner
+    module's output from KEPT args only, and underivable symints pass
+    through as raw ints."""
+    import json as _json
+    import tempfile as _tempfile
+    from pathlib import Path as _Path
+
+    from repro_harness import (
+        DerivedSymintRepro,
+        symint_derivations_for_repro,
+    )
+
+    with _tempfile.TemporaryDirectory() as tmp:
+        d = _Path(tmp)
+        (d / "repro.py").write_text("# placeholder\n")
+        (d / "shapes.json").write_text(_json.dumps({
+            "symbols": {"s0": {"hint": 4, "range": [2, None]},
+                        "s1": {"hint": 8, "range": [2, None]}},
+            "points": [{
+                "shape_hash": "aa11bb22",
+                "captured_dynamic": True,
+                "bindings": {"s0": 4, "s1": 8},
+                "inputs": [
+                    ["I", 4, "s0"],                       # root: t.size(0)
+                    [["s0", "s1", 16], "f32"],            # source tensor
+                    ["I", 32, "s0*s1"],                   # derived product
+                    ["I", 7, "s99"],                      # NO tensor source
+                ],
+                "models": {"m": {"occurrences": 1}},
+            }],
+        }))
+
+        derivations = symint_derivations_for_repro(str(d / "repro.py"))
+        assert derivations is not None
+        plan, kept = derivations
+        assert [p for p, _f, _s in plan] == [0, 2]   # s99 not derivable
+        assert kept == [1, 3]                        # tensor + raw-int slot
+
+        class Inner(torch.nn.Module):
+            def forward(self, n, x, prod, other):
+                assert n == x.size(0)
+                assert prod == x.size(0) * x.size(1)
+                return x.reshape(n, -1) * 1.0 + other
+
+        x = torch.randn(4, 8, 16)
+        inner = Inner()
+        expected = inner(4, x, 32, 7)
+        wrapped = DerivedSymintRepro(inner, 4, plan, kept)
+        got = wrapped(x, 7)                          # kept args only
+        assert torch.equal(got, expected)
+
+
 def test_shape_hash_symbolization_identity():
     """shape_hash must (a) stay byte-stable for static captures — the whole
     static corpus keys on it, (b) distinguish two symbolic FAMILIES whose

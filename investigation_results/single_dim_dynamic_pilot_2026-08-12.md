@@ -22,12 +22,16 @@ lock, CUDAGraph, do_bench min. Raw: `single_dim_dynamic_pilot_raw_2026-08-12.jso
 |---|---|---:|---:|---:|---:|---|
 | FFN LayerNorm (feature 1024 static) | batch | 0.99 | 0.99 | 0.99 | **0.99** | per→per |
 | FFN GELU chain | batch | 0.98 | 0.99 | 1.17 | 1.53 | poi→poi |
+| GroupNorm+ReLU (spatial 16×16 static) | batch | 0.98 | 0.82 | 0.88 | 1.26 | per→per |
 
 | family | dynamic dim | K=64 | 256 (hint) | 1024 | 4096 | kernels |
 |---|---|---:|---:|---:|---:|---|
 | attention softmax [16,8,128,K] | K = **reduction** dim | 2.08 | 1.56 | 1.63 | 1.44 | per→red |
 
-(Absolute µs in the raw JSON. GroupNorm-batch-dyn: blocked, see finding 4.)
+(Absolute µs in the raw JSON. The GroupNorm row exists because of the
+finding-4 fix; ratios ≤1 at 4–64 mean the general kernel's config beats
+some per-point static tunings — no dynamism penalty until the mild
+large-batch drift both pointwise-heavy families show at 512.)
 
 ## Findings
 
@@ -57,20 +61,26 @@ lock, CUDAGraph, do_bench min. Raw: `single_dim_dynamic_pilot_raw_2026-08-12.jso
    extra compile but never becomes the general kernel's tuning hint and
    does not degrade later batch=8 performance.
 
-4. **Repro-fidelity gap for symint-input families under `--dynamic`**
-   (found by the GroupNorm-batch-dyn case, reproducible): the captured
-   region takes the model's `x.size(0)` as a SYMINT INPUT; the standalone
-   repro lifts it to a plain Python int argument; dynamo specializes int
-   args per compile, and the reshape's `infer_size` then PINS the marked
-   batch dim to that constant (`Eq(16384*s67, 65536)` → s67=4) →
-   `ConstraintViolationError`, at any binding. The ORIGINAL model never
-   sees this — its symint is derived from the tensor and stays symbolic.
-   Follow-up (support code): emit lifted symints as re-DERIVATIONS from
-   their source tensor (`arg2_1 = arg3_1.size(0)`) in the repro when the
-   symint is a root dim of a tensor input, restoring the coupling.
-   (Families whose symint feeds only as a VALUE, like var_mean_3a40's
-   spatial pair, survive because infer_size produces a relation between
-   two symbols rather than a constant pin.)
+4. **Repro-fidelity gap for symint-input families under `--dynamic` —
+   found AND fixed** (GroupNorm-batch-dyn case): the captured region takes
+   the model's `x.size(0)` as a SYMINT INPUT; the standalone repro lifts it
+   to a plain Python int argument; dynamo specializes int args per compile,
+   and the reshape's `infer_size` then PINS the marked batch dim to that
+   constant (`Eq(16384*s67, 65536)` → s67=4) → `ConstraintViolationError`,
+   at any binding. The ORIGINAL model never sees this — its symint is
+   derived from the tensor and stays symbolic. FIX (repro_harness): the
+   `--dynamic` bench now re-derives symint inputs from their source tensor
+   dims INSIDE the traced forward (`symint_derivations_for_repro` +
+   `DerivedSymintRepro`): each `['I',hint,expr]` slot whose expr's root
+   symbols are readable off a tensor input's dims becomes
+   `tensor.size(d)`-arithmetic in a wrapper, and the compiled callable
+   takes only the remaining args. Kernel-faithful — the inner region
+   receives real SymInts coupled to the marked dims, exactly the structure
+   the enclosing model provided. Underivable symints (no tensor source /
+   non-arithmetic expr) pass through as ints with a loud note. Verified:
+   the family now runs at every binding including the previously-fatal
+   2 and 4 (table above), the persistent kernel survives, and symint-free
+   families bypass the wrapper entirely (regression-checked).
 
 5. **Prior curve re-verified on the current harness** (the earlier sweep
    accidentally imported a stale June harness via sys.path fallthrough —
