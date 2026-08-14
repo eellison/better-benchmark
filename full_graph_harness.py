@@ -1083,6 +1083,23 @@ def _is_int_token(tok: str) -> bool:
     return tok.lstrip("-").isdigit()
 
 
+def _split_dim_commas(s: str) -> list:
+    """Split a rendered shape/stride body on TOP-LEVEL commas only — commas
+    nested inside a symbolic dim's own call (Mod(s0, 8), Max(1, s0)) belong to
+    that dim, not to the slot separator. Bracket/paren-depth aware, no regex."""
+    parts, depth, start = [], 0, 0
+    for i, ch in enumerate(s):
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append(s[start:i])
+            start = i + 1
+    parts.append(s[start:])
+    return parts
+
+
 def _dim_tokens(s: str | None) -> list:
     """Split a rendered shape/stride annotation into per-slot values WITHOUT
     losing symbolic information: an integer slot becomes an int, a symbolic
@@ -1093,12 +1110,19 @@ def _dim_tokens(s: str | None) -> list:
     if s is None:
         return None
     out = []
-    for tok in s.split(","):
+    for tok in _split_dim_commas(s):
         tok = tok.strip()
         if not tok:
             continue
-        out.append(int(tok) if _is_int_token(tok)
-                   else canonical_expr_str(tok))
+        if _is_int_token(tok):
+            out.append(int(tok))
+            continue
+        canon = canonical_expr_str(tok)
+        # A dim expr that CONSTANT-FOLDS to an integer ('2**3' -> '8',
+        # 'Mod(16, 8)' -> '0') is a concrete dim, not a symbolic one — return
+        # it as an int so downstream symbolic detection doesn't treat a folded
+        # constant as a live symbol.
+        out.append(int(canon) if _is_int_token(canon) else canon)
     return out
 
 

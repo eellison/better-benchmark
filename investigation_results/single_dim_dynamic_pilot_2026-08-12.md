@@ -68,19 +68,22 @@ large-batch drift both pointwise-heavy families show at 512.)
    and the reshape's `infer_size` then PINS the marked batch dim to that
    constant (`Eq(16384*s67, 65536)` → s67=4) → `ConstraintViolationError`,
    at any binding. The ORIGINAL model never sees this — its symint is
-   derived from the tensor and stays symbolic. FIX (repro_harness): the
-   `--dynamic` bench now re-derives symint inputs from their source tensor
-   dims INSIDE the traced forward (`symint_derivations_for_repro` +
-   `DerivedSymintRepro`): each `['I',hint,expr]` slot whose expr's root
-   symbols are readable off a tensor input's dims becomes
-   `tensor.size(d)`-arithmetic in a wrapper, and the compiled callable
-   takes only the remaining args. Kernel-faithful — the inner region
-   receives real SymInts coupled to the marked dims, exactly the structure
-   the enclosing model provided. Underivable symints (no tensor source /
-   non-arithmetic expr) pass through as ints with a loud note. Verified:
-   the family now runs at every binding including the previously-fatal
-   2 and 4 (table above), the persistent kernel survives, and symint-free
-   families bypass the wrapper entirely (regression-checked).
+   derived from the tensor and stays symbolic. FIX (repro_harness),
+   FALLBACK-ONLY: the `--dynamic` bench first builds the faithful raw-int
+   artifact; only when that raises ConstraintViolation does it rebuild
+   with symint inputs re-derived from their source tensor dims INSIDE the
+   traced forward (`symint_derivations_for_repro` + `DerivedSymintRepro`:
+   each `['I',hint,expr]` slot whose expr's root symbols are readable off
+   a tensor input's dims becomes `tensor.size(d)` arithmetic; the compiled
+   callable takes only the remaining args), announcing the substitution
+   loudly. FALLBACK-ONLY matters: deriving unconditionally CHANGES
+   inductor's fusion for symint-VALUE families (var_mean fused 1 kernel
+   vs the model's 2 — the same unfaithfulness as compile_fx-direct,
+   caught by test_dynamic_default_measures_general_kernel_gpu when the
+   first version derived always). Verified: the pin-hazard family now
+   runs at every binding including the previously-fatal 2 and 4 (table
+   above) with the persistent kernel surviving; value-consuming and
+   symint-free families keep their exact pre-fix artifacts.
 
 5. **Prior curve re-verified on the current harness** (the earlier sweep
    accidentally imported a stale June harness via sys.path fallthrough —

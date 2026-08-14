@@ -281,9 +281,19 @@ def _sidecar_symbol_hints(graph_path: Path) -> dict:
         return {}
     hints = {}
     for name, defn in (meta.get("symbols") or {}).items():
-        hint = defn.get("hint") if isinstance(defn, dict) else None
+        if not isinstance(defn, dict):
+            continue
+        hint = defn.get("hint")
+        # bool is an int subclass but never a valid size hint (True would seed
+        # a 1 -> ShapeEnv 0/1-specialization); a float that is exactly integral
+        # is coerced losslessly (JSON may round-trip 4 as 4.0). Anything else
+        # (None, non-integral float, str) is dropped -> caller's default hint.
+        if isinstance(hint, bool):
+            continue
         if isinstance(hint, int):
             hints[name] = hint
+        elif isinstance(hint, float) and hint.is_integer():
+            hints[name] = int(hint)
     return hints
 
 
@@ -310,29 +320,55 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
     # picks which concrete size make_fx traces at — the symbol stays symbolic
     # regardless — so the default is safe for structure, wrong for the point.
     hints: dict[str, int] = dict(symbol_hints or {})
+
+    import ast as _ast
+
+    def _expr_symbols(text: str) -> set:
+        """Symbol identifiers referenced by a closed arithmetic expr, via AST
+        (no regex, lossless over the printed grammar): 's0*s53' -> {'s0','s53'},
+        's53' -> {'s53'}, '64' -> set(). A token the grammar doesn't cover
+        (SyntaxError) contributes no symbols, so the caller later falls back to
+        real-mode rather than seeding a half-parsed name."""
+        try:
+            tree = _ast.parse(text, mode="eval")
+        except (SyntaxError, ValueError):
+            return set()
+        return {n.id for n in _ast.walk(tree) if isinstance(n, _ast.Name)}
+
+    # A live symint carries an expr ('s53' or a product 's0*s53'); seed EVERY
+    # symbol it references, not just bare-identifier exprs — a composite symint
+    # whose components appear in no tensor dim must still resolve.
     for s in specs:
         if not isinstance(s, dict):
             continue
         if s.get("kind") == "symint" and isinstance(s.get("expr"), str):
-            nm = s["expr"]
-            if nm.isidentifier():
+            for nm in _expr_symbols(s["expr"]):
                 hints.setdefault(nm, int(s.get("hint", 8) or 8))
-    # Tensor dims that are bare symbol identifiers: seed any still-unhinted ones.
+    # Seed any still-unhinted symbols that appear in tensor SHAPE *or* STRIDE
+    # tokens. Strides are seeded too: a symbol that occurs ONLY in a stride
+    # expr (e.g. a permuted/non-contiguous dynamic tensor) would otherwise be
+    # unknown to eval_dim, dropping the strided view to a contiguous fallback.
     for s in specs:
         if not isinstance(s, dict) or s.get("kind") == "symint":
             continue
-        for d in (s.get("shape") or []):
-            if isinstance(d, str) and d.isidentifier():
-                hints.setdefault(d, 8)
+        for tok in list(s.get("shape") or []) + list(s.get("stride") or []):
+            if isinstance(tok, str):
+                for nm in _expr_symbols(tok):
+                    hints.setdefault(nm, 8)
     if not hints:
         return None
 
     shape_env = ShapeEnv()
     symnodes: dict[str, object] = {}
     for nm, h in hints.items():
+        # ShapeEnv 0/1-specializes size hints of 0 and 1 — the created "symbol"
+        # collapses to a constant, so a dynamic dim would silently recapture as
+        # static. The hint only picks the concrete size make_fx traces at (the
+        # symbol stays symbolic regardless), so trace at >=2 to keep it dynamic.
+        trace_h = h if isinstance(h, int) and h >= 2 else 2
         sym = shape_env.create_symbol(
-            h, source=LocalSource(nm), dynamic_dim=DimDynamic.DYNAMIC)
-        symnodes[nm] = shape_env.create_symintnode(sym, hint=h)
+            trace_h, source=LocalSource(nm), dynamic_dim=DimDynamic.DYNAMIC)
+        symnodes[nm] = shape_env.create_symintnode(sym, hint=trace_h)
 
     # Evaluate a dim/stride token to a torch SymInt (or int). The expression
     # MUST be evaluated over the torch SymIntNODES so arithmetic produces torch
@@ -387,7 +423,15 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
         kind = spec.get("kind")
         if kind == "symint":
             nm = spec.get("expr")
-            return symnodes.get(nm) if nm in symnodes else int(spec.get("hint", 8))
+            if nm is None:
+                # Constant-valued symint (Sym(256)): no symbol — keep the
+                # recorded concrete value, don't collapse it to the default.
+                return spec.get("value", spec.get("hint", 8))
+            # Bare symbol ('s53') or composite ('s0*s53'): evaluate over the
+            # shared symbol nodes so it stays a torch SymInt tied to the SAME
+            # symbols as the tensor dims. An unknown component -> None -> caller
+            # falls back to real-mode tracing (never silently bakes a guess).
+            return eval_dim(nm)
         if kind == "scalar":
             return spec.get("value", 1)
         shape = [eval_dim(d) for d in (spec.get("shape") or [])]
@@ -627,6 +671,14 @@ def load_graph_module(graph_path: Path):
                 with fake_mode:
                     gm = make_fx(instance, tracing_mode="symbolic")(*inputs)
                 return gm
+            # A dynamic graph whose symbolic rebuild failed (an unresolved
+            # symbol/expr) must not SILENTLY recapture as static — that drops
+            # dynamism with zero signal and f(f(x)) != f(x). Warn loudly; the
+            # real-mode fallback below still produces a (static) GraphModule so
+            # ingestion isn't lost, but the operator can see the degradation.
+            print(f"  WARNING: {graph_path.name} carries symbolic inputs but "
+                  f"symbolic rebuild failed (unresolved symbol/expr); falling "
+                  f"back to STATIC real-mode trace — DYNAMISM LOST for this graph")
 
         inputs = []
         for raw_spec in input_shapes:

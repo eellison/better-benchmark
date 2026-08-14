@@ -226,6 +226,14 @@ def run_tests():
     # kernel handles concrete dims internally.
     _run_point_dispatch_tests()
 
+    # --- point= THREADING through resolve_oracle / check_oracle -------------
+    # select() routing by hash is covered above; this pins the layer the bench
+    # loop actually calls: resolve_oracle(point=) and check_oracle(point=) must
+    # thread the shape_hash so a DYNAMIC (shape-less) point-keyed oracle is
+    # reachable. Without it, --check returns False (NO_ORACLE_FOR_SHAPE) for
+    # every point and --check verifies a different callable than --bench times.
+    _run_point_resolve_check_tests()
+
     reset_oracle_registry(MOD)
     print("\nALL DISPATCH TESTS PASS")
 
@@ -311,6 +319,80 @@ def _run_point_dispatch_tests():
         reset_oracle_registry(PMOD)
         del sys.modules[PMOD]
     print("PASS point= dispatch (dynamic point routes by hash, family coverage)")
+
+
+def _run_point_resolve_check_tests():
+    """B2: resolve_oracle / check_oracle must thread point= for dynamic points.
+
+    A DYNAMIC point registers shape-less (its shape is symbolic). The bench
+    loop knows the point's shape_hash and threads it; the check gate must too,
+    or a dynamic oracle can never pass --check and --check ends up verifying a
+    different callable than --bench times.
+    """
+    import json
+    import tempfile
+    import types
+    from pathlib import Path
+
+    from oracle_harness import check_oracle
+
+    RMOD = "test_oracle_dispatch_resolve_fake"
+    reset_oracle_registry(RMOD)
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        shapes = {
+            "symbols": {"s0": {"hint": 8, "range": [2, None]}},
+            "guards": [],
+            "points": [
+                {"shape_hash": "cccc3333", "captured_dynamic": True,
+                 "bindings": {"s0": 8},
+                 "inputs": [[[64, "s0"], "f32"]]},
+            ],
+        }
+        (d / "shapes.json").write_text(json.dumps(shapes))
+        mod = types.ModuleType(RMOD)
+        mod.__file__ = str(d / "oracle.py")
+        sys.modules[RMOD] = mod
+
+        # A numeric kernel so check_oracle's allclose has real tensors.
+        def _double(inputs):
+            return [inputs[0] * 2]
+        _double.__module__ = RMOD
+        _double.__name__ = "_double"
+        oracle_impl(point="cccc3333")(_double)
+
+        inputs = [torch.randn(64, 8)]  # concrete binding of (64, s0) at s0=8
+
+        # resolve_oracle WITHOUT point: shape-less + point-keyed -> unreachable
+        # by shape lookup -> loud (this is the pre-B2 bench-time failure).
+        try:
+            resolve_oracle(_double, inputs)
+            raise AssertionError("expected OracleDispatchError (no point threaded)")
+        except OracleDispatchError:
+            pass
+
+        # resolve_oracle WITH point -> resolves the point-keyed kernel.
+        fn, info = resolve_oracle(_double, inputs, point="cccc3333")
+        assert info["matched"] in ("point", "point+hardware"), info
+        # B9: the dispatch trace records BOTH the queried point and the point
+        # the chosen entry is keyed to — a point-tier match is otherwise
+        # unexplained (a dynamic entry registers shape-less).
+        assert info["point"] == "cccc3333", info
+        assert info["matched_point"] == "cccc3333", info
+
+        class _Inst:
+            def __call__(self, x):
+                return x * 2
+
+        # check_oracle WITH point passes the gate; WITHOUT point fails it
+        # (NO_ORACLE_FOR_SHAPE) — the exact B2 gate bug.
+        assert check_oracle(_double, _Inst(), inputs, point="cccc3333") is True
+        assert check_oracle(_double, _Inst(), inputs) is False
+
+        reset_oracle_registry(RMOD)
+        del sys.modules[RMOD]
+    print("PASS point= threading (resolve_oracle / check_oracle gate)")
 
 
 if __name__ == "__main__":

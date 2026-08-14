@@ -1102,6 +1102,58 @@ def test_symint_derivation_plan_and_wrapper():
         assert torch.equal(got, expected)
 
 
+def test_distinct_dynamic_bindings_are_internally_distinct():
+    """Warm bindings for the general-kernel pre-warm must be INTERNALLY
+    distinct — no two symbols sharing a value — else dynamo unifies them into
+    one square symbol and the "general" artifact is square-specialized. A plain
+    multiplicative scale (hint * (1+j) * (1+shape_idx)) collides for a 2:1 hint
+    ratio (h0 == 2*h1) at every shape_idx; the distinct-value generator must
+    avoid that while (a) keeping each value a multiple of its hint so
+    divisibility guards survive and (b) varying each symbol across the set."""
+    import json as _json
+    import tempfile as _tempfile
+    from pathlib import Path as _Path
+
+    from repro_harness import _distinct_dynamic_bindings
+
+    def _bindings(symbols, guards):
+        with _tempfile.TemporaryDirectory() as tmp:
+            d = _Path(tmp)
+            (d / "repro.py").write_text("# placeholder\n")
+            (d / "shapes.json").write_text(_json.dumps(
+                {"symbols": symbols, "guards": guards, "points": []}))
+            return _distinct_dynamic_bindings(str(d / "repro.py"), [], {}, n=2)
+
+    # 2:1 ratio, NO coupling guard: the old scheme returned squares.
+    sym = {"s0": {"hint": 2, "range": [2, None]},
+           "s1": {"hint": 1, "range": [1, None]}}
+    out = _bindings(sym, [])
+    assert len(out) >= 2, out
+    for b in out:
+        assert len(set(b.values())) == len(b), f"square warm binding: {b}"
+    # requirement (2): every symbol takes >= 2 distinct values across the set.
+    for name in ("s0", "s1"):
+        assert len({b[name] for b in out}) >= 2, (name, out)
+
+    # divisibility guard survives: 3:1 with Mod(s0, 6) == 0 stays a multiple.
+    sym2 = {"s0": {"hint": 6, "range": [6, None]},
+            "s1": {"hint": 2, "range": [2, None]}}
+    out2 = _bindings(sym2, ["Eq(Mod(s0, 6), 0)"])
+    assert out2, out2
+    for b in out2:
+        assert len(set(b.values())) == len(b), f"square warm binding: {b}"
+        assert b["s0"] % 6 == 0, b
+
+    # coupled Eq(s0, s1): distinct values would break the guard, so the coupled
+    # (equal-magnitude) fallback is correct — squares are EXPECTED here.
+    sym3 = {"s0": {"hint": 8, "range": [2, None]},
+            "s1": {"hint": 8, "range": [2, None]}}
+    out3 = _bindings(sym3, ["Eq(s0, s1)"])
+    assert out3, out3
+    for b in out3:
+        assert b["s0"] == b["s1"], b
+
+
 def test_shape_hash_symbolization_identity():
     """shape_hash must (a) stay byte-stable for static captures — the whole
     static corpus keys on it, (b) distinguish two symbolic FAMILIES whose

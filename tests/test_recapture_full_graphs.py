@@ -384,5 +384,96 @@ class RecaptureFullGraphsTests(unittest.TestCase):
         return {d.name: d for d in canon.iterdir()} if canon.exists() else {}
 
 
+class TestBuildSymbolicInputs(unittest.TestCase):
+    """Unit tests for _build_symbolic_inputs symbol resolution (CPU, no CUDA).
+
+    Regression coverage for the symint/stride/hint resolution bugs where a
+    dynamic quantity silently collapsed to a constant (losing dynamism):
+      B3  constant symint (Sym(256)) and composite symint (Sym(s0*s1))
+      B4  a symbol appearing ONLY in a stride expr
+      B5  a symbol whose hint is 0 or 1 (ShapeEnv 0/1-specialization)
+    """
+
+    def _build(self, specs, hints=None):
+        import torch
+        from ingest_tlparse import _build_symbolic_inputs
+        return _build_symbolic_inputs(specs, torch.device("cpu"), hints or {})
+
+    def test_constant_symint_keeps_value_not_default(self):
+        import torch
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0"],
+             "dtype": "float32", "stride": ["1"], "device": "cpu"},
+            {"kind": "symint", "name": "n", "value": 256},
+        ]
+        _mode, inputs = self._build(specs, {"s0": 8})
+        self.assertEqual(inputs[1], 256)  # not collapsed to the default hint
+
+    def test_composite_symint_stays_symbolic(self):
+        import torch
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0", "s1"],
+             "dtype": "float32", "stride": ["s1", "1"], "device": "cpu"},
+            {"kind": "symint", "name": "n", "expr": "s0*s1"},
+        ]
+        _mode, inputs = self._build(specs, {"s0": 8, "s1": 4})
+        self.assertIsInstance(inputs[1], torch.SymInt)
+
+    def test_stride_only_symbol_is_seeded(self):
+        import torch
+        # s2 appears ONLY in the stride, never in a shape dim or the sidecar.
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0", "4"],
+             "dtype": "float32", "stride": ["s2", "s0"], "device": "cpu"},
+        ]
+        res = self._build(specs, {})
+        self.assertIsNotNone(res, "stride-only symbol dropped -> rebuild None")
+        _mode, inputs = res
+        self.assertIsInstance(inputs[0].stride()[0], torch.SymInt)
+
+    def test_hint_one_does_not_specialize(self):
+        import torch
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0"],
+             "dtype": "float32", "stride": ["1"], "device": "cpu"},
+        ]
+        _mode, inputs = self._build(specs, {"s0": 1})  # falsy hint
+        self.assertIsInstance(inputs[0].shape[0], torch.SymInt)
+
+
+class TestSidecarSymbolHints(unittest.TestCase):
+    """B7: sidecar hint coercion. A native per-symbol hint is the join key
+    back to live occurrence counts, so a hint stored in a slightly-off type
+    must not be silently dropped (orphaning the accounting join) nor let a
+    bool through as a 0/1-specializing size."""
+
+    def _hints(self, symbols):
+        from ingest_tlparse import _sidecar_symbol_hints
+        with tempfile.TemporaryDirectory() as tmp:
+            g = Path(tmp) / "full_graph_000.py"
+            g.write_text("# stub")
+            (g.with_name("full_graph_000.meta.json")).write_text(
+                __import__("json").dumps({"symbols": symbols}))
+            return _sidecar_symbol_hints(g)
+
+    def test_int_hint_is_kept(self):
+        self.assertEqual(self._hints({"s0": {"hint": 16}}), {"s0": 16})
+
+    def test_bool_hint_is_rejected(self):
+        # isinstance(True, int) is True; a bool must not seed a size-1 hint.
+        self.assertEqual(self._hints({"s0": {"hint": True}}), {})
+
+    def test_integral_float_is_coerced(self):
+        r = self._hints({"s0": {"hint": 4.0}})
+        self.assertEqual(r, {"s0": 4})
+        self.assertIsInstance(r["s0"], int)
+
+    def test_non_integral_and_garbage_are_dropped(self):
+        self.assertEqual(
+            self._hints({"a": {"hint": 3.5}, "b": {"hint": "8"},
+                         "c": {"hint": None}, "d": "notadict"}),
+            {})
+
+
 if __name__ == "__main__":
     unittest.main()

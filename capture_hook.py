@@ -514,6 +514,12 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         if isinstance(v, (torch.SymInt, torch.SymFloat)):
             _note_env(v)
             hint = v.node.hint if hasattr(v, "node") and hasattr(v.node, "hint") else int(v)
+            if hint is None:
+                # Unbacked SymInt with no hint -> can't resolve to a concrete
+                # List[int] literal. Per this function's contract, return None
+                # so the caller leaves THIS op unlifted, rather than int(None)
+                # raising and dropping the whole graph's regions.
+                return None, None
             return int(hint), _sym_expr_str(v)
         if isinstance(v, int):
             return int(v), None
@@ -933,10 +939,12 @@ def _canonical_symbolic_suffixes(placeholder_info: dict) -> dict:
         sym = info.get("symbolic") or {}
         shape_exprs = sym.get("shape_exprs")
         stride_exprs = sym.get("stride_exprs")
+        offset_expr = sym.get("offset_expr")
         symint_expr = info.get("expr")
-        if shape_exprs or stride_exprs or symint_expr:
+        if shape_exprs or stride_exprs or offset_expr or symint_expr:
             any_symbolic = True
-        ordered.append((name, shape_exprs, stride_exprs, symint_expr))
+        ordered.append((name, shape_exprs, stride_exprs, offset_expr,
+                        symint_expr))
     if not any_symbolic:
         return {}
 
@@ -953,11 +961,12 @@ def _canonical_symbolic_suffixes(placeholder_info: dict) -> dict:
                 seen.add(nm)
                 first_seen.append(nm)
 
-    for _, shape_exprs, stride_exprs, symint_expr in ordered:
+    for _, shape_exprs, stride_exprs, offset_expr, symint_expr in ordered:
         for d in (shape_exprs or []):
             note(d)
         for s in (stride_exprs or []):
             note(s)
+        note(offset_expr)
         note(symint_expr)
 
     rename = {nm: sympy.Symbol(f"s{i}") for i, nm in enumerate(first_seen)}
@@ -973,12 +982,19 @@ def _canonical_symbolic_suffixes(placeholder_info: dict) -> dict:
         return str(expr.xreplace(sub)) if sub else e
 
     suffixes = {}
-    for name, shape_exprs, stride_exprs, symint_expr in ordered:
-        if not (shape_exprs or stride_exprs or symint_expr):
+    for name, shape_exprs, stride_exprs, offset_expr, symint_expr in ordered:
+        if not (shape_exprs or stride_exprs or offset_expr or symint_expr):
             continue
+        # A symbolic storage OFFSET is part of the placeholder's symbolic
+        # identity (a static-shape/stride view at a symbolic start, e.g. the
+        # 'offset s77-2' R3-1 case) — omitting it let a dynamic-offset capture
+        # collide with the static point and with other offset families (the
+        # Finding-E conflation the suffix scheme exists to close, left open for
+        # the offset channel). Include it as its own suffix slot.
         suffixes[name] = json.dumps([
             [canon(d) for d in shape_exprs] if shape_exprs else None,
             [canon(s) for s in stride_exprs] if stride_exprs else None,
+            canon(offset_expr) if offset_expr else None,
             canon(symint_expr) if symint_expr else None,
         ])
     return suffixes
@@ -1602,6 +1618,25 @@ class _CaptureState:
         def _apply_exprs(slots, exprs):
             return [e if e is not None else s for s, e in zip(slots, exprs)]
 
+        # shape_param_exprs is keyed by the EXTRACTION-time _shape_param_N
+        # names; shape_params/ph_names here carry the (possibly re-lifted)
+        # CANONICAL names. When canonicalize_subgraph bails (symint placeholder)
+        # the two name sets are identical, so the overlay below joins cleanly.
+        # But a dynamic-TENSOR partition with no symint placeholder retraces at
+        # hints and re-lifts shape params, and the fresh names can desync from
+        # the expr keys — the overlay would then silently miss and freeze the
+        # lifted shape param as a static list (dynamism LOST). Detect that and
+        # say so loudly rather than emit a quietly-wrong static repro.
+        _expr_keys_desynced = set(shape_param_exprs or {}) - set(shape_params)
+        if _expr_keys_desynced:
+            print(
+                f"  WARNING: {filename}: shape-param exprs {sorted(_expr_keys_desynced)} "
+                f"do not match the lifted shape-param names {sorted(shape_params)} "
+                f"(canonicalization re-lifted under new names) — those symbolic "
+                f"dims will serialize as STATIC (dynamism LOST for this repro)",
+                file=sys.stderr,
+            )
+
         compact_inputs = []
         for name in ph_names:
             if name in shape_params:
@@ -1681,13 +1716,18 @@ from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-# Fallback: the repo this repro was generated from. parents[3] only resolves
-# the harness when the canonical root sits INSIDE the repo (repros/canonical/
-# <dir>/); a repro merged into a scratch root would otherwise silently import
-# whatever repro_harness is findable on sys.path — a stale copy from another
-# checkout benches with the WRONG methodology/flags. Appended (not inserted):
-# an in-repo install still wins via parents[3].
-sys.path.append({str(Path(__file__).resolve().parent)!r})
+# Fallback for a repro merged into a scratch root: parents[3] only resolves the
+# harness when the canonical root sits INSIDE the repo (repros/canonical/<dir>/).
+# Search upward from THIS file's RUNTIME location for the directory holding
+# repro_harness.py, rather than baking the generator's absolute path — that path
+# is the machine/checkout (often an ephemeral worktree) the repro was captured
+# from and may not exist when the repro is later run. The runtime walk finds the
+# harness co-located with the repro in its own tree; an in-repo install still
+# wins via the parents[3] insert above.
+for _harness_root in Path(__file__).resolve().parents:
+    if (_harness_root / "repro_harness.py").exists():
+        sys.path.append(str(_harness_root))
+        break
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = {CURRENT_REPRO_VERSION}

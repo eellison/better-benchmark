@@ -52,20 +52,40 @@ def _atomic_write_text(path: Path, text: str) -> None:
     tmp.replace(path)
 
 
+def _symbol_alloc_key(name: str):
+    """Sort key that orders symbol names by ShapeEnv ALLOCATION order, not
+    lexicographically. Dynamo allocates symbols off a monotonic counter, so the
+    trailing integer reflects allocation (and thus role) order; a plain string
+    sort puts 's10' before 's9' ('1' < '9'), which flips the canonical
+    assignment across two dynamo namings of the SAME family. Key = (non-digit
+    prefix, trailing int, name) so 's9' < 's10' and 'u0' groups apart from
+    's0'; a name with no trailing digits sorts by name alone."""
+    i = len(name)
+    while i > 0 and name[i - 1].isdigit():
+        i -= 1
+    prefix = name[:i]
+    num = int(name[i:]) if i < len(name) else -1
+    return (prefix, num, name)
+
+
 def _symbols_in_order(text) -> list:
     """Free symbol NAMES in an expr string, in a DETERMINISTIC order. sympy
-    gives free_symbols as an unordered SET, so we order by sympy's own
-    canonical sort_key — the same order sympy renders a commutative product in
-    — which is stable and (unlike a str.find on the rendering) has no
-    substring hazard (find('s1') would match inside 's15'). A bare int or a
-    non-symbolic slot yields []. Per-slot building block of the first-
-    appearance canonical ordering; for the common case (a symbol first appears
-    as a BARE shape dim) the slot has one symbol and order is trivial."""
+    gives free_symbols as an unordered SET, so we order by ALLOCATION order
+    (_symbol_alloc_key) — stable across dynamo namings and (unlike a str.find on
+    the rendering) with no substring hazard (find('s1') would match inside
+    's15'). NOT sympy's sort_key: that is lexicographic on the name, so within a
+    compound slot where two symbols FIRST co-appear (a flattened 's_b*s_s' dim)
+    it orders 's10' before 's9' and a re-run whose names straddle a digit
+    boundary gets a different canonical assignment -> a different shape_hash for
+    the same family. A bare int or non-symbolic slot yields []. For the common
+    case (a symbol first appears as a BARE shape dim) the slot has one symbol
+    and order is trivial."""
     if not isinstance(text, str):
         return []
     from input_codec import _sympify_expr
     expr = _sympify_expr(text)
-    return [s.name for s in sorted(expr.free_symbols, key=lambda s: s.sort_key())]
+    return [s.name for s in sorted(expr.free_symbols,
+                                   key=lambda s: _symbol_alloc_key(s.name))]
 
 
 def _canonical_symbol_rename(inputs, guards, extra_names=None) -> dict:
@@ -186,6 +206,14 @@ def _rename_symbols_in_inputs(inputs, rename: dict):
                 opts = dict(e[2])
                 if "st" in opts:
                     opts["st"] = [_slot(s) for s in opts["st"]]
+                if "off" in opts:
+                    # A symbolic storage offset ('off') is part of the coupled
+                    # set — _canonical_symbol_rename reads it for ordering, so
+                    # it MUST be rewritten too, else it retains a raw dynamo
+                    # name (unbound-symbol error at eval) or, worse, a name that
+                    # now denotes a DIFFERENT canonical symbol (silent
+                    # wrong-offset tensor).
+                    opts["off"] = _slot(opts["off"])
                 ne.append(opts)
             out.append(ne)
         else:
@@ -302,22 +330,46 @@ def _write_shapes_json(
     # merge. Same-definition reuse is genuine -> no rename (idempotent).
     if symbols:
         existing_syms_table = data.get("symbols") or {}
+        existing_guards_list = data.get("guards") or []
+        incoming_guards_list = guards or []
+
+        def _guard_participation(nm, glist):
+            # The set of guard exprs mentioning symbol `nm`. Compared name-to-
+            # name (both sides use the same canonical name), so string equality
+            # is meaningful. Two same-range symbols that participate in
+            # DIFFERENT guards are structurally different — a real clash the
+            # shared table can't hold, else the pooled `guards` union below
+            # would apply one point's constraint to an unrelated point.
+            return frozenset(g for g in glist if nm in _symbols_in_order(g))
+
         rename = {}
         for name, defn in symbols.items():
             other = existing_syms_table.get(name)
             # Collision = same canonical name but a STRUCTURALLY different
-            # symbol. Compare RANGE (+ guard participation, shared graph-level),
-            # NOT the hint: post-canonicalization every point of the same
-            # family gets s0,s1,... so two points differing only in BINDING
-            # (hint 8 vs 4) are the SAME symbol at different points — they MUST
-            # share the name (the whole point of canonicalization), with the
-            # per-point `bindings` carrying the hint. Only a different range is
-            # a genuine clash that the shared symbols table can't hold.
-            if other is not None and other.get("range") != defn.get("range"):
-                # collision with a different definition -> fresh name
+            # symbol. Compare RANGE *and* guard participation, NOT the hint:
+            # post-canonicalization every point of the same family gets
+            # s0,s1,... so two points differing only in BINDING (hint 8 vs 4)
+            # are the SAME symbol at different points — they MUST share the name
+            # (the whole point of canonicalization), with the per-point
+            # `bindings` carrying the hint. A different range OR a different
+            # guard set is a genuine clash the shared symbols table can't hold.
+            if other is not None and (
+                    other.get("range") != defn.get("range")
+                    or _guard_participation(name, existing_guards_list)
+                    != _guard_participation(name, incoming_guards_list)):
+                # Collision with a different definition -> fresh name. REUSE
+                # this point's own prior namespacing instead of bumping past it
+                # every re-merge: a candidate already in the table with the SAME
+                # range is our previous rename (range is name-independent, so
+                # guard strings — which carry the renamed name — don't factor
+                # into the reuse test). Only a DIFFERENT-range occupant forces a
+                # bump. This keeps namespacing idempotent (no sN__hash_i creep).
                 cand = f"{name}__{shape_hash[:4]}"
                 i = 1
-                while cand in existing_syms_table or cand in symbols:
+                while ((cand in existing_syms_table
+                        and existing_syms_table[cand].get("range")
+                        != defn.get("range"))
+                       or cand in symbols):
                     cand = f"{name}__{shape_hash[:4]}_{i}"
                     i += 1
                 rename[name] = cand
@@ -584,8 +636,15 @@ def _forward_graph_dump(source_text: str) -> str | None:
     keeps those call-arg constants but strips everything hint-valued: the
     forward's argument annotations AND the per-statement shape annotations
     (both render the hint binding, which must not split a family). Returns
-    None when no forward is found."""
-    tree = ast.parse(source_text)
+    None when no forward is found OR the source does not parse — a truncated/
+    corrupt capture file (a SIGKILL'd worker can leave one) must fall back to
+    legacy grouping, not abort the whole model's merge mid-loop the way an
+    escaping SyntaxError would (the legacy source-extraction path is likewise
+    guarded)."""
+    try:
+        tree = ast.parse(source_text)
+    except (SyntaxError, ValueError):
+        return None
     forward = next((n for n in ast.walk(tree)
                     if isinstance(n, ast.FunctionDef) and n.name == "forward"),
                    None)
@@ -628,10 +687,16 @@ def _entry_family_identity(entry: dict, src_file: Path) -> str | None:
     if dump is None:
         return None
     symbols = entry.get("symbols")
+    if not symbols:
+        # No symbolic dims => no dynamic FAMILY to split by. Return None so the
+        # caller groups it like a static capture (legacy first-dir path). A
+        # non-None identity here would never match the dir side — which reports
+        # None for a symbol-less point (its write path leaves captured_dynamic
+        # unset) — so every merge would mint a fresh __N dir (D5).
+        return None
     inputs = entry.get("inputs")
     guards = entry.get("guards")
-    if symbols:
-        symbols, inputs, guards, _ = canonicalize_symbols(symbols, inputs, guards)
+    symbols, inputs, guards, _ = canonicalize_symbols(symbols, inputs, guards)
     sig = _hintfree_inputs_signature(inputs)
     return hashlib.md5(f"{dump}||{sig}".encode()).hexdigest()[:12]
 
@@ -674,7 +739,8 @@ def _pattern_dirs(canonical_path: Path, pattern_hash: str) -> list[Path]:
 
 def _resolve_dynamic_family_dir(canonical_path: Path, pattern_hash: str,
                                 dir_name: str,
-                                entry_identity: str | None) -> Path:
+                                entry_identity: str | None,
+                                entry_is_symbolic: bool = False) -> Path:
     """Pick the canonical dir for a DYNAMIC capture, splitting by graph identity.
 
     A dynamic capture may only JOIN a pattern dir with the IDENTICAL family
@@ -683,20 +749,46 @@ def _resolve_dynamic_family_dir(canonical_path: Path, pattern_hash: str,
     input symbolization that pattern_hash can't see) gets its OWN dir:
     `dir_name` if free, else `dir_name__2`, `__3`, ... The first family of a
     pattern keeps the plain name, so an oracle-bearing dir stays put.
-    entry_identity=None (no source to hash) falls back to the first pattern
-    dir (legacy behaviour)."""
+
+    entry_identity=None (no computable identity): a NON-symbolic capture is
+    effectively static and takes the legacy first-dir path. But a genuinely
+    SYMBOLIC capture whose identity couldn't be computed (e.g. its source
+    failed to parse) must NOT be poured into a STATIC oracle dir — that freezes
+    a static repro.py over dynamic points and pools guards. Route it instead to
+    the first EXISTING dynamic dir (one with a computable identity), else its
+    own dir; this stays idempotent because the dir it writes gains a computable
+    identity and is re-selected on the next merge (D6).
+
+    CONCURRENCY: the __N suffix is allocated by reading the dirs on disk, so it
+    is only race-free under the tool's single-process invocation — merge_one_
+    capture materializes each resolved dir (mkdir) before the next entry
+    resolves (main()'s loop is sequential). Two merge_captures processes writing
+    the SAME --canonical-dir at once could both pick the same __N and clobber;
+    callers running merges in parallel must shard by canonical root or serialize
+    them (there is no cross-process lock here by design)."""
     existing = _pattern_dirs(canonical_path, pattern_hash)
+
+    def _own_dir() -> Path:
+        candidate = canonical_path / dir_name
+        n = 2
+        while candidate in existing or candidate.exists():
+            candidate = canonical_path / f"{dir_name}__{n}"
+            n += 1
+        return candidate
+
     if entry_identity is None:
-        return existing[0] if existing else canonical_path / dir_name
+        if not entry_is_symbolic:
+            return existing[0] if existing else canonical_path / dir_name
+        # Symbolic but identity-uncomputable: prefer any existing DYNAMIC dir
+        # (non-None identity) over a static one; else our own dir.
+        for d in existing:
+            if _dir_family_identity(d) is not None:
+                return d
+        return _own_dir()
     for d in existing:
         if _dir_family_identity(d) == entry_identity:
             return d  # same family -> join as a point
-    candidate = canonical_path / dir_name
-    n = 2
-    while candidate in existing or candidate.exists():
-        candidate = canonical_path / f"{dir_name}__{n}"
-        n += 1
-    return candidate
+    return _own_dir()
 
 
 def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
@@ -806,7 +898,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         if is_dynamic:
             entry_identity = _entry_family_identity(entry, Path(entry["file"]))
             repro_dir = _resolve_dynamic_family_dir(
-                canonical_path, pattern_hash, dir_name, entry_identity)
+                canonical_path, pattern_hash, dir_name, entry_identity,
+                entry_is_symbolic=bool(entry.get("symbols")))
         else:
             repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
             if repro_dir is None:
