@@ -98,7 +98,7 @@ across the inputs (then guards), left-to-right — exactly the output-ordering
 discipline. Then the canonical FAMILY identity is:
     family_hash = md5(pattern_hash + canonical_inputs + canonical_guards)
 where canonical_inputs/guards use the renamed symbols and already-canonical
-exprs (canonical_expr_str). VERIFIED: two captures of the GroupNorm family
+exprs (_canonical_expr_str). VERIFIED: two captures of the GroupNorm family
 (independent dynamo trace contexts) produce IDENTICAL canonical inputs,
 guards, symbols, and family_hash (e17e43ee084d == e17e43ee084d), regardless
 of dynamo's original symbol names.

@@ -107,7 +107,7 @@ def _concrete_int(value: Any, *, default: int = 32) -> int:
 # instantiate_point in input_codec.
 # ---------------------------------------------------------------------------
 
-def canonical_expr_str(expr) -> str:
+def _canonical_expr_str(expr) -> str:
     """ONE canonical string rendering of a symbolic expr, so the SAME
     mathematical expression always serializes to the SAME string regardless
     of how it was constructed/rendered (live SymNode str() vs print_readable
@@ -118,7 +118,7 @@ def canonical_expr_str(expr) -> str:
     downstream equality is plain string ==, no sympy-equivalence reasoning.
     Accepts a sympy expr or an expr string; ints/plain strings pass through.
 
-    BOTH branches route through _sympify_expr so canonical_expr_str is a fixed
+    BOTH branches route through _sympify_expr so _canonical_expr_str is a fixed
     point (idempotent). A raw str(expr) on the expr branch is NOT idempotent:
     torch prints FloorDiv as '(s0//8)', but re-parsing that string yields
     'floor(s0/8)' — so the sidecar form stored via a live expr would differ
@@ -132,13 +132,13 @@ def canonical_expr_str(expr) -> str:
     return str(_sympify_expr(str(expr)))
 
 
-def sym_expr_str(x: Any) -> str | None:
+def _sym_expr_str(x: Any) -> str | None:
     """Canonical sympy-printed expr for a live SymInt/SymFloat, else None.
 
     A bare symbol prints as its name ('s0'); a derived node prints compound
     ('64*s0*s53'). Returns None when there is no symbol to preserve (plain
     int, or a SymInt whose expr is a constant — the hint already captures
-    it). Routed through canonical_expr_str so it matches the annotation
+    it). Routed through _canonical_expr_str so it matches the annotation
     rendering of the same expr. THE extractor; capture_hook imports it."""
     import torch
 
@@ -150,16 +150,16 @@ def sym_expr_str(x: Any) -> str | None:
         return None
     if getattr(expr, "is_number", False):
         return None
-    return canonical_expr_str(expr)
+    return _canonical_expr_str(expr)
 
 
-def shape_env_of(x: Any) -> Any:
+def _shape_env_of(x: Any) -> Any:
     """ShapeEnv backing a live SymInt/SymFloat, or None."""
     node = getattr(x, "node", None)
     return getattr(node, "shape_env", None)
 
 
-def symbolic_block_from_value(value: Any) -> dict | None:
+def _symbolic_block_from_value(value: Any) -> dict | None:
     """Per-tensor {shape_exprs?, stride_exprs?} from a live tensor's SymNodes,
     or None if fully static. Each list is per-slot: the exact expr string
     where the slot is symbolic, None where it is a plain int. Shared by both
@@ -169,8 +169,8 @@ def symbolic_block_from_value(value: Any) -> dict | None:
 
     if not torch.is_tensor(value):
         return None
-    shape_exprs = [sym_expr_str(s) for s in value.shape]
-    stride_exprs = [sym_expr_str(s) for s in value.stride()]
+    shape_exprs = [_sym_expr_str(s) for s in value.shape]
+    stride_exprs = [_sym_expr_str(s) for s in value.stride()]
     block: dict[str, Any] = {}
     if any(e is not None for e in shape_exprs):
         block["shape_exprs"] = shape_exprs
@@ -179,7 +179,7 @@ def symbolic_block_from_value(value: Any) -> dict | None:
     # A VIEW can have a symbolic storage_offset (e.g. a slice at a symbolic
     # start). Record its expr too, else a rebind as_strides at the frozen
     # hint offset (review R4 Finding 2).
-    off_expr = sym_expr_str(value.storage_offset())
+    off_expr = _sym_expr_str(value.storage_offset())
     if off_expr is not None:
         block["offset_expr"] = off_expr
     return block or None
@@ -195,7 +195,7 @@ def _jsonable_range_bound(v: Any) -> int | None:
     return int(v)
 
 
-def harvest_shape_env(shape_env: Any) -> dict | None:
+def _harvest_shape_env(shape_env: Any) -> dict | None:
     """Graph-level {symbols, guards, captured_dynamic} from a live ShapeEnv.
 
     THE shared harvester (capture_hook + full-graph sidecar both call it).
@@ -310,7 +310,7 @@ def harvest_shape_env(shape_env: Any) -> dict | None:
     return {"symbols": symbols, "guards": guards, "captured_dynamic": True}
 
 
-def shape_env_from_gm(gm: Any) -> Any:
+def _shape_env_from_gm(gm: Any) -> Any:
     """The live ShapeEnv backing any SymInt dim/stride/input in gm, or None."""
     import torch
 
@@ -318,11 +318,11 @@ def shape_env_from_gm(gm: Any) -> Any:
         val = (node.meta or {}).get("val")
         if torch.is_tensor(val):
             for s in (*val.shape, *val.stride()):
-                se = shape_env_of(s)
+                se = _shape_env_of(s)
                 if se is not None:
                     return se
         elif isinstance(val, (torch.SymInt, torch.SymFloat)):
-            se = shape_env_of(val)
+            se = _shape_env_of(val)
             if se is not None:
                 return se
     return None
@@ -738,7 +738,7 @@ def _tensor_spec_from_value(
     # exact exprs, recorded the same way as region capture so the sidecar
     # stride is '64*s0*s53', not a hint int or a regex-mangled number. None
     # for static tensors. compact_from_spec overlays these into the entry.
-    symbolic = symbolic_block_from_value(value)
+    symbolic = _symbolic_block_from_value(value)
     if symbolic:
         spec["symbolic"] = symbolic
     if generator.get("kind") in {"index", "permutation"}:
@@ -798,7 +798,7 @@ def _scalar_spec_from_value(name: str, value: Any) -> dict[str, Any]:
         # Keep the exact expr for a live symint input ('s53', 's0*s53') so the
         # sidecar can rebind, same as the region path's ['I', hint, expr].
         # None for a constant-valued symint (the hint already captures it).
-        expr = sym_expr_str(value)
+        expr = _sym_expr_str(value)
         if expr is not None:
             spec["expr"] = expr
         return spec
@@ -920,7 +920,7 @@ def graph_constraints_from_gm(
     # Dynamic shapes: the graph-level symbol table + guards from the live
     # ShapeEnv, so the sidecar's symbolic shape/stride exprs can be evaluated
     # at the hint (or any valid binding) by a consumer. None for static.
-    shape_env_block = harvest_shape_env(shape_env_from_gm(gm))
+    shape_env_block = _harvest_shape_env(_shape_env_from_gm(gm))
     if shape_env_block is not None:
         payload["symbols"] = shape_env_block["symbols"]
         payload["guards"] = shape_env_block["guards"]
@@ -1083,22 +1083,46 @@ def _is_int_token(tok: str) -> bool:
     return tok.lstrip("-").isdigit()
 
 
+def _split_dim_commas(s: str) -> list:
+    """Split a rendered shape/stride body on TOP-LEVEL commas only — commas
+    nested inside a symbolic dim's own call (Mod(s0, 8), Max(1, s0)) belong to
+    that dim, not to the slot separator. Bracket/paren-depth aware, no regex."""
+    parts, depth, start = [], 0, 0
+    for i, ch in enumerate(s):
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append(s[start:i])
+            start = i + 1
+    parts.append(s[start:])
+    return parts
+
+
 def _dim_tokens(s: str | None) -> list:
     """Split a rendered shape/stride annotation into per-slot values WITHOUT
     losing symbolic information: an integer slot becomes an int, a symbolic
-    slot is CANONICALIZED (canonical_expr_str) to the same steady-state form
+    slot is CANONICALIZED (_canonical_expr_str) to the same steady-state form
     the sidecar stores — so the two renderings of one expr are
     string-identical and the cross-check is plain ==. Returns [] / None for
     empty / None."""
     if s is None:
         return None
     out = []
-    for tok in s.split(","):
+    for tok in _split_dim_commas(s):
         tok = tok.strip()
         if not tok:
             continue
-        out.append(int(tok) if _is_int_token(tok)
-                   else canonical_expr_str(tok))
+        if _is_int_token(tok):
+            out.append(int(tok))
+            continue
+        canon = _canonical_expr_str(tok)
+        # A dim expr that CONSTANT-FOLDS to an integer ('2**3' -> '8',
+        # 'Mod(16, 8)' -> '0') is a concrete dim, not a symbolic one — return
+        # it as an int so downstream symbolic detection doesn't treat a folded
+        # constant as a live symbol.
+        out.append(int(canon) if _is_int_token(canon) else canon)
     return out
 
 
@@ -1307,7 +1331,7 @@ def _normalize_device_name(device: Any) -> str | None:
 
 def _dims_differ(a: Any, b: Any) -> bool:
     """Whether two shape/stride slots disagree. Both the sidecar and the
-    annotation render symbolic exprs through canonical_expr_str (one round of
+    annotation render symbolic exprs through _canonical_expr_str (one round of
     simplification -> idempotent steady state), so the SAME expression has the
     SAME string on both sides and equality is plain ==. Ints compare directly;
     an int vs a canonical string compares unequal (a symbolic slot is not the
@@ -1316,7 +1340,7 @@ def _dims_differ(a: Any, b: Any) -> bool:
     if isinstance(a, int) and isinstance(b, int):
         return a != b
     # one side symbolic, other int, or both strings: canonical string compare
-    return canonical_expr_str(a) != canonical_expr_str(b)
+    return _canonical_expr_str(a) != _canonical_expr_str(b)
 
 
 def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,

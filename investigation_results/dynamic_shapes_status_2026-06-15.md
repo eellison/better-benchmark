@@ -44,11 +44,11 @@ across capture paths.**
 ### 2.1 Shared SymNode→expr extractor (one source of truth)
 `full_graph_harness.py` — imported by `capture_hook.py` (verified same
 object by `test_capture_hook_reexports_shared_extractor`):
-- `sym_expr_str(x)` :110 — exact sympy string for a live SymInt/SymFloat
+- `_sym_expr_str(x)` :110 — exact sympy string for a live SymInt/SymFloat
   (`'s0'`, `'64*s0*s53'`), None for plain/constant ints.
-- `symbolic_block_from_value(value)` :136 — per-tensor
+- `_symbolic_block_from_value(value)` :136 — per-tensor
   `{shape_exprs, stride_exprs}` (per-slot expr or None).
-- `harvest_shape_env(shape_env)` :166 — graph-level
+- `_harvest_shape_env(shape_env)` :166 — graph-level
   `{symbols:{name:{hint,range[,unbacked,hint_source]}}, guards,
   captured_dynamic}`. Backed symbols from `backed_var_to_val`; UNBACKED
   symbols (data-dependent `nonzero`/`item`/…) harvested too, with
@@ -56,7 +56,7 @@ object by `test_capture_hook_reexports_shared_extractor`):
   `range_fallback` placeholder) so a consumer knows how much to trust the
   hint. Specialized symbols (range `[k,k]`) dropped. Guards filtered to
   those over kept symbols. Finite range upper bounds survive; `int_oo`→None.
-- `shape_env_from_gm(gm)` :252 — finds the live ShapeEnv in a graph.
+- `_shape_env_from_gm(gm)` :252 — finds the live ShapeEnv in a graph.
 
 ### 2.2 Expr-preserving capture (capture_hook.py)
 - `_record_placeholder` :347 — records hint shape/stride AS BEFORE, plus an
@@ -131,7 +131,7 @@ model's real dynamic structure.
   approximation — dynamic dims + ranges, but guards are freshly re-traced
   and symbols re-allocated, so coupled constraints (`s0*s53==256`) are NOT
   restored. The `--dynamic` bench path today uses `mark_dynamic` on the
-  recorded dims (`repro_harness.dynamic_dims_for_repro` :309) — a strict
+  recorded dims (`repro_harness._dynamic_dims_for_repro` :309) — a strict
   improvement over blanket `dynamic=True`, but it still recompiles per
   binding for the lifted-symint repro form.
 - The FAITHFUL mechanism is `torch.compile(mod, shapes_spec=ShapesSpec(...))`

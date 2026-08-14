@@ -945,8 +945,8 @@ def test_canonicalize_symbols_first_appearance_order():
     """Symbol names canonicalize to s0,s1,... by FIRST APPEARANCE across the
     inputs (then guards), left-to-right — so two captures of the same family
     with different dynamo names (s17/s15 vs s7/s92) produce IDENTICAL saved
-    structure. Pure (no GPU): exercises merge_captures.canonicalize_symbols."""
-    from merge_captures import canonicalize_symbols, _canonical_symbol_rename
+    structure. Pure (no GPU): exercises merge_captures._canonicalize_symbols."""
+    from merge_captures import _canonicalize_symbols, _canonical_symbol_rename
 
     # s17 appears first (shape dim 2), s15 second -> s17->s0, s15->s1.
     symbols = {"s17": {"hint": 8, "range": [2, None]},
@@ -958,7 +958,7 @@ def test_canonicalize_symbols_first_appearance_order():
     bindings = {"s17": 8, "s15": 8}
 
     assert _canonical_symbol_rename(inputs, guards) == {"s17": "s0", "s15": "s1"}
-    s, i, g, b = canonicalize_symbols(symbols, inputs, guards, bindings)
+    s, i, g, b = _canonicalize_symbols(symbols, inputs, guards, bindings)
     assert set(s) == {"s0", "s1"}
     assert i[0][0] == [64, 64, "s0", "s1"]
     assert i[0][2]["st"] == ["64*s0*s1", "s0*s1", "s1", 1]
@@ -972,12 +972,12 @@ def test_canonicalize_symbols_first_appearance_order():
     inputs2 = [[[64, 64, "s7", "s92"], "f32",
                 {"st": ["64*s7*s92", "s7*s92", "s92", 1]}],
                ["I", 64, "s7*s92"], ["I", 8, "s7"], ["I", 8, "s92"]]
-    s2, i2, g2, b2 = canonicalize_symbols(
+    s2, i2, g2, b2 = _canonicalize_symbols(
         symbols2, inputs2, ["Eq(s7*s92, 64)"], {"s7": 8, "s92": 8})
     assert (s2, i2, g2, b2) == (s, i, g, b), "equivalent captures not identical"
 
     # Idempotent: feeding the canonical form back in is a no-op.
-    assert canonicalize_symbols(s, i, g, b) == (s, i, g, b)
+    assert _canonicalize_symbols(s, i, g, b) == (s, i, g, b)
 
 
 def test_merge_static_point_has_no_dynamic_fields():
@@ -1433,18 +1433,18 @@ def test_bind_parsing_and_symbol_binding_threading():
     import pytest
     from pathlib import Path
     from repro_harness import (format_binding, load_shape_configs,
-                               parse_bind_args, resolve_bound_configs)
+                               _parse_bind_args, _resolve_bound_configs)
 
     # parsing: repeatable flags, whitespace, malformed entries are LOUD
-    assert parse_bind_args(None) == []
-    assert parse_bind_args(["s16=24,s82=24", " s16 = 16 "]) == [
+    assert _parse_bind_args(None) == []
+    assert _parse_bind_args(["s16=24,s82=24", " s16 = 16 "]) == [
         {"s16": 24, "s82": 24}, {"s16": 16}]
     with pytest.raises(ValueError, match="must be symbol=int"):
-        parse_bind_args(["s16"])
+        _parse_bind_args(["s16"])
     with pytest.raises(ValueError, match="must be an int"):
-        parse_bind_args(["s16=abc"])
+        _parse_bind_args(["s16=abc"])
     with pytest.raises(ValueError, match="no bindings"):
-        parse_bind_args([","])
+        _parse_bind_args([","])
     assert format_binding(None) == "hint"
     assert format_binding({"s82": 24, "s16": 16}) == "s16=16,s82=24"
 
@@ -1476,22 +1476,22 @@ def test_bind_parsing_and_symbol_binding_threading():
         assert specs[2]["dims"] == [64, 32, 2, 576]  # coupled s16*s82
 
         # rows: one per (binding x config); binding=None = hint point
-        rows = resolve_bound_configs(repro, parse_bind_args(
+        rows = _resolve_bound_configs(repro, _parse_bind_args(
             ["s16=16,s82=16", "s16=24,s82=24"]))
         assert [b for _, b, _ in rows] == [
             {"s16": 16, "s82": 16}, {"s16": 24, "s82": 24}]
         assert rows[0][2]["inputs"][0]["shape"] == [64, 64, 16, 16]
         assert rows[1][2]["inputs"][0]["shape"] == [64, 64, 24, 24]
-        hint_rows = resolve_bound_configs(repro, [])
+        hint_rows = _resolve_bound_configs(repro, [])
         assert hint_rows[0][1] is None
         assert hint_rows[0][2]["inputs"][0]["shape"] == [64, 64, 16, 16]
 
         # range violations surface (not silently benched)
         with pytest.raises(ValueError, match="below range"):
-            resolve_bound_configs(repro, [{"s16": 1, "s82": 16}])
+            _resolve_bound_configs(repro, [{"s16": 1, "s82": 16}])
         # unknown --shape is loud
         with pytest.raises(ValueError, match="not in configs"):
-            resolve_bound_configs(repro, [], shape="nope")
+            _resolve_bound_configs(repro, [], shape="nope")
 
     # shapes.txt-only repros cannot honor bindings: loud, not ignored
     with tempfile.TemporaryDirectory() as td:
@@ -1535,7 +1535,7 @@ def test_sym_expr_str_roundtrips_through_sympy():
     that is the contract instantiate_point relies on. The extractor lives in
     full_graph_harness (THE shared home); capture_hook re-exports it."""
     import sympy
-    from full_graph_harness import sym_expr_str
+    from full_graph_harness import _sym_expr_str
 
     def f(x):
         return x.view(x.shape[0], x.shape[1] * x.shape[2]).sum(1)
@@ -1543,7 +1543,7 @@ def test_sym_expr_str_roundtrips_through_sympy():
     _se, syms = _symbolic_shape_env_and_syms(f, torch.randn(4, 8, 16))
     seen_compound = False
     for s in syms:
-        es = sym_expr_str(s)
+        es = _sym_expr_str(s)
         if es is None:
             continue
         expr = sympy.sympify(es)  # must not raise
@@ -1551,7 +1551,7 @@ def test_sym_expr_str_roundtrips_through_sympy():
         if "*" in es:
             seen_compound = True
     # A plain int has no symbolic content -> None (no redundant string)
-    assert sym_expr_str(5) is None
+    assert _sym_expr_str(5) is None
 
 
 def test_capture_hook_reexports_shared_extractor():
@@ -1559,21 +1559,21 @@ def test_capture_hook_reexports_shared_extractor():
     full_graph_harness (shared-utility invariant)."""
     import capture_hook
     import full_graph_harness
-    assert capture_hook._sym_expr_str is full_graph_harness.sym_expr_str
-    assert capture_hook._harvest_shape_env is full_graph_harness.harvest_shape_env
+    assert capture_hook._sym_expr_str is full_graph_harness._sym_expr_str
+    assert capture_hook._harvest_shape_env is full_graph_harness._harvest_shape_env
 
 
 def test_harvest_shape_env_symbols_ranges():
-    """harvest_shape_env returns {symbols:{name:{hint,range}}, guards,
+    """_harvest_shape_env returns {symbols:{name:{hint,range}}, guards,
     captured_dynamic}; free symbols kept with hints + ranges, unbounded
     upper clamped to None, returns None when nothing is dynamic."""
-    from full_graph_harness import harvest_shape_env
+    from full_graph_harness import _harvest_shape_env
 
     def f(x):
         return x.view(x.shape[0], x.shape[1] * x.shape[2]).sum(1)
 
     se, _syms = _symbolic_shape_env_and_syms(f, torch.randn(4, 8, 16))
-    block = harvest_shape_env(se)
+    block = _harvest_shape_env(se)
     assert block is not None and block["captured_dynamic"] is True
     assert block["symbols"], "no symbols harvested"
     for name, meta in block["symbols"].items():
@@ -1595,8 +1595,8 @@ def test_harvest_shape_env_symbols_ranges():
 
 def test_harvest_none_shape_env():
     """None env (static capture) -> None block, never raises."""
-    from full_graph_harness import harvest_shape_env
-    assert harvest_shape_env(None) is None
+    from full_graph_harness import _harvest_shape_env
+    assert _harvest_shape_env(None) is None
 
 
 def test_symbolic_stride_codec_roundtrip_is_exprs_not_hints():
@@ -1681,7 +1681,7 @@ def test_harvest_unbacked_symbol_records_hint_source_tiers():
     runtime) > size_hint (derived) > range_fallback (arbitrary placeholder).
     Backed symbols are implicitly observed (no flags). Synthetic ShapeEnv
     stub — data-dependent ops are extern, rare in fusion regions."""
-    from full_graph_harness import harvest_shape_env
+    from full_graph_harness import _harvest_shape_env
     import sympy
 
     class _VR:
@@ -1706,7 +1706,7 @@ def test_harvest_unbacked_symbol_records_hint_source_tiers():
             # tier 2 only for u1; u2 falls through to the range floor
             return sympy.Integer(8192) if str(sym) == "u1" else None
 
-    block = harvest_shape_env(_FakeEnv())
+    block = _harvest_shape_env(_FakeEnv())
     # backed: observed, no flags
     assert block["symbols"]["s0"] == {"hint": 16, "range": [2, None]}
     # tier 1 — real runtime value
@@ -1938,14 +1938,14 @@ def test_static_capture_has_no_symbolic_artifacts_gpu():
 
 
 def test_dynamic_dims_for_repro_maps_tensor_positions():
-    """dynamic_dims_for_repro returns {tensor-input-index: [symbolic dims]}
+    """_dynamic_dims_for_repro returns {tensor-input-index: [symbolic dims]}
     over make_inputs positions — only TENSOR entries advance the index
     (symints/shape-params don't). This is the mark_dynamic map; it must
     name exactly the dims that were symbolic, not every dim (blanket
     dynamic=True over-dynamizes static dims -> a different kernel)."""
     import json, tempfile
     from pathlib import Path
-    from repro_harness import dynamic_dims_for_repro
+    from repro_harness import _dynamic_dims_for_repro
 
     shapes = {
         "symbols": {"s0": {"hint": 16, "range": [2, None]},
@@ -1968,7 +1968,7 @@ def test_dynamic_dims_for_repro_maps_tensor_positions():
         d = Path(td)
         (d / "shapes.json").write_text(json.dumps(shapes))
         (d / "repro.py").write_text("# stub")
-        dmap = dynamic_dims_for_repro(str(d / "repro.py"))
+        dmap = _dynamic_dims_for_repro(str(d / "repro.py"))
         # tensor index 0 has dims 2,3 dynamic; the static tensor (index 1)
         # and the non-tensor entries contribute nothing.
         assert dmap == {0: [2, 3]}, dmap
@@ -1979,7 +1979,7 @@ def test_dynamic_dims_none_for_static_repro():
     falls back to blanket dynamic=True."""
     import json, tempfile
     from pathlib import Path
-    from repro_harness import dynamic_dims_for_repro
+    from repro_harness import _dynamic_dims_for_repro
 
     with tempfile.TemporaryDirectory() as td:
         d = Path(td)
@@ -1987,7 +1987,73 @@ def test_dynamic_dims_none_for_static_repro():
             "shape_hash": "aa", "inputs": [[[8, 4], "f32"]],
             "models": {"m": {"occurrences": 1}}}]}))
         (d / "repro.py").write_text("# stub")
-        assert dynamic_dims_for_repro(str(d / "repro.py")) is None
+        assert _dynamic_dims_for_repro(str(d / "repro.py")) is None
+
+
+def test_dynamic_dim_bounds_restores_symbol_ranges():
+    """PR80 review finding 3: mark_dynamic without min/max compiles a LESS
+    constrained artifact than the model's (its ShapeEnv knew the range).
+    _dynamic_dim_bounds_for_repro maps each bare-symbol dim with a FULLY
+    concrete range to that range so _mark_dynamic can restore it. Half-open
+    ranges get no entry (dynamo's builder feeds (min, max) straight into
+    ValueRanges, which asserts on None; [2, None] is already exactly what an
+    unbounded mark gives). Composite dims ('64*s0') are not expressible as a
+    per-dim bound and get no entry. A static repro yields {}."""
+    import json, tempfile
+    from pathlib import Path
+    from repro_harness import _dynamic_dim_bounds_for_repro
+
+    shapes = {
+        "symbols": {"s0": {"hint": 16, "range": [2, 512]},
+                    "s53": {"hint": 16, "range": [4, 256]},
+                    "s90": {"hint": 16, "range": [2, None]}},
+        "guards": [],
+        "points": [{
+            "shape_hash": "deadbeef",
+            "captured_dynamic": True,
+            "bindings": {"s0": 16, "s53": 16, "s90": 16},
+            "models": {"probe/infer/m": {"occurrences": 1}},
+            "inputs": [
+                [[64, "s53", "s0", "s90"], "f32"],  # s90 half-open: no entry
+                [["64*s0"], "f32"],          # composite: no per-dim bound
+                ["I", 256, "s0*s53"],        # symint — not a tensor slot
+            ],
+        }],
+    }
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps(shapes))
+        (d / "repro.py").write_text("# stub")
+        bounds = _dynamic_dim_bounds_for_repro(str(d / "repro.py"))
+        assert bounds == {(0, 1): (4, 256), (0, 2): (2, 512)}, bounds
+
+    with tempfile.TemporaryDirectory() as td:
+        d = Path(td)
+        (d / "shapes.json").write_text(json.dumps({"points": [{
+            "shape_hash": "aa", "inputs": [[[8, 4], "f32"]],
+            "models": {"m": {"occurrences": 1}}}]}))
+        (d / "repro.py").write_text("# stub")
+        assert _dynamic_dim_bounds_for_repro(str(d / "repro.py")) == {}
+
+
+def test_mark_dynamic_bounded_compiles_and_generalizes():
+    """The bench restores recorded ranges via mark_dynamic(min=, max=); a
+    bounded mark must actually COMPILE and serve a second in-range shape
+    without recompiling assumptions (an attribute-level check is not enough:
+    a half-open range sets the attribute fine but dynamo's ValueRanges
+    asserts at guard creation — the reason only concrete pairs are emitted)."""
+    torch._dynamo.reset()
+    t = torch.zeros(8, 16)
+    torch._dynamo.mark_dynamic(t, 0, min=2, max=512)
+    dims = {r.dim: (r.min, r.max) for r in t._dynamo_dynamic_range}
+    assert dims == {0: (2, 512)}, dims
+    fn = torch.compile(lambda x: x * 2)
+    fn(t)
+    t2 = torch.zeros(12, 16)
+    torch._dynamo.mark_dynamic(t2, 0, min=2, max=512)
+    out = fn(t2)
+    assert out.shape == (12, 16)
+    torch._dynamo.reset()
 
 
 # ============================================================================
@@ -2055,12 +2121,12 @@ def test_contiguous_stride_symbolic_shape_no_crash():
 
 
 def test_canonical_expr_str_idempotent_and_collapses_renderings():
-    """The steady-state invariant: canonical_expr_str(canonical(x)) ==
+    """The steady-state invariant: _canonical_expr_str(canonical(x)) ==
     canonical(x) (one round of simplification reaches a fixed point, same
     discipline as the canonical-subgraph retrace), and commutative /
     cancellable / floor-int renderings collapse to one string so the
     sidecar and annotation of the SAME expr are string-identical."""
-    from full_graph_harness import canonical_expr_str as C
+    from full_graph_harness import _canonical_expr_str as C
     for f in ["64*s0*s53", "s0*s53*64", "64*s0*s53//64", "s0*(s53-1)+s0",
               "Mod(s0,8)", "Max(1,s0//2)", "CeilToInt(s0/3)", "s0",
               "PythonMod(s0,128)", "s0**2"]:
@@ -2087,12 +2153,12 @@ def test_canonical_expr_str_idempotent_and_collapses_renderings():
 
 
 def test_dynamic_dims_for_repro_absolute_position():
-    """Finding C: dynamic_dims_for_repro must key by ABSOLUTE make_inputs
+    """Finding C: _dynamic_dims_for_repro must key by ABSOLUTE make_inputs
     position, not a tensor-only counter — else a symint before a tensor marks
     the wrong input (or a static one)."""
     import json, tempfile
     from pathlib import Path
-    from repro_harness import (dynamic_dims_for_repro, load_shape_configs,
+    from repro_harness import (_dynamic_dims_for_repro, load_shape_configs,
                                make_inputs_from_config)
     shapes = {"symbols": {"s0": {"hint": 16, "range": [2, None]}}, "guards": [],
               "points": [{"shape_hash": "aa", "captured_dynamic": True,
@@ -2102,7 +2168,7 @@ def test_dynamic_dims_for_repro_absolute_position():
         d = Path(td)
         (d / "shapes.json").write_text(json.dumps(shapes))
         (d / "repro.py").write_text("# stub")
-        dmap = dynamic_dims_for_repro(str(d / "repro.py"))
+        dmap = _dynamic_dims_for_repro(str(d / "repro.py"))
         assert dmap == {1: [1]}, dmap   # tensor is at ABSOLUTE position 1
         cfg = next(iter(load_shape_configs(
             str(d / "repro.py"), symbol_bindings={"s0": 16}).values()))
@@ -2116,7 +2182,7 @@ def test_harvest_preserves_guard_over_specialized_symbol():
     (Eq(s0*s53, s77), s77==64) must be PRESERVED as Eq(s0*s53, 64), not
     dropped when s77 leaves the symbol table."""
     import sympy
-    from full_graph_harness import harvest_shape_env
+    from full_graph_harness import _harvest_shape_env
 
     class _VR:
         def __init__(self, lo, hi):
@@ -2138,7 +2204,7 @@ def test_harvest_preserves_guard_over_specialized_symbol():
         def is_unbacked_symint(self, x):
             return False
 
-    block = harvest_shape_env(_Env())
+    block = _harvest_shape_env(_Env())
     assert set(block["symbols"]) == {"s0", "s53"}      # s77 dropped
     assert block["guards"] == ["Eq(s0*s53, 64)"]       # constraint preserved
 
@@ -2147,7 +2213,7 @@ def test_harvest_survives_size_hint_raise():
     """Finding J: an unbacked symbol whose size_hint() RAISES must not lose
     the whole harvest — fall through to the range tier."""
     import sympy
-    from full_graph_harness import harvest_shape_env
+    from full_graph_harness import _harvest_shape_env
 
     class _VR:
         def __init__(self, lo, hi):
@@ -2166,7 +2232,7 @@ def test_harvest_survives_size_hint_raise():
         def size_hint(self, x, allow_none=False):
             raise RuntimeError("data-dependent")
 
-    block = harvest_shape_env(_Env())
+    block = _harvest_shape_env(_Env())
     assert "s0" in block["symbols"]                    # harvest survived
     assert block["symbols"]["u0"]["hint_source"] == "range_fallback"
     assert block["symbols"]["u0"]["hint"] == 4
@@ -2213,7 +2279,7 @@ def test_merge_distinct_symbolizations_do_not_clobber():
 def test_dims_differ_never_raises_on_torch_functions():
     """The OLD _dims_equal used sympy .equals()/.simplify(), which probe at
     FRACTIONAL random points and made torch's PythonMod.eval assert -> crash.
-    _dims_differ compares CANONICAL strings (canonical_expr_str = one
+    _dims_differ compares CANONICAL strings (_canonical_expr_str = one
     sympify+str, no fractional probing), so it NEVER raises and never
     samples. Distinct canonical strings -> differ; identical -> not."""
     from full_graph_harness import _dims_differ
@@ -2228,7 +2294,7 @@ def test_dims_differ_never_raises_on_torch_functions():
 def test_capture_does_not_force_storage_size_guard_gpu():
     """Review R2-1 (SEVERE): int(val.untyped_storage().size()) on a symbolic
     tensor forced an Eq(...) byte-size guard into the live ShapeEnv, which
-    harvest_shape_env baked into shapes.json and which then REJECTED every
+    _harvest_shape_env baked into shapes.json and which then REJECTED every
     rebind that changed the product (and DROPPED whole families whose dims
     all specialized). Capture must read the storage-size HINT, never int()
     the SymInt, and read metadata under suppress_guards."""
@@ -2363,8 +2429,8 @@ def test_compile_fx_one_artifact_serves_many_bindings_gpu():
     torch._dynamo.reset()
     from capture_hook import install_capture_hook, uninstall_capture_hook
     from merge_captures import _write_shapes_json
-    from repro_harness import (build_compile_fx_dynamic_artifact,
-                               dynamic_dims_for_repro, make_inputs_from_config,
+    from repro_harness import (_build_compile_fx_dynamic_artifact,
+                               _dynamic_dims_for_repro, make_inputs_from_config,
                                load_shape_configs)
 
     class _GN(torch.nn.Module):
@@ -2402,7 +2468,7 @@ def test_compile_fx_one_artifact_serves_many_bindings_gpu():
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
 
-        dyn = dynamic_dims_for_repro(repro_py)
+        dyn = _dynamic_dims_for_repro(repro_py)
         # symbols are canonicalized (s0,s1,...) in the written shapes.json;
         # bind via those names, not the entry's raw dynamo names.
         syms = sorted(json.loads((cdir / "shapes.json").read_text())["symbols"])
@@ -2410,7 +2476,7 @@ def test_compile_fx_one_artifact_serves_many_bindings_gpu():
         tb = {syms[0]: 8, syms[1]: 32}
         trace_inputs = make_inputs_from_config(
             next(iter(load_shape_configs(repro_py, symbol_bindings=tb).values())))
-        compiled = build_compile_fx_dynamic_artifact(mod.Repro, trace_inputs, dyn)
+        compiled = _build_compile_fx_dynamic_artifact(mod.Repro, trace_inputs, dyn)
         artifact_id = id(compiled)
 
         for b in ({syms[0]: 8, syms[1]: 32}, {syms[0]: 16, syms[1]: 16},
@@ -2633,7 +2699,7 @@ def test_distinct_dynamic_bindings_respects_guards(tmp_path):
     import json
     from repro_harness import (_distinct_dynamic_bindings,
                                _distinct_trace_binding,
-                               symbols_and_guards_for_repro)
+                               _symbols_and_guards_for_repro)
     from input_codec import bindings_satisfy
 
     def write(symbols, guards):
@@ -2657,7 +2723,7 @@ def test_distinct_dynamic_bindings_respects_guards(tmp_path):
 
     # Coupled Eq -> equal-magnitude warmup, every binding satisfies the guard.
     rf2 = write(syms, ["Eq(s0, s53)"])
-    s2, g2 = symbols_and_guards_for_repro(rf2)
+    s2, g2 = _symbols_and_guards_for_repro(rf2)
     wb2 = _distinct_dynamic_bindings(rf2, rows, {0: [2, 3]}, n=2)
     for b in wb2:
         assert b["s0"] == b["s53"], f"coupled warmup not equal: {b}"
@@ -2699,7 +2765,7 @@ def test_dynamic_default_measures_general_kernel_gpu():
 
     from merge_captures import _write_shapes_json
     from repro_harness import (benchmark_repro, make_inputs_from_config,
-                               load_shape_configs, dynamic_dims_for_repro)
+                               load_shape_configs, _dynamic_dims_for_repro)
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
@@ -2753,7 +2819,7 @@ def test_dynamic_default_measures_general_kernel_gpu():
         syms = sorted(json.loads((cdir / "shapes.json").read_text())["symbols"])
 
         # GROUND TRUTH: dynamo->AOT->inductor at two distinct shapes (generalized)
-        dyn = dynamic_dims_for_repro(repro_py)
+        dyn = _dynamic_dims_for_repro(repro_py)
         torch._dynamo.reset()
         with fresh_inductor_cache():
             for b in ({syms[0]: 8, syms[1]: 32}, {syms[0]: 12, syms[1]: 40}):
@@ -2816,9 +2882,9 @@ def test_compile_fx_direct_diverges_from_model_kernels_gpu():
         pytest.skip("GPU required")
 
     from merge_captures import _write_shapes_json
-    from repro_harness import (build_compile_fx_dynamic_artifact,
+    from repro_harness import (_build_compile_fx_dynamic_artifact,
                                make_inputs_from_config, load_shape_configs,
-                               dynamic_dims_for_repro)
+                               _dynamic_dims_for_repro)
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
@@ -2847,7 +2913,7 @@ def test_compile_fx_direct_diverges_from_model_kernels_gpu():
         spec.loader.exec_module(mod)
         # canonical names from the written shapes.json (not raw dynamo names)
         syms = sorted(json.loads((cdir / "shapes.json").read_text())["symbols"])
-        dyn = dynamic_dims_for_repro(repro_py)
+        dyn = _dynamic_dims_for_repro(repro_py)
         B1, B2 = {syms[0]: 8, syms[1]: 32}, {syms[0]: 12, syms[1]: 40}
 
         def mk(b):
@@ -2872,7 +2938,7 @@ def test_compile_fx_direct_diverges_from_model_kernels_gpu():
         # compile_fx-direct at a DISTINCT (rectangular) trace binding
         torch._dynamo.reset()
         with fresh_inductor_cache():
-            compiled = build_compile_fx_dynamic_artifact(mod.Repro, mk(B1), dyn)
+            compiled = _build_compile_fx_dynamic_artifact(mod.Repro, mk(B1), dyn)
             with torch.no_grad():
                 compiled(*mk(B1)); compiled(*mk(B2))
             torch.cuda.synchronize()

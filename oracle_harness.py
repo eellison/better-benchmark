@@ -297,15 +297,22 @@ class OracleRegistry:
                 if entry.get("point") == point and entry["hardware"] == current_hw:
                     chosen, matched = entry, "point+hardware"
                     break
-            if chosen is None:
-                for entry in self._entries:  # 0b: exact point hash, any hardware
-                    if entry.get("point") == point:
-                        chosen, matched = entry, "point"
-                        break
         if chosen is None:
             for entry in self._entries:  # 1: exact signature + hardware
                 if self._signature_matches(entry, actual_shapes) and entry["hardware"] == current_hw:
                     chosen, matched = entry, "hardware+shape"
+                    break
+        if chosen is None and point is not None:
+            # 0b: exact point hash, ANY hardware. Deliberately AFTER tier 1: a
+            # static point keeps its concrete shape, so when point= is threaded
+            # for every shapes.json point (bench_oracle_all_shapes), a WRONG-
+            # hardware point match must NOT preempt an exact-shape RIGHT-
+            # hardware impl. This tier is the cross-hardware fallback for a
+            # DYNAMIC (shape-less) point-keyed oracle, or the same-entry
+            # equivalent of tier 2 (shape, any hardware) for a static point.
+            for entry in self._entries:
+                if entry.get("point") == point:
+                    chosen, matched = entry, "point"
                     break
         if chosen is None:
             for entry in self._entries:  # 2: exact signature, any hardware
@@ -348,6 +355,13 @@ class OracleRegistry:
             "configs": chosen["configs"],
             "current_hardware": current_hw,
             "actual_shapes": actual_shapes,
+            # The point hash threaded into this resolve (None for a shape-only
+            # query) plus the point the chosen entry is keyed to. A point-tier
+            # match (matched in {"point", "point+hardware"}) is otherwise
+            # unexplained in the trace: a DYNAMIC entry registers shape-less, so
+            # only these fields say WHICH point selected it.
+            "point": point,
+            "matched_point": chosen.get("point"),
         }
         # dtype honesty: the corpus dedupes patterns across dtypes, so a
         # bf16-tuned kernel legitimately serves f32 inputs — but flag it so
@@ -991,6 +1005,7 @@ def check_oracle(
     atol: float = 1e-2,
     rtol: float = 1e-2,
     skip_stochastic: bool = True,
+    point: str | None = None,
 ) -> bool:
     """Standard oracle correctness check with auto stochastic detection.
 
@@ -1001,6 +1016,9 @@ def check_oracle(
         atol: absolute tolerance for allclose
         rtol: relative tolerance for allclose
         skip_stochastic: if True, auto-detect and skip stochastic outputs
+        point: optional shape_hash of the point being checked, threaded into
+            dispatch so a DYNAMIC (shape-less) point resolves to the same
+            point-keyed impl that --bench times.
 
     Returns:
         True if all non-stochastic outputs pass.
@@ -1008,7 +1026,8 @@ def check_oracle(
     # Resolve oracle_impl dispatch so --check verifies the SAME callable that
     # --bench times (e.g. a B200 kwargs variant, not the undecorated default).
     try:
-        oracle_forward, _dispatch_info = resolve_oracle(oracle_forward, inputs)
+        oracle_forward, _dispatch_info = resolve_oracle(
+            oracle_forward, inputs, point=point)
     except OracleDispatchError as e:
         print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
         return False
@@ -1093,8 +1112,13 @@ def check_oracle_all_shapes(
         oracle_inputs = make_inputs_from_config(config)
 
         try:
+            # Thread the point's shape_hash so --check resolves the SAME
+            # callable --bench times (bench_oracle_all_shapes / _runner_main
+            # both thread it). A DYNAMIC point registers shape-less, so without
+            # the hash resolve_oracle can't shape-match and the point could
+            # never pass the check gate.
             selected_oracle, _dispatch_info = resolve_oracle(
-                oracle_forward, oracle_inputs)
+                oracle_forward, oracle_inputs, point=config.get("shape_hash"))
         except OracleDispatchError as e:
             print(f"  NO_ORACLE_FOR_SHAPE: {str(e)[:200]}")
             results[label] = False
@@ -1473,6 +1497,12 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
         inputs = get_inputs(repro_dir)
         instance = get_repro_instance(repro_dir)
         return [bench_oracle(oracle_forward, instance, inputs, repro_id, **kwargs)]
+
+    # point is derived per-config below (each point carries its own
+    # shape_hash); a single caller-supplied point kwarg is meaningless across
+    # configs and would collide with the per-config point= we thread ("multiple
+    # values for keyword argument 'point'"), so drop it once up front.
+    kwargs.pop("point", None)
 
     results = []
     for label, config in configs.items():
@@ -1960,6 +1990,7 @@ def _runner_main(argv=None):
                         bench_oracle(fn, instance, inputs, point_id,
                                      warmup=args.warmup, rep=args.rep,
                                      numerics_optout=optout,
+                                     point=config.get("shape_hash"),
                                      disable_gpu_lock=args.disable_gpu_lock))
                 else:
                     bench_results.append({

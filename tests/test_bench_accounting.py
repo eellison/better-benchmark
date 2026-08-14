@@ -1058,8 +1058,8 @@ def test_symint_derivation_plan_and_wrapper():
     from pathlib import Path as _Path
 
     from repro_harness import (
-        DerivedSymintRepro,
-        symint_derivations_for_repro,
+        _DerivedSymintRepro,
+        _symint_derivations_for_repro,
     )
 
     with _tempfile.TemporaryDirectory() as tmp:
@@ -1082,7 +1082,7 @@ def test_symint_derivation_plan_and_wrapper():
             }],
         }))
 
-        derivations = symint_derivations_for_repro(str(d / "repro.py"))
+        derivations = _symint_derivations_for_repro(str(d / "repro.py"))
         assert derivations is not None
         plan, kept = derivations
         assert [p for p, _f, _s in plan] == [0, 2]   # s99 not derivable
@@ -1097,9 +1097,61 @@ def test_symint_derivation_plan_and_wrapper():
         x = torch.randn(4, 8, 16)
         inner = Inner()
         expected = inner(4, x, 32, 7)
-        wrapped = DerivedSymintRepro(inner, 4, plan, kept)
+        wrapped = _DerivedSymintRepro(inner, 4, plan, kept)
         got = wrapped(x, 7)                          # kept args only
         assert torch.equal(got, expected)
+
+
+def test_distinct_dynamic_bindings_are_internally_distinct():
+    """Warm bindings for the general-kernel pre-warm must be INTERNALLY
+    distinct — no two symbols sharing a value — else dynamo unifies them into
+    one square symbol and the "general" artifact is square-specialized. A plain
+    multiplicative scale (hint * (1+j) * (1+shape_idx)) collides for a 2:1 hint
+    ratio (h0 == 2*h1) at every shape_idx; the distinct-value generator must
+    avoid that while (a) keeping each value a multiple of its hint so
+    divisibility guards survive and (b) varying each symbol across the set."""
+    import json as _json
+    import tempfile as _tempfile
+    from pathlib import Path as _Path
+
+    from repro_harness import _distinct_dynamic_bindings
+
+    def _bindings(symbols, guards):
+        with _tempfile.TemporaryDirectory() as tmp:
+            d = _Path(tmp)
+            (d / "repro.py").write_text("# placeholder\n")
+            (d / "shapes.json").write_text(_json.dumps(
+                {"symbols": symbols, "guards": guards, "points": []}))
+            return _distinct_dynamic_bindings(str(d / "repro.py"), [], {}, n=2)
+
+    # 2:1 ratio, NO coupling guard: the old scheme returned squares.
+    sym = {"s0": {"hint": 2, "range": [2, None]},
+           "s1": {"hint": 1, "range": [1, None]}}
+    out = _bindings(sym, [])
+    assert len(out) >= 2, out
+    for b in out:
+        assert len(set(b.values())) == len(b), f"square warm binding: {b}"
+    # requirement (2): every symbol takes >= 2 distinct values across the set.
+    for name in ("s0", "s1"):
+        assert len({b[name] for b in out}) >= 2, (name, out)
+
+    # divisibility guard survives: 3:1 with Mod(s0, 6) == 0 stays a multiple.
+    sym2 = {"s0": {"hint": 6, "range": [6, None]},
+            "s1": {"hint": 2, "range": [2, None]}}
+    out2 = _bindings(sym2, ["Eq(Mod(s0, 6), 0)"])
+    assert out2, out2
+    for b in out2:
+        assert len(set(b.values())) == len(b), f"square warm binding: {b}"
+        assert b["s0"] % 6 == 0, b
+
+    # coupled Eq(s0, s1): distinct values would break the guard, so the coupled
+    # (equal-magnitude) fallback is correct — squares are EXPECTED here.
+    sym3 = {"s0": {"hint": 8, "range": [2, None]},
+            "s1": {"hint": 8, "range": [2, None]}}
+    out3 = _bindings(sym3, ["Eq(s0, s1)"])
+    assert out3, out3
+    for b in out3:
+        assert b["s0"] == b["s1"], b
 
 
 def test_shape_hash_symbolization_identity():
@@ -1139,6 +1191,25 @@ def test_shape_hash_symbolization_identity():
     assert h_cs != h_ad          # (b) same hints, different symbolization
     assert h_cs == h_rn          # (c) raw trace names don't leak into identity
     assert h_cs != legacy        # dynamic never collides with the static point
+
+    # (d) a SYMINT placeholder's concrete value is point identity (PR80 review
+    # finding 2): its historical fields are constant (shape=[], stride=[],
+    # dtype=symint) and the expr suffix is binding-blind by design, so points
+    # of a family differing ONLY in the symint's value hashed identically —
+    # the later points were deduped away at process_graph and never reached
+    # merge or oracle dispatch. The hint is a symint's analogue of a tensor's
+    # hint-evaluated shape.
+    def _symint_point(hint):
+        return {
+            "arg0_1": {"shape": [], "stride": [], "dtype": "symint",
+                       "device": "cpu", "hint": hint, "expr": "s77"},
+            "arg1_1": {"shape": [64, 128], "stride": [],
+                       "dtype": "torch.float32"},
+        }
+    h8, h16, h32 = (shape_hash_for_placeholders(_symint_point(h))
+                    for h in (8, 16, 32))
+    assert len({h8, h16, h32}) == 3, (h8, h16, h32)
+    assert shape_hash_for_placeholders(_symint_point(8)) == h8  # stable
 
 
 def test_capture_hook_process_graph_splits_horizontal_fusion_regions():

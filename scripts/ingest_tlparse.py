@@ -281,9 +281,19 @@ def _sidecar_symbol_hints(graph_path: Path) -> dict:
         return {}
     hints = {}
     for name, defn in (meta.get("symbols") or {}).items():
-        hint = defn.get("hint") if isinstance(defn, dict) else None
+        if not isinstance(defn, dict):
+            continue
+        hint = defn.get("hint")
+        # bool is an int subclass but never a valid size hint (True would seed
+        # a 1 -> ShapeEnv 0/1-specialization); a float that is exactly integral
+        # is coerced losslessly (JSON may round-trip 4 as 4.0). Anything else
+        # (None, non-integral float, str) is dropped -> caller's default hint.
+        if isinstance(hint, bool):
+            continue
         if isinstance(hint, int):
             hints[name] = hint
+        elif isinstance(hint, float) and hint.is_integer():
+            hints[name] = int(hint)
     return hints
 
 
@@ -310,43 +320,79 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
     # picks which concrete size make_fx traces at — the symbol stays symbolic
     # regardless — so the default is safe for structure, wrong for the point.
     hints: dict[str, int] = dict(symbol_hints or {})
+
+    import ast as _ast
+
+    def _expr_symbols(text: str) -> set:
+        """Symbol identifiers referenced by a closed arithmetic expr, via AST
+        (no regex, lossless over the printed grammar): 's0*s53' -> {'s0','s53'},
+        's53' -> {'s53'}, '64' -> set(). Call-position names are NOT symbols —
+        'CeilToInt(s0/3)' references only s0; seeding 'CeilToInt' would mint a
+        bogus unused ShapeEnv symbol. A token the grammar doesn't cover
+        (SyntaxError) contributes no symbols, so the caller later falls back to
+        real-mode rather than seeding a half-parsed name."""
+        try:
+            tree = _ast.parse(text, mode="eval")
+        except (SyntaxError, ValueError):
+            return set()
+        called = {n.func.id for n in _ast.walk(tree)
+                  if isinstance(n, _ast.Call) and isinstance(n.func, _ast.Name)}
+        return {n.id for n in _ast.walk(tree)
+                if isinstance(n, _ast.Name)} - called
+
+    # A live symint carries an expr ('s53' or a product 's0*s53'); seed EVERY
+    # symbol it references, not just bare-identifier exprs — a composite symint
+    # whose components appear in no tensor dim must still resolve.
     for s in specs:
         if not isinstance(s, dict):
             continue
         if s.get("kind") == "symint" and isinstance(s.get("expr"), str):
-            nm = s["expr"]
-            if nm.isidentifier():
+            for nm in _expr_symbols(s["expr"]):
                 hints.setdefault(nm, int(s.get("hint", 8) or 8))
-    # Tensor dims that are bare symbol identifiers: seed any still-unhinted ones.
+    # Seed any still-unhinted symbols that appear in tensor SHAPE *or* STRIDE
+    # tokens. Strides are seeded too: a symbol that occurs ONLY in a stride
+    # expr (e.g. a permuted/non-contiguous dynamic tensor) would otherwise be
+    # unknown to eval_dim, dropping the strided view to a contiguous fallback.
     for s in specs:
         if not isinstance(s, dict) or s.get("kind") == "symint":
             continue
-        for d in (s.get("shape") or []):
-            if isinstance(d, str) and d.isidentifier():
-                hints.setdefault(d, 8)
+        for tok in list(s.get("shape") or []) + list(s.get("stride") or []):
+            if isinstance(tok, str):
+                for nm in _expr_symbols(tok):
+                    hints.setdefault(nm, 8)
     if not hints:
         return None
 
     shape_env = ShapeEnv()
     symnodes: dict[str, object] = {}
+    trace_hints: dict[str, int] = {}
     for nm, h in hints.items():
+        # ShapeEnv 0/1-specializes size hints of 0 and 1 — the created "symbol"
+        # collapses to a constant, so a dynamic dim would silently recapture as
+        # static. The hint only picks the concrete size make_fx traces at (the
+        # symbol stays symbolic regardless), so trace at >=2 to keep it dynamic.
+        trace_h = h if isinstance(h, int) and h >= 2 else 2
+        trace_hints[nm] = trace_h
         sym = shape_env.create_symbol(
-            h, source=LocalSource(nm), dynamic_dim=DimDynamic.DYNAMIC)
-        symnodes[nm] = shape_env.create_symintnode(sym, hint=h)
+            trace_h, source=LocalSource(nm), dynamic_dim=DimDynamic.DYNAMIC)
+        symnodes[nm] = shape_env.create_symintnode(sym, hint=trace_h)
 
-    # Evaluate a dim/stride token to a torch SymInt (or int). The expression
-    # MUST be evaluated over the torch SymIntNODES so arithmetic produces torch
-    # SymInts: substituting into a sympy expr instead yields a sympy.Mul that
-    # torch.empty/as_strided reject (verified), and sympy can't be coerced back
-    # to a torch SymInt. The printed-annotation grammar is closed: int literals,
-    # bare symbols, and +/-/* products over them ("64*s16*s82"). We evaluate in
-    # a namespace exposing ONLY the symbol nodes (no builtins); every
-    # identifier in the token is checked to be a known symbol FIRST, so the
-    # evaluation cannot reference anything else — an unrecognized name (e.g. a
-    # FloorDiv/CeilToInt the grammar doesn't cover) returns None and the caller
-    # falls back to real-mode tracing rather than guessing.
-    import re as _re
-    _IDENT = _re.compile(r"[A-Za-z_]\w*")
+    # Evaluate a dim/stride token to a torch SymInt (or int), covering the
+    # SAME closed expression grammar input_codec accepts everywhere else —
+    # not just +/-/* products but the torch shape functions a saved
+    # annotation can legitimately carry ('s0//2', 'CeilToInt(s0/3)',
+    # 'PythonMod(s0, 4)', 'ModularIndexing(...)'). The old evaluator's
+    # charset gate rejected those, so a VALID symbolic dim returned None and
+    # the whole graph silently recaptured STATIC — dynamism lost,
+    # f(f(x)) != f(x) (PR80 review finding 4). _sympify_expr is the shared
+    # safe-grammar boundary (AST allowlist gates the string before sympify
+    # eval()s it; torch's sympy function classes parse natively); the parsed
+    # expr is rebuilt over the ShapeEnv's OWN backing symbols and minted into
+    # a torch SymInt via create_symintnode, so composite dims stay tied to
+    # the same symbols as every other dim. An expr outside the grammar or
+    # over unknown symbols returns None and the caller fails ingestion
+    # loudly rather than guessing.
+    from input_codec import _sympify_expr
 
     def eval_dim(tok):
         if isinstance(tok, int):
@@ -358,12 +404,22 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
             return int(tok)
         if tok.isidentifier():
             return symnodes.get(tok)  # bare symbol (None if unknown)
-        # multi-symbol product/sum: charset-bounded AND every identifier known.
-        if not all(c.isalnum() or c in " _*+-" for c in tok):
+        try:
+            expr = _sympify_expr(tok)
+        except ValueError:
+            return None  # outside the closed safe grammar — never guess
+        free = list(getattr(expr, "free_symbols", ()))
+        if any(s.name not in symnodes for s in free):
             return None
-        if any(name not in symnodes for name in _IDENT.findall(tok)):
+        # Concrete value at the trace hints — create_symintnode needs it, and
+        # a non-integer fold means a function we can't evaluate: refuse.
+        hint_val = expr.subs({s: trace_hints[s.name] for s in free})
+        if not getattr(hint_val, "is_Integer", False):
             return None
-        return eval(tok, {"__builtins__": {}, **symnodes})  # symbol-node only
+        if not free:
+            return int(hint_val)  # constant expr folds to a plain int
+        sub = expr.subs({s: symnodes[s.name].node.expr for s in free})
+        return shape_env.create_symintnode(sub, hint=int(hint_val))
 
     fake_mode = FakeTensorMode(shape_env=shape_env)
 
@@ -387,7 +443,15 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
         kind = spec.get("kind")
         if kind == "symint":
             nm = spec.get("expr")
-            return symnodes.get(nm) if nm in symnodes else int(spec.get("hint", 8))
+            if nm is None:
+                # Constant-valued symint (Sym(256)): no symbol — keep the
+                # recorded concrete value, don't collapse it to the default.
+                return spec.get("value", spec.get("hint", 8))
+            # Bare symbol ('s53') or composite ('s0*s53'): evaluate over the
+            # shared symbol nodes so it stays a torch SymInt tied to the SAME
+            # symbols as the tensor dims. An unknown component -> None -> caller
+            # falls back to real-mode tracing (never silently bakes a guess).
+            return eval_dim(nm)
         if kind == "scalar":
             return spec.get("value", 1)
         shape = [eval_dim(d) for d in (spec.get("shape") or [])]
@@ -627,6 +691,18 @@ def load_graph_module(graph_path: Path):
                 with fake_mode:
                     gm = make_fx(instance, tracing_mode="symbolic")(*inputs)
                 return gm
+            # A dynamic graph whose symbolic rebuild failed (an unresolved
+            # symbol, or an expr outside the closed grammar) must NOT
+            # recapture as static: a static recapture of a dynamic family
+            # silently corrupts point/family identity and breaks
+            # f(f(x)) == f(x). FAIL the ingestion instead — a skipped graph
+            # is visible and recoverable, a wrong recapture is neither
+            # (PR80 review finding 4; supersedes the earlier warn-and-
+            # -degrade behavior).
+            print(f"  ERROR: {graph_path.name} carries symbolic inputs but "
+                  f"symbolic rebuild failed (unresolved symbol/expr) — "
+                  f"refusing to recapture a dynamic graph as static")
+            return None
 
         inputs = []
         for raw_spec in input_shapes:

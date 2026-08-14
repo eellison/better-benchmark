@@ -368,7 +368,7 @@ than re-deriving it — our capture maps 1:1:
 
 VERIFIED (spike, EagerAndRecordGraphs): a model that derives shapes INSIDE
 forward compiles to **1 graph** across a coupled rebind (16×16 → 32×8) — the
-ShapeEnv is faithfully restored, no recompile. 
+ShapeEnv is faithfully restored, no recompile.
 
 THE BLOCKER: our captured repros LIFT reshape/view shapes into
 `_shape_param_N` **list** arguments (`[64,64,h,w]`). `ParamsSpec` has spec

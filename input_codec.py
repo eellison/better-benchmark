@@ -383,18 +383,40 @@ _SAFE_EXPR_NODES = (
 )
 
 
+# Pure sympy helper FUNCTIONS (not classes) that construct expressions with no
+# side effects and no code generation. Everything else legitimate in a shape
+# expr is a Basic-subclass constructor (Eq, Mod, Max, Abs, floor, Add, ...) and
+# is admitted structurally below; this tiny curated set is only for the handful
+# of expr builders sympy exposes as plain functions.
+_SAFE_SYMPY_FUNCS = frozenset({"sqrt", "cbrt", "root"})
+
+
 def _call_name_is_allowed(name: str) -> bool:
     """A call target is legitimate only if it is a torch shape-function class
-    (_sympy_locals) or a callable exported by the sympy package (Eq, Mod, Max,
-    Abs, floor, sqrt, And, ... — present and future, no hand-maintained list).
-    Rejects breakpoint/exit/open/system/etc. Combined with the str-literal,
-    attribute and subscript bans, even a sympy meta-function (sympify/lambdify)
-    can't be weaponized: they all need a string or attribute to bootstrap."""
+    (_sympy_locals), a sympy EXPRESSION-CONSTRUCTOR class (a subclass of
+    sympy.Basic: Eq, Mod, Max, Abs, floor, And, Add, Mul, Pow, ...), or one of
+    a tiny curated set of pure expression-building functions (sqrt/cbrt/root).
+
+    NOT "any callable sympy exports": sympy.sympify() eval()s the expr, so a
+    side-effecting or code-generating export reached as a call head IS code
+    execution on a poisoned DATA artifact. The str-literal/attribute/subscript
+    bans do NOT contain this — sympy.preview(s0) spawns an external viewer,
+    plot(s0) starts a backend, init_session()/init_printing() mutate global
+    state, and lambdify(s0, s0) compiles generated source, all with only a bare
+    symbol argument. Restricting to Basic-subclass constructors (plus the
+    curated pure functions) is the structural fix: those meta-functions are
+    plain functions, not Basic subclasses, and are not in the curated set."""
     if name in _sympy_locals():
         return True
     import sympy
     obj = getattr(sympy, name, None)
-    return callable(obj) and getattr(obj, "__module__", "").split(".")[0] == "sympy"
+    if obj is None:
+        return False
+    if getattr(obj, "__module__", "").split(".")[0] != "sympy":
+        return False
+    if isinstance(obj, type) and issubclass(obj, sympy.Basic):
+        return True
+    return name in _SAFE_SYMPY_FUNCS and callable(obj)
 
 
 def _assert_safe_expr(text: str) -> None:
@@ -597,6 +619,13 @@ def binding_violation(symbols: dict, bindings: dict,
         if sym is None:
             return (f"binding for unknown symbol {name!r} "
                     f"(table has {sorted(symbols)})")
+        if not isinstance(val, int):
+            # A hint-less / unresolved symbol can reach here as None (e.g.
+            # instantiate_point on a symbols entry with no hint). Report it as a
+            # violation rather than raising `None < lo` — this predicate is
+            # documented never to raise so callers can search for a valid
+            # binding without exceptions for control flow.
+            return f"binding {name}={val!r} is not an int"
         lo, hi = (sym.get("range") or [None, None])
         if lo is not None and val < lo:
             return f"{name}={val} below range min {lo}"
