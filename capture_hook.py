@@ -1681,6 +1681,13 @@ from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+# Fallback: the repo this repro was generated from. parents[3] only resolves
+# the harness when the canonical root sits INSIDE the repo (repros/canonical/
+# <dir>/); a repro merged into a scratch root would otherwise silently import
+# whatever repro_harness is findable on sys.path — a stale copy from another
+# checkout benches with the WRONG methodology/flags. Appended (not inserted):
+# an in-repo install still wins via parents[3].
+sys.path.append({str(Path(__file__).resolve().parent)!r})
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = {CURRENT_REPRO_VERSION}
