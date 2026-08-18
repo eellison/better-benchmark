@@ -149,6 +149,27 @@ touches — so a large kernel win translates to a much smaller model-level
 number. When reporting a model-level result, use the rollup's number, not one
 extrapolated from the kernel table.
 
+### PyTorch dashboard export
+
+The dashboard exporter consumes one sweep, so any two uploaded CI workflows can
+be compared later without rerunning either side:
+
+```bash
+python scripts/dashboard_export.py \
+    --input current.json \
+    --model-accounting benchmarks/model_accounting_b200.json \
+    --timing auto \
+    --ci-json test/test-reports/inductor_kernel_benchmark.json
+```
+
+It emits stable pattern/shape kernel records plus absolute projected model
+latencies. The model values use the same occurrence weighting and unchanged
+extern dilution and timing selection as `perf_ab_rollup.py`. Records include
+the timing policy and accounting-artifact digest so incompatible workflows are
+not combined. The B200 accounting artifact is versioned separately from
+measurements and can be regenerated from occurrence sidecars with
+`scripts/build_model_accounting.py`.
+
 ## Extraction
 
 ```python
@@ -272,6 +293,8 @@ scripts/
   gc_corpus.py           # corpus reference-counting / migration transaction tool
   bench_report.py        # before/after comparison reports (raw per-kernel A/B table)
   perf_ab_rollup.py      # careful A/B: shape-matched, genai-excl, per-model-e2e rollup
+  dashboard_export.py    # single-run PyTorch v3 kernel + projected-model records
+  build_model_accounting.py  # compact occurrence sidecars for dashboard export
   test_adversarial.py    # infrastructure regression tests
   test_merge_into.py     # --merge-into adversarial tests
   test_bench_recovery.py # worker failure recovery tests
