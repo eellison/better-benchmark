@@ -69,6 +69,7 @@ from repro_harness import parse_shapes_config
 
 N_WARMUP = 10
 N_REP = 50
+EXTERN_BENCH_TIMEOUT_S = 600
 
 
 # ============================================================================
@@ -601,7 +602,8 @@ def _run_extern_nodes_child(graph_path: str, node_names: list[str]) -> int:
 
 def _bench_extern_graph_isolated(
         graph_path: str, node_names: list[str],
-        results: dict[str, float], failures: dict[str, str]) -> None:
+        results: dict[str, float], failures: dict[str, str],
+        timeout_s: float = EXTERN_BENCH_TIMEOUT_S) -> None:
     """Parent side: bench `node_names` (from one graph) in a subprocess,
     recording successes into `results[name]` and fatal failures into
     `failures[name]`.
@@ -618,10 +620,25 @@ def _bench_extern_graph_isolated(
         env.setdefault("INDUCTOR_GPU_BENCH_LOCK", "1")
         cmd = [sys.executable, str(Path(__file__).resolve()),
                "--bench-extern-node", graph_path, *pending]
-        proc = subprocess.run(cmd, capture_output=True, text=True, env=env,
-                              cwd=str(ROOT))
+        timed_out = False
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                env=env,
+                cwd=str(ROOT),
+                timeout=timeout_s,
+                check=False,
+            )
+            stdout = proc.stdout
+        except subprocess.TimeoutExpired as exc:
+            timed_out = True
+            stdout = exc.stdout or ""
+            if isinstance(stdout, bytes):
+                stdout = stdout.decode(errors="replace")
         got: list[str] = []
-        for line in proc.stdout.splitlines():
+        for line in stdout.splitlines():
             if not line.startswith(_EXTERN_RESULT_PREFIX):
                 continue
             try:
@@ -638,6 +655,15 @@ def _bench_extern_graph_isolated(
                 failures[name] = obj.get("error", "unknown")
         # Drop everything the child reported on (success or per-node error).
         remaining = [n for n in pending if n not in got]
+        if timed_out:
+            if not remaining:
+                return
+            poison = remaining[0]
+            failures[poison] = (
+                f"standalone benchmark timed out after {timeout_s:g}s"
+            )
+            pending = remaining[1:]
+            continue
         if proc.returncode == 0:
             # Clean exit: any node still unreported genuinely produced no
             # result; record once and stop (don't respin indefinitely).

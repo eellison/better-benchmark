@@ -183,6 +183,9 @@ def _load_occurrence_record(path: Path) -> dict:
     record = json.loads(path.read_text())
     if not isinstance(record, dict):
         raise ValueError(f"{path}: occurrence sidecar must be an object")
+    schema_version = record.get("schema_version")
+    if schema_version is not None and schema_version != 1:
+        raise ValueError(f"{path}: unsupported occurrence schema {schema_version}")
     for field in ("suite", "mode", "model"):
         if not isinstance(record.get(field), str) or not record[field]:
             raise ValueError(f"{path}: missing non-empty {field}")
@@ -197,6 +200,29 @@ def _load_occurrence_record(path: Path) -> dict:
     return record
 
 
+def _occurrence_sidecars(occdir: Path) -> list[Path]:
+    sidecars = sorted(
+        path for path in Path(occdir).glob("*.json") if not path.name.startswith("_")
+    )
+    manifest_path = Path(occdir) / "_metadata.json"
+    if not manifest_path.is_file():
+        return sidecars
+    manifest = json.loads(manifest_path.read_text())
+    if manifest.get("schema_version") != 1:
+        raise ValueError(f"{manifest_path}: unsupported schema version")
+    if manifest.get("status") != "complete":
+        raise ValueError(f"{manifest_path}: generation is not complete")
+    expected = manifest.get("expected_sidecars")
+    if not isinstance(expected, dict):
+        raise ValueError(f"{manifest_path}: missing expected sidecar inventory")
+    expected_paths = sorted(Path(occdir) / filename for filename in expected.values())
+    if expected_paths != sidecars:
+        raise ValueError(
+            f"{manifest_path}: sidecar inventory does not match output directory"
+        )
+    return sidecars
+
+
 def rollup_models(
     base_path: Path,
     head_path: Path,
@@ -207,9 +233,7 @@ def rollup_models(
     base, head, representatives = paired_arms(base_path, head_path, timing)
     models = {}
     per_model_coverage = {}
-    sidecars = sorted(
-        path for path in Path(occdir).glob("*.json") if not path.name.startswith("_")
-    )
+    sidecars = _occurrence_sidecars(occdir)
     if not sidecars:
         raise ValueError(f"no occurrence sidecars found in {occdir}")
 

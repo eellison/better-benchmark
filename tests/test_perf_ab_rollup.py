@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from scripts.perf_ab_rollup import (
+    _occurrence_sidecars,
     cut,
     fusible_kernel_summary,
     kernel_mover_summary,
@@ -45,6 +46,26 @@ def write_occurrence(
             }
         )
     )
+
+
+def test_occurrence_manifest_rejects_incomplete_and_stale_runs(tmp_path):
+    sidecar = tmp_path / "model.json"
+    sidecar.write_text("{}")
+    manifest = {
+        "schema_version": 1,
+        "status": "incomplete",
+        "expected_sidecars": {"hf/infer/model": "model.json"},
+    }
+    (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
+
+    with pytest.raises(ValueError, match="not complete"):
+        _occurrence_sidecars(tmp_path)
+
+    manifest["status"] = "complete"
+    manifest["expected_sidecars"]["hf/infer/stale"] = "stale.json"
+    (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="does not match"):
+        _occurrence_sidecars(tmp_path)
 
 
 def test_explicit_timing_axes_do_not_fall_back_and_auto_is_compatible(tmp_path):

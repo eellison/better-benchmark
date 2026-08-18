@@ -155,6 +155,20 @@ The dashboard exporter consumes one sweep, so any two uploaded CI workflows can
 be compared later without rerunning either side:
 
 ```bash
+# Occasionally regenerate model accounting on the target hardware. The
+# persistent extern cache makes interrupted runs resumable.
+python scripts/with_gpu_lock.py --device-kind B200 -- \
+  python scripts/generate_occurrence_sidecars.py \
+    --corpus-root repros \
+    --all \
+    --output-dir results/b200/occurrences \
+    --extern-cache results/b200/extern_cache.json \
+    --resume
+python scripts/build_model_accounting.py \
+    --occdir results/b200/occurrences \
+    --output benchmarks/model_accounting_b200.json
+
+# Export every kernel sweep using that versioned accounting snapshot.
 python scripts/dashboard_export.py \
     --input current.json \
     --model-accounting benchmarks/model_accounting_b200.json \
@@ -168,7 +182,10 @@ extern dilution and timing selection as `perf_ab_rollup.py`. Records include
 the timing policy and accounting-artifact digest so incompatible workflows are
 not combined. The B200 accounting artifact is versioned separately from
 measurements and can be regenerated from occurrence sidecars with
-`scripts/build_model_accounting.py`.
+`scripts/generate_occurrence_sidecars.py` and
+`scripts/build_model_accounting.py`. The generator reuses the model-attribution
+tracer and crash-isolated extern benchmark, writes a provenance manifest, and
+fingerprints its persistent cache by GPU, PyTorch, CUDA, and timing method.
 
 ## Extraction
 
@@ -293,6 +310,7 @@ scripts/
   gc_corpus.py           # corpus reference-counting / migration transaction tool
   bench_report.py        # before/after comparison reports (raw per-kernel A/B table)
   perf_ab_rollup.py      # careful A/B: shape-matched, genai-excl, per-model-e2e rollup
+  generate_occurrence_sidecars.py  # trace models + price externs reproducibly
   dashboard_export.py    # single-run PyTorch v3 kernel + projected-model records
   build_model_accounting.py  # compact occurrence sidecars for dashboard export
   test_adversarial.py    # infrastructure regression tests

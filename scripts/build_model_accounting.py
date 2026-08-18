@@ -10,6 +10,7 @@ all a single-run exporter needs to reconstruct projected model latency.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import subprocess
@@ -111,6 +112,7 @@ def build_artifact(
     *,
     hardware: str,
     source: str,
+    source_manifest_digest: str = "",
 ) -> dict:
     models = {}
     for name, raw in records:
@@ -120,12 +122,56 @@ def build_artifact(
         models[model_key] = compact
     if not models:
         raise ValueError("no model accounting records found")
-    return {
+    artifact = {
         "schema_version": SCHEMA_VERSION,
         "hardware": hardware,
         "source": source,
         "models": models,
     }
+    if source_manifest_digest:
+        artifact["source_manifest_digest"] = source_manifest_digest
+    return artifact
+
+
+def validate_occurrence_manifest(path: Path) -> tuple[dict | None, str]:
+    manifest_path = path / "_metadata.json"
+    if not manifest_path.is_file():
+        return None, ""
+    manifest_bytes = manifest_path.read_bytes()
+    manifest = json.loads(manifest_bytes)
+    if manifest.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(f"{manifest_path}: unsupported schema version")
+    if manifest.get("status") != "complete":
+        raise ValueError(f"{manifest_path}: generation is not complete")
+    expected = manifest.get("expected_sidecars")
+    digests = manifest.get("sidecar_digests")
+    if not isinstance(expected, dict) or not isinstance(digests, dict):
+        raise TypeError(f"{manifest_path}: missing sidecar inventory")
+    expected_files = set(expected.values())
+    actual_files = {
+        item.name
+        for item in path.glob("*.json")
+        if not item.name.startswith("_")
+    }
+    if expected_files != actual_files:
+        raise ValueError(
+            f"{manifest_path}: sidecar inventory does not match output directory"
+        )
+    if set(expected) != set(digests):
+        raise ValueError(f"{manifest_path}: missing sidecar digests")
+    for identity, filename in expected.items():
+        sidecar = path / filename
+        digest = hashlib.sha256(
+            json.dumps(
+                json.loads(sidecar.read_text()),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode()
+        ).hexdigest()
+        if digest != digests[identity]:
+            raise ValueError(f"{sidecar}: content does not match manifest digest")
+    return manifest, hashlib.sha256(manifest_bytes).hexdigest()
 
 
 def main() -> None:
@@ -147,16 +193,27 @@ def main() -> None:
     if args.occdir is not None:
         if not args.occdir.is_dir():
             parser.error(f"occurrence directory not found: {args.occdir}")
+        manifest, manifest_digest = validate_occurrence_manifest(args.occdir)
         records = _records_from_directory(args.occdir)
         source_name = str(args.occdir)
+        hardware = (
+            str(manifest.get("hardware_key"))
+            if manifest is not None
+            else args.hardware
+        )
     else:
+        manifest_digest = ""
         records = _records_from_git(args.git_revision, args.git_path)
         source_name = f"{args.git_revision}:{args.git_path}"
+        hardware = args.hardware
+    if not hardware or hardware == "None":
+        parser.error("accounting hardware is missing")
 
     artifact = build_artifact(
         records,
-        hardware=args.hardware,
+        hardware=hardware,
         source=source_name,
+        source_manifest_digest=manifest_digest,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(artifact, sort_keys=True, separators=(",", ":")))
