@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import sys
@@ -55,6 +56,9 @@ def test_occurrence_manifest_rejects_incomplete_and_stale_runs(tmp_path):
         "schema_version": 1,
         "status": "incomplete",
         "expected_sidecars": {"hf/infer/model": "model.json"},
+        "sidecar_digests": {
+            "hf/infer/model": hashlib.sha256(b"{}").hexdigest()
+        },
     }
     (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
 
@@ -63,8 +67,35 @@ def test_occurrence_manifest_rejects_incomplete_and_stale_runs(tmp_path):
 
     manifest["status"] = "complete"
     manifest["expected_sidecars"]["hf/infer/stale"] = "stale.json"
+    manifest["sidecar_digests"]["hf/infer/stale"] = "unused"
     (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="does not match"):
+        _occurrence_sidecars(tmp_path)
+
+
+def test_occurrence_manifest_rejects_modified_sidecar(tmp_path):
+    sidecar = tmp_path / "model.json"
+    sidecar.write_text(json.dumps({"model": "original"}))
+    identity = "hf/infer/model"
+    digest = hashlib.sha256(
+        json.dumps(
+            json.loads(sidecar.read_text()),
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+    ).hexdigest()
+    manifest = {
+        "schema_version": 1,
+        "status": "complete",
+        "expected_sidecars": {identity: sidecar.name},
+        "sidecar_digests": {identity: digest},
+    }
+    (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
+
+    assert _occurrence_sidecars(tmp_path) == [sidecar]
+
+    sidecar.write_text(json.dumps({"model": "modified"}))
+    with pytest.raises(ValueError, match="does not match manifest digest"):
         _occurrence_sidecars(tmp_path)
 
 

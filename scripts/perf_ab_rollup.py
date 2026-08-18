@@ -9,6 +9,7 @@ or approximate model estimates are listed but excluded from aggregate results.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import statistics
@@ -213,13 +214,28 @@ def _occurrence_sidecars(occdir: Path) -> list[Path]:
     if manifest.get("status") != "complete":
         raise ValueError(f"{manifest_path}: generation is not complete")
     expected = manifest.get("expected_sidecars")
-    if not isinstance(expected, dict):
-        raise ValueError(f"{manifest_path}: missing expected sidecar inventory")
+    digests = manifest.get("sidecar_digests")
+    if not isinstance(expected, dict) or not isinstance(digests, dict):
+        raise ValueError(f"{manifest_path}: missing sidecar inventory")
     expected_paths = sorted(Path(occdir) / filename for filename in expected.values())
     if expected_paths != sidecars:
         raise ValueError(
             f"{manifest_path}: sidecar inventory does not match output directory"
         )
+    if set(expected) != set(digests):
+        raise ValueError(f"{manifest_path}: missing sidecar digests")
+    for identity, filename in expected.items():
+        sidecar = Path(occdir) / filename
+        digest = hashlib.sha256(
+            json.dumps(
+                json.loads(sidecar.read_text()),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode()
+        ).hexdigest()
+        if digest != digests[identity]:
+            raise ValueError(f"{sidecar}: content does not match manifest digest")
     return sidecars
 
 
