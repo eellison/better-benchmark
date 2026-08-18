@@ -12,6 +12,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from gpu_lock import device_kind_from_name
+
 BENCHMARK_NAME = "inductor-kernel-benchmark"
 RESERVED_KEYS = {"_metadata", "__failures__", "__summary__"}
 
@@ -304,7 +308,7 @@ def model_records(
     accounting_hardware = accounting.get("hardware")
     if not isinstance(accounting_hardware, str) or not accounting_hardware:
         raise ValueError(f"{accounting_path}: missing accounting hardware")
-    if accounting_hardware.casefold().strip() != arch.casefold().strip():
+    if device_kind_from_name(accounting_hardware) != device_kind_from_name(arch):
         print(
             f"Skipping projected model records: accounting hardware "
             f"{accounting_hardware!r} does not match run architecture {arch!r}",

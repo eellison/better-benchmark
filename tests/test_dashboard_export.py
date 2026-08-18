@@ -261,6 +261,25 @@ def test_hardware_mismatch_keeps_kernel_records(tmp_path):
     }
 
 
+def test_hardware_alias_matches_canonical_device_kind(tmp_path):
+    sweep, pattern_hash, shape_hash = _write_sweep(tmp_path)
+    accounting = _write_accounting(tmp_path, pattern_hash, shape_hash)
+    payload = json.loads(accounting.read_text())
+    payload["hardware"] = "B200"
+    accounting.write_text(json.dumps(payload))
+
+    records = export_records(
+        sweep,
+        model_accounting=accounting,
+        device="cuda",
+        arch="NVIDIA B200",
+    )
+
+    assert "projected_model_latency_us" in {
+        record["metric"]["name"] for record in records
+    }
+
+
 def test_export_skips_one_invalid_measurement(tmp_path):
     sweep, _, _ = _write_sweep(tmp_path)
     payload = json.loads(sweep.read_text())
