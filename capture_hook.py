@@ -23,6 +23,7 @@ After capture, merge them into the canonical set with:
     python merge_captures.py /tmp/captures/my_model --canonical-dir repros/
 """
 import collections
+import contextlib
 import copy
 import hashlib
 import json
@@ -40,6 +41,10 @@ from full_graph_harness import (
     infer_index_bounds_from_gm,
     infer_permutation_indices_from_gm,
     placeholder_info_from_gm,
+    sym_expr_str as _sym_expr_str,
+    shape_env_of as _shape_env_of,
+    symbolic_block_from_value as _symbolic_block_from_value,
+    harvest_shape_env as _harvest_shape_env,
 )
 # Single source of truth for the emitted version marker: the generated repro
 # template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
@@ -257,10 +262,22 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
     return [comp for comp in components if partition_has_real_compute(comp)]
 
 
+# ---------------------------------------------------------------------------
+# Dynamic-shape capture: SymInt expr + ShapeEnv harvesting (design §2.1)
+#
+# At post-grad time the SymNodes are live, so the expr, hint, value-ranges
+# and guards are all one shape_env read away. We record exprs ALONGSIDE the
+# hint ints (never instead — the hint fields stay exactly as a static capture
+# produces them, so shape_hash identity and every existing consumer are
+# unchanged). A fully static capture touches none of this.
+# ---------------------------------------------------------------------------
+
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     """Extract a standalone sub-GraphModule for one fusible partition.
 
-    Returns (sub_gm, placeholder_info, shape_params) or None.
+    Returns (sub_gm, placeholder_info, shape_params, shape_env_block) — the
+    last is None for a static capture, else the {symbols, guards,
+    captured_dynamic} block harvested from the live ShapeEnv.
     """
     seen = set()
     unique_origins = []
@@ -312,10 +329,19 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     new_graph = fx.Graph()
     env: dict[fx.Node, fx.Node] = {}
     placeholder_info: dict[str, dict] = {}
+    # Live ShapeEnv seen during this extraction (any SymInt dim/stride/input).
+    # Harvested once into the graph-level symbolic block at the end.
+    _seen_shape_env = [None]
+
+    def _note_env(x):
+        se = _shape_env_of(x)
+        if se is not None and _seen_shape_env[0] is None:
+            _seen_shape_env[0] = se
 
     def _resolve_sym(x):
-        """Resolve SymInt/SymFloat to concrete int/float."""
+        """Resolve SymInt/SymFloat to concrete int/float (the hint)."""
         if isinstance(x, (torch.SymInt, torch.SymFloat)):
+            _note_env(x)
             return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
         return int(x)
 
@@ -325,35 +351,92 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         except Exception:
             return None
 
+    @contextlib.contextmanager
+    def _no_guards(val):
+        """Suppress ShapeEnv guard recording while we READ a symbolic
+        tensor's metadata. Reading shape/stride/storage of a SymInt-backed
+        fake tensor (is_contiguous, storage size, comparisons) can FORCE
+        guards into the live ShapeEnv that harvest_shape_env then bakes into
+        shapes.json — guards the model never actually had, which reject
+        rebinds (review R2-1). Capture must never mutate the env it harvests.
+        No-op when the tensor has no ShapeEnv (static)."""
+        # Discover the env from EVERY symbolic surface we will read: shape,
+        # stride, AND storage_offset. A view with a static shape+stride but a
+        # SYMBOLIC offset (e.g. offset s77-2) would otherwise leave se=None,
+        # and the `if off_raw:` bool(SymInt) read below would force a guard
+        # unsuppressed — the same R2-1 leak class (review R3-1). The storage
+        # SIZE is read only after the env is found, inside the suppressed
+        # block, so it need not seed discovery.
+        candidates = list(getattr(val, "shape", ()))
+        if torch.is_tensor(val):
+            candidates += list(val.stride())
+            candidates.append(val.storage_offset())
+        se = None
+        for s in candidates:
+            se = _shape_env_of(s)
+            if se is not None:
+                break
+        if se is not None and hasattr(se, "suppress_guards"):
+            with se.suppress_guards():
+                yield
+        else:
+            yield
+
     def _record_placeholder(name: str, meta: dict) -> None:
         val = meta.get("val", None)
         if val is not None and isinstance(val, torch.Tensor):
-            placeholder_info[name] = {
-                "shape": [_resolve_sym(s) for s in val.shape],
-                "stride": [_resolve_sym(s) for s in val.stride()] if not val.is_contiguous() else [],
-                "dtype": str(val.dtype),
-                "device": str(val.device),
-            }
-            off = _resolve_sym(val.storage_offset()) if val.storage_offset() else 0
-            if off:
-                placeholder_info[name]["storage_offset"] = off
-            # Alias tag: inputs whose fake vals share one untyped storage
-            # (packed-qkv saved views). Live-capture-only signal — any
-            # retrace re-fabricates inputs and the identity is gone. Tag
-            # is the storage key; serialization rewrites it to a small
-            # group index ("alias_group") so replay can allocate ONE
-            # buffer per group and as_strided the members. Storage SIZE
-            # captured here too (the true allocation) so consumers never
-            # re-derive it by scanning members.
-            sk = _storage_key(val)
-            if sk is not None:
-                placeholder_info[name]["_storage_key"] = sk
-                try:
-                    placeholder_info[name]["_storage_nbytes"] = int(
-                        val.untyped_storage().size())
-                except Exception:
-                    pass
+            # ALL reads of a symbolic tensor's metadata happen under
+            # suppress_guards: is_contiguous(), bool(storage_offset()), and
+            # the storage size are each guard-forcing on a SymInt-backed fake
+            # tensor (review R2-1). Capture must never mutate the ShapeEnv it
+            # then harvests, or spurious guards land in shapes.json and reject
+            # every rebind.
+            with _no_guards(val):
+                for s in (*val.shape, *val.stride(), val.storage_offset()):
+                    _note_env(s)
+                is_contig = val.is_contiguous()
+                placeholder_info[name] = {
+                    "shape": [_resolve_sym(s) for s in val.shape],
+                    "stride": ([_resolve_sym(s) for s in val.stride()]
+                               if not is_contig else []),
+                    "dtype": str(val.dtype),
+                    "device": str(val.device),
+                }
+                off_raw = val.storage_offset()
+                off = _resolve_sym(off_raw) if off_raw else 0
+                if off:
+                    placeholder_info[name]["storage_offset"] = off
+                # Symbolic block (design §2.1): per-slot exprs alongside the
+                # hint ints above, via the SHARED extractor. Even a stride
+                # contiguous AT THE HINT records exprs (a rebind may break
+                # contiguity). Additive — absent for static tensors.
+                symbolic = _symbolic_block_from_value(val)
+                if symbolic:
+                    placeholder_info[name]["symbolic"] = symbolic
+                # Alias tag: inputs whose fake vals share one untyped storage
+                # (packed-qkv saved views). Live-capture-only signal — any
+                # retrace re-fabricates inputs and the identity is gone. Tag
+                # is the storage key; serialization rewrites it to a small
+                # group index ("alias_group") so replay can allocate ONE
+                # buffer per group and as_strided the members. Storage SIZE
+                # captured too (the true allocation) so consumers never
+                # re-derive it by scanning members.
+                sk = _storage_key(val)
+                if sk is not None:
+                    placeholder_info[name]["_storage_key"] = sk
+                    # NEVER int() the storage size: under dynamic shapes it is
+                    # a SymInt (e.g. 4*s27*s77), and int() forces an equality
+                    # guard pinning the byte-size — harvested into shapes.json,
+                    # rejecting every rebind (R2-1). Read the hint instead.
+                    # (We're inside _no_guards, so even reads here can't leak.)
+                    ssz = val.untyped_storage().size()
+                    if isinstance(ssz, (torch.SymInt, torch.SymFloat)):
+                        _note_env(ssz)
+                        ssz = ssz.node.hint        # int by construction
+                    if ssz is not None:
+                        placeholder_info[name]["_storage_nbytes"] = int(ssz)
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
+            _note_env(val)
             hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
             placeholder_info[name] = {
                 "shape": [],
@@ -362,6 +445,12 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 "device": "cpu",
                 "hint": hint,
             }
+            # Live symint input: record its expr ('s0' root, or 's0*s53'
+            # derived) so it serializes as ['I', hint, expr], not the old
+            # S([hint]) conflation. None for a constant-valued symint.
+            expr = _sym_expr_str(val)
+            if expr is not None:
+                placeholder_info[name]["expr"] = expr
 
     _ph_names_used: set[str] = set()
 
@@ -397,6 +486,9 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     }
 
     shape_params: dict[str, list[int]] = {}
+    # Parallel to shape_params: per-slot expr strings (None where a slot is a
+    # plain int) for shape params carrying symbolic dims. Absent for static.
+    shape_param_exprs: dict[str, list] = {}
     _shape_counter = [0]
 
     def _should_lift_shape(shape_list):
@@ -408,8 +500,52 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             return False
         return True
 
+    def _shape_entry_hint_expr(entry):
+        """One shape-list entry -> (hint_int_or_None, expr_or_None). Entries
+        arrive already mapped through _ensure_in_env, so a symbolic dim is an
+        fx.Node whose .meta['val'] is the live SymInt; a static dim is a
+        plain int. Resolving to the hint keeps the lifted literal a valid
+        List[int] (region captures at the hint, exactly like a static
+        capture); the expr rides in shape_param_exprs. hint=None means the
+        entry can't be resolved to an int -> caller leaves the op unlifted."""
+        v = entry
+        if isinstance(entry, fx.Node):
+            v = (entry.meta or {}).get("val")
+        if isinstance(v, (torch.SymInt, torch.SymFloat)):
+            _note_env(v)
+            hint = v.node.hint if hasattr(v, "node") and hasattr(v.node, "hint") else int(v)
+            if hint is None:
+                # Unbacked SymInt with no hint -> can't resolve to a concrete
+                # List[int] literal. Per this function's contract, return None
+                # so the caller leaves THIS op unlifted, rather than int(None)
+                # raising and dropping the whole graph's regions.
+                return None, None
+            return int(hint), _sym_expr_str(v)
+        if isinstance(v, int):
+            return int(v), None
+        return None, None
+
+    def _entry_is_symbolic_node(entry):
+        """True if a (already env-mapped) shape-list entry is an fx.Node
+        wrapping a live SymInt — i.e. a symbolic dim that flows from a symint
+        input node, not a plain int."""
+        if not isinstance(entry, fx.Node):
+            return False
+        return isinstance((entry.meta or {}).get("val"),
+                          (torch.SymInt, torch.SymFloat))
+
     def _lift_shape_arg(node, args):
-        """For reshape/view ops, lift the shape literal to a parameter."""
+        """For reshape/view ops, lift the shape literal to a parameter.
+
+        EXCEPT when the shape list contains symbolic dims (fx.Node SymInts):
+        those entries already reference live symint INPUT nodes that are in
+        scope as forward args (the lifted ['I',hint,expr] symints), so the
+        faithful form is the INLINE list `[64, 32, 2, mul]` — exactly what
+        the model's graph had before our lift. Lifting it to a standalone
+        _shape_param LIST placeholder freezes the dims into a constant list
+        literal that re-specializes per binding and defeats dynamic reuse
+        (design 2.5b: ParamsSpec can't spec list elements; verified 1-vs-2
+        graphs). A fully-static shape list still lifts as before."""
         if node.target not in _VIEW_LIKE_OPS:
             return args
         if len(args) < 2 or not isinstance(args[1], (list, tuple)):
@@ -417,11 +553,30 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         shape_list = list(args[1])
         if not _should_lift_shape(shape_list):
             return args
+        # Symbolic shape list: keep it inline (don't lift). Note the env for
+        # harvest; the symint nodes are already external placeholders.
+        if any(_entry_is_symbolic_node(e) for e in shape_list):
+            for e in shape_list:
+                if isinstance(e, fx.Node):
+                    v = (e.meta or {}).get("val")
+                    if isinstance(v, (torch.SymInt, torch.SymFloat)):
+                        _note_env(v)
+            return args
+        # Static shape list: lift to a _shape_param placeholder as before.
+        hints, exprs = [], []
+        for entry in shape_list:
+            h, e = _shape_entry_hint_expr(entry)
+            if h is None:
+                return args  # unresolvable entry: don't lift this op
+            hints.append(h)
+            exprs.append(e)
         param_name = f"_shape_param_{_shape_counter[0]}"
         _shape_counter[0] += 1
         ph = new_graph.placeholder(param_name)
-        ph.meta = {"val": shape_list}
-        shape_params[param_name] = shape_list
+        ph.meta = {"val": hints}
+        shape_params[param_name] = hints
+        if any(e is not None for e in exprs):
+            shape_param_exprs[param_name] = exprs
         return (args[0], ph) + tuple(args[2:]) if len(args) > 2 else (args[0], ph)
 
     all_graph_nodes = list(gm.graph.nodes)
@@ -473,7 +628,17 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
 
     new_graph.lint()
     new_gm = fx.GraphModule(gm, new_graph)
-    return new_gm, placeholder_info, shape_params
+
+    # Harvest the graph-level symbolic block from whatever live ShapeEnv we
+    # saw (None for a fully static partition). Fold in any lifted-shape-param
+    # exprs so the whole symbolic story for this region is one object.
+    shape_env_block = _harvest_shape_env(_seen_shape_env[0])
+    if shape_param_exprs:
+        if shape_env_block is None:
+            shape_env_block = {"symbols": {}, "guards": [],
+                               "captured_dynamic": True}
+        shape_env_block["shape_param_exprs"] = shape_param_exprs
+    return new_gm, placeholder_info, shape_params, shape_env_block
 
 
 # ----------------------------------------------------------------------------
@@ -756,6 +921,85 @@ def pattern_hash_for_subgraph(sub_gm) -> str:
     return hashlib.md5(json.dumps(dag_signature).encode()).hexdigest()[:12]
 
 
+def _canonical_symbolic_suffixes(placeholder_info: dict) -> dict:
+    """Per-placeholder canonical symbolic-structure suffix for shape_hash.
+
+    Returns {} for fully static captures (their hash input must stay
+    byte-identical to the historical scheme — the whole static corpus keys
+    on it). For dynamic captures, each symbolic placeholder gets a rendering
+    of its shape/stride exprs and symint expr with symbol names CANONICALIZED
+    by first appearance across placeholders in graph order (shape dims, then
+    strides, then the symint expr — the same slot discipline as
+    merge_captures._canonical_symbol_rename). Dynamo allocates names off a
+    global counter (s16/s82 one trace, s28/s31 the next), so raw names would
+    make the same family hash differently every capture."""
+    ordered: list = []
+    any_symbolic = False
+    for name, info in placeholder_info.items():
+        sym = info.get("symbolic") or {}
+        shape_exprs = sym.get("shape_exprs")
+        stride_exprs = sym.get("stride_exprs")
+        offset_expr = sym.get("offset_expr")
+        symint_expr = info.get("expr")
+        if shape_exprs or stride_exprs or offset_expr or symint_expr:
+            any_symbolic = True
+        ordered.append((name, shape_exprs, stride_exprs, offset_expr,
+                        symint_expr))
+    if not any_symbolic:
+        return {}
+
+    from merge_captures import _symbols_in_order
+    from input_codec import _sympify_expr
+    import sympy
+
+    first_seen: list = []
+    seen: set = set()
+
+    def note(text):
+        for nm in _symbols_in_order(text):
+            if nm not in seen:
+                seen.add(nm)
+                first_seen.append(nm)
+
+    for _, shape_exprs, stride_exprs, offset_expr, symint_expr in ordered:
+        for d in (shape_exprs or []):
+            note(d)
+        for s in (stride_exprs or []):
+            note(s)
+        note(offset_expr)
+        note(symint_expr)
+
+    rename = {nm: sympy.Symbol(f"s{i}") for i, nm in enumerate(first_seen)}
+
+    def canon(e):
+        if not isinstance(e, str):
+            return e
+        expr = _sympify_expr(e)
+        # xreplace: exact-node, SIMULTANEOUS substitution — raw names may
+        # already be s0/s1 in permuted positions, where sequential subs
+        # would chain-corrupt (s1->s0 then s0->s1 round-trips s1 to itself).
+        sub = {s: rename[s.name] for s in expr.free_symbols if s.name in rename}
+        return str(expr.xreplace(sub)) if sub else e
+
+    suffixes = {}
+    for name, shape_exprs, stride_exprs, offset_expr, symint_expr in ordered:
+        if not (shape_exprs or stride_exprs or offset_expr or symint_expr):
+            continue
+        # A symbolic storage OFFSET is part of the placeholder's symbolic
+        # identity (a static-shape/stride view at a symbolic start, e.g. the
+        # 'offset s77-2' R3-1 case) — omitting it let a dynamic-offset capture
+        # collide with the static point and with other offset families (the
+        # Finding-E conflation the suffix scheme exists to close, left open for
+        # the offset channel). Include it as its own suffix slot.
+        suffixes[name] = json.dumps([
+            [canon(d) for d in shape_exprs] if shape_exprs else None,
+            [canon(s) for s in stride_exprs] if stride_exprs else None,
+            canon(offset_expr) if offset_expr else None,
+            canon(symint_expr) if symint_expr else None,
+        ])
+    return suffixes
+
+
 def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     """8-hex hash of the partition's input shapes+strides+dtypes (shape config id).
 
@@ -765,10 +1009,20 @@ def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     inputs record stride=[] (placeholder_info construction), which is the
     canonical spelling for "contiguous", so the hash is stable across
     captures of the same layout.
+
+    For DYNAMIC captures the SYMBOLIZATION is part of the identity too
+    (Finding E, finding_e_identity_analysis.md): the concrete fields above
+    are hint-evaluated, so [64,128,s0,s1]@(4,4) and [64,s0,s1,s2]@(128,4,4)
+    would collide — two different symbolic families conflated into one
+    point (one absorbed the other's occurrence counts pre-fix). Symbolic
+    placeholders therefore append a canonical-symbol expr suffix; static
+    captures append nothing and hash exactly as they always have.
     """
+    suffixes = _canonical_symbolic_suffixes(placeholder_info)
     input_shapes = sorted(
         f"{info.get('shape', '?')}:{info.get('stride', [])}:{info.get('dtype', '?')}"
-        for info in placeholder_info.values()
+        + (f":{suffixes[name]}" if name in suffixes else "")
+        for name, info in placeholder_info.items()
     )
     return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
 
@@ -1056,7 +1310,7 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
     result = extract_partition_subgraph(comp, gm)
     if result is None:
         return None
-    sub_gm, placeholder_info, shape_params = result
+    sub_gm, placeholder_info, shape_params, shape_env_block = result
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
     return {
@@ -1065,6 +1319,24 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
         "sub_gm": sub_gm,
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
+        # None for static partitions; {symbols, guards, captured_dynamic,
+        # [shape_param_exprs]} for dynamic ones.
+        #
+        # IDENTITY NOTE (review R4 Finding 1, finding_e_identity_analysis.md):
+        # a dynamic capture does NOT dedup against the static capture of the
+        # same hint shapes when the partition has lifted symint inputs — the
+        # symint placeholders perturb shape_hash, and the dynamic DAG skips
+        # canonicalization so pattern_hash differs too. That is CORRECT: a
+        # dynamic kernel is a different kernel (the 2.6x premise). Dynamic
+        # captures form their own identity namespace; the resolved scheme is a
+        # canonical-symbol FAMILY hash (pattern + canonical symbolic structure
+        # + canonical guards) — see finding_e_identity_analysis.md. Wired in
+        # at BOTH levels now: shape_hash appends a canonical-symbol expr
+        # suffix for symbolic placeholders (point identity + per-graph dedup/
+        # occurrence key), and merge_one_capture groups dynamic captures into
+        # dirs by family identity (hint-blind body + hint-free input
+        # signature — merge_captures._entry_family_identity).
+        "shape_env_block": shape_env_block,
     }
 
 
@@ -1172,8 +1444,19 @@ class _CaptureState:
     def _infer_permutation_indices(gm, placeholder_info) -> dict[str, int]:
         return infer_permutation_indices_from_gm(gm, placeholder_info)
 
-    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
+    def _generate_repro_file(self, gm, placeholder_info, meta, filename,
+                             shape_params=None, shape_env_block=None):
         shape_params = shape_params or {}
+        # Dynamic-shape metadata (None for static captures). Per-shape-param
+        # exprs overlay symbolic dims onto the lifted shape-param ['S', ...]
+        # entries; hint_bindings is the binding under which every expr
+        # evaluates back to the captured concrete shape (eager validation +
+        # signature rendering both need concrete ints).
+        shape_param_exprs = (shape_env_block or {}).get("shape_param_exprs", {})
+        hint_bindings = {
+            n: s["hint"]
+            for n, s in (shape_env_block or {}).get("symbols", {}).items()
+        }
         code = gm.print_readable(print_output=False)
         import re as _re
         code = _re.sub(r"^class \S+\(torch\.nn\.Module\):",
@@ -1329,10 +1612,39 @@ class _CaptureState:
             for sk, _idx in sorted(_group_of.items(), key=lambda kv: kv[1])
         ]
 
+        # Overlay per-slot exprs onto a lifted shape-param's hint dims (shape
+        # params are not tensor specs, so they don't go through
+        # compact_from_spec's symbolic overlay).
+        def _apply_exprs(slots, exprs):
+            return [e if e is not None else s for s, e in zip(slots, exprs)]
+
+        # shape_param_exprs is keyed by the EXTRACTION-time _shape_param_N
+        # names; shape_params/ph_names here carry the (possibly re-lifted)
+        # CANONICAL names. When canonicalize_subgraph bails (symint placeholder)
+        # the two name sets are identical, so the overlay below joins cleanly.
+        # But a dynamic-TENSOR partition with no symint placeholder retraces at
+        # hints and re-lifts shape params, and the fresh names can desync from
+        # the expr keys — the overlay would then silently miss and freeze the
+        # lifted shape param as a static list (dynamism LOST). Detect that and
+        # say so loudly rather than emit a quietly-wrong static repro.
+        _expr_keys_desynced = set(shape_param_exprs or {}) - set(shape_params)
+        if _expr_keys_desynced:
+            print(
+                f"  WARNING: {filename}: shape-param exprs {sorted(_expr_keys_desynced)} "
+                f"do not match the lifted shape-param names {sorted(shape_params)} "
+                f"(canonicalization re-lifted under new names) — those symbolic "
+                f"dims will serialize as STATIC (dynamism LOST for this repro)",
+                file=sys.stderr,
+            )
+
         compact_inputs = []
         for name in ph_names:
             if name in shape_params:
-                compact_inputs.append(["S", list(shape_params[name])])
+                dims = list(shape_params[name])
+                pexprs = (shape_param_exprs or {}).get(name)
+                if pexprs:
+                    dims = _apply_exprs(dims, pexprs)
+                compact_inputs.append(["S", dims])
             else:
                 info = placeholder_info.get(name)
                 if info and info["dtype"] != "symint":
@@ -1362,10 +1674,32 @@ class _CaptureState:
                         # chains: OPT position ids derive from a float
                         # mask; randn would index negative/OOB).
                         spec["gen"] = info["gen"]
+                    # Symbolic dims/strides ride on the spec; compact_from_spec
+                    # overlays the exprs into the entry's shape/stride slots
+                    # (ONE overlay path, shared with the sidecar).
+                    if info.get("symbolic"):
+                        spec["symbolic"] = info["symbolic"]
                     compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
-                    compact_inputs.append(["sym", info.get("hint", 1)])
-        shapes_config_line = render_signature(compact_inputs)
+                    expr = info.get("expr")
+                    if expr is not None:
+                        # Live symint input: ['I', hint, expr] (NOT the old
+                        # S([hint]) conflation that returned a list where the
+                        # graph needs an int).
+                        compact_inputs.append(["I", info.get("hint", 1), expr])
+                    else:
+                        compact_inputs.append(["sym", info.get("hint", 1)])
+
+        # Render the human signature from a CONCRETE (hint-evaluated) copy —
+        # render_T can't print expr strings, and the signature is
+        # documentation; the data is compact_inputs.
+        from input_codec import evaluate_symbolic_entry, is_symbolic_entry
+
+        def _concrete(e):
+            return evaluate_symbolic_entry(e, hint_bindings) if (
+                hint_bindings and is_symbolic_entry(e)) else e
+        shapes_config_line = render_signature(
+            [_concrete(e) for e in compact_inputs])
 
         script = f'''"""
 Standalone repro captured via capture_hook.
@@ -1382,6 +1716,18 @@ from math import inf, nan
 from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+# Fallback for a repro merged into a scratch root: parents[3] only resolves the
+# harness when the canonical root sits INSIDE the repo (repros/canonical/<dir>/).
+# Search upward from THIS file's RUNTIME location for the directory holding
+# repro_harness.py, rather than baking the generator's absolute path — that path
+# is the machine/checkout (often an ephemeral worktree) the repro was captured
+# from and may not exist when the repro is later run. The runtime walk finds the
+# harness co-located with the repro in its own tree; an in-repo install still
+# wins via the parents[3] insert above.
+for _harness_root in Path(__file__).resolve().parents:
+    if (_harness_root / "repro_harness.py").exists():
+        sys.path.append(str(_harness_root))
+        break
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
 
 _repro_version = {CURRENT_REPRO_VERSION}
@@ -1443,10 +1789,23 @@ if __name__ == "__main__":
                 # path can't be used here — and validating with the same
                 # compact entries that BECOME the shapes.json point means
                 # we validate exactly what consumers will load.
-                from input_codec import spec_from_compact
+                from input_codec import (spec_from_compact,
+                                          evaluate_symbolic_entry,
+                                          is_symbolic_entry)
                 from repro_harness import make_inputs_from_config as _mific
+                # Dynamic entries carry expr strings; evaluate at the hint
+                # binding so validation runs the concrete snapshot shape
+                # (exactly the static point this dynamic capture dedupes to).
+                _hb = {n: s["hint"]
+                       for n, s in (shape_env_block or {}).get(
+                           "symbols", {}).items()}
+
+                def _concrete_entry(e):
+                    return (evaluate_symbolic_entry(e, _hb)
+                            if (_hb and is_symbolic_entry(e)) else e)
                 _vcfg = {
-                    "inputs": [spec_from_compact(e) for e in compact_inputs]}
+                    "inputs": [spec_from_compact(_concrete_entry(e))
+                               for e in compact_inputs]}
                 if alias_group_nbytes:
                     _vcfg["alias_group_nbytes"] = alias_group_nbytes
                 inputs = mod.make_inputs(shape_config=_vcfg)
@@ -1556,6 +1915,7 @@ if __name__ == "__main__":
             sub_gm = pattern["sub_gm"]
             placeholder_info = pattern["placeholder_info"]
             shape_params = pattern["shape_params"]
+            shape_env_block = pattern.get("shape_env_block")
 
             # Attach observed stats to placeholder_info for integer/bool inputs.
             # The subgraph's placeholders inherit names from the full graph's nodes,
@@ -1619,7 +1979,8 @@ if __name__ == "__main__":
             try:
                 (filepath, signature, compact_inputs,
                  alias_group_nbytes) = self._generate_repro_file(
-                    sub_gm, placeholder_info, meta, filename, shape_params)
+                    sub_gm, placeholder_info, meta, filename, shape_params,
+                    shape_env_block=shape_env_block)
                 entry = {
                     "file": filepath,
                     "kind": kind,
@@ -1634,6 +1995,13 @@ if __name__ == "__main__":
                 }
                 if alias_group_nbytes:
                     entry["alias_group_nbytes"] = alias_group_nbytes
+                # Dynamic-shape metadata travels with the captured entry so
+                # the merge can write symbols/guards/bindings into shapes.json
+                # (design §2.1). Absent for static captures.
+                if shape_env_block:
+                    entry["symbols"] = shape_env_block.get("symbols", {})
+                    entry["guards"] = shape_env_block.get("guards", [])
+                    entry["captured_dynamic"] = True
                 self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report
