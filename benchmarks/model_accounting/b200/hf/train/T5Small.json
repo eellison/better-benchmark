@@ -1,0 +1,285 @@
+{
+  "hardware": "NVIDIA B200",
+  "identity": "hf/train/T5Small",
+  "model": {
+    "extern_occurrences": 399,
+    "extern_total_us": 9292.320042848587,
+    "fusible": {
+      "04d85912d998": {
+        "03889ef1": 72,
+        "1e571200": 12,
+        "2a26ac60": 12
+      },
+      "0551250469f2": {
+        "fde72c46": 1
+      },
+      "07f3b9d27881": {
+        "363c89c3": 1
+      },
+      "099e5b919a05": {
+        "52dd4c9c": 1
+      },
+      "0cd85fd63f82": {
+        "5c8ea537": 11
+      },
+      "119baf9550ec": {
+        "696b5761": 1
+      },
+      "1d0b8274d1b3": {
+        "aeb1682d": 1
+      },
+      "1e6f46231554": {
+        "b63e0b0f": 18
+      },
+      "246b835fa5d1": {
+        "52dd4c9c": 1
+      },
+      "2f7419dff92d": {
+        "ebc95169": 1
+      },
+      "33b36e228e74": {
+        "e0876406": 10
+      },
+      "36a7a1f42a5b": {
+        "ebc95169": 1
+      },
+      "3dfc8b0d0b06": {
+        "ebc95169": 1
+      },
+      "4a6776b9b660": {
+        "ebc95169": 1
+      },
+      "4b5a3669805d": {
+        "52dd4c9c": 1
+      },
+      "4c6ae5dbcf21": {
+        "a4c9a272": 18
+      },
+      "4e2a690272cd": {
+        "beb18eeb": 18
+      },
+      "52aa132fd273": {
+        "b63e0b0f": 36
+      },
+      "54a1c45ad37b": {
+        "aeb1682d": 1
+      },
+      "55602d03e235": {
+        "ebc95169": 1
+      },
+      "5926e8454de3": {
+        "ebc95169": 1
+      },
+      "5b2f38aad09a": {
+        "ebc95169": 1
+      },
+      "6381ec1f2e2a": {
+        "52dd4c9c": 1
+      },
+      "63bc58206705": {
+        "ebc95169": 1
+      },
+      "64a0cf92faf4": {
+        "ebc95169": 1
+      },
+      "65771166374c": {
+        "ebc95169": 1
+      },
+      "6a21a0e60348": {
+        "52dd4c9c": 1
+      },
+      "6d79593efb7d": {
+        "ebc95169": 1
+      },
+      "6f3222a009d0": {
+        "aeb1682d": 1
+      },
+      "7523f1bd5831": {
+        "ebc95169": 1
+      },
+      "75d8aed50737": {
+        "5d077752": 1
+      },
+      "77a9e1c598ea": {
+        "ebc95169": 1
+      },
+      "78433096579d": {
+        "696b5761": 1
+      },
+      "7ce96d2e23ba": {
+        "a4350e46": 1
+      },
+      "7ddf265c7180": {
+        "52dd4c9c": 1
+      },
+      "8621de4c2766": {
+        "5d25ba41": 1
+      },
+      "8a7e89839c2f": {
+        "ebc95169": 1
+      },
+      "8bb40810003c": {
+        "16e5c8c0": 72,
+        "76ad9430": 12,
+        "b3e78a1b": 12,
+        "fdf8e815": 1
+      },
+      "8f64f866aa67": {
+        "52dd4c9c": 1
+      },
+      "8fc8b05567b8": {
+        "ebc95169": 1
+      },
+      "9160afb21da2": {
+        "52dd4c9c": 1
+      },
+      "996428153329": {
+        "d37791c4": 1
+      },
+      "99b12bdefa24": {
+        "ebc95169": 1
+      },
+      "9b533c851bf2": {
+        "6c3c2efc": 36
+      },
+      "9fba32aab5d5": {
+        "ebc95169": 1
+      },
+      "a3bb6457fbb8": {
+        "ebc95169": 1
+      },
+      "b11b5e30ca7a": {
+        "aeb1682d": 1
+      },
+      "b135b743f643": {
+        "ebc95169": 1
+      },
+      "b1e9709e6271": {
+        "52dd4c9c": 1
+      },
+      "b4ba26016a2b": {
+        "aeb1682d": 1
+      },
+      "b6027582bc37": {
+        "0c10a950": 1
+      },
+      "b9c2c7be4890": {
+        "ebc95169": 1
+      },
+      "bb3c8e668150": {
+        "ebc95169": 1
+      },
+      "bbddc9f04e80": {
+        "ebc95169": 1
+      },
+      "c0d12c8ed1f9": {
+        "52dd4c9c": 1
+      },
+      "c0d19d490a2f": {
+        "b63e0b0f": 18
+      },
+      "c2886f99a0ae": {
+        "aeb1682d": 1
+      },
+      "c4040694963d": {
+        "ebc95169": 1
+      },
+      "c44b24139d10": {
+        "ebc95169": 1
+      },
+      "c634506089db": {
+        "04d5ba81": 10
+      },
+      "c92c18d1c961": {
+        "696b5761": 1
+      },
+      "d21b31cf06aa": {
+        "696b5761": 1
+      },
+      "d2c97d17f3dc": {
+        "3932aff4": 1
+      },
+      "d5a292f49eef": {
+        "64b0de65": 6
+      },
+      "d8316a4248ca": {
+        "ebc95169": 1
+      },
+      "d84d382a699c": {
+        "aeb1682d": 1
+      },
+      "dd0ae0c99a52": {
+        "ebc95169": 1
+      },
+      "e06a68534c7d": {
+        "aeb1682d": 1
+      },
+      "e1a43ba9dec2": {
+        "aeb1682d": 1
+      },
+      "e4d2c6337728": {
+        "52dd4c9c": 1
+      },
+      "e87d6ebc9ded": {
+        "6c3c2efc": 18
+      },
+      "e8b283443d04": {
+        "ebc95169": 1
+      },
+      "e8e4b21e74ff": {
+        "52dd4c9c": 1
+      },
+      "ec8e6cb1cc72": {
+        "ebc95169": 1
+      },
+      "ece69d14f132": {
+        "ebc95169": 1
+      },
+      "edf871faa304": {
+        "aeb1682d": 1
+      },
+      "f1250e5f7b6e": {
+        "6927d79e": 1
+      },
+      "f1a0a4098400": {
+        "696b5761": 1
+      },
+      "fadd9f17f869": {
+        "696b5761": 1
+      },
+      "fb0fac280d31": {
+        "ebc95169": 1
+      }
+    },
+    "mode": "train",
+    "model": "T5Small",
+    "suite": "hf",
+    "trace_errors": [],
+    "unpriced_extern_occurrences": 0
+  },
+  "schema_version": 2,
+  "source": "occurrences",
+  "source_manifest_digest": "0815e58947c01dcfb346b34eacf60045ed9027d2b8c9beea49cb4805fd6200ce",
+  "source_provenance": {
+    "better_benchmark_commit": "3724b16ed9288e35322bdca186e15b8884691196",
+    "completed_at": "2026-08-19T23:28:20.324382+00:00",
+    "corpus_digest": "34bac6363ed61ad7f98c9dbc99736a2bcbe351c7952d32f57eaebbaf3736a85b",
+    "failed_extern_points": 0,
+    "generated_at": "2026-08-19T23:21:04.492294+00:00",
+    "hardware": {
+      "benchmark_source_digest": "ad703e72b19c0ea893472d2432f8b7e75b0852699c1c0547af17b735ea37e5fd",
+      "benchmark_version": 1,
+      "compute_capability": "10.0",
+      "cuda_driver": "580.173.02",
+      "cuda_runtime": "13.0",
+      "device_kind": "B200",
+      "device_name": "NVIDIA B200",
+      "method": "cudagraph_replay_min",
+      "repetitions": 50,
+      "torch_git_version": "7cfd797a696a98317641792f4964c9898d5d93ad",
+      "torch_version": "2.15.0a0+git7cfd797",
+      "warmup": 10
+    },
+    "priced_extern_points": 2678
+  }
+}

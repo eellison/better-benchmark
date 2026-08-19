@@ -1,0 +1,245 @@
+{
+  "hardware": "NVIDIA B200",
+  "identity": "hf/train/MegatronBertForCausalLM",
+  "model": {
+    "extern_occurrences": 486,
+    "extern_total_us": 22388.86404596269,
+    "fusible": {
+      "02f96287f24b": {
+        "cfc55f11": 1
+      },
+      "04d85912d998": {
+        "2d6ceca7": 24,
+        "4fa33397": 24,
+        "a9384bfb": 97
+      },
+      "05100ef55a7f": {
+        "cfc55f11": 1
+      },
+      "0cf78904d48a": {
+        "cfc55f11": 1
+      },
+      "139a3020e8bf": {
+        "8951d544": 24
+      },
+      "140a28e119af": {
+        "8ab09cfc": 1
+      },
+      "17d3d92edca8": {
+        "7b151c28": 1
+      },
+      "199240d27571": {
+        "138859e5": 1
+      },
+      "1c3bad3003cb": {
+        "cfc55f11": 1
+      },
+      "21faaccf749d": {
+        "3871c2e1": 1
+      },
+      "2336bccf950b": {
+        "cfc55f11": 1
+      },
+      "25e302386921": {
+        "cfc55f11": 1
+      },
+      "2edacc9b086b": {
+        "cfc55f11": 1
+      },
+      "320d8d15d623": {
+        "ad7b2a2c": 24
+      },
+      "3321182dda49": {
+        "cfc55f11": 1
+      },
+      "38960b5c159a": {
+        "cfc55f11": 1
+      },
+      "38a1ef006479": {
+        "cfc55f11": 1
+      },
+      "3aab85d2b053": {
+        "cfc55f11": 1
+      },
+      "56f70f193173": {
+        "cfc55f11": 1
+      },
+      "5bc38bbfb644": {
+        "cfc55f11": 1
+      },
+      "5c94515647e9": {
+        "cfc55f11": 1
+      },
+      "60be3c717aec": {
+        "cfc55f11": 1
+      },
+      "61d05ec9e9df": {
+        "cfc55f11": 1
+      },
+      "623a84402e27": {
+        "903ae292": 24
+      },
+      "65c3d9f36fd9": {
+        "e3ecf7e0": 23
+      },
+      "6ad2dcf096da": {
+        "cfc55f11": 1
+      },
+      "6c73cc36288d": {
+        "cfc55f11": 1
+      },
+      "785c25a716ed": {
+        "903ae292": 48
+      },
+      "7c71094ec875": {
+        "cfc55f11": 1
+      },
+      "8187f7c4e01e": {
+        "ad62e054": 1
+      },
+      "826ea0b5f6e4": {
+        "e44d982c": 24
+      },
+      "87444703be27": {
+        "cfc55f11": 1
+      },
+      "8bb40810003c": {
+        "17dcd71b": 24,
+        "19d8a989": 24,
+        "2bb61127": 1,
+        "c4cfc269": 97
+      },
+      "8c76be9c9a48": {
+        "cfc55f11": 1
+      },
+      "8e06cc841b36": {
+        "cfc55f11": 1
+      },
+      "954cf90ce025": {
+        "cfc55f11": 1
+      },
+      "966b39d54c96": {
+        "34401043": 24
+      },
+      "9ce76edffcec": {
+        "cfc55f11": 1
+      },
+      "9d56b9ed5aa7": {
+        "cfc55f11": 1
+      },
+      "9e07bb297a15": {
+        "cfc55f11": 1
+      },
+      "9f3bef8d360d": {
+        "cfc55f11": 1
+      },
+      "a48ef61eae4e": {
+        "cfc55f11": 1
+      },
+      "a817e12c3ff0": {
+        "cfc55f11": 1
+      },
+      "ac119d330398": {
+        "cfc55f11": 1
+      },
+      "b1d294e82f98": {
+        "cfc55f11": 1
+      },
+      "b20c40e35cf9": {
+        "cfc55f11": 1
+      },
+      "b89a1eb0b38d": {
+        "903ae292": 24
+      },
+      "c0264c0d2975": {
+        "cfc55f11": 1
+      },
+      "ccd411f2a45d": {
+        "3dd2d471": 121,
+        "50024ffa": 1,
+        "c2b1a89d": 24
+      },
+      "ceafd02ea4c4": {
+        "cfc55f11": 1
+      },
+      "d0cb44a92f6d": {
+        "a1f869c6": 1
+      },
+      "d6d0815bb6fa": {
+        "cfc55f11": 1
+      },
+      "d8a04dcc69ee": {
+        "cfc55f11": 1
+      },
+      "d8af25d872f0": {
+        "cfc55f11": 1
+      },
+      "dc0663f33d87": {
+        "cfc55f11": 1
+      },
+      "ddc379848ac5": {
+        "cfc55f11": 1
+      },
+      "e063bcf2d8d5": {
+        "cfc55f11": 1
+      },
+      "e1d758bfd9bc": {
+        "cfc55f11": 1
+      },
+      "e25dd389c8ed": {
+        "cfc55f11": 1
+      },
+      "e6f457facad2": {
+        "cfc55f11": 1
+      },
+      "e7bcffc0e186": {
+        "cfc55f11": 1
+      },
+      "f0e10186a3cf": {
+        "cfc55f11": 1
+      },
+      "f1094971e1b4": {
+        "cfc55f11": 1
+      },
+      "f58f591dd576": {
+        "4137e900": 1
+      },
+      "fdbe15b24063": {
+        "cfc55f11": 1
+      },
+      "fedecee359f3": {
+        "cfc55f11": 1
+      }
+    },
+    "mode": "train",
+    "model": "MegatronBertForCausalLM",
+    "suite": "hf",
+    "trace_errors": [],
+    "unpriced_extern_occurrences": 0
+  },
+  "schema_version": 2,
+  "source": "occurrences",
+  "source_manifest_digest": "0815e58947c01dcfb346b34eacf60045ed9027d2b8c9beea49cb4805fd6200ce",
+  "source_provenance": {
+    "better_benchmark_commit": "3724b16ed9288e35322bdca186e15b8884691196",
+    "completed_at": "2026-08-19T23:28:20.324382+00:00",
+    "corpus_digest": "34bac6363ed61ad7f98c9dbc99736a2bcbe351c7952d32f57eaebbaf3736a85b",
+    "failed_extern_points": 0,
+    "generated_at": "2026-08-19T23:21:04.492294+00:00",
+    "hardware": {
+      "benchmark_source_digest": "ad703e72b19c0ea893472d2432f8b7e75b0852699c1c0547af17b735ea37e5fd",
+      "benchmark_version": 1,
+      "compute_capability": "10.0",
+      "cuda_driver": "580.173.02",
+      "cuda_runtime": "13.0",
+      "device_kind": "B200",
+      "device_name": "NVIDIA B200",
+      "method": "cudagraph_replay_min",
+      "repetitions": 50,
+      "torch_git_version": "7cfd797a696a98317641792f4964c9898d5d93ad",
+      "torch_version": "2.15.0a0+git7cfd797",
+      "warmup": 10
+    },
+    "priced_extern_points": 2678
+  }
+}
