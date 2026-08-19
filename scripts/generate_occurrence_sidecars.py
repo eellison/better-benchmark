@@ -11,12 +11,14 @@ from incompatible environments.
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -45,8 +47,43 @@ def _digest(value: object) -> str:
 def _atomic_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    temporary.write_bytes(_canonical_json(value) + b"\n")
+    with temporary.open("wb") as stream:
+        stream.write(_canonical_json(value) + b"\n")
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary, path)
+
+
+@contextmanager
+def _cache_lock(path: Path):
+    lock_path = path.with_name(f".{path.name}.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+") as stream:
+        fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
+def _persist_cache_entries(path: Path, cache: dict, updates: dict) -> None:
+    if not updates:
+        return
+    with _cache_lock(path):
+        persisted = load_cache(path, cache["fingerprint"])
+        for key, update in updates.items():
+            existing = persisted["entries"].get(key)
+            if existing is None or existing.get("us") is None:
+                persisted["entries"][key] = update
+        _atomic_json(path, persisted)
+    cache["entries"] = persisted["entries"]
+
+
+def _logical_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return path.name
 
 
 def _git_revision(path: Path) -> str:
@@ -272,11 +309,13 @@ def price_externs(
     cache_path: Path,
     *,
     retry_failures: bool,
+    device: int = 0,
 ) -> None:
     from model_attribution import _bench_extern_graph_isolated
 
     missing_by_graph = defaultdict(list)
     node_to_key = {}
+    unresolved = {}
     for key in sorted(inventory["extern"]):
         target, signature = key
         entry = cache["entries"].get(_cache_key(target, signature))
@@ -284,26 +323,29 @@ def price_externs(
             continue
         handle = inventory["handles"].get(key)
         if handle is None:
-            cache["entries"][_cache_key(target, signature)] = {
+            unresolved[_cache_key(target, signature)] = {
                 "target": target,
                 "signature": signature,
                 "us": None,
                 "error": "no reproducible graph/node handle",
             }
-            _atomic_json(cache_path, cache)
             continue
         graph_path, node_name = handle
         missing_by_graph[graph_path].append(node_name)
         node_to_key[(graph_path, node_name)] = key
 
+    _persist_cache_entries(cache_path, cache, unresolved)
     for graph_path, node_names in sorted(missing_by_graph.items()):
         results: dict[str, float] = {}
         failures: dict[str, str] = {}
-        _bench_extern_graph_isolated(graph_path, node_names, results, failures)
+        _bench_extern_graph_isolated(
+            graph_path, node_names, results, failures, device=device
+        )
+        updates = {}
         for node_name in node_names:
             target, signature = node_to_key[(graph_path, node_name)]
             us = results.get(node_name)
-            cache["entries"][_cache_key(target, signature)] = {
+            updates[_cache_key(target, signature)] = {
                 "target": target,
                 "signature": signature,
                 "us": us,
@@ -311,7 +353,14 @@ def price_externs(
                     node_name, "benchmark produced no result"
                 ),
             }
-        _atomic_json(cache_path, cache)
+        cacheable_updates = {
+            key: update
+            for key, update in updates.items()
+            if not str(update.get("error", "")).startswith(
+                "standalone benchmark graph budget exhausted"
+            )
+        }
+        _persist_cache_entries(cache_path, cache, cacheable_updates)
 
 
 def build_sidecar(spec: dict, inventory: dict, cache: dict) -> dict:
@@ -351,6 +400,7 @@ def generate(
     fingerprint: dict,
     resume: bool,
     retry_failures: bool,
+    device: int = 0,
 ) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     existing = [
@@ -374,7 +424,7 @@ def generate(
         "status": "incomplete",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "better_benchmark_commit": _git_revision(ROOT),
-        "corpus_root": str(corpus_root),
+        "corpus_root": _logical_path(corpus_root),
         "corpus_digest": _digest(
             {
                 spec["identity"]: _source_digest(spec["directory"], corpus_root)
@@ -383,7 +433,7 @@ def generate(
         ),
         "hardware": fingerprint,
         "hardware_key": fingerprint["device_kind"],
-        "extern_cache": str(cache_path),
+        "extern_cache": _logical_path(cache_path),
         "extern_cache_fingerprint": cache["fingerprint_digest"],
         "expected_sidecars": expected,
     }
@@ -391,14 +441,20 @@ def generate(
     _atomic_json(manifest_path, manifest)
 
     sidecar_digests = {}
+    run_extern_keys = set()
     for index, spec in enumerate(specs, 1):
         print(f"[{index}/{len(specs)}] {spec['identity']}", flush=True)
         inventory = inventory_model(spec, corpus_root)
+        run_extern_keys.update(
+            _cache_key(target, signature)
+            for target, signature in inventory["extern"]
+        )
         price_externs(
             inventory,
             cache,
             cache_path,
             retry_failures=retry_failures,
+            device=device,
         )
         sidecar = build_sidecar(spec, inventory, cache)
         sidecar_path = output_dir / expected[spec["identity"]]
@@ -409,10 +465,12 @@ def generate(
     manifest["completed_at"] = datetime.now(timezone.utc).isoformat()
     manifest["sidecar_digests"] = sidecar_digests
     manifest["priced_extern_points"] = sum(
-        entry.get("us") is not None for entry in cache["entries"].values()
+        cache["entries"].get(key, {}).get("us") is not None
+        for key in run_extern_keys
     )
     manifest["failed_extern_points"] = sum(
-        entry.get("us") is None for entry in cache["entries"].values()
+        cache["entries"].get(key, {}).get("us") is None
+        for key in run_extern_keys
     )
     _atomic_json(manifest_path, manifest)
     return manifest
@@ -458,6 +516,7 @@ def main() -> None:
             fingerprint=fingerprint,
             resume=args.resume,
             retry_failures=args.retry_failures,
+                device=args.device,
         )
     except (OSError, ValueError, json.JSONDecodeError) as error:
         parser.error(str(error))

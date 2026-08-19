@@ -12,9 +12,6 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "scripts"))
-
-from gpu_lock import device_kind_from_name
 
 BENCHMARK_NAME = "inductor-kernel-benchmark"
 RESERVED_KEYS = {"_metadata", "__failures__", "__summary__"}
@@ -31,6 +28,10 @@ DTYPE_NAMES = {
     "i64": "int64",
     "u8": "uint8",
 }
+
+
+def _hardware_key(name: str) -> str:
+    return " ".join(name.casefold().split()).removeprefix("nvidia ")
 TIMING_FIELDS = ("compiled_us", "coord_descent_us")
 
 
@@ -60,14 +61,9 @@ def _selected_timing(measurement: dict, timing: str) -> tuple[object, str]:
     if timing == "auto":
         for field in ("coord_descent_us", "compiled_us"):
             value = measurement.get(field)
-            if value is None or isinstance(value, bool):
+            if value is None:
                 continue
-            try:
-                number = float(value)
-            except (TypeError, ValueError):
-                continue
-            if math.isfinite(number) and number > 0:
-                return value, field
+            return value, field
         return None, ""
     return measurement.get(timing), timing
 
@@ -135,9 +131,19 @@ def load_kernel_points(path: Path, timing: str = "auto") -> dict[tuple[str, str]
     payload = json.loads(path.read_text())
     if not isinstance(payload, dict):
         raise TypeError(f"{path}: sweep root must be an object")
+    metadata = payload.get("_metadata")
+    workload_kind = metadata.get("workload_kind") if isinstance(metadata, dict) else None
+    if workload_kind not in (None, "repro"):
+        raise ValueError(
+            f"{path}: dashboard export requires a canonical kernel sweep, "
+            f"not workload_kind={workload_kind!r}"
+        )
 
     points = {}
     skipped_measurements = 0
+    invalid_gaps = 0
+    missing_shape_files = set()
+    unresolved_shape_metadata = set()
     for repro_path, measurements in payload.items():
         if (
             repro_path in RESERVED_KEYS
@@ -145,9 +151,15 @@ def load_kernel_points(path: Path, timing: str = "auto") -> dict[tuple[str, str]
             or not isinstance(measurements, dict)
         ):
             continue
+        if Path(repro_path).name.startswith("full_graph_"):
+            raise ValueError(
+                f"{path}: dashboard export does not support full-graph sweeps"
+            )
         pattern_hash = _pattern_hash(repro_path)
         repro_dir = Path(repro_path).parent.name
         metadata = _shape_metadata(repro_path)
+        if not _shape_file(repro_path).is_file():
+            missing_shape_files.add(str(_shape_file(repro_path)))
         for label, measurement in measurements.items():
             if label == "__graph__" or not isinstance(measurement, dict):
                 continue
@@ -164,6 +176,8 @@ def load_kernel_points(path: Path, timing: str = "auto") -> dict[tuple[str, str]
             if key in points:
                 raise ValueError(f"duplicate kernel point {pattern_hash}/{shape_hash}")
             point = metadata.get(shape_hash, {})
+            if shape_hash not in metadata:
+                unresolved_shape_metadata.add((repro_path, shape_hash))
             dtype, actual_dtypes = _dtype(point)
             suite, mode, source_models = _sources(point)
             gap_field = (
@@ -177,7 +191,7 @@ def load_kernel_points(path: Path, timing: str = "auto") -> dict[tuple[str, str]
                         gap, f"{repro_path}/{label}/{gap_field}"
                     )
                 except (TypeError, ValueError):
-                    pass
+                    invalid_gaps += 1
             points[key] = {
                 "pattern_hash": pattern_hash,
                 "shape_hash": shape_hash,
@@ -199,6 +213,39 @@ def load_kernel_points(path: Path, timing: str = "auto") -> dict[tuple[str, str]
             f"Skipped {skipped_measurements} invalid timing measurements",
             file=sys.stderr,
         )
+    if invalid_gaps:
+        print(f"Skipped {invalid_gaps} invalid gap measurements", file=sys.stderr)
+    if missing_shape_files:
+        print(
+            f"Missing shapes.json metadata for {len(missing_shape_files)} repros",
+            file=sys.stderr,
+        )
+    if unresolved_shape_metadata:
+        print(
+            f"Missing shape metadata for {len(unresolved_shape_metadata)} points",
+            file=sys.stderr,
+        )
+    failures = payload.get("__failures__", {})
+    successful_repros = {
+        key
+        for key, value in payload.items()
+        if key not in RESERVED_KEYS and isinstance(value, dict)
+    }
+    failed_repro_paths = (
+        {key.split("::SHAPE::", 1)[0] for key in failures}
+        if isinstance(failures, dict)
+        else set()
+    )
+    failed_repro_paths.difference_update(successful_repros)
+    run_info = {
+        "sweep_total_repros": str(len(successful_repros | failed_repro_paths)),
+        "sweep_failed_repros": str(len(failed_repro_paths)),
+        "sweep_invalid_measurements": str(skipped_measurements),
+        "sweep_missing_shape_files": str(len(missing_shape_files)),
+        "sweep_unresolved_shape_metadata": str(len(unresolved_shape_metadata)),
+    }
+    for point in points.values():
+        point["run_info"] = run_info
     return points
 
 
@@ -260,6 +307,7 @@ def kernel_records(
             "source_model_count": str(len(point["source_models"])),
             "timing": point["timing"],
             "timing_policy": timing_policy,
+            **point["run_info"],
         }
         records.append(
             _record(
@@ -308,17 +356,26 @@ def model_records(
     accounting_hardware = accounting.get("hardware")
     if not isinstance(accounting_hardware, str) or not accounting_hardware:
         raise ValueError(f"{accounting_path}: missing accounting hardware")
-    if device_kind_from_name(accounting_hardware) != device_kind_from_name(arch):
-        print(
-            f"Skipping projected model records: accounting hardware "
-            f"{accounting_hardware!r} does not match run architecture {arch!r}",
-            file=sys.stderr,
+    if not isinstance(arch, str) or not arch.strip():
+        raise ValueError("run architecture is required for projected model records")
+    if _hardware_key(accounting_hardware) != _hardware_key(arch):
+        raise ValueError(
+            f"accounting hardware {accounting_hardware!r} does not match "
+            f"run architecture {arch!r}"
         )
-        return []
-    accounting_digest = hashlib.sha256(accounting_bytes).hexdigest()
+    accounting_digest = hashlib.sha256(
+        json.dumps(
+            accounting, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        ).encode()
+    ).hexdigest()
 
     records = []
     for name, model in sorted(models.items()):
+        model_accounting_digest = hashlib.sha256(
+            json.dumps(
+                model, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+            ).encode()
+        ).hexdigest()
         required_fields = (
             "suite",
             "mode",
@@ -346,7 +403,6 @@ def model_records(
         total_occurrences = 0
         matched_occurrences = 0
         fusible_total_us = 0.0
-        model_dtypes = set()
         for pattern_hash, shapes in model["fusible"].items():
             if not isinstance(pattern_hash, str) or not isinstance(shapes, dict):
                 raise TypeError(f"{name}: invalid fusible occurrence map")
@@ -364,7 +420,6 @@ def model_records(
                     continue
                 matched_occurrences += count
                 fusible_total_us += point["us"] * count
-                model_dtypes.add(point["dtype"])
 
         coverage = matched_occurrences / total_occurrences if total_occurrences else 1.0
         extern_total_us = _finite_nonnegative(
@@ -381,20 +436,17 @@ def model_records(
             exclusion_reasons.append("no_priced_baseline")
         complete = not exclusion_reasons
         model_dtype = "mixed"
-        for workload_dtype in ("bfloat16", "float16"):
-            if workload_dtype in model_dtypes:
-                model_dtype = workload_dtype
-                break
-        else:
-            if len(model_dtypes) == 1:
-                model_dtype = next(iter(model_dtypes))
         common_info = {
             "record_type": "model",
             "suite": model["suite"],
             "source_mode": model["mode"],
             "accounting_schema": str(schema_version),
             "accounting_source": str(accounting.get("source", "")),
+            "accounting_source_manifest_digest": str(
+                accounting.get("source_manifest_digest", "")
+            ),
             "accounting_digest": accounting_digest,
+            "model_accounting_digest": model_accounting_digest,
             "accounting_hardware": accounting_hardware,
             "timing_policy": timing_policy,
             "matched_occurrences": str(matched_occurrences),
@@ -442,10 +494,12 @@ def detect_arch() -> str:
             text=True,
             timeout=5,
         )
-    except (OSError, subprocess.SubprocessError):
-        return "unknown"
+    except (OSError, subprocess.SubprocessError) as error:
+        raise RuntimeError("could not detect GPU architecture with nvidia-smi") from error
     lines = output.strip().splitlines()
-    return lines[0] if lines else "unknown"
+    if not lines:
+        raise RuntimeError("nvidia-smi returned no GPU architecture")
+    return lines[0]
 
 
 def export_records(
@@ -489,7 +543,10 @@ def main() -> None:
         "--timing",
         choices=("auto", *TIMING_FIELDS),
         default="auto",
-        help="Timing axis. auto prefers coord_descent_us with compiled_us fallback.",
+        help=(
+            "Timing axis. auto uses coord_descent_us when present and falls back "
+            "to compiled_us only when coordinate-descent timing is absent."
+        ),
     )
     args = parser.parse_args()
 

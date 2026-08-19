@@ -181,7 +181,7 @@ def _weighted_add(total: float, value: float, count: int, context: str) -> float
 
 
 def _load_occurrence_record(path: Path) -> dict:
-    record = json.loads(path.read_text())
+    record = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(record, dict):
         raise ValueError(f"{path}: occurrence sidecar must be an object")
     schema_version = record.get("schema_version")
@@ -208,7 +208,7 @@ def _occurrence_sidecars(occdir: Path) -> list[Path]:
     manifest_path = Path(occdir) / "_metadata.json"
     if not manifest_path.is_file():
         return sidecars
-    manifest = json.loads(manifest_path.read_text())
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("schema_version") != 1:
         raise ValueError(f"{manifest_path}: unsupported schema version")
     if manifest.get("status") != "complete":
@@ -228,7 +228,7 @@ def _occurrence_sidecars(occdir: Path) -> list[Path]:
         sidecar = Path(occdir) / filename
         digest = hashlib.sha256(
             json.dumps(
-                json.loads(sidecar.read_text()),
+                json.loads(sidecar.read_text(encoding="utf-8")),
                 sort_keys=True,
                 separators=(",", ":"),
                 ensure_ascii=False,

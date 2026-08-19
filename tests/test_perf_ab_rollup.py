@@ -75,13 +75,17 @@ def test_occurrence_manifest_rejects_incomplete_and_stale_runs(tmp_path):
 
 def test_occurrence_manifest_rejects_modified_sidecar(tmp_path):
     sidecar = tmp_path / "model.json"
-    sidecar.write_text(json.dumps({"model": "original"}))
+    sidecar.write_text(
+        json.dumps({"model": "original", "trace_errors": ["stride mismatch → retry"]}),
+        encoding="utf-8",
+    )
     identity = "hf/infer/model"
     digest = hashlib.sha256(
         json.dumps(
-            json.loads(sidecar.read_text()),
+            json.loads(sidecar.read_text(encoding="utf-8")),
             sort_keys=True,
             separators=(",", ":"),
+            ensure_ascii=False,
         ).encode()
     ).hexdigest()
     manifest = {
@@ -94,7 +98,7 @@ def test_occurrence_manifest_rejects_modified_sidecar(tmp_path):
 
     assert _occurrence_sidecars(tmp_path) == [sidecar]
 
-    sidecar.write_text(json.dumps({"model": "modified"}))
+    sidecar.write_text(json.dumps({"model": "modified"}), encoding="utf-8")
     with pytest.raises(ValueError, match="does not match manifest digest"):
         _occurrence_sidecars(tmp_path)
 

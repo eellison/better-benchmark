@@ -17,6 +17,34 @@ import subprocess
 from pathlib import Path
 
 SCHEMA_VERSION = 1
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def _logical_source(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(ROOT.resolve()))
+    except ValueError:
+        return path.name
+
+
+def _manifest_content_digest(manifest: dict) -> str:
+    content = {
+        key: manifest.get(key)
+        for key in (
+            "schema_version",
+            "corpus_digest",
+            "hardware",
+            "hardware_key",
+            "extern_cache_fingerprint",
+            "expected_sidecars",
+            "sidecar_digests",
+        )
+    }
+    return hashlib.sha256(
+        json.dumps(
+            content, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        ).encode()
+    ).hexdigest()
 
 
 def _compact_record(record: dict, source: str) -> tuple[str, dict]:
@@ -82,7 +110,7 @@ def _records_from_directory(path: Path):
     for sidecar in sorted(path.glob("*.json")):
         if sidecar.name.startswith("_"):
             continue
-        yield sidecar.name, json.loads(sidecar.read_text())
+        yield sidecar.name, json.loads(sidecar.read_text(encoding="utf-8"))
 
 
 def _records_from_git(revision: str, git_path: str):
@@ -90,7 +118,7 @@ def _records_from_git(revision: str, git_path: str):
         output = subprocess.check_output(
             ["git", "ls-tree", "-r", "--name-only", revision, git_path],
             text=True,
-            cwd=Path(__file__).resolve().parent.parent,
+            cwd=ROOT,
         )
     except subprocess.CalledProcessError as exc:
         raise ValueError(
@@ -102,9 +130,79 @@ def _records_from_git(revision: str, git_path: str):
         content = subprocess.check_output(
             ["git", "show", f"{revision}:{path}"],
             text=True,
-            cwd=Path(__file__).resolve().parent.parent,
+            cwd=ROOT,
         )
         yield path, json.loads(content)
+
+
+def _git_file(revision: str, path: str) -> bytes:
+    try:
+        return subprocess.check_output(
+            ["git", "show", f"{revision}:{path}"],
+            cwd=ROOT,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise ValueError(f"could not read {path} from git revision {revision}") from exc
+
+
+def validate_git_occurrence_manifest(
+    revision: str, git_path: str
+) -> tuple[dict, str]:
+    manifest_path = f"{git_path.rstrip('/')}/_metadata.json"
+    manifest_bytes = _git_file(revision, manifest_path)
+    manifest = json.loads(manifest_bytes)
+    if manifest.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(f"{revision}:{manifest_path}: unsupported schema version")
+    if manifest.get("status") != "complete":
+        raise ValueError(f"{revision}:{manifest_path}: generation is not complete")
+    expected = manifest.get("expected_sidecars")
+    digests = manifest.get("sidecar_digests")
+    if not isinstance(expected, dict) or not isinstance(digests, dict):
+        raise TypeError(f"{revision}:{manifest_path}: missing sidecar inventory")
+    if set(expected) != set(digests):
+        raise ValueError(f"{revision}:{manifest_path}: missing sidecar digests")
+
+    prefix = f"{git_path.rstrip('/')}/"
+    actual_files = set()
+    for path, _record in _records_from_git(revision, git_path):
+        if not path.startswith(prefix):
+            raise ValueError(f"{revision}:{path}: sidecar is outside {git_path}")
+        relative = path[len(prefix) :]
+        if "/" in relative:
+            raise ValueError(
+                f"{revision}:{path}: nested occurrence sidecars are not supported"
+            )
+        actual_files.add(relative)
+    if set(expected.values()) != actual_files:
+        raise ValueError(
+            f"{revision}:{manifest_path}: sidecar inventory does not match git tree"
+        )
+    for identity, filename in expected.items():
+        raw = json.loads(_git_file(revision, f"{git_path.rstrip('/')}/{filename}"))
+        digest = hashlib.sha256(
+            json.dumps(
+                raw, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+            ).encode()
+        ).hexdigest()
+        if digest != digests[identity]:
+            raise ValueError(
+                f"{revision}:{git_path}/{filename}: "
+                "content does not match manifest digest"
+            )
+    return manifest, _manifest_content_digest(manifest)
+
+
+def _hardware_key(value: str) -> str:
+    return " ".join(value.upper().split()).removeprefix("NVIDIA ")
+
+
+def _manifest_hardware(manifest: dict) -> str:
+    hardware = manifest.get("hardware")
+    if isinstance(hardware, dict):
+        device_name = hardware.get("device_name")
+        if isinstance(device_name, str) and device_name.strip():
+            return device_name
+    return str(manifest.get("hardware_key"))
 
 
 def build_artifact(
@@ -113,6 +211,7 @@ def build_artifact(
     hardware: str,
     source: str,
     source_manifest_digest: str = "",
+    source_provenance: dict | None = None,
 ) -> dict:
     models = {}
     for name, raw in records:
@@ -130,6 +229,8 @@ def build_artifact(
     }
     if source_manifest_digest:
         artifact["source_manifest_digest"] = source_manifest_digest
+    if source_provenance:
+        artifact["source_provenance"] = source_provenance
     return artifact
 
 
@@ -163,7 +264,7 @@ def validate_occurrence_manifest(path: Path) -> tuple[dict | None, str]:
         sidecar = path / filename
         digest = hashlib.sha256(
             json.dumps(
-                json.loads(sidecar.read_text()),
+                json.loads(sidecar.read_text(encoding="utf-8")),
                 sort_keys=True,
                 separators=(",", ":"),
                 ensure_ascii=False,
@@ -171,7 +272,7 @@ def validate_occurrence_manifest(path: Path) -> tuple[dict | None, str]:
         ).hexdigest()
         if digest != digests[identity]:
             raise ValueError(f"{sidecar}: content does not match manifest digest")
-    return manifest, hashlib.sha256(manifest_bytes).hexdigest()
+    return manifest, _manifest_content_digest(manifest)
 
 
 def main() -> None:
@@ -186,7 +287,7 @@ def main() -> None:
         default="results/b200/occurrences",
         help="Occurrence directory inside --git-revision",
     )
-    parser.add_argument("--hardware", default="NVIDIA B200")
+    parser.add_argument("--hardware")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
 
@@ -195,17 +296,24 @@ def main() -> None:
             parser.error(f"occurrence directory not found: {args.occdir}")
         manifest, manifest_digest = validate_occurrence_manifest(args.occdir)
         records = _records_from_directory(args.occdir)
-        source_name = str(args.occdir)
+        source_name = _logical_source(args.occdir)
         hardware = (
-            str(manifest.get("hardware_key"))
+            _manifest_hardware(manifest)
             if manifest is not None
-            else args.hardware
+            else args.hardware or "NVIDIA B200"
         )
     else:
-        manifest_digest = ""
+        manifest, manifest_digest = validate_git_occurrence_manifest(
+            args.git_revision, args.git_path
+        )
         records = _records_from_git(args.git_revision, args.git_path)
         source_name = f"{args.git_revision}:{args.git_path}"
-        hardware = args.hardware
+        hardware = _manifest_hardware(manifest)
+        if args.hardware and _hardware_key(args.hardware) != _hardware_key(hardware):
+            parser.error(
+                f"--hardware {args.hardware!r} disagrees with manifest "
+                f"hardware {hardware!r}"
+            )
     if not hardware or hardware == "None":
         parser.error("accounting hardware is missing")
 
@@ -214,9 +322,28 @@ def main() -> None:
         hardware=hardware,
         source=source_name,
         source_manifest_digest=manifest_digest,
+        source_provenance=(
+            {
+                key: manifest.get(key)
+                for key in (
+                    "better_benchmark_commit",
+                    "generated_at",
+                    "completed_at",
+                    "corpus_digest",
+                    "hardware",
+                    "priced_extern_points",
+                    "failed_extern_points",
+                )
+            }
+            if manifest is not None
+            else None
+        ),
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(artifact, sort_keys=True, separators=(",", ":")))
+    args.output.write_text(
+        json.dumps(artifact, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     print(f"Wrote {len(artifact['models'])} models to {args.output}")
 
 

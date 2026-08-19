@@ -52,6 +52,7 @@ import math
 import os
 import subprocess
 import sys
+import time
 from collections import Counter
 from pathlib import Path
 
@@ -603,7 +604,9 @@ def _run_extern_nodes_child(graph_path: str, node_names: list[str]) -> int:
 def _bench_extern_graph_isolated(
         graph_path: str, node_names: list[str],
         results: dict[str, float], failures: dict[str, str],
-        timeout_s: float = EXTERN_BENCH_TIMEOUT_S) -> None:
+        timeout_s: float = EXTERN_BENCH_TIMEOUT_S,
+        max_total_s: float | None = None,
+        device: int | None = None) -> None:
     """Parent side: bench `node_names` (from one graph) in a subprocess,
     recording successes into `results[name]` and fatal failures into
     `failures[name]`.
@@ -615,11 +618,26 @@ def _bench_extern_graph_isolated(
     (worker-recovery: one poison node never blocks the rest).
     """
     pending = list(node_names)
+    total_budget = max_total_s if max_total_s is not None else timeout_s * 2
+    deadline = time.monotonic() + total_budget
     while pending:
+        remaining_budget = deadline - time.monotonic()
+        minimum_attempt = min(1.0, timeout_s * 0.1)
+        if remaining_budget < minimum_attempt:
+            for name in pending:
+                failures.setdefault(
+                    name,
+                    f"standalone benchmark graph budget exhausted after "
+                    f"{total_budget:g}s",
+                )
+            return
         env = os.environ.copy()
         env.setdefault("INDUCTOR_GPU_BENCH_LOCK", "1")
+        if device is not None:
+            env["CUDA_VISIBLE_DEVICES"] = str(device)
         cmd = [sys.executable, str(Path(__file__).resolve()),
                "--bench-extern-node", graph_path, *pending]
+        attempt_timeout = min(timeout_s, remaining_budget)
         timed_out = False
         try:
             proc = subprocess.run(
@@ -628,7 +646,7 @@ def _bench_extern_graph_isolated(
                 text=True,
                 env=env,
                 cwd=str(ROOT),
-                timeout=timeout_s,
+                timeout=attempt_timeout,
                 check=False,
             )
             stdout = proc.stdout
@@ -660,7 +678,7 @@ def _bench_extern_graph_isolated(
                 return
             poison = remaining[0]
             failures[poison] = (
-                f"standalone benchmark timed out after {timeout_s:g}s"
+                f"standalone benchmark timed out after {attempt_timeout:g}s"
             )
             pending = remaining[1:]
             continue

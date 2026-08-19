@@ -1462,7 +1462,10 @@ def test_gpu_lock_detects_dead_pid_metadata_while_blocked():
 
 
 def test_extern_benchmark_timeout_is_recorded(monkeypatch):
-    def timeout(*_args, **_kwargs):
+    captured = {}
+
+    def timeout(*_args, **kwargs):
+        captured.update(kwargs)
         raise subprocess.TimeoutExpired(["python"], timeout=0.01)
 
     monkeypatch.setattr(model_attribution.subprocess, "run", timeout)
@@ -1475,12 +1478,12 @@ def test_extern_benchmark_timeout_is_recorded(monkeypatch):
         results,
         failures,
         timeout_s=0.01,
+        device=3,
     )
 
     assert results == {}
-    assert failures == {
-        "extern": "standalone benchmark timed out after 0.01s"
-    }
+    assert failures["extern"].startswith("standalone benchmark timed out after ")
+    assert captured["env"]["CUDA_VISIBLE_DEVICES"] == "3"
 
 
 if __name__ == "__main__":

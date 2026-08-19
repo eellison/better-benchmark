@@ -8,6 +8,7 @@ from scripts.build_model_accounting import validate_occurrence_manifest
 from scripts.generate_occurrence_sidecars import (
     _cache_key,
     _metadata_validation_error,
+    _persist_cache_entries,
     build_sidecar,
     discover_models,
     generate,
@@ -51,6 +52,59 @@ def test_cache_rejects_different_environment(tmp_path):
 
     with pytest.raises(ValueError, match="different environment"):
         load_cache(path, {"device_kind": "B200", "torch": "b"})
+
+
+def test_cache_updates_merge_stale_writers_and_preserve_success(tmp_path):
+    path = tmp_path / "cache.json"
+    fingerprint = {"device_kind": "B200"}
+    first = load_cache(path, fingerprint)
+    second = load_cache(path, fingerprint)
+    _persist_cache_entries(
+        path,
+        first,
+        {"first": {"target": "a", "signature": "a", "us": 1.0, "error": None}},
+    )
+    _persist_cache_entries(
+        path,
+        second,
+        {
+            "first": {
+                "target": "a",
+                "signature": "a",
+                "us": None,
+                "error": "late failure",
+            },
+            "second": {
+                "target": "b",
+                "signature": "b",
+                "us": 2.0,
+                "error": None,
+            },
+            "failed": {
+                "target": "c",
+                "signature": "c",
+                "us": None,
+                "error": "old failure",
+            },
+        },
+    )
+    _persist_cache_entries(
+        path,
+        second,
+        {
+            "failed": {
+                "target": "c",
+                "signature": "c",
+                "us": None,
+                "error": "new diagnosis",
+            }
+        },
+    )
+
+    persisted = load_cache(path, fingerprint)
+    assert set(persisted["entries"]) == {"failed", "first", "second"}
+    assert persisted["entries"]["first"]["us"] == 1.0
+    assert persisted["entries"]["failed"]["error"] == "new diagnosis"
 
 
 def test_failed_roundtrip_metadata_is_preserved_as_trace_error(tmp_path):
@@ -121,7 +175,7 @@ def test_generate_writes_complete_manifest_and_resumes(
     inventory = {
         "graphs": [directory / "full_graph_000.py"],
         "fusible": Counter({("pattern", "shape"): 1}),
-        "extern": Counter(),
+        "extern": Counter({("aten.mm.default", "signature"): 1}),
         "handles": {},
         "trace_errors": [],
         "source_digest": "source",
@@ -130,10 +184,15 @@ def test_generate_writes_complete_manifest_and_resumes(
         "scripts.generate_occurrence_sidecars.inventory_model",
         lambda *_args: inventory,
     )
-    monkeypatch.setattr(
-        "scripts.generate_occurrence_sidecars.price_externs",
-        lambda *_args, **_kwargs: None,
-    )
+    def price(_inventory, cache_data, _cache_path, **_kwargs):
+        cache_data["entries"][_cache_key("aten.mm.default", "signature")] = {
+            "target": "aten.mm.default",
+            "signature": "signature",
+            "us": 2.0,
+            "error": None,
+        }
+
+    monkeypatch.setattr("scripts.generate_occurrence_sidecars.price_externs", price)
     output = tmp_path / "occurrences"
     cache = tmp_path / "extern-cache.json"
     fingerprint = {"device_kind": "B200"}
@@ -147,6 +206,7 @@ def test_generate_writes_complete_manifest_and_resumes(
         resume=False,
         retry_failures=False,
     )
+    _first_manifest, first_manifest_digest = validate_occurrence_manifest(output)
     second = generate(
         [spec],
         corpus_root=corpus,
@@ -161,12 +221,15 @@ def test_generate_writes_complete_manifest_and_resumes(
     assert second["status"] == "complete"
     manifest = json.loads((output / "_metadata.json").read_text())
     assert manifest["status"] == "complete"
+    assert manifest["priced_extern_points"] == 1
+    assert manifest["failed_extern_points"] == 0
     assert set(manifest["sidecar_digests"]) == {"hf/infer/model"}
     sidecar_path = output / manifest["expected_sidecars"]["hf/infer/model"]
     assert json.loads(sidecar_path.read_text())["source_digest"] == "source"
     validated, manifest_digest = validate_occurrence_manifest(output)
     assert validated["hardware_key"] == "B200"
     assert len(manifest_digest) == 64
+    assert manifest_digest == first_manifest_digest
 
     sidecar_path.write_text("{}")
     with pytest.raises(ValueError, match="does not match manifest digest"):
