@@ -6,7 +6,12 @@ import pytest
 
 from scripts.build_model_accounting import (
     build_artifact,
+    build_per_model_artifacts,
+    load_model_accounting,
+    model_accounting_path,
+    require_priced_artifacts,
     validate_git_occurrence_manifest,
+    write_per_model_artifacts,
 )
 from scripts.dashboard_export import _dtype, export_records, load_kernel_points
 from scripts.perf_ab_rollup import rollup_models
@@ -84,9 +89,31 @@ def _write_accounting(
     return accounting
 
 
+def _split_accounting(accounting_path: Path) -> Path:
+    accounting = json.loads(accounting_path.read_text())
+    output = accounting_path.with_name("model_accounting")
+    for identity, model in accounting["models"].items():
+        destination = output / model_accounting_path(identity)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            json.dumps(
+                {
+                    "schema_version": 2,
+                    "hardware": accounting["hardware"],
+                    "identity": identity,
+                    "source": accounting["source"],
+                    "model": model,
+                }
+            )
+        )
+    return output
+
+
 def test_export_records_contains_stable_kernel_and_projected_model(tmp_path):
     sweep, pattern_hash, shape_hash = _write_sweep(tmp_path)
-    accounting = _write_accounting(tmp_path, pattern_hash, shape_hash)
+    accounting = _split_accounting(
+        _write_accounting(tmp_path, pattern_hash, shape_hash)
+    )
 
     records = export_records(
         sweep,
@@ -412,6 +439,136 @@ def test_build_artifact_compacts_unchanged_extern_latency():
     assert model["unpriced_extern_occurrences"] == 0
 
 
+def test_per_model_files_aggregate_to_exact_legacy_model_map(tmp_path):
+    records = [
+        (
+            "nested.json",
+            {
+                "suite": "hf",
+                "mode": "infer",
+                "model": "org/model",
+                "fusible": {"pattern": {"shape": 2}},
+                "extern": [{"target": "aten.mm", "count": 3, "baseline_us": 4.0}],
+                "trace_errors": [],
+            },
+        ),
+        (
+            "resnet.json",
+            {
+                "suite": "timm",
+                "mode": "train",
+                "model": "resnet18",
+                "fusible": {},
+                "extern": [],
+                "trace_errors": ["known graph failure"],
+            },
+        ),
+    ]
+    legacy = build_artifact(records, hardware="NVIDIA B200", source="test")
+    per_model = build_per_model_artifacts(
+        records,
+        hardware="NVIDIA B200",
+        source="test",
+        source_manifest_digest="manifest",
+    )
+    output = tmp_path / "accounting"
+    write_per_model_artifacts(output, per_model)
+
+    loaded = load_model_accounting(output)
+
+    assert loaded["hardware"] == legacy["hardware"]
+    assert loaded["models"] == legacy["models"]
+    assert (output / "hf" / "infer" / "org" / "model.json").is_file()
+
+
+def test_per_model_loader_rejects_mixed_hardware_and_wrong_path(tmp_path):
+    records = [
+        (
+            "model.json",
+            {
+                "suite": "timm",
+                "mode": "infer",
+                "model": "resnet18",
+                "fusible": {},
+                "extern": [],
+                "trace_errors": [],
+            },
+        )
+    ]
+    artifacts = build_per_model_artifacts(
+        records, hardware="NVIDIA B200", source="test"
+    )
+    output = tmp_path / "accounting"
+    write_per_model_artifacts(output, artifacts)
+    model_path = output / "timm" / "infer" / "resnet18.json"
+    payload = json.loads(model_path.read_text())
+    payload["hardware"] = "NVIDIA H100"
+    model_path.write_text(json.dumps(payload))
+    second = output / "hf" / "infer" / "model.json"
+    second.parent.mkdir(parents=True)
+    second.write_text(
+        json.dumps(
+            {
+                **payload,
+                "hardware": "NVIDIA B200",
+                "identity": "hf/infer/model",
+                "model": {
+                    **payload["model"],
+                    "suite": "hf",
+                    "model": "model",
+                },
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="mixed accounting hardware"):
+        load_model_accounting(output)
+
+    second.unlink()
+    wrong = output / "wrong.json"
+    model_path.rename(wrong)
+    with pytest.raises(ValueError, match="path does not match model identity"):
+        load_model_accounting(output)
+
+
+def test_per_model_updates_preserve_other_models_and_prune_only_accounting(tmp_path):
+    records = [
+        (
+            f"{model}.json",
+            {
+                "suite": "timm",
+                "mode": "infer",
+                "model": model,
+                "fusible": {},
+                "extern": [],
+                "trace_errors": [],
+            },
+        )
+        for model in ("resnet18", "resnet50")
+    ]
+    artifacts = build_per_model_artifacts(
+        records, hardware="NVIDIA B200", source="test"
+    )
+    output = tmp_path / "accounting"
+    write_per_model_artifacts(output, artifacts)
+    resnet18_path = model_accounting_path("timm/infer/resnet18")
+    write_per_model_artifacts(output, {resnet18_path: artifacts[resnet18_path]})
+    assert (output / model_accounting_path("timm/infer/resnet50")).is_file()
+
+    unrelated = output / "notes.json"
+    unrelated.write_text("{}")
+    changed = json.loads(json.dumps(artifacts[resnet18_path]))
+    changed["model"]["extern_total_us"] = 99.0
+    with pytest.raises(ValueError, match="refusing to prune unrelated JSON"):
+        write_per_model_artifacts(
+            output, {**artifacts, resnet18_path: changed}, prune=True
+        )
+    assert unrelated.is_file()
+    assert (
+        json.loads((output / resnet18_path).read_text())["model"]["extern_total_us"]
+        != 99.0
+    )
+
+
 def test_build_artifact_rejects_invalid_counts():
     records = [
         (
@@ -427,6 +584,28 @@ def test_build_artifact_rejects_invalid_counts():
     ]
     with pytest.raises(ValueError, match="invalid extern occurrence count"):
         build_artifact(records, hardware="NVIDIA B200", source="test")
+
+
+def test_compaction_rejects_unpriced_extern_occurrences():
+    records = [
+        (
+            "model.json",
+            {
+                "suite": "timm",
+                "mode": "infer",
+                "model": "resnet18",
+                "fusible": {},
+                "extern": [{"target": "aten.mm", "count": 2, "baseline_us": None}],
+                "trace_errors": [],
+            },
+        )
+    ]
+    artifacts = build_per_model_artifacts(
+        records, hardware="NVIDIA B200", source="test"
+    )
+
+    with pytest.raises(ValueError, match="2 external-operation occurrences"):
+        require_priced_artifacts(artifacts)
 
 
 def test_git_accounting_source_validates_manifest_digests(monkeypatch):

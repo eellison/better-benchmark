@@ -156,22 +156,24 @@ be compared later without rerunning either side:
 
 ```bash
 # Occasionally regenerate model accounting on the target hardware. The
-# persistent extern cache makes interrupted runs resumable.
-python scripts/with_gpu_lock.py --device-kind B200 -- \
-  python scripts/generate_occurrence_sidecars.py \
+# persistent extern cache makes interrupted runs resumable. On a dedicated
+# 8-GPU B200 runner, shard models across every GPU.
+python scripts/generate_occurrence_sidecars.py \
     --corpus-root repros \
     --all \
     --output-dir results/b200/occurrences \
     --extern-cache results/b200/extern_cache.json \
+    --devices 0,1,2,3,4,5,6,7 \
     --resume
 python scripts/build_model_accounting.py \
     --occdir results/b200/occurrences \
-    --output benchmarks/model_accounting_b200.json
+    --output benchmarks/model_accounting/b200 \
+    --prune
 
 # Export every kernel sweep using that versioned accounting snapshot.
 python scripts/dashboard_export.py \
     --input current.json \
-    --model-accounting benchmarks/model_accounting_b200.json \
+    --model-accounting benchmarks/model_accounting/b200 \
     --timing auto \
     --ci-json test/test-reports/inductor_kernel_benchmark.json
 ```
@@ -180,12 +182,17 @@ It emits stable pattern/shape kernel records plus absolute projected model
 latencies. The model values use the same occurrence weighting and unchanged
 extern dilution and timing selection as `perf_ab_rollup.py`. Records include
 the timing policy and accounting-artifact digest so incompatible workflows are
-not combined. The B200 accounting artifact is versioned separately from
-measurements and can be regenerated from occurrence sidecars with
+not combined. B200 accounting is versioned as one self-contained file per
+suite/mode/model under `benchmarks/model_accounting/b200`, so individual models
+can be added or refreshed without rewriting a shared artifact. The exporter
+validates and aggregates the directory at runtime. These files can be
+regenerated from occurrence sidecars with
 `scripts/generate_occurrence_sidecars.py` and
 `scripts/build_model_accounting.py`. The generator reuses the model-attribution
 tracer and crash-isolated extern benchmark, writes a provenance manifest, and
 fingerprints its persistent cache by GPU, PyTorch, CUDA, and timing method.
+Generation and compaction fail by default if any external operation remains
+unpriced.
 
 ## Extraction
 

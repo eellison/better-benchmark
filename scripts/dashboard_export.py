@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from scripts.build_model_accounting import load_model_accounting
 
 BENCHMARK_NAME = "inductor-kernel-benchmark"
 RESERVED_KEYS = {"_metadata", "__failures__", "__summary__"}
@@ -347,11 +350,10 @@ def model_records(
     arch: str,
     timing_policy: str,
 ) -> list[dict]:
-    accounting_bytes = accounting_path.read_bytes()
-    accounting = json.loads(accounting_bytes)
+    accounting = load_model_accounting(accounting_path)
     schema_version = accounting.get("schema_version")
     models = accounting.get("models")
-    if schema_version != 1 or not isinstance(models, dict):
+    if schema_version not in (1, 2) or not isinstance(models, dict):
         raise ValueError(f"{accounting_path}: unsupported accounting schema")
     accounting_hardware = accounting.get("hardware")
     if not isinstance(accounting_hardware, str) or not accounting_hardware:
@@ -550,12 +552,10 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    for label, path in (
-        ("input", args.input),
-        ("model accounting", args.model_accounting),
-    ):
-        if path is not None and not path.is_file():
-            parser.error(f"{label} file not found: {path}")
+    if not args.input.is_file():
+        parser.error(f"input file not found: {args.input}")
+    if args.model_accounting is not None and not args.model_accounting.exists():
+        parser.error(f"model accounting path not found: {args.model_accounting}")
 
     records = export_records(
         args.input,

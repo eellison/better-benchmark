@@ -13,10 +13,12 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import subprocess
 from pathlib import Path
 
 SCHEMA_VERSION = 1
+PER_MODEL_SCHEMA_VERSION = 2
 ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -25,6 +27,25 @@ def _logical_source(path: Path) -> str:
         return str(path.resolve().relative_to(ROOT.resolve()))
     except ValueError:
         return path.name
+
+
+def _canonical_digest(value: object) -> str:
+    return hashlib.sha256(
+        json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        ).encode()
+    ).hexdigest()
+
+
+def _atomic_json(path: Path, value: object) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with temporary.open("w", encoding="utf-8") as stream:
+        json.dump(value, stream, sort_keys=True, indent=2, ensure_ascii=False)
+        stream.write("\n")
+        stream.flush()
+        os.fsync(stream.fileno())
+    os.replace(temporary, path)
 
 
 def _manifest_content_digest(manifest: dict) -> str:
@@ -234,6 +255,178 @@ def build_artifact(
     return artifact
 
 
+def model_accounting_path(identity: str) -> Path:
+    parts = identity.split("/")
+    if len(parts) < 3 or any(part in ("", ".", "..") for part in parts):
+        raise ValueError(f"invalid model accounting identity: {identity!r}")
+    return Path(*parts[:-1], f"{parts[-1]}.json")
+
+
+def build_per_model_artifacts(
+    records,
+    *,
+    hardware: str,
+    source: str,
+    source_manifest_digest: str = "",
+    source_provenance: dict | None = None,
+) -> dict[Path, dict]:
+    artifacts = {}
+    identities = set()
+    for record_name, raw in records:
+        identity, compact = _compact_record(raw, record_name)
+        if identity in identities:
+            raise ValueError(f"duplicate model accounting record: {identity}")
+        identities.add(identity)
+        relative_path = model_accounting_path(identity)
+        if relative_path in artifacts:
+            raise ValueError(f"model accounting path collision: {relative_path}")
+        artifact = {
+            "schema_version": PER_MODEL_SCHEMA_VERSION,
+            "hardware": hardware,
+            "identity": identity,
+            "source": source,
+            "model": compact,
+        }
+        if source_manifest_digest:
+            artifact["source_manifest_digest"] = source_manifest_digest
+        if source_provenance:
+            artifact["source_provenance"] = source_provenance
+        artifacts[relative_path] = artifact
+    if not artifacts:
+        raise ValueError("no model accounting records found")
+    return artifacts
+
+
+def write_per_model_artifacts(
+    output_dir: Path,
+    artifacts: dict[Path, dict],
+    *,
+    prune: bool = False,
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    expected = set(artifacts)
+    destinations = {}
+    for relative_path, artifact in sorted(
+        artifacts.items(), key=lambda item: str(item[0])
+    ):
+        destination = output_dir / relative_path
+        if output_dir.resolve() not in destination.resolve().parents:
+            raise ValueError(f"model accounting path escapes output: {relative_path}")
+        destinations[destination] = artifact
+    stale = []
+    if prune:
+        for path in sorted(output_dir.rglob("*.json")):
+            relative_path = path.relative_to(output_dir)
+            if relative_path not in expected:
+                try:
+                    existing = json.loads(path.read_text(encoding="utf-8"))
+                    identity = existing.get("identity")
+                    is_accounting = (
+                        existing.get("schema_version") == PER_MODEL_SCHEMA_VERSION
+                        and isinstance(identity, str)
+                        and model_accounting_path(identity) == relative_path
+                    )
+                except (OSError, ValueError, json.JSONDecodeError):
+                    is_accounting = False
+                if not is_accounting:
+                    raise ValueError(
+                        f"refusing to prune unrelated JSON file: {path}"
+                    )
+                stale.append(path)
+
+    for destination, artifact in destinations.items():
+        _atomic_json(destination, artifact)
+    if prune:
+        for path in stale:
+            path.unlink()
+        for directory in sorted(
+            (item for item in output_dir.rglob("*") if item.is_dir()),
+            reverse=True,
+        ):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
+
+
+def require_priced_artifacts(artifacts: dict[Path, dict]) -> None:
+    unpriced = sum(
+        artifact["model"]["unpriced_extern_occurrences"]
+        for artifact in artifacts.values()
+    )
+    if unpriced:
+        raise ValueError(
+            f"{unpriced} external-operation occurrences are unpriced; "
+            "refusing to build dashboard accounting"
+        )
+
+
+def load_model_accounting(path: Path) -> dict:
+    """Load a per-model accounting tree, with legacy single-file compatibility."""
+    if path.is_file():
+        accounting = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            accounting.get("schema_version") != SCHEMA_VERSION
+            or not isinstance(accounting.get("models"), dict)
+        ):
+            raise ValueError(f"{path}: unsupported accounting schema")
+        return accounting
+    if not path.is_dir():
+        raise ValueError(f"{path}: model accounting path does not exist")
+
+    models = {}
+    hardware = None
+    source_digests = {}
+    source_names = {}
+    files = sorted(path.rglob("*.json"))
+    if not files:
+        raise ValueError(f"{path}: no per-model accounting files found")
+    for model_file in files:
+        artifact = json.loads(model_file.read_text(encoding="utf-8"))
+        if artifact.get("schema_version") != PER_MODEL_SCHEMA_VERSION:
+            raise ValueError(f"{model_file}: unsupported per-model accounting schema")
+        identity = artifact.get("identity")
+        model = artifact.get("model")
+        file_hardware = artifact.get("hardware")
+        if not isinstance(identity, str) or not identity:
+            raise ValueError(f"{model_file}: missing model identity")
+        if not isinstance(model, dict):
+            raise TypeError(f"{model_file}: model must be an object")
+        if not isinstance(file_hardware, str) or not file_hardware:
+            raise ValueError(f"{model_file}: missing accounting hardware")
+        expected_path = model_accounting_path(identity)
+        if model_file.relative_to(path) != expected_path:
+            raise ValueError(
+                f"{model_file}: path does not match model identity {identity!r}"
+            )
+        compact_identity = "/".join(
+            str(model.get(field, "")) for field in ("suite", "mode", "model")
+        )
+        if compact_identity != identity:
+            raise ValueError(f"{model_file}: model fields do not match identity")
+        if hardware is None:
+            hardware = file_hardware
+        elif _hardware_key(hardware) != _hardware_key(file_hardware):
+            raise ValueError(
+                f"{model_file}: mixed accounting hardware "
+                f"{hardware!r} and {file_hardware!r}"
+            )
+        if identity in models:
+            raise ValueError(f"duplicate model accounting record: {identity}")
+        models[identity] = model
+        source_digests[identity] = str(artifact.get("source_manifest_digest", ""))
+        source_names[identity] = str(artifact.get("source", ""))
+
+    return {
+        "schema_version": PER_MODEL_SCHEMA_VERSION,
+        "hardware": hardware,
+        "source": f"per-model-accounting:{len(models)}",
+        "source_manifest_digest": _canonical_digest(source_digests),
+        "source_digest": _canonical_digest(source_names),
+        "models": models,
+    }
+
+
 def validate_occurrence_manifest(path: Path) -> tuple[dict | None, str]:
     manifest_path = path / "_metadata.json"
     if not manifest_path.is_file():
@@ -289,6 +482,16 @@ def main() -> None:
     )
     parser.add_argument("--hardware")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--prune",
+        action="store_true",
+        help="Remove per-model JSON files that are absent from this complete build",
+    )
+    parser.add_argument(
+        "--allow-unpriced-externs",
+        action="store_true",
+        help="Allow compact records with incomplete external-operation pricing",
+    )
     args = parser.parse_args()
 
     if args.occdir is not None:
@@ -317,34 +520,36 @@ def main() -> None:
     if not hardware or hardware == "None":
         parser.error("accounting hardware is missing")
 
-    artifact = build_artifact(
+    source_provenance = (
+        {
+            key: manifest.get(key)
+            for key in (
+                "better_benchmark_commit",
+                "generated_at",
+                "completed_at",
+                "corpus_digest",
+                "hardware",
+                "priced_extern_points",
+                "failed_extern_points",
+            )
+        }
+        if manifest is not None
+        else None
+    )
+    artifacts = build_per_model_artifacts(
         records,
         hardware=hardware,
         source=source_name,
         source_manifest_digest=manifest_digest,
-        source_provenance=(
-            {
-                key: manifest.get(key)
-                for key in (
-                    "better_benchmark_commit",
-                    "generated_at",
-                    "completed_at",
-                    "corpus_digest",
-                    "hardware",
-                    "priced_extern_points",
-                    "failed_extern_points",
-                )
-            }
-            if manifest is not None
-            else None
-        ),
+        source_provenance=source_provenance,
     )
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(artifact, sort_keys=True, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
-    print(f"Wrote {len(artifact['models'])} models to {args.output}")
+    if not args.allow_unpriced_externs:
+        try:
+            require_priced_artifacts(artifacts)
+        except ValueError as error:
+            parser.error(str(error))
+    write_per_model_artifacts(args.output, artifacts, prune=args.prune)
+    print(f"Wrote {len(artifacts)} per-model files to {args.output}")
 
 
 if __name__ == "__main__":

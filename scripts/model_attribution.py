@@ -606,7 +606,7 @@ def _bench_extern_graph_isolated(
         results: dict[str, float], failures: dict[str, str],
         timeout_s: float = EXTERN_BENCH_TIMEOUT_S,
         max_total_s: float | None = None,
-        device: int | None = None) -> None:
+        device: int | str | None = None) -> None:
     """Parent side: bench `node_names` (from one graph) in a subprocess,
     recording successes into `results[name]` and fatal failures into
     `failures[name]`.

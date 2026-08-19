@@ -1,18 +1,27 @@
 import json
+import sys
 from collections import Counter
+from contextlib import nullcontext
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from scripts.build_model_accounting import validate_occurrence_manifest
 from scripts.generate_occurrence_sidecars import (
     _cache_key,
+    _claim_cache_entries,
     _metadata_validation_error,
     _persist_cache_entries,
+    _release_cuda_memory,
+    _release_owner_claims,
+    _visible_device_selector,
+    _wait_for_cache_entries,
     build_sidecar,
     discover_models,
     generate,
     load_cache,
+    require_complete_extern_pricing,
     sidecar_filename,
 )
 
@@ -52,6 +61,43 @@ def test_cache_rejects_different_environment(tmp_path):
 
     with pytest.raises(ValueError, match="different environment"):
         load_cache(path, {"device_kind": "B200", "torch": "b"})
+
+
+def test_release_cuda_memory_collects_cycles_and_clears_selected_device(
+    monkeypatch,
+):
+    calls = []
+    fake_cuda = SimpleNamespace(
+        is_available=lambda: True,
+        device=lambda device: calls.append(("device", device)) or nullcontext(),
+        empty_cache=lambda: calls.append(("empty_cache",)),
+    )
+    fake_dynamo = SimpleNamespace(reset=lambda: calls.append(("dynamo_reset",)))
+    monkeypatch.setitem(
+        sys.modules, "torch", SimpleNamespace(cuda=fake_cuda, _dynamo=fake_dynamo)
+    )
+    monkeypatch.setattr(
+        "scripts.generate_occurrence_sidecars.gc.collect",
+        lambda: calls.append(("collect",)),
+    )
+
+    _release_cuda_memory(7)
+
+    assert calls == [
+        ("dynamo_reset",),
+        ("collect",),
+        ("device", 7),
+        ("empty_cache",),
+    ]
+
+
+def test_visible_device_selector_preserves_parent_mask(monkeypatch):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "GPU-a,GPU-b")
+
+    assert _visible_device_selector(0) == "GPU-a"
+    assert _visible_device_selector(1) == "GPU-b"
+    with pytest.raises(ValueError, match="outside CUDA_VISIBLE_DEVICES"):
+        _visible_device_selector(2)
 
 
 def test_cache_updates_merge_stale_writers_and_preserve_success(tmp_path):
@@ -105,6 +151,66 @@ def test_cache_updates_merge_stale_writers_and_preserve_success(tmp_path):
     assert set(persisted["entries"]) == {"failed", "first", "second"}
     assert persisted["entries"]["first"]["us"] == 1.0
     assert persisted["entries"]["failed"]["error"] == "new diagnosis"
+
+
+def test_cache_claims_prevent_duplicate_concurrent_benchmarks(tmp_path):
+    path = tmp_path / "cache.json"
+    fingerprint = {"device_kind": "B200"}
+    first = load_cache(path, fingerprint)
+    second = load_cache(path, fingerprint)
+
+    assert _claim_cache_entries(
+        path,
+        first,
+        {"a", "b"},
+        retry_failures=False,
+        owner="first",
+    ) == {"a", "b"}
+    assert (
+        _claim_cache_entries(
+            path,
+            second,
+            {"a", "b"},
+            retry_failures=False,
+            owner="second",
+        )
+        == set()
+    )
+
+    _persist_cache_entries(
+        path,
+        first,
+        {
+            "a": {"target": "a", "signature": "a", "us": 1.0, "error": None},
+            "b": {"target": "b", "signature": "b", "us": 2.0, "error": None},
+        },
+    )
+    _wait_for_cache_entries(
+        path,
+        second,
+        {"a", "b"},
+        timeout_s=0.1,
+    )
+
+    persisted = load_cache(path, fingerprint)
+    assert persisted["claims"] == {}
+    assert set(persisted["entries"]) == {"a", "b"}
+
+
+def test_failed_owner_releases_cache_claims_for_retry(tmp_path):
+    path = tmp_path / "cache.json"
+    fingerprint = {"device_kind": "B200"}
+    first = load_cache(path, fingerprint)
+    second = load_cache(path, fingerprint)
+    assert _claim_cache_entries(
+        path, first, {"a"}, retry_failures=False, owner="first"
+    ) == {"a"}
+
+    _release_owner_claims(path, fingerprint, "first")
+
+    assert _claim_cache_entries(
+        path, second, {"a"}, retry_failures=False, owner="second"
+    ) == {"a"}
 
 
 def test_failed_roundtrip_metadata_is_preserved_as_trace_error(tmp_path):
@@ -184,13 +290,25 @@ def test_generate_writes_complete_manifest_and_resumes(
         "scripts.generate_occurrence_sidecars.inventory_model",
         lambda *_args: inventory,
     )
+    releases = []
+    monkeypatch.setattr(
+        "scripts.generate_occurrence_sidecars._release_cuda_memory",
+        lambda device: releases.append(device),
+    )
+
     def price(_inventory, cache_data, _cache_path, **_kwargs):
-        cache_data["entries"][_cache_key("aten.mm.default", "signature")] = {
-            "target": "aten.mm.default",
-            "signature": "signature",
-            "us": 2.0,
-            "error": None,
-        }
+        _persist_cache_entries(
+            _cache_path,
+            cache_data,
+            {
+                _cache_key("aten.mm.default", "signature"): {
+                    "target": "aten.mm.default",
+                    "signature": "signature",
+                    "us": 2.0,
+                    "error": None,
+                }
+            },
+        )
 
     monkeypatch.setattr("scripts.generate_occurrence_sidecars.price_externs", price)
     output = tmp_path / "occurrences"
@@ -223,6 +341,7 @@ def test_generate_writes_complete_manifest_and_resumes(
     assert manifest["status"] == "complete"
     assert manifest["priced_extern_points"] == 1
     assert manifest["failed_extern_points"] == 0
+    assert releases == [0, 0, 0, 0]
     assert set(manifest["sidecar_digests"]) == {"hf/infer/model"}
     sidecar_path = output / manifest["expected_sidecars"]["hf/infer/model"]
     assert json.loads(sidecar_path.read_text())["source_digest"] == "source"
@@ -251,3 +370,10 @@ def test_generate_requires_resume_for_existing_sidecars(tmp_path):
             resume=False,
             retry_failures=False,
         )
+
+
+def test_incomplete_extern_pricing_is_a_hard_failure():
+    require_complete_extern_pricing({"failed_extern_points": 0})
+
+    with pytest.raises(ValueError, match="3 external-operation points"):
+        require_complete_extern_pricing({"failed_extern_points": 3})
