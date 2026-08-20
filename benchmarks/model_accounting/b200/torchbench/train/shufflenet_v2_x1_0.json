@@ -1,0 +1,166 @@
+{
+  "hardware": "NVIDIA B200",
+  "identity": "torchbench/train/shufflenet_v2_x1_0",
+  "model": {
+    "extern_occurrences": 115,
+    "extern_total_us": 3805.27997110039,
+    "fusible": {
+      "04d85912d998": {
+        "1de4b515": 17,
+        "3e3bfb59": 5,
+        "40fe5864": 1,
+        "48ffb95c": 1,
+        "55bfbbde": 9,
+        "9b2aff10": 7,
+        "b26b998a": 9,
+        "ed385436": 1,
+        "ed3cecdb": 4,
+        "f4a82139": 2,
+        "fb36fdc1": 1
+      },
+      "100a39b686e3": {
+        "896c6bb5": 56
+      },
+      "183b124c731f": {
+        "40a8e8e1": 5,
+        "819a1512": 4,
+        "86433bd5": 1,
+        "8a1d8530": 9
+      },
+      "19ffdb35cc67": {
+        "5b9efb9c": 1
+      },
+      "1ec65e499477": {
+        "0e23e8e0": 1
+      },
+      "33d24326eae6": {
+        "00e34431": 1,
+        "99b3b05e": 1,
+        "b0183d97": 1
+      },
+      "3a61ea52bbe0": {
+        "5a321d75": 1
+      },
+      "41826392af68": {
+        "aa052f71": 1
+      },
+      "42fad1ece813": {
+        "138137a0": 1,
+        "21cf057f": 3,
+        "8cbf400d": 7,
+        "9e46e7dc": 1,
+        "b6bdfd5b": 1,
+        "d1ba5867": 3
+      },
+      "456d637a9bc7": {
+        "3df80ba2": 1
+      },
+      "4b4d0668d167": {
+        "75543dfe": 1
+      },
+      "563676e3726c": {
+        "f0fa1db9": 1
+      },
+      "643db2887a01": {
+        "5556e7e9": 1,
+        "6424a3de": 1,
+        "927aa925": 7,
+        "95bfb998": 3,
+        "c0ea6855": 1,
+        "d8f6241e": 3
+      },
+      "74b57fcc4507": {
+        "ce5d17b1": 1
+      },
+      "77f6be69be60": {
+        "27bd32b1": 1
+      },
+      "789f08ef70ab": {
+        "c8e869b1": 1
+      },
+      "7a2ac1c4841d": {
+        "21cf057f": 5,
+        "8cbf400d": 9,
+        "d1ba5867": 4,
+        "e031939e": 1
+      },
+      "8bb40810003c": {
+        "46c132a4": 1
+      },
+      "92c45aff3580": {
+        "55c2f021": 1
+      },
+      "b12103db1177": {
+        "b0183d97": 2
+      },
+      "b1354c2a333b": {
+        "ce2eb236": 2
+      },
+      "b925d072e497": {
+        "8d158a8e": 1
+      },
+      "c2bf513c1ebf": {
+        "e781aba9": 1
+      },
+      "ccd411f2a45d": {
+        "008a0950": 1,
+        "451cc04f": 1,
+        "5bec99de": 1,
+        "6726be28": 1,
+        "6cf96f8a": 4,
+        "7044ac58": 9,
+        "735b802c": 17,
+        "7662d21d": 9,
+        "8b86722a": 7,
+        "b3ef8e60": 2,
+        "dc135658": 1,
+        "ec247fe7": 5
+      },
+      "e642e2ea37a3": {
+        "24b29630": 1
+      },
+      "e67fddfba074": {
+        "00e34431": 6
+      },
+      "ed4730568670": {
+        "94013926": 2
+      },
+      "f9e4c9d243d2": {
+        "82bc110b": 6
+      },
+      "fd789e584775": {
+        "99b3b05e": 2
+      }
+    },
+    "mode": "train",
+    "model": "shufflenet_v2_x1_0",
+    "suite": "torchbench",
+    "trace_errors": [],
+    "unpriced_extern_occurrences": 0
+  },
+  "schema_version": 2,
+  "source": "occurrences",
+  "source_manifest_digest": "0815e58947c01dcfb346b34eacf60045ed9027d2b8c9beea49cb4805fd6200ce",
+  "source_provenance": {
+    "better_benchmark_commit": "3724b16ed9288e35322bdca186e15b8884691196",
+    "completed_at": "2026-08-19T23:28:20.324382+00:00",
+    "corpus_digest": "34bac6363ed61ad7f98c9dbc99736a2bcbe351c7952d32f57eaebbaf3736a85b",
+    "failed_extern_points": 0,
+    "generated_at": "2026-08-19T23:21:04.492294+00:00",
+    "hardware": {
+      "benchmark_source_digest": "ad703e72b19c0ea893472d2432f8b7e75b0852699c1c0547af17b735ea37e5fd",
+      "benchmark_version": 1,
+      "compute_capability": "10.0",
+      "cuda_driver": "580.173.02",
+      "cuda_runtime": "13.0",
+      "device_kind": "B200",
+      "device_name": "NVIDIA B200",
+      "method": "cudagraph_replay_min",
+      "repetitions": 50,
+      "torch_git_version": "7cfd797a696a98317641792f4964c9898d5d93ad",
+      "torch_version": "2.15.0a0+git7cfd797",
+      "warmup": 10
+    },
+    "priced_extern_points": 2678
+  }
+}

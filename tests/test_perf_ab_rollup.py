@@ -1,3 +1,4 @@
+import hashlib
 import json
 import subprocess
 import sys
@@ -6,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from scripts.perf_ab_rollup import (
+    _occurrence_sidecars,
     cut,
     fusible_kernel_summary,
     kernel_mover_summary,
@@ -45,6 +47,60 @@ def write_occurrence(
             }
         )
     )
+
+
+def test_occurrence_manifest_rejects_incomplete_and_stale_runs(tmp_path):
+    sidecar = tmp_path / "model.json"
+    sidecar.write_text("{}")
+    manifest = {
+        "schema_version": 1,
+        "status": "incomplete",
+        "expected_sidecars": {"hf/infer/model": "model.json"},
+        "sidecar_digests": {
+            "hf/infer/model": hashlib.sha256(b"{}").hexdigest()
+        },
+    }
+    (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
+
+    with pytest.raises(ValueError, match="not complete"):
+        _occurrence_sidecars(tmp_path)
+
+    manifest["status"] = "complete"
+    manifest["expected_sidecars"]["hf/infer/stale"] = "stale.json"
+    manifest["sidecar_digests"]["hf/infer/stale"] = "unused"
+    (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="does not match"):
+        _occurrence_sidecars(tmp_path)
+
+
+def test_occurrence_manifest_rejects_modified_sidecar(tmp_path):
+    sidecar = tmp_path / "model.json"
+    sidecar.write_text(
+        json.dumps({"model": "original", "trace_errors": ["stride mismatch → retry"]}),
+        encoding="utf-8",
+    )
+    identity = "hf/infer/model"
+    digest = hashlib.sha256(
+        json.dumps(
+            json.loads(sidecar.read_text(encoding="utf-8")),
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=False,
+        ).encode()
+    ).hexdigest()
+    manifest = {
+        "schema_version": 1,
+        "status": "complete",
+        "expected_sidecars": {identity: sidecar.name},
+        "sidecar_digests": {identity: digest},
+    }
+    (tmp_path / "_metadata.json").write_text(json.dumps(manifest))
+
+    assert _occurrence_sidecars(tmp_path) == [sidecar]
+
+    sidecar.write_text(json.dumps({"model": "modified"}), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match manifest digest"):
+        _occurrence_sidecars(tmp_path)
 
 
 def test_explicit_timing_axes_do_not_fall_back_and_auto_is_compatible(tmp_path):

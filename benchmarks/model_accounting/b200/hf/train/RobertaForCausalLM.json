@@ -1,0 +1,237 @@
+{
+  "hardware": "NVIDIA B200",
+  "identity": "hf/train/RobertaForCausalLM",
+  "model": {
+    "extern_occurrences": 295,
+    "extern_total_us": 15640.224073082209,
+    "fusible": {
+      "013b789f83b8": {
+        "8ae0f618": 1
+      },
+      "04d85912d998": {
+        "2ddc1bad": 49,
+        "5a62163f": 12,
+        "6393d8ae": 12
+      },
+      "106cb6ed6885": {
+        "243d7832": 1
+      },
+      "11df982f906b": {
+        "243d7832": 1
+      },
+      "139a3020e8bf": {
+        "05a5e903": 12
+      },
+      "161752724969": {
+        "8ae0f618": 1
+      },
+      "199240d27571": {
+        "02c9dc6d": 1
+      },
+      "1c8a151acad6": {
+        "243d7832": 1
+      },
+      "21faaccf749d": {
+        "ca0eabd2": 1
+      },
+      "23294968b555": {
+        "243d7832": 1
+      },
+      "255caf07ee83": {
+        "d20f46e2": 12
+      },
+      "260a107eaf32": {
+        "9846b7f2": 12
+      },
+      "2655cc8a0790": {
+        "8ae0f618": 1
+      },
+      "292acd4e7428": {
+        "243d7832": 1
+      },
+      "2aec3d12d3d5": {
+        "020b9e29": 1
+      },
+      "2da2cb2a9aeb": {
+        "243d7832": 1
+      },
+      "2f4a2365eba8": {
+        "c6b0f684": 12
+      },
+      "30cded63a2f9": {
+        "8ae0f618": 1
+      },
+      "31d568179350": {
+        "243d7832": 1
+      },
+      "3260131881b0": {
+        "243d7832": 1
+      },
+      "331f3c87e4d8": {
+        "243d7832": 1
+      },
+      "3342ba469382": {
+        "279c055a": 1
+      },
+      "34ccb88507ce": {
+        "8ae0f618": 1
+      },
+      "38f166201359": {
+        "243d7832": 1
+      },
+      "414d63e6d542": {
+        "243d7832": 1
+      },
+      "47eaf3cbeb9b": {
+        "243d7832": 1
+      },
+      "4a1fb62e29b0": {
+        "c1e38d67": 11
+      },
+      "4d561d6ce269": {
+        "7fadcbae": 1
+      },
+      "5140dfbeba32": {
+        "243d7832": 1
+      },
+      "52903d400fef": {
+        "68a9ca47": 1
+      },
+      "52aa132fd273": {
+        "d20f46e2": 12
+      },
+      "52fe1925ccda": {
+        "6ce50a53": 1
+      },
+      "569bba0f4f68": {
+        "8ae0f618": 1
+      },
+      "577af7e1e84b": {
+        "8ae0f618": 1
+      },
+      "58ccf001855a": {
+        "8ae0f618": 1
+      },
+      "5c3555859171": {
+        "8ae0f618": 1
+      },
+      "6a7f72eec85a": {
+        "243d7832": 1
+      },
+      "6bcd7f175f83": {
+        "8ae0f618": 1
+      },
+      "6d8612892024": {
+        "79d7858b": 1
+      },
+      "76fb9946e296": {
+        "c6b0f684": 12
+      },
+      "77263211d169": {
+        "243d7832": 1
+      },
+      "7cb726f1f92d": {
+        "06af09d8": 1
+      },
+      "826ea0b5f6e4": {
+        "92efc45e": 12
+      },
+      "8799151bd693": {
+        "243d7832": 1
+      },
+      "890c673522ec": {
+        "243d7832": 1
+      },
+      "8bb40810003c": {
+        "44a2434c": 12,
+        "ae9f1068": 12,
+        "f5f85987": 49
+      },
+      "8cc7ad505f35": {
+        "26cc4258": 1
+      },
+      "8db0f751a574": {
+        "d02283d5": 11
+      },
+      "9b7df2917dda": {
+        "14a5f5ad": 1
+      },
+      "a158b001a93f": {
+        "243d7832": 1
+      },
+      "a678817dc522": {
+        "243d7832": 1
+      },
+      "ad769fcbdaca": {
+        "243d7832": 1
+      },
+      "b193afd50ebd": {
+        "243d7832": 1
+      },
+      "b3bc5f490215": {
+        "8ae0f618": 1
+      },
+      "b52cf3fd9807": {
+        "243d7832": 1
+      },
+      "bdf875eb35d3": {
+        "243d7832": 1
+      },
+      "c0d19d490a2f": {
+        "d20f46e2": 12
+      },
+      "c8d23ac4414d": {
+        "d59edba9": 1
+      },
+      "ccd411f2a45d": {
+        "726421b1": 61,
+        "7a1c483f": 12
+      },
+      "d0cb44a92f6d": {
+        "dca7eb09": 1
+      },
+      "d8be325d48fc": {
+        "243d7832": 1
+      },
+      "dadf1b0b8097": {
+        "d20f46e2": 12
+      },
+      "e87d6ebc9ded": {
+        "c6b0f684": 12
+      },
+      "f3f44f50fa4d": {
+        "17865e49": 12
+      }
+    },
+    "mode": "train",
+    "model": "RobertaForCausalLM",
+    "suite": "hf",
+    "trace_errors": [],
+    "unpriced_extern_occurrences": 0
+  },
+  "schema_version": 2,
+  "source": "occurrences",
+  "source_manifest_digest": "0815e58947c01dcfb346b34eacf60045ed9027d2b8c9beea49cb4805fd6200ce",
+  "source_provenance": {
+    "better_benchmark_commit": "3724b16ed9288e35322bdca186e15b8884691196",
+    "completed_at": "2026-08-19T23:28:20.324382+00:00",
+    "corpus_digest": "34bac6363ed61ad7f98c9dbc99736a2bcbe351c7952d32f57eaebbaf3736a85b",
+    "failed_extern_points": 0,
+    "generated_at": "2026-08-19T23:21:04.492294+00:00",
+    "hardware": {
+      "benchmark_source_digest": "ad703e72b19c0ea893472d2432f8b7e75b0852699c1c0547af17b735ea37e5fd",
+      "benchmark_version": 1,
+      "compute_capability": "10.0",
+      "cuda_driver": "580.173.02",
+      "cuda_runtime": "13.0",
+      "device_kind": "B200",
+      "device_name": "NVIDIA B200",
+      "method": "cudagraph_replay_min",
+      "repetitions": 50,
+      "torch_git_version": "7cfd797a696a98317641792f4964c9898d5d93ad",
+      "torch_version": "2.15.0a0+git7cfd797",
+      "warmup": 10
+    },
+    "priced_extern_points": 2678
+  }
+}

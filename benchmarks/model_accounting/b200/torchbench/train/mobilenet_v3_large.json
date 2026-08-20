@@ -1,0 +1,290 @@
+{
+  "hardware": "NVIDIA B200",
+  "identity": "torchbench/train/mobilenet_v3_large",
+  "model": {
+    "extern_occurrences": 130,
+    "extern_total_us": 2642.687995452434,
+    "fusible": {
+      "04d85912d998": {
+        "02b08269": 1,
+        "03b4a772": 2,
+        "047f3e89": 1,
+        "0539fdea": 1,
+        "0b93ff3c": 2,
+        "0ec57a61": 1,
+        "1238c69e": 1,
+        "1de45ad1": 3,
+        "1e23135c": 1,
+        "216dece3": 3,
+        "24aebc95": 1,
+        "2ce6048d": 1,
+        "3047d934": 2,
+        "32a02f3d": 1,
+        "4b053b17": 2,
+        "4fd1884d": 1,
+        "5065e963": 1,
+        "5ba2cfc0": 2,
+        "5c274eea": 1,
+        "658a0097": 2,
+        "6b167218": 2,
+        "6cc3da18": 1,
+        "6e52b66f": 2,
+        "6f3a310a": 2,
+        "83350839": 2,
+        "90187e0c": 1,
+        "9357c095": 1,
+        "a0bc4be4": 1,
+        "b783e2ae": 2,
+        "c2b68c3e": 2,
+        "c39d875c": 1,
+        "cc408ab6": 1,
+        "cc85f631": 1,
+        "ce11835b": 1,
+        "daba876c": 2,
+        "db6f45ba": 1,
+        "dcb43c99": 2,
+        "deaf11e8": 1,
+        "df3dbe38": 1,
+        "e875c188": 2,
+        "efa63a42": 1,
+        "f3c583c2": 1,
+        "f7f61ba5": 1,
+        "fb48e60c": 2
+      },
+      "100a39b686e3": {
+        "896c6bb5": 46
+      },
+      "12bce2738ed4": {
+        "a7c9263b": 1
+      },
+      "183b124c731f": {
+        "3ab290cb": 1,
+        "4248d2e3": 1,
+        "7ef2067a": 1,
+        "805fe5b3": 1,
+        "ba1f5763": 1,
+        "c37e4be5": 1
+      },
+      "245fc9d79aad": {
+        "26a83dcc": 1,
+        "3468f7bd": 1,
+        "50dc27bc": 2,
+        "d6f080d2": 1
+      },
+      "26237066094b": {
+        "7088b6e2": 1
+      },
+      "29c472896711": {
+        "c7ec772c": 1
+      },
+      "38b494b9c61a": {
+        "239d1349": 2,
+        "6425bce8": 1,
+        "64645353": 1,
+        "e7e0ad11": 1
+      },
+      "3a94a106616a": {
+        "e8a9d13a": 1
+      },
+      "3ab1da5a9e6c": {
+        "8f42374e": 1,
+        "a6881a60": 2
+      },
+      "3abc926270f6": {
+        "3ba76078": 2,
+        "6b167218": 1,
+        "7eaaa5e5": 2,
+        "c763255d": 1,
+        "cc570918": 2
+      },
+      "3eee452cee40": {
+        "90e96d75": 1,
+        "9542f2d8": 2,
+        "9b1311e4": 2,
+        "d0c4278a": 1,
+        "e9945fee": 1,
+        "ec0b4267": 4,
+        "fab0dcaa": 2
+      },
+      "3f4aa90365fa": {
+        "8aafc432": 1,
+        "ba044ce1": 1,
+        "d3bf7421": 1,
+        "e8a9d13a": 2
+      },
+      "42fad1ece813": {
+        "00cca0ad": 2,
+        "22d6d5c7": 1,
+        "5e2cd32b": 1,
+        "7dc93580": 1,
+        "e85936d9": 3
+      },
+      "522de516d7b7": {
+        "4e453d00": 1,
+        "531cd9bd": 4,
+        "5e2cd32b": 1,
+        "76491bca": 2,
+        "85aaacf2": 1,
+        "8aafc432": 2,
+        "ba044ce1": 1,
+        "e8a9d13a": 2
+      },
+      "5a22dd21d88e": {
+        "007d658d": 2,
+        "16c9375e": 1,
+        "1e3428af": 2,
+        "7cea4043": 3,
+        "82eff7d5": 1,
+        "dcb799ef": 1
+      },
+      "643db2887a01": {
+        "399d5934": 3,
+        "52ba495d": 1,
+        "7fe614dc": 1,
+        "a38f76ef": 2,
+        "ae27c8fd": 1
+      },
+      "7a2ac1c4841d": {
+        "0fbf9a67": 1,
+        "1a8507ca": 1,
+        "b3e3f5ef": 1,
+        "b9d86480": 1,
+        "fc44e6c2": 1
+      },
+      "7cfdb80c54c5": {
+        "48c0f941": 2,
+        "af287ed4": 1,
+        "bb80badd": 1,
+        "c56de08d": 2,
+        "e2abc8eb": 1
+      },
+      "894f3180f3c4": {
+        "864b3c6f": 1,
+        "cf15f756": 2,
+        "f35ade00": 1
+      },
+      "8bb40810003c": {
+        "5617a165": 1,
+        "7cfcfe39": 1
+      },
+      "a58657212bf4": {
+        "0dc5b6bd": 1,
+        "864b3c6f": 1,
+        "cf15f756": 1,
+        "f35ade00": 1,
+        "f63ebc76": 1
+      },
+      "ba870b00a0b3": {
+        "0c85aae0": 1,
+        "38d11fef": 1,
+        "be7a1f98": 2,
+        "d7edb67c": 2,
+        "f76fad38": 1,
+        "f9969da7": 1
+      },
+      "c2bf513c1ebf": {
+        "4b6198d7": 1
+      },
+      "c98413eb2743": {
+        "00cca0ad": 2,
+        "b7fea7d6": 1
+      },
+      "ccd411f2a45d": {
+        "0073e107": 2,
+        "029b2ffc": 2,
+        "03c404af": 2,
+        "069511b6": 2,
+        "118ea6bc": 2,
+        "11b53ced": 3,
+        "19b504d4": 1,
+        "1ef5a22a": 1,
+        "211473d3": 1,
+        "359b1709": 3,
+        "36e93be8": 2,
+        "3f9a27a3": 2,
+        "45d2acd6": 2,
+        "4d28ec9d": 1,
+        "544f0b36": 1,
+        "6235682d": 2,
+        "62fc72a8": 1,
+        "654bfd80": 1,
+        "669ded90": 2,
+        "6bc2a838": 2,
+        "6fbb626c": 1,
+        "7036bd6b": 1,
+        "751bd4ae": 1,
+        "7f1e6805": 2,
+        "837c7bad": 2,
+        "83890eeb": 2,
+        "8960c5a6": 1,
+        "8ea47b2a": 1,
+        "92a6b7cc": 2,
+        "9875e770": 2,
+        "9a6374d9": 1,
+        "9dc6f46e": 1,
+        "a0bf2e69": 2,
+        "aa684dc7": 2,
+        "aed6c070": 1,
+        "b3e60402": 1,
+        "bdcfbdb8": 1,
+        "c8763cd5": 1,
+        "cbcfb3ff": 1,
+        "cd8a7a1b": 1,
+        "cf8e1b2f": 1,
+        "d3c3b581": 1,
+        "db80c8d7": 2,
+        "dc135658": 1,
+        "dcb5fb85": 2,
+        "e1054827": 1,
+        "e1920811": 2,
+        "ecc00eb8": 3,
+        "ee4ffd61": 1,
+        "eecc0939": 1,
+        "eecf42f8": 1,
+        "f763fd93": 1,
+        "f9ebe6cb": 1,
+        "fae56879": 1
+      },
+      "d49b2da97323": {
+        "040ff6c3": 1
+      },
+      "d6239b8319dc": {
+        "f4357794": 1
+      },
+      "e681bc3d9d59": {
+        "0e83eb42": 2,
+        "c557d2c1": 1
+      }
+    },
+    "mode": "train",
+    "model": "mobilenet_v3_large",
+    "suite": "torchbench",
+    "trace_errors": [],
+    "unpriced_extern_occurrences": 0
+  },
+  "schema_version": 2,
+  "source": "occurrences",
+  "source_manifest_digest": "0815e58947c01dcfb346b34eacf60045ed9027d2b8c9beea49cb4805fd6200ce",
+  "source_provenance": {
+    "better_benchmark_commit": "3724b16ed9288e35322bdca186e15b8884691196",
+    "completed_at": "2026-08-19T23:28:20.324382+00:00",
+    "corpus_digest": "34bac6363ed61ad7f98c9dbc99736a2bcbe351c7952d32f57eaebbaf3736a85b",
+    "failed_extern_points": 0,
+    "generated_at": "2026-08-19T23:21:04.492294+00:00",
+    "hardware": {
+      "benchmark_source_digest": "ad703e72b19c0ea893472d2432f8b7e75b0852699c1c0547af17b735ea37e5fd",
+      "benchmark_version": 1,
+      "compute_capability": "10.0",
+      "cuda_driver": "580.173.02",
+      "cuda_runtime": "13.0",
+      "device_kind": "B200",
+      "device_name": "NVIDIA B200",
+      "method": "cudagraph_replay_min",
+      "repetitions": 50,
+      "torch_git_version": "7cfd797a696a98317641792f4964c9898d5d93ad",
+      "torch_version": "2.15.0a0+git7cfd797",
+      "warmup": 10
+    },
+    "priced_extern_points": 2678
+  }
+}

@@ -1,0 +1,226 @@
+{
+  "hardware": "NVIDIA B200",
+  "identity": "timm/train/adv_inception_v3",
+  "model": {
+    "extern_occurrences": 191,
+    "extern_total_us": 11073.600095696747,
+    "fusible": {
+      "04d85912d998": {
+        "01c4aa98": 2,
+        "051349d0": 1,
+        "0730b368": 2,
+        "11a19ca8": 3,
+        "12d8ef02": 2,
+        "215c452d": 1,
+        "25f8f618": 1,
+        "2db5e612": 1,
+        "3070c8f9": 1,
+        "35d516d1": 1,
+        "41dcb802": 3,
+        "448fc025": 4,
+        "49e64e10": 1,
+        "4af17ea6": 4,
+        "5303c1fe": 1,
+        "5e9822c8": 1,
+        "61b56371": 2,
+        "623f8ca6": 12,
+        "795241a6": 1,
+        "7a20422d": 1,
+        "7d884c45": 1,
+        "7de9bd35": 4,
+        "8ffa104a": 4,
+        "97efcb82": 1,
+        "9bddb1bb": 4,
+        "a6a2ae70": 1,
+        "a8a68a04": 1,
+        "ac8858e5": 1,
+        "ae275ccf": 1,
+        "b6cfd6c1": 2,
+        "c180bc3c": 1,
+        "cd35cac8": 4,
+        "ce04aae0": 1,
+        "daa4b0dd": 4,
+        "dff54966": 1,
+        "e3e42cd3": 1,
+        "e79325d8": 2,
+        "eca65597": 4,
+        "efc6a14d": 4,
+        "f5b2301d": 4,
+        "f60754ac": 1,
+        "fd250a48": 1,
+        "ffbae90c": 2
+      },
+      "052b3bc6efa8": {
+        "f00fbabc": 1
+      },
+      "06b536dc906d": {
+        "0acf4a9d": 1
+      },
+      "0e86f1318633": {
+        "22c184d8": 1
+      },
+      "100a39b686e3": {
+        "896c6bb5": 94
+      },
+      "164269af8770": {
+        "13e49e96": 1
+      },
+      "1d1822e90ccc": {
+        "505c1a16": 1,
+        "5b79c9f7": 1
+      },
+      "2d8146dc520a": {
+        "e5f2e3e0": 1
+      },
+      "302622e401f9": {
+        "9b65830c": 1
+      },
+      "42fad1ece813": {
+        "0d2cf849": 1,
+        "2534b995": 6,
+        "371d495a": 4,
+        "5921a507": 10,
+        "652894ae": 4,
+        "8913da8d": 4,
+        "8e6a7889": 2,
+        "9514c47f": 1,
+        "bdbc3e2e": 12,
+        "bf947a21": 1,
+        "cf977d52": 3
+      },
+      "643db2887a01": {
+        "06c9e96f": 2,
+        "257ba105": 1,
+        "2cd54028": 1,
+        "401c4c35": 10,
+        "67158ff7": 1,
+        "741c33e1": 4,
+        "75b1771b": 3,
+        "9d64073a": 12,
+        "a5b95268": 6,
+        "dfd393d3": 4
+      },
+      "6a8cdea856dd": {
+        "33ee22dc": 4
+      },
+      "72ccaeb6654a": {
+        "a91d4c93": 1
+      },
+      "77aa028cea27": {
+        "28b80430": 1,
+        "c9aa364e": 3,
+        "d0d42d59": 1
+      },
+      "77f93c745c34": {
+        "1de9bf8b": 1
+      },
+      "7bfe496f3aa5": {
+        "32cbe7ad": 1
+      },
+      "7d7f5082453e": {
+        "83737dd9": 1
+      },
+      "7ea3cfe27698": {
+        "71ddf97f": 1
+      },
+      "8a8261a3607b": {
+        "c9aa364e": 1,
+        "d0d42d59": 1
+      },
+      "8bb40810003c": {
+        "0cf39344": 1
+      },
+      "8d5cb645d3bf": {
+        "13e49e96": 1
+      },
+      "92943d6eae4c": {
+        "9eb75afe": 3
+      },
+      "bb06617cadbd": {
+        "0d731111": 1
+      },
+      "c2bf513c1ebf": {
+        "e781aba9": 1
+      },
+      "ccd411f2a45d": {
+        "03619f5c": 1,
+        "0f5962f8": 2,
+        "1107e53a": 1,
+        "1771f8ae": 1,
+        "2a4bc6ce": 1,
+        "2a7286a7": 4,
+        "2bb21f32": 1,
+        "307745fe": 1,
+        "3183d98f": 4,
+        "31df5182": 4,
+        "3e4875e5": 1,
+        "42eef497": 1,
+        "43dd5e7c": 2,
+        "454b090e": 1,
+        "47413ffa": 2,
+        "4ae4b613": 1,
+        "58fc684a": 4,
+        "5d7c691a": 3,
+        "6502eacf": 1,
+        "659534a4": 1,
+        "6827cae5": 2,
+        "68f5632d": 4,
+        "6f1015b4": 3,
+        "710298ff": 1,
+        "762bc05c": 1,
+        "7673240e": 1,
+        "7db96956": 1,
+        "7dbe4864": 1,
+        "8365a56e": 12,
+        "94e4c343": 1,
+        "9bae9df9": 4,
+        "9cdc0f60": 1,
+        "a3ab8648": 4,
+        "ac007048": 4,
+        "b2efc93a": 4,
+        "baa2565a": 1,
+        "ce0d6f32": 2,
+        "d61d71f7": 1,
+        "dc135658": 1,
+        "de6fb673": 2,
+        "e41c8f2d": 1,
+        "e4b311d4": 4,
+        "ebd52f0a": 1,
+        "ed597ce8": 2
+      },
+      "f34efcbb8bb7": {
+        "32065934": 1
+      }
+    },
+    "mode": "train",
+    "model": "adv_inception_v3",
+    "suite": "timm",
+    "trace_errors": [],
+    "unpriced_extern_occurrences": 0
+  },
+  "schema_version": 2,
+  "source": "occurrences",
+  "source_manifest_digest": "0815e58947c01dcfb346b34eacf60045ed9027d2b8c9beea49cb4805fd6200ce",
+  "source_provenance": {
+    "better_benchmark_commit": "3724b16ed9288e35322bdca186e15b8884691196",
+    "completed_at": "2026-08-19T23:28:20.324382+00:00",
+    "corpus_digest": "34bac6363ed61ad7f98c9dbc99736a2bcbe351c7952d32f57eaebbaf3736a85b",
+    "failed_extern_points": 0,
+    "generated_at": "2026-08-19T23:21:04.492294+00:00",
+    "hardware": {
+      "benchmark_source_digest": "ad703e72b19c0ea893472d2432f8b7e75b0852699c1c0547af17b735ea37e5fd",
+      "benchmark_version": 1,
+      "compute_capability": "10.0",
+      "cuda_driver": "580.173.02",
+      "cuda_runtime": "13.0",
+      "device_kind": "B200",
+      "device_name": "NVIDIA B200",
+      "method": "cudagraph_replay_min",
+      "repetitions": 50,
+      "torch_git_version": "7cfd797a696a98317641792f4964c9898d5d93ad",
+      "torch_version": "2.15.0a0+git7cfd797",
+      "warmup": 10
+    },
+    "priced_extern_points": 2678
+  }
+}

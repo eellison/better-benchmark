@@ -9,6 +9,7 @@ or approximate model estimates are listed but excluded from aggregate results.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import statistics
@@ -180,9 +181,12 @@ def _weighted_add(total: float, value: float, count: int, context: str) -> float
 
 
 def _load_occurrence_record(path: Path) -> dict:
-    record = json.loads(path.read_text())
+    record = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(record, dict):
         raise ValueError(f"{path}: occurrence sidecar must be an object")
+    schema_version = record.get("schema_version")
+    if schema_version is not None and schema_version != 1:
+        raise ValueError(f"{path}: unsupported occurrence schema {schema_version}")
     for field in ("suite", "mode", "model"):
         if not isinstance(record.get(field), str) or not record[field]:
             raise ValueError(f"{path}: missing non-empty {field}")
@@ -197,6 +201,44 @@ def _load_occurrence_record(path: Path) -> dict:
     return record
 
 
+def _occurrence_sidecars(occdir: Path) -> list[Path]:
+    sidecars = sorted(
+        path for path in Path(occdir).glob("*.json") if not path.name.startswith("_")
+    )
+    manifest_path = Path(occdir) / "_metadata.json"
+    if not manifest_path.is_file():
+        return sidecars
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("schema_version") != 1:
+        raise ValueError(f"{manifest_path}: unsupported schema version")
+    if manifest.get("status") != "complete":
+        raise ValueError(f"{manifest_path}: generation is not complete")
+    expected = manifest.get("expected_sidecars")
+    digests = manifest.get("sidecar_digests")
+    if not isinstance(expected, dict) or not isinstance(digests, dict):
+        raise ValueError(f"{manifest_path}: missing sidecar inventory")
+    expected_paths = sorted(Path(occdir) / filename for filename in expected.values())
+    if expected_paths != sidecars:
+        raise ValueError(
+            f"{manifest_path}: sidecar inventory does not match output directory"
+        )
+    if set(expected) != set(digests):
+        raise ValueError(f"{manifest_path}: missing sidecar digests")
+    for identity, filename in expected.items():
+        sidecar = Path(occdir) / filename
+        digest = hashlib.sha256(
+            json.dumps(
+                json.loads(sidecar.read_text(encoding="utf-8")),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            ).encode()
+        ).hexdigest()
+        if digest != digests[identity]:
+            raise ValueError(f"{sidecar}: content does not match manifest digest")
+    return sidecars
+
+
 def rollup_models(
     base_path: Path,
     head_path: Path,
@@ -207,9 +249,7 @@ def rollup_models(
     base, head, representatives = paired_arms(base_path, head_path, timing)
     models = {}
     per_model_coverage = {}
-    sidecars = sorted(
-        path for path in Path(occdir).glob("*.json") if not path.name.startswith("_")
-    )
+    sidecars = _occurrence_sidecars(occdir)
     if not sidecars:
         raise ValueError(f"no occurrence sidecars found in {occdir}")
 

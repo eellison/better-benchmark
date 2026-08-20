@@ -3,6 +3,7 @@ import inspect
 import json
 import operator
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -42,6 +43,7 @@ from full_graph_harness import (
     write_full_graph_metadata,
 )
 from input_codec import spec_from_compact
+import model_attribution
 from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
 
 
@@ -1457,6 +1459,31 @@ def test_gpu_lock_detects_dead_pid_metadata_while_blocked():
             gpu_lock_module.STALE_LOCK_GRACE_S = old_stale_grace
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
+
+
+def test_extern_benchmark_timeout_is_recorded(monkeypatch):
+    captured = {}
+
+    def timeout(*_args, **kwargs):
+        captured.update(kwargs)
+        raise subprocess.TimeoutExpired(["python"], timeout=0.01)
+
+    monkeypatch.setattr(model_attribution.subprocess, "run", timeout)
+    results = {}
+    failures = {}
+
+    model_attribution._bench_extern_graph_isolated(
+        "full_graph_000.py",
+        ["extern"],
+        results,
+        failures,
+        timeout_s=0.01,
+        device=3,
+    )
+
+    assert results == {}
+    assert failures["extern"].startswith("standalone benchmark timed out after ")
+    assert captured["env"]["CUDA_VISIBLE_DEVICES"] == "3"
 
 
 if __name__ == "__main__":
