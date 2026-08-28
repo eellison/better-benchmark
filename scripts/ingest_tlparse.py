@@ -17,8 +17,6 @@ Usage:
     python scripts/ingest_tlparse.py --run-id 25956360525 --list-only
 """
 import argparse
-import importlib.util
-import json
 import math
 import os
 import subprocess
@@ -28,6 +26,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+
+from saved_graph_replay import (  # noqa: E402
+    _build_symbolic_inputs,
+    _sidecar_symbol_hints,
+    _specs_have_symbols,
+)
 
 
 def download_tlparse(run_id: int, suite: str | None, output_dir: Path) -> Path:
@@ -423,6 +427,38 @@ def load_graph_module(graph_path: Path):
                 ) + 1
                 return make_base((storage_size,)).as_strided(shape, stride)
             return make_base(shape)
+
+        # FAITHFUL DYNAMIC RECAPTURE (idempotence): a saved full graph whose
+        # forward annotations carry symbolic dims/symints (e.g. arg4_1:
+        # "f32[64,64,s16,s82][64*s16*s82,...]" + arg2_1:"Sym(s16)") must be
+        # re-traced SYMBOLICALLY, with the symint inputs sharing the SAME
+        # symbols as the tensor dynamic dims — else make_fx(real) bakes them to
+        # their hints and a dynamic graph recaptures as a STATIC region
+        # (frozen dims + lifted _shape_param const list). The lossy local
+        # annotation parser collapses s16->hint and strides->garbage, so use
+        # full_graph_harness.parse_full_graph_inputs (keeps symbol names +
+        # exprs) and reconstruct shared ShapeEnv symbols. Static graphs (no
+        # symbolic spec) keep the original real-mode path untouched.
+        from full_graph_harness import parse_full_graph_inputs
+        dyn_specs = parse_full_graph_inputs(content)
+        if dyn_specs and _specs_have_symbols(dyn_specs):
+            sym_inputs = _build_symbolic_inputs(
+                dyn_specs, dev, _sidecar_symbol_hints(graph_path))
+            if sym_inputs is not None:
+                fake_mode, inputs = sym_inputs
+                with fake_mode:
+                    gm = make_fx(instance, tracing_mode="symbolic")(*inputs)
+                return gm
+            # A dynamic graph whose symbolic rebuild failed (an unresolved
+            # symbol, or an expr outside the closed grammar) must NOT
+            # recapture as static: a static recapture of a dynamic family
+            # silently corrupts point/family identity and breaks
+            # f(f(x)) == f(x). FAIL the ingestion instead — a skipped graph
+            # is visible and recoverable, a wrong recapture is neither.
+            print(f"  ERROR: {graph_path.name} carries symbolic inputs but "
+                  f"symbolic rebuild failed (unresolved symbol/expr) — "
+                  f"refusing to recapture a dynamic graph as static")
+            return None
 
         inputs = []
         for raw_spec in input_shapes:
