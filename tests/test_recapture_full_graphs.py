@@ -401,6 +401,118 @@ class RecaptureFullGraphsTests(unittest.TestCase):
             )
             self.assertIsNone(load_graph_module(graph))
 
+    def test_dynamic_full_graph_partitions_and_repro_reuses_artifact(self):
+        """Run both execution surfaces through one serialized contract.
+
+        The saved full graph must reuse one dynamic artifact at two points;
+        after partitioning, the generated individual repro must do the same
+        and produce the same values. This covers the seam that the loader
+        idempotence and repro-only benchmark tests exercise separately.
+        """
+        import importlib.util
+        import json
+        import torch
+
+        from dynamic_shape_replay import (
+            _backed_args,
+            _backed_replay_plan_for_repro,
+            _backed_repro,
+        )
+        from full_graph_harness import prepare_full_graph_execution
+        from repro_harness import load_shape_configs
+
+        tmp = Path(tempfile.mkdtemp(prefix="full_graph_to_repro_exec_"))
+        models_root = tmp / "repros" / "models"
+        graph = (
+            models_root
+            / "torchbench"
+            / "infer"
+            / "m"
+            / "full_graph_000.py"
+        )
+        _write(graph, FULL_GRAPH_SYM_POINTWISE)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 2,
+            "inputs": [
+                ["I", 2, "s0"],
+                [[2, "s0"], "f32", {"dev": "cpu"}],
+            ],
+            "outputs": [[[2, "s0"], "f32", {"dev": "cpu"}]],
+            "tensor_attrs": {},
+            "symbols": {"s0": {"hint": 2, "range": [2, None]}},
+            "guards": [],
+            "captured_dynamic": True,
+        }))
+
+        def backend_recorder(graphs):
+            def backend(gm, _inputs):
+                graphs.append(gm)
+                return gm.forward
+            return backend
+
+        def output_tensor(output):
+            return output[0] if isinstance(output, tuple) else output
+
+        # Surface 1: the saved full graph itself.
+        full_execution = prepare_full_graph_execution(
+            graph, default_device="cpu")
+        full_graphs = []
+        full_compiled = torch.compile(
+            full_execution.module,
+            backend=backend_recorder(full_graphs),
+        )
+        expected = {}
+        for size in (2, 4):
+            args = full_execution.args({"s0": size})
+            args[0].copy_(
+                torch.arange(2 * size, dtype=args[0].dtype).reshape(2, size))
+            expected[size] = output_tensor(full_compiled(*args)).detach().cpu()
+        self.assertEqual(len(full_graphs), 1)
+        torch._dynamo.reset()
+
+        # Partition the symbolically reloaded graph into a canonical repro.
+        gm = load_graph_module(graph)
+        self.assertIsNotNone(gm)
+        target = recapture.infer_target(graph, models_root=models_root)
+        output_root = tmp / "out"
+        recapture.process_graph_for_target(
+            gm, target, output_root, validate=True)
+        repro_dirs = list((output_root / "canonical").iterdir())
+        self.assertEqual(len(repro_dirs), 1)
+        repro_file = repro_dirs[0] / "repro.py"
+
+        module_spec = importlib.util.spec_from_file_location(
+            "_partitioned_dynamic_repro", repro_file)
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+        plan = _backed_replay_plan_for_repro(str(repro_file))
+        self.assertIsNotNone(plan)
+
+        # Surface 2: the generated individual repro.
+        repro_graphs = []
+        repro_compiled = torch.compile(
+            _backed_repro(module.Repro(), plan),
+            backend=backend_recorder(repro_graphs),
+        )
+        for size in (2, 4):
+            config = next(iter(load_shape_configs(
+                str(repro_file),
+                symbol_bindings={"s0": size},
+            ).values()))
+            inputs = module.make_inputs(config)
+            inputs[0].copy_(
+                torch.arange(
+                    2 * size,
+                    dtype=inputs[0].dtype,
+                    device=inputs[0].device,
+                ).reshape(2, size)
+            )
+            actual = output_tensor(
+                repro_compiled(*_backed_args(inputs, plan))).detach().cpu()
+            torch.testing.assert_close(actual, expected[size])
+        self.assertEqual(len(repro_graphs), 1)
+        torch._dynamo.reset()
+
     def test_recapture_is_fixed_point_for_dynamic_graph(self):
         """recapture(recapture(x)) == recapture(x): a dynamic saved graph,
         recaptured twice, yields byte-identical canonical content. Guards the
