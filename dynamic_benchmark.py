@@ -188,8 +188,11 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     compiled = None
     warm_bindings = []
     warm_source = "auto"
-    def artifact_args(inputs, _binding, _config):
+
+    def identity_artifact_args(inputs, _binding, _config):
         return inputs
+
+    artifact_args = identity_artifact_args
     prewarmed = False
 
     if mode == "dynamic" and is_family:
@@ -200,8 +203,10 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             shape_model = _backed_repro(repro_cls(), backed_plan)
             count_dynamic = None  # honor exact mark_dynamic annotations
 
-            def artifact_args(inputs, _binding, _config):
+            def backed_artifact_args(inputs, _binding, _config):
                 return _backed_args(inputs, backed_plan)
+
+            artifact_args = backed_artifact_args
         else:
             (
                 shape_spec,
@@ -219,7 +224,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                 frozen_for_spec,
             )
 
-            def artifact_args(inputs, binding, config):
+            def shape_env_artifact_args(inputs, binding, config):
                 effective = _effective_binding_for_row(binding, config)
                 missing = sorted(set(live_symbol_names) - set(effective))
                 if missing:
@@ -230,6 +235,8 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                     *inputs,
                     *(effective[name] for name in live_symbol_names),
                 ]
+
+            artifact_args = shape_env_artifact_args
 
         warm_bindings, warm_source = warm_bindings_for_family()
 
