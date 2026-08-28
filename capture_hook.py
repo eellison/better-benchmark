@@ -339,10 +339,32 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             _seen_shape_env[0] = se
 
     def _resolve_sym(x):
-        """Resolve SymInt/SymFloat to concrete int/float (the hint)."""
+        """Concrete trace materialization value for symbolic metadata.
+
+        Prefer a genuinely observed unbacked value, then a normal backed hint,
+        then an explicit optimization hint. A final ShapeEnv optimization
+        fallback is only for rendering/validation of the graph template; it is
+        never written as a point binding.
+        """
         if isinstance(x, (torch.SymInt, torch.SymFloat)):
             _note_env(x)
-            return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
+            node = x.node
+            shape_env = node.shape_env
+            expr = node.expr
+            real_vals = getattr(
+                shape_env, "real_tensor_prop_unbacked_vals", {}) or {}
+            if real_vals:
+                replaced = expr.xreplace(real_vals)
+                if getattr(replaced, "is_number", False):
+                    return int(replaced)
+            if node.hint is not None:
+                return node.hint
+            hint_overrides = getattr(
+                shape_env, "var_to_hint_override", {}) or {}
+            replaced = expr.xreplace(hint_overrides)
+            if getattr(replaced, "is_number", False):
+                return int(replaced)
+            return shape_env.optimization_hint(expr, fallback=2)
         return int(x)
 
     def _storage_key(val):
@@ -437,7 +459,7 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                         placeholder_info[name]["_storage_nbytes"] = int(ssz)
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
             _note_env(val)
-            hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
+            hint = _resolve_sym(val)
             placeholder_info[name] = {
                 "shape": [],
                 "stride": [],
@@ -1465,10 +1487,16 @@ class _CaptureState:
         # evaluates back to the captured concrete shape (eager validation +
         # signature rendering both need concrete ints).
         shape_param_exprs = (shape_env_block or {}).get("shape_param_exprs", {})
+        symbols = (shape_env_block or {}).get("symbols", {})
+        from input_codec import _symbol_point_value
         hint_bindings = {
-            n: s["hint"]
-            for n, s in (shape_env_block or {}).get("symbols", {}).items()
+            name: value
+            for name, definition in symbols.items()
+            if isinstance(
+                (value := _symbol_point_value(definition)), int)
+            and not isinstance(value, bool)
         }
+        complete_observed_binding = set(hint_bindings) == set(symbols)
         code = gm.print_readable(print_output=False)
         import re as _re
         code = _re.sub(r"^class \S+\(torch\.nn\.Module\):",
@@ -1698,7 +1726,17 @@ class _CaptureState:
                         # Live symint input: ['I', hint, expr] (NOT the old
                         # S([hint]) conflation that returned a list where the
                         # graph needs an int).
-                        compact_inputs.append(["I", info.get("hint", 1), expr])
+                        from input_codec import _sympify_expr
+                        expr_names = {
+                            symbol.name
+                            for symbol in _sympify_expr(expr).free_symbols
+                        }
+                        point_hint = (
+                            info.get("hint")
+                            if expr_names <= set(hint_bindings)
+                            else None
+                        )
+                        compact_inputs.append(["I", point_hint, expr])
                     else:
                         compact_inputs.append(["sym", info.get("hint", 1)])
 
@@ -1710,8 +1748,10 @@ class _CaptureState:
         def _concrete(e):
             return evaluate_symbolic_entry(e, hint_bindings) if (
                 hint_bindings and is_symbolic_entry(e)) else e
-        shapes_config_line = render_signature(
-            [_concrete(e) for e in compact_inputs])
+        shapes_config_line = (
+            render_signature([_concrete(e) for e in compact_inputs])
+            if complete_observed_binding else ""
+        )
 
         script = f'''"""
 Standalone repro captured via capture_hook.
@@ -1774,7 +1814,7 @@ if __name__ == "__main__":
             f.write(script)
 
         # Validate: the repro must run in eager without error
-        if self.validate:
+        if self.validate and complete_observed_binding:
             try:
                 import importlib.util
                 import math as _math
@@ -1808,9 +1848,7 @@ if __name__ == "__main__":
                 # Dynamic entries carry expr strings; evaluate at the hint
                 # binding so validation runs the concrete snapshot shape
                 # (exactly the static point this dynamic capture dedupes to).
-                _hb = {n: s["hint"]
-                       for n, s in (shape_env_block or {}).get(
-                           "symbols", {}).items()}
+                _hb = dict(hint_bindings)
 
                 def _concrete_entry(e):
                     return (evaluate_symbolic_entry(e, _hb)
@@ -1830,6 +1868,13 @@ if __name__ == "__main__":
                     f"Captured repro {filename} failed eager validation: {e}\n"
                     f"This indicates a bug in the capture hook (index bounds, shape params, etc.)"
                 ) from e
+        elif self.validate:
+            missing = sorted(set(symbols) - set(hint_bindings))
+            print(
+                f"  [capture_hook] NOTE: {filename}: eager point validation "
+                f"requires an explicit binding for {missing}",
+                file=sys.stderr,
+            )
 
         # Signature returned as DATA alongside the file: consumers (merge ->
         # shapes.json) must never re-derive it by regexing the generated

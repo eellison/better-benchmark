@@ -3,7 +3,8 @@
 Live capture belongs to ``capture_hook.py``. This module consumes the captured
 family contract and owns only four execution policies:
 
-* dynamic replay through one native ShapesSpec/ShapeEnv artifact;
+* one dynamic replay path, using backed tensor symbols when the capture has
+  them and native ShapesSpec for genuinely unbacked symbols;
 * partial specialization with ``--freeze``;
 * full specialization with ``--static``;
 * explicit compile/run history with ``--compile-at`` and ``--run-at``.
@@ -19,7 +20,11 @@ import time
 import torch
 
 import repro_harness as _harness
+from input_codec import _symbol_point_value
 from dynamic_shape_replay import (
+    _backed_args,
+    _backed_replay_plan_for_repro,
+    _backed_repro,
     _distinct_dynamic_bindings,
     _effective_binding_for_row,
     _parse_bind_args,
@@ -82,17 +87,34 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         if not bindings:
             missing = sorted(
                 name for name, definition in symbols.items()
-                if not isinstance((definition or {}).get("hint"), int)
-                or isinstance((definition or {}).get("hint"), bool)
+                if not isinstance(
+                    _symbol_point_value(definition), int)
+                or isinstance(
+                    _symbol_point_value(definition), bool)
             )
             if missing:
                 raise ValueError(
-                    "--static needs an integer hint for every symbol; "
-                    f"no int hint for {missing}")
-            bindings = [
-                {name: definition["hint"]
-                 for name, definition in symbols.items()}
-            ]
+                    "--static needs an observed integer value for every "
+                    f"symbol; no observed value for {missing}. Supply "
+                    "explicit --run-at bindings.")
+            bindings = [{
+                name: _symbol_point_value(definition)
+                for name, definition in symbols.items()
+            }]
+
+    if (is_family and mode == "dynamic" and not bindings
+            and not _recorded_point_bindings(repro_file, overlay=frozen)):
+        missing = sorted(
+            name for name, definition in symbols.items()
+            if name not in frozen
+            and (
+                not isinstance(_symbol_point_value(definition), int)
+                or isinstance(_symbol_point_value(definition), bool)
+            )
+        )
+        raise ValueError(
+            "this dynamic family has no complete observed point; pass "
+            f"explicit {run_flag} bindings for {missing}")
 
     if parsed.prewarm and mode == "static":
         raise ValueError(
@@ -171,33 +193,43 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     prewarmed = False
 
     if mode == "dynamic" and is_family:
-        (
-            shape_spec,
-            live_symbol_names,
-            original_input_count,
-            metadata_checks,
-            frozen_for_spec,
-        ) = _shape_env_spec_for_repro(repro_file, frozen=frozen)
-        shape_model = _shape_env_repro(
-            repro_cls(),
-            original_input_count,
-            shape_spec,
-            live_symbol_names,
-            metadata_checks,
-            frozen_for_spec,
-        )
+        backed_plan = _backed_replay_plan_for_repro(
+            repro_file, frozen=frozen)
+        count_dynamic = False
+        if backed_plan is not None:
+            shape_model = _backed_repro(repro_cls(), backed_plan)
+            count_dynamic = None  # honor exact mark_dynamic annotations
 
-        def artifact_args(inputs, binding, config):
-            effective = _effective_binding_for_row(binding, config)
-            missing = sorted(set(live_symbol_names) - set(effective))
-            if missing:
-                raise ValueError(
-                    "cannot invoke ShapeEnv artifact: binding is missing "
-                    f"live symbols {missing}")
-            return [
-                *inputs,
-                *(effective[name] for name in live_symbol_names),
-            ]
+            def artifact_args(inputs, _binding, _config):
+                return _backed_args(inputs, backed_plan)
+        else:
+            (
+                shape_spec,
+                live_symbol_names,
+                original_input_count,
+                metadata_checks,
+                frozen_for_spec,
+            ) = _shape_env_spec_for_repro(repro_file, frozen=frozen)
+            shape_model = _shape_env_repro(
+                repro_cls(),
+                original_input_count,
+                shape_spec,
+                live_symbol_names,
+                metadata_checks,
+                frozen_for_spec,
+            )
+
+            def artifact_args(inputs, binding, config):
+                effective = _effective_binding_for_row(binding, config)
+                missing = sorted(set(live_symbol_names) - set(effective))
+                if missing:
+                    raise ValueError(
+                        "cannot invoke dynamic artifact: binding is missing "
+                        f"live symbols {missing}")
+                return [
+                    *inputs,
+                    *(effective[name] for name in live_symbol_names),
+                ]
 
         warm_bindings, warm_source = warm_bindings_for_family()
 
@@ -213,7 +245,11 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             if len(warm_bindings) > 1 else None
         )
         n_kernels, kernel_names = _harness.count_kernels(
-            shape_model, count_first, second_inputs=count_second)
+            shape_model,
+            count_first,
+            dynamic=count_dynamic,
+            second_inputs=count_second,
+        )
         torch._dynamo.reset()
         if not parsed.count_kernels_only:
             compiled = torch.compile(shape_model)

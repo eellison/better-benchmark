@@ -41,6 +41,18 @@ SHORT_DTYPE = {
 LONG_DTYPE = {v: k for k, v in SHORT_DTYPE.items()}
 
 
+def _symbol_point_value(definition: dict | None):
+    """Observed concrete value for one family symbol, if any.
+
+    Backed ShapeEnv symbols call this a hint. Unbacked symbols have no guarding
+    hint, so their independently observed runtime value is stored explicitly.
+    Optimization hints and range bounds are never point values.
+    """
+    definition = definition or {}
+    key = "observed_value" if definition.get("unbacked") is True else "hint"
+    return definition.get(key)
+
+
 def _short_dtype(name: str) -> str:
     name = str(name).removeprefix("torch.")
     return SHORT_DTYPE.get(name, name)
@@ -744,10 +756,17 @@ def instantiate_point(point: dict, symbols: dict,
     hints (the static snapshot — default behavior matches static corpus).
     Returns fully static compact entries ready for spec_from_compact.
     """
-    eff = dict(point.get("bindings") or
-               {k: v.get("hint") for k, v in (symbols or {}).items()})
+    eff = dict(point.get("bindings") or {
+        name: value
+        for name, definition in (symbols or {}).items()
+        if (value := _symbol_point_value(definition)) is not None
+    })
     if bindings:
         eff.update(bindings)
+    missing = sorted(set(symbols or {}) - set(eff))
+    if missing:
+        raise ValueError(
+            f"point needs explicit bindings for unobserved symbols {missing}")
     if eff:
         validate_bindings(symbols or {}, eff, guards)
     return [evaluate_symbolic_entry(e, eff) for e in point.get("inputs", [])]

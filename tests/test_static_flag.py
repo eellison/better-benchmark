@@ -180,7 +180,7 @@ class TestStaticAtHints(unittest.TestCase):
             with self.assertRaises(ValueError) as cm:
                 benchmark_repro(str(repro), _Scale, _mk,
                                 args=["--static", "--no-gpu-lock"])
-            self.assertIn("no int hint", str(cm.exception))
+            self.assertIn("no observed value", str(cm.exception))
 
 
 if __name__ == "__main__":

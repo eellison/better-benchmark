@@ -30,6 +30,8 @@ Usage:
 """
 from __future__ import annotations
 
+from pathlib import Path
+
 import torch
 import torch.fx as fx
 from torch._subclasses.fake_tensor import FakeTensorMode
@@ -1679,12 +1681,8 @@ def test_symint_input_expr_codec_roundtrips_as_I():
     assert compact_from_spec(const) == ["sym", 256]
 
 
-def test_harvest_unbacked_symbol_records_hint_source_tiers():
-    """An unbacked symbol (data-dependent) is recorded with unbacked=True and
-    a hint_source naming WHICH tier the value came from — observed (real
-    runtime) > size_hint (derived) > range_fallback (arbitrary placeholder).
-    Backed symbols are implicitly observed (no flags). Synthetic ShapeEnv
-    stub — data-dependent ops are extern, rare in fusion regions."""
+def test_harvest_unbacked_symbol_separates_point_and_optimization_hint():
+    """Observed values are points; optimization hints and ranges are not."""
     from full_graph_harness import _harvest_shape_env
     import sympy
 
@@ -1693,36 +1691,41 @@ def test_harvest_unbacked_symbol_records_hint_source_tiers():
             self.lower, self.upper = lo, hi
 
     s0 = sympy.Symbol("s0")
-    u_obs, u_sh, u_fb = (sympy.Symbol(n) for n in ("u0", "u1", "u2"))
+    u_obs, u_opt, u_plain = (
+        sympy.Symbol(n) for n in ("u0", "u1", "u2"))
 
     class _FakeEnv:
         backed_var_to_val = {s0: sympy.Integer(16)}
-        var_to_range = {s0: _VR(2, sympy.oo), u_obs: _VR(0, sympy.oo),
-                        u_sh: _VR(0, sympy.oo), u_fb: _VR(4, sympy.oo)}
+        var_to_range = {
+            s0: _VR(2, sympy.oo),
+            u_obs: _VR(0, sympy.oo),
+            u_opt: _VR(0, sympy.oo),
+            u_plain: _VR(4, sympy.oo),
+        }
         guards = []
-        # tier 1: a real propagated runtime value for u0
         real_tensor_prop_unbacked_vals = {u_obs: sympy.Integer(1372)}
+        var_to_hint_override = {u_obs: 99, u_opt: 512}
 
         def is_unbacked_symint(self, sym):
             return str(sym).startswith("u")
 
-        def size_hint(self, sym, *, allow_none=False):
-            # tier 2 only for u1; u2 falls through to the range floor
-            return sympy.Integer(8192) if str(sym) == "u1" else None
-
     block = _harvest_shape_env(_FakeEnv())
-    # backed: observed, no flags
     assert block["symbols"]["s0"] == {"hint": 16, "range": [2, None]}
-    # tier 1 — real runtime value
     assert block["symbols"]["u0"] == {
-        "hint": 1372, "range": [0, None], "unbacked": True,
-        "hint_source": "observed"}
-    # tier 2 — derived size_hint
-    assert block["symbols"]["u1"]["hint_source"] == "size_hint"
-    assert block["symbols"]["u1"]["hint"] == 8192
-    # tier 3 — arbitrary range floor
-    assert block["symbols"]["u2"]["hint_source"] == "range_fallback"
-    assert block["symbols"]["u2"]["hint"] == 4
+        "observed_value": 1372,
+        "range": [0, None],
+        "unbacked": True,
+        "optimization_hint": 99,
+    }
+    assert block["symbols"]["u1"] == {
+        "range": [0, None],
+        "unbacked": True,
+        "optimization_hint": 512,
+    }
+    assert block["symbols"]["u2"] == {
+        "range": [4, None],
+        "unbacked": True,
+    }
 
 
 def test_symint_input_expr_parsed_without_regex_or_default():
@@ -1791,6 +1794,42 @@ def _capture_dynamic_region(tmpdir):
     assert idx["n_dropped"] == 0, f"dynamic region dropped: {idx.get('dropped')}"
     assert idx["n_captured"] == 1, idx
     return idx["captured"][0]
+
+
+def _latest_inductor_call_kernels():
+    """Kernel launcher names from the newest generated Inductor call file."""
+    import glob
+    import os
+    from torch._inductor.codecache import cache_dir
+
+    files = sorted(
+        glob.glob(os.path.join(cache_dir(), "**", "*.py"), recursive=True),
+        key=os.path.getmtime,
+        reverse=True,
+    )
+    for filename in files:
+        content = Path(filename).read_text()
+        if "def call(" not in content or ".run(" not in content:
+            continue
+        return [
+            line.strip().split(".run(")[0]
+            for line in content.splitlines()
+            if ".run(" in line and not line.strip().startswith("#")
+        ]
+    return []
+
+
+def _kernel_kinds(names):
+    """Compare fusion structure without pinning reduction tiling variants."""
+    kinds = []
+    for name in names:
+        if "triton_per_" in name or "triton_red_" in name:
+            kinds.append("reduction")
+        elif "triton_poi_" in name:
+            kinds.append("pointwise")
+        else:
+            kinds.append(name)
+    return sorted(kinds)
 
 
 def test_dynamic_capture_merge_load_roundtrip_gpu():
@@ -1895,6 +1934,103 @@ def test_dynamic_capture_merge_load_roundtrip_gpu():
         # its captured range floor of 2).
         with pytest.raises(ValueError, match="guard|range"):
             _run({syms[0]: 1, syms[1]: 16})
+
+
+def test_dynamic_default_measures_general_kernel_gpu():
+    """Default replay must preserve the original model's kernel structure.
+
+    This fixture has repeatedly distinguished a faithful replay from one that
+    merely accepts the same shapes: independent/raw SymInts and deferred
+    runtime assertions can both split or fuse the GroupNorm reduction
+    differently. Compare against a fresh Dynamo->AOT->Inductor compile of the
+    original model rather than pinning a version-specific kernel count.
+    """
+    import importlib.util
+    import json
+    import tempfile
+
+    import pytest
+    from torch._inductor.utils import fresh_inductor_cache
+
+    if not torch.cuda.is_available():
+        pytest.skip("GPU required for kernel-faithfulness comparison")
+
+    # Ground truth: the original model with exactly the two recorded dynamic
+    # spatial dimensions. A second shape forces the general artifact.
+    torch._dynamo.reset()
+    with fresh_inductor_cache():
+        original = torch.compile(_GroupNormDyn().cuda())
+        for height, width in ((8, 32), (16, 40)):
+            tensor = torch.randn(
+                64, 64, height, width, device="cuda")
+            torch._dynamo.mark_dynamic(tensor, 2)
+            torch._dynamo.mark_dynamic(tensor, 3)
+            with torch.no_grad():
+                original(tensor)
+        torch.cuda.synchronize()
+        expected = _latest_inductor_call_kernels()
+    assert expected, "original model generated no discoverable kernels"
+
+    from merge_captures import _write_shapes_json
+    from repro_harness import benchmark_repro
+
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        torch._dynamo.reset()
+        entry = _capture_dynamic_region(root)
+        repro_dir = root / "canonical" / "kernel_faithfulness"
+        repro_dir.mkdir(parents=True)
+        (repro_dir / "repro.py").write_text(
+            Path(entry["file"]).read_text())
+        _write_shapes_json(
+            repro_dir,
+            entry["shape_hash"],
+            entry.get("signature", ""),
+            "probe/infer/groupnorm",
+            occurrences=1,
+            inputs=entry["inputs"],
+            symbols=entry.get("symbols"),
+            guards=entry.get("guards"),
+        )
+
+        data = json.loads((repro_dir / "shapes.json").read_text())
+        # Exercise a residual family guard too. It should become a Dynamo
+        # guard, not a runtime-assert node that changes the kernel boundary.
+        data["guards"] = ["Eq(Mod(s0, 8), 0)"]
+        (repro_dir / "shapes.json").write_text(json.dumps(data, indent=2))
+        symbols = sorted(data["symbols"])
+        module_spec = importlib.util.spec_from_file_location(
+            "_kernel_faithfulness_repro", repro_dir / "repro.py")
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+
+        # No --dynamic flag: a family takes the one dynamic replay path by
+        # default. The timed artifact must reuse the compile-history shapes.
+        rows = benchmark_repro(
+            str(repro_dir / "repro.py"),
+            module.Repro,
+            getattr(module, "make_inputs", None),
+            args=[
+                "--run-at", f"{symbols[0]}=8,{symbols[1]}=32",
+                "--run-at", f"{symbols[0]}=16,{symbols[1]}=40",
+                "--n-warmup", "1",
+                "--n-rep", "1",
+                "--no-gpu-lock",
+            ],
+        )
+
+    assert rows
+    expected_kinds = _kernel_kinds(expected)
+    for key, row in rows.items():
+        assert row["mode"] == "dynamic"
+        assert row["recompiled"] is False, (
+            f"{key}: measured point escaped the prewarmed artifact")
+        assert row["n_kernels"] == len(expected), (
+            f"{key}: replay emitted {row['kernel_names']}, original emitted "
+            f"{expected}")
+        assert _kernel_kinds(row["kernel_names"]) == expected_kinds, (
+            f"{key}: replay structure {_kernel_kinds(row['kernel_names'])} "
+            f"!= original {expected_kinds}")
 
 
 def test_static_capture_has_no_symbolic_artifacts_gpu():
@@ -2069,9 +2205,8 @@ def test_harvest_preserves_guard_over_specialized_symbol():
     assert block["guards"] == ["Eq(s0*s53, 64)"]       # constraint preserved
 
 
-def test_harvest_survives_size_hint_raise():
-    """Finding J: an unbacked symbol whose size_hint() RAISES must not lose
-    the whole harvest — fall through to the range tier."""
+def test_harvest_does_not_fabricate_unbacked_point_from_range():
+    """No observed value means no point hint, even with a bounded range."""
     import sympy
     from full_graph_harness import _harvest_shape_env
 
@@ -2089,13 +2224,12 @@ def test_harvest_survives_size_hint_raise():
         def is_unbacked_symint(self, x):
             return str(x).startswith("u")
 
-        def size_hint(self, x, allow_none=False):
-            raise RuntimeError("data-dependent")
-
     block = _harvest_shape_env(_Env())
-    assert "s0" in block["symbols"]                    # harvest survived
-    assert block["symbols"]["u0"]["hint_source"] == "range_fallback"
-    assert block["symbols"]["u0"]["hint"] == 4
+    assert "s0" in block["symbols"]
+    assert block["symbols"]["u0"] == {
+        "range": [4, None],
+        "unbacked": True,
+    }
 
 
 def test_merge_distinct_symbolizations_do_not_clobber():

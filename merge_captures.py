@@ -355,7 +355,8 @@ def _write_shapes_json(
             # `bindings` carrying the hint. A different range OR a different
             # guard set is a genuine clash the shared symbols table can't hold.
             if other is not None and (
-                    other.get("range") != defn.get("range")
+                    _symbol_family_definition(other)
+                    != _symbol_family_definition(defn)
                     or _guard_participation(name, existing_guards_list)
                     != _guard_participation(name, incoming_guards_list)):
                 # Collision with a different definition -> fresh name. REUSE
@@ -368,8 +369,9 @@ def _write_shapes_json(
                 cand = f"{name}__{shape_hash[:4]}"
                 i = 1
                 while ((cand in existing_syms_table
-                        and existing_syms_table[cand].get("range")
-                        != defn.get("range"))
+                        and _symbol_family_definition(
+                            existing_syms_table[cand])
+                        != _symbol_family_definition(defn))
                        or cand in symbols):
                     cand = f"{name}__{shape_hash[:4]}_{i}"
                     i += 1
@@ -381,23 +383,50 @@ def _write_shapes_json(
 
     # The hint binding for this point — computed from the (possibly renamed)
     # symbols, so a namespaced symbol binds its NEW name.
-    bindings = ({name: s["hint"] for name, s in symbols.items()}
-                if symbols else None)
+    from input_codec import _symbol_point_value
+    bindings = ({
+        name: value
+        for name, definition in symbols.items()
+        if isinstance(
+            (value := _symbol_point_value(definition)), int)
+        and not isinstance(value, bool)
+    } if symbols else None)
+    required_bindings = (
+        sorted(set(symbols) - set(bindings or {})) if symbols else [])
 
-    # A second capture with a DIFFERENT symbol SET (after any renaming) is a
-    # distinct symbolization of the same shape_hash -> keep it as a SEPARATE
-    # point rather than overwriting the existing one's bindings (which would
-    # strand its inputs on names with no binding).
+    # A second capture with a DIFFERENT OBSERVED symbol set is a distinct
+    # template/point under the same shape hash. Find its prior entry on
+    # re-merge (idempotence) rather than always comparing with the first hash
+    # match and appending duplicates.
     existing_syms = set((existing_point or {}).get("bindings") or {})
-    if symbols and existing_syms and existing_syms != set(symbols):
-        existing_point = None
+    if symbols and existing_point is not None \
+            and existing_syms != set(bindings or {}):
+        existing_point = next(
+            (
+                point for point in data["points"]
+                if point.get("shape_hash") == shape_hash
+                and set(point.get("bindings") or {}) == set(bindings or {})
+            ),
+            None,
+        )
 
     # Graph-level symbols/guards (shared across points). After collision
     # renaming above, names are now genuinely distinct OR identically-defined,
     # so update() is a safe union; guards de-duped. Each point's bindings
     # select its own symbols.
     if symbols:
-        data.setdefault("symbols", {}).update(symbols)
+        symbol_table = data.setdefault("symbols", {})
+        for name, definition in symbols.items():
+            if name not in symbol_table:
+                symbol_table[name] = definition
+                continue
+            prior_hint = symbol_table[name].get("hint")
+            prior_observed = symbol_table[name].get("observed_value")
+            symbol_table[name].update(definition)
+            if prior_hint is not None:
+                symbol_table[name]["hint"] = prior_hint
+            if prior_observed is not None:
+                symbol_table[name]["observed_value"] = prior_observed
         if guards:
             existing_guards = data.setdefault("guards", [])
             for g in guards:
@@ -429,6 +458,10 @@ def _write_shapes_json(
             # never overwrite it from a later (consistent) capture.
             existing_point["bindings"] = bindings
             existing_point["captured_dynamic"] = True
+        if required_bindings:
+            existing_point["requires_binding"] = required_bindings
+        else:
+            existing_point.pop("requires_binding", None)
     else:
         # New point. "inputs" is THE data (compact codec); render the
         # human-readable string on demand via input_codec.render_signature
@@ -448,9 +481,11 @@ def _write_shapes_json(
             # the live storage — consumers allocate group buffers directly,
             # never re-derive size by scanning member offsets/spans.
             new_point["alias_group_nbytes"] = alias_group_nbytes
-        if bindings is not None:
+        if symbols:
             new_point["bindings"] = bindings
             new_point["captured_dynamic"] = True
+            if required_bindings:
+                new_point["requires_binding"] = required_bindings
         data["points"].append(new_point)
 
     # Persist the family identity the dir was routed by, so later merges match
@@ -690,6 +725,16 @@ def _hintfree_inputs_signature(inputs) -> str:
     return json.dumps(entries, sort_keys=True)
 
 
+def _symbol_family_definition(definition: dict | None) -> dict:
+    """Hint-blind symbol metadata that changes the compiled family."""
+    definition = definition or {}
+    return {
+        "range": definition.get("range"),
+        "unbacked": definition.get("unbacked") is True,
+        "optimization_hint": definition.get("optimization_hint"),
+    }
+
+
 def _family_constraints_component(symbols, guards) -> str:
     """Canonical, hint-free rendering of a family's CONSTRAINT surface:
     per-symbol ranges + the guard set. This is the third identity component
@@ -705,9 +750,11 @@ def _family_constraints_component(symbols, guards) -> str:
     guard twice, and _write_shapes_json already dedups on persist:
     multiplicity is not constraint semantics and must not split a family
     (PR80 re-review P2)."""
-    ranges = {name: (defn or {}).get("range")
-              for name, defn in (symbols or {}).items()}
-    return (json.dumps(ranges, sort_keys=True)
+    definitions = {
+        name: _symbol_family_definition(defn)
+        for name, defn in (symbols or {}).items()
+    }
+    return (json.dumps(definitions, sort_keys=True)
             + "||" + json.dumps(sorted(set(guards or []))))
 
 

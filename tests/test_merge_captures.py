@@ -103,6 +103,86 @@ def _write_dynamic_capture(
 
 
 class MergeCapturesTests(unittest.TestCase):
+    def test_unobserved_unbacked_symbol_requires_explicit_point(self):
+        """Ranges and optimization hints never become benchmark bindings."""
+        from merge_captures import (
+            _family_constraints_component,
+            _write_shapes_json,
+        )
+        from repro_harness import load_shape_configs
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repro_dir = Path(tmp)
+            (repro_dir / "repro.py").write_text("# stub")
+            symbols = {
+                "u0": {
+                    "range": [0, 64],
+                    "unbacked": True,
+                    "optimization_hint": 16,
+                },
+            }
+            _write_shapes_json(
+                repro_dir,
+                "template",
+                "",
+                "hf/infer/m",
+                occurrences=1,
+                inputs=[[["u0", 3], "f32"], ["I", None, "u0"]],
+                symbols=symbols,
+                guards=[],
+            )
+            first_bytes = (repro_dir / "shapes.json").read_bytes()
+            _write_shapes_json(
+                repro_dir,
+                "template",
+                "",
+                "hf/infer/m",
+                occurrences=1,
+                inputs=[[["u0", 3], "f32"], ["I", None, "u0"]],
+                symbols=symbols,
+                guards=[],
+            )
+            self.assertEqual(
+                (repro_dir / "shapes.json").read_bytes(), first_bytes)
+
+            data = json.loads((repro_dir / "shapes.json").read_text())
+            self.assertNotIn("hint", data["symbols"]["s0"])
+            self.assertNotIn("observed_value", data["symbols"]["s0"])
+            self.assertEqual(
+                data["symbols"]["s0"]["optimization_hint"], 16)
+            self.assertEqual(data["points"][0]["bindings"], {})
+            self.assertEqual(
+                data["points"][0]["requires_binding"], ["s0"])
+            self.assertEqual(load_shape_configs(
+                str(repro_dir / "repro.py")), {})
+
+            configs = load_shape_configs(
+                str(repro_dir / "repro.py"),
+                symbol_bindings={"s0": 7},
+            )
+            config = next(iter(configs.values()))
+            self.assertEqual(config["inputs"][0]["shape"], [7, 3])
+            self.assertEqual(config["inputs"][1]["value"], 7)
+            self.assertEqual(config["bindings"], {"s0": 7})
+            with self.assertRaisesRegex(ValueError, "above range max"):
+                load_shape_configs(
+                    str(repro_dir / "repro.py"),
+                    symbol_bindings={"s0": 65},
+                )
+
+            backed = {"s0": {"hint": 7, "range": [0, 64]}}
+            unbacked = {
+                "s0": {
+                    "observed_value": 7,
+                    "range": [0, 64],
+                    "unbacked": True,
+                },
+            }
+            self.assertNotEqual(
+                _family_constraints_component(backed, []),
+                _family_constraints_component(unbacked, []),
+            )
+
     def test_same_pattern_hash_reuses_existing_canonical_dir(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

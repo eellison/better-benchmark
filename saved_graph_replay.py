@@ -27,18 +27,8 @@ def _specs_have_symbols(specs) -> bool:
     return False
 
 
-def _sidecar_symbol_hints(graph_path: Path) -> dict:
-    """Per-symbol NATIVE hints recorded at capture time in the graph's sidecar
-    meta.json (full_graph_XXX.meta.json -> {"symbols": {"s16": {"hint": 4}}}).
-
-    The saved .py annotations are symbolic (Sym(s16)) and carry no hint, so
-    without the sidecar the re-trace seeds every symbol at a benign default.
-    The default is fine for FIDELITY (the symbol stays symbolic either way)
-    but not for the recorded POINT: the point's bindings become the default
-    bench binding and its shape_hash (which includes hints) is the join key
-    back to live-captured occurrence counts — a non-native hint times the
-    wrong problem size and orphans the accounting join. Missing/corrupt
-    sidecar -> {} (caller falls back to the default)."""
+def _sidecar_symbol_definitions(graph_path: Path) -> dict:
+    """Per-symbol metadata recorded in a saved graph's sidecar."""
     meta_path = graph_path.with_name(graph_path.stem + ".meta.json")
     if not meta_path.exists():
         return {}
@@ -46,34 +36,48 @@ def _sidecar_symbol_hints(graph_path: Path) -> dict:
         meta = json.loads(meta_path.read_text())
     except Exception:
         return {}
-    hints = {}
-    for name, defn in (meta.get("symbols") or {}).items():
-        if not isinstance(defn, dict):
-            continue
-        hint = defn.get("hint")
-        # bool is an int subclass but never a valid size hint (True would seed
-        # a 1 -> ShapeEnv 0/1-specialization); a float that is exactly integral
-        # is coerced losslessly (JSON may round-trip 4 as 4.0). Anything else
-        # (None, non-integral float, str) is dropped -> caller's default hint.
-        if isinstance(hint, bool):
-            continue
-        if isinstance(hint, int):
-            hints[name] = hint
-        elif isinstance(hint, float) and hint.is_integer():
-            hints[name] = int(hint)
-    return hints
+    return {
+        name: dict(defn)
+        for name, defn in (meta.get("symbols") or {}).items()
+        if isinstance(name, str) and isinstance(defn, dict)
+    }
 
 
-def _build_symbolic_inputs(specs, dev, symbol_hints=None):
+def _coerce_hint(defn) -> int | None:
+    from input_codec import _symbol_point_value
+    hint = _symbol_point_value(defn)
+    # bool is an int subclass but never a valid value. Do not coerce floats:
+    # replay must preserve the serialized point exactly, not normalize it.
+    if isinstance(hint, int) and not isinstance(hint, bool):
+        return hint
+    return None
+
+
+def _sidecar_symbol_hints(graph_path: Path) -> dict:
+    """Per-symbol observed point values from a saved graph's sidecar.
+
+    Backed symbols store this as ``hint``; unbacked symbols store the
+    independent ``observed_value``. Optimization hints are deliberately not
+    returned as points. Missing/corrupt sidecar -> {}."""
+    return {
+        name: hint
+        for name, defn in _sidecar_symbol_definitions(graph_path).items()
+        if (hint := _coerce_hint(defn)) is not None
+    }
+
+
+def _build_symbolic_inputs(specs, dev, symbol_hints=None,
+                           symbol_definitions=None):
     """Rebuild the forward inputs for a dynamic saved graph with ONE shared
     ShapeEnv symbol per symbol NAME, so a symint input (arg2_1:Sym(s16)) and a
     tensor dynamic dim (arg4_1:[...,s16,...]) trace as the SAME symbol — the
     structure the model actually had. Returns (FakeTensorMode, inputs), or None
     if a symbol could not be resolved (caller falls back to real-mode trace).
 
-    Symbols are created backed at their recorded hint (size_hint), mirroring
-    capture; the strides come from the annotation's stride exprs evaluated
-    over the same symbols, so a non-contiguous dynamic tensor round-trips.
+    Backed/unbacked provenance, observed values, ranges, and optimization
+    hints come from the sidecar symbol definitions. Strides come from the
+    annotation's expressions evaluated over the same symbols, so a
+    non-contiguous dynamic tensor round-trips.
     """
     import torch
     from torch.fx.experimental.symbolic_shapes import ShapeEnv, DimDynamic
@@ -83,10 +87,22 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
     # Collect symbol names + a hint per symbol. Precedence: the sidecar
     # meta.json's NATIVE hints (symbol_hints) first — they set the recaptured
     # point's bindings and shape_hash, which must match the live capture —
-    # then a symint spec's own hint, then a benign default (8). The hint only
+    # then a symint spec's own trace value, then the same benign template value
+    # (2) used by live capture. This value only
     # picks which concrete size make_fx traces at — the symbol stays symbolic
     # regardless — so the default is safe for structure, wrong for the point.
-    hints: dict[str, int] = dict(symbol_hints or {})
+    definitions = dict(symbol_definitions or {})
+    hints: dict[str, int] = {}
+    for name, definition in definitions.items():
+        observed = _coerce_hint(definition)
+        optimization_hint = definition.get("optimization_hint")
+        if observed is not None:
+            hints[name] = observed
+        elif (isinstance(optimization_hint, int)
+              and not isinstance(optimization_hint, bool)):
+            # Trace seed only: this must not become an observed point.
+            hints[name] = optimization_hint
+    hints.update(symbol_hints or {})
 
     import ast as _ast
 
@@ -115,7 +131,7 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
             continue
         if s.get("kind") == "symint" and isinstance(s.get("expr"), str):
             for nm in _expr_symbols(s["expr"]):
-                hints.setdefault(nm, int(s.get("hint", 8) or 8))
+                hints.setdefault(nm, int(s.get("hint", 2) or 2))
     # Seed any still-unhinted symbols that appear in tensor SHAPE *or* STRIDE
     # tokens. Strides are seeded too: a symbol that occurs ONLY in a stride
     # expr (e.g. a permuted/non-contiguous dynamic tensor) would otherwise be
@@ -126,7 +142,7 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
         for tok in list(s.get("shape") or []) + list(s.get("stride") or []):
             if isinstance(tok, str):
                 for nm in _expr_symbols(tok):
-                    hints.setdefault(nm, 8)
+                    hints.setdefault(nm, 2)
     if not hints:
         return None
 
@@ -140,9 +156,54 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None):
         # symbol stays symbolic regardless), so trace at >=2 to keep it dynamic.
         trace_h = h if isinstance(h, int) and h >= 2 else 2
         trace_hints[nm] = trace_h
-        sym = shape_env.create_symbol(
-            trace_h, source=LocalSource(nm), dynamic_dim=DimDynamic.DYNAMIC)
-        symnodes[nm] = shape_env.create_symintnode(sym, hint=trace_h)
+        defn = definitions.get(nm) or {}
+        if defn.get("unbacked") is True:
+            symint = shape_env.create_unbacked_symint(source=LocalSource(nm))
+            symnodes[nm] = symint
+
+            # Preserve the captured range instead of replacing it with the
+            # unconstrained default of a fresh unbacked symbol.
+            recorded_range = defn.get("range")
+            if recorded_range is not None:
+                if (not isinstance(recorded_range, list)
+                        or len(recorded_range) != 2):
+                    return None
+                lo, hi = recorded_range
+
+                def valid_bound(value):
+                    return (
+                        value is None
+                        or (isinstance(value, int)
+                            and not isinstance(value, bool))
+                    )
+
+                if (not valid_bound(lo) or not valid_bound(hi)
+                        or (lo is not None and hi is not None and lo > hi)):
+                    return None
+                import sympy
+                from torch.utils._sympy.numbers import int_oo
+                from torch.utils._sympy.value_ranges import ValueRanges
+                shape_env._update_var_to_range(
+                    symint.node.expr,
+                    ValueRanges(
+                        -int_oo if lo is None else sympy.Integer(lo),
+                        int_oo if hi is None else sympy.Integer(hi),
+                    ),
+                )
+            observed = _coerce_hint(defn)
+            if observed is not None:
+                shape_env.set_real_tensor_prop_unbacked_vals(
+                    symint.node.expr, observed)
+            optimization_hint = defn.get("optimization_hint")
+            if (isinstance(optimization_hint, int)
+                    and not isinstance(optimization_hint, bool)):
+                shape_env._set_unbacked_var_to_hint_override(
+                    symint, optimization_hint)
+        else:
+            sym = shape_env.create_symbol(
+                trace_h, source=LocalSource(nm),
+                dynamic_dim=DimDynamic.DYNAMIC)
+            symnodes[nm] = shape_env.create_symintnode(sym, hint=trace_h)
 
     # Evaluate a dim/stride token to a torch SymInt (or int), covering the
     # SAME closed expression grammar input_codec accepts everywhere else —

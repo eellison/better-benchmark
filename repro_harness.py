@@ -125,6 +125,8 @@ def _parse_shapes_json(shapes_path: Path,
         # compact encoding existed; the string is documentation otherwise.
         compact = point.get("inputs")
         symbols = data.get("symbols") or {}
+        if symbol_bindings is None and point.get("requires_binding"):
+            continue
         if compact is not None and (symbols or symbol_bindings):
             # Dynamic repro: instantiate symbolic entries (at the point's
             # recorded bindings, or the caller's). Range/guard violations
@@ -142,11 +144,15 @@ def _parse_shapes_json(shapes_path: Path,
             specs = [spec_from_compact(e) for e in compact]
             cfg = {"inputs": specs}
             if symbols:
+                from input_codec import _symbol_point_value
                 cfg["bindings"] = dict(
                     symbol_bindings
                     or point.get("bindings")
-                    or {name: meta.get("hint")
-                        for name, meta in symbols.items()}
+                    or {
+                        name: value
+                        for name, meta in symbols.items()
+                        if (value := _symbol_point_value(meta)) is not None
+                    }
                 )
             # The point's shape_hash travels with the config so the oracle
             # bench loop can dispatch by hash (a DYNAMIC point's shape is

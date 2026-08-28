@@ -90,6 +90,31 @@ def _two_symbol_family(d: Path) -> str:
     return str(repro)
 
 
+def _unobserved_unbacked_family(d: Path) -> str:
+    """No default point: range + optimization hint, explicit run required."""
+    (d / "shapes.json").write_text(json.dumps({
+        "symbols": {
+            "s0": {
+                "range": [0, 64],
+                "unbacked": True,
+                "optimization_hint": 16,
+            },
+        },
+        "guards": [],
+        "points": [{
+            "shape_hash": "template",
+            "captured_dynamic": True,
+            "bindings": {},
+            "requires_binding": ["s0"],
+            "models": {"probe/infer/m": {"occurrences": 1}},
+            "inputs": [[["s0", 3], "f32"]],
+        }],
+    }))
+    repro = d / "repro.py"
+    repro.write_text("# stub")
+    return str(repro)
+
+
 def _mocked(extra_patches=()):
     fake_compile = lambda m, **kw: m  # noqa: E731 - eager stand-in
     patches = [
@@ -134,6 +159,18 @@ class TestDynamicByDefault(unittest.TestCase):
             (key, row), = results.items()
             self.assertTrue(key.endswith("::s0=16::dynamic"), key)
             self.assertEqual(row["mode"], "dynamic")
+
+    def test_unobserved_unbacked_requires_run_at(self):
+        with tempfile.TemporaryDirectory() as td:
+            repro = _unobserved_unbacked_family(Path(td))
+            with self.assertRaisesRegex(
+                    ValueError, "no complete observed point"):
+                _run(repro, [])
+            results = _run(repro, ["--run-at", "s0=7"])
+            (_key, row), = results.items()
+            self.assertEqual(row["binding"], {"s0": 7})
+            self.assertEqual(
+                row["compile_bindings"][0], {"s0": 7})
 
     def test_static_repro_keeps_historical_default(self):
         with tempfile.TemporaryDirectory() as td:

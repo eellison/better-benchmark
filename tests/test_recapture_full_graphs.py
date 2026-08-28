@@ -18,7 +18,11 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import recapture_full_graphs as recapture
 from ingest_tlparse import load_graph_module
-from saved_graph_replay import _build_symbolic_inputs, _sidecar_symbol_hints
+from saved_graph_replay import (
+    _build_symbolic_inputs,
+    _sidecar_symbol_definitions,
+    _sidecar_symbol_hints,
+)
 
 
 FAKE_FULL_GRAPH = """
@@ -510,9 +514,14 @@ class TestBuildSymbolicInputs(unittest.TestCase):
       B5  a symbol whose hint is 0 or 1 (ShapeEnv 0/1-specialization)
     """
 
-    def _build(self, specs, hints=None):
+    def _build(self, specs, hints=None, definitions=None):
         import torch
-        return _build_symbolic_inputs(specs, torch.device("cpu"), hints or {})
+        return _build_symbolic_inputs(
+            specs,
+            torch.device("cpu"),
+            hints or {},
+            symbol_definitions=definitions,
+        )
 
     def test_constant_symint_keeps_value_not_default(self):
         import torch
@@ -555,6 +564,49 @@ class TestBuildSymbolicInputs(unittest.TestCase):
         _mode, inputs = self._build(specs, {"s0": 1})  # falsy hint
         self.assertIsInstance(inputs[0].shape[0], torch.SymInt)
 
+    def test_unbacked_provenance_and_range_survive_rebuild(self):
+        """Saved-graph replay must not silently turn an unbacked root backed."""
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0", 3],
+             "dtype": "float32", "stride": ["3", "1"], "device": "cpu"},
+            {"kind": "symint", "name": "n", "expr": "s0"},
+        ]
+        for definition in (
+            {
+                "s0": {
+                    "observed_value": 8,
+                    "range": [0, 64],
+                    "unbacked": True,
+                    "optimization_hint": 16,
+                },
+            },
+            {
+                "s0": {
+                    "range": [0, 64],
+                    "unbacked": True,
+                    "optimization_hint": 9,
+                },
+            },
+            {
+                "s0": {
+                    "range": [0, 64],
+                    "unbacked": True,
+                },
+            },
+        ):
+            mode, inputs = self._build(
+                specs, definitions=definition)
+            expr = inputs[1].node.expr
+            self.assertTrue(mode.shape_env.is_unbacked_symint(expr))
+            value_range = mode.shape_env.var_to_range[expr]
+            self.assertEqual(int(value_range.lower), 0)
+            self.assertEqual(int(value_range.upper), 64)
+            self.assertEqual(inputs[0].shape[0].node.expr, expr)
+            from full_graph_harness import _harvest_shape_env
+            recaptured = next(iter(
+                _harvest_shape_env(mode.shape_env)["symbols"].values()))
+            self.assertEqual(recaptured, definition["s0"])
+
     def test_composite_grammar_dims_stay_symbolic(self):
         """PR80 review finding 4: valid saved dims using the closed torch
         grammar beyond +/-/* (floordiv, CeilToInt, PythonMod) must rebuild
@@ -582,10 +634,7 @@ class TestBuildSymbolicInputs(unittest.TestCase):
 
 
 class TestSidecarSymbolHints(unittest.TestCase):
-    """B7: sidecar hint coercion. A native per-symbol hint is the join key
-    back to live occurrence counts, so a hint stored in a slightly-off type
-    must not be silently dropped (orphaning the accounting join) nor let a
-    bool through as a 0/1-specializing size."""
+    """Sidecar point values remain typed and separate from optimizer hints."""
 
     def _hints(self, symbols):
         with tempfile.TemporaryDirectory() as tmp:
@@ -595,6 +644,22 @@ class TestSidecarSymbolHints(unittest.TestCase):
                 __import__("json").dumps({"symbols": symbols}))
             return _sidecar_symbol_hints(g)
 
+    def test_full_definition_keeps_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            g = Path(tmp) / "full_graph_000.py"
+            g.write_text("# stub")
+            symbols = {
+                "s0": {
+                    "observed_value": 8,
+                    "range": [0, None],
+                    "unbacked": True,
+                    "optimization_hint": 32,
+                },
+            }
+            (g.with_name("full_graph_000.meta.json")).write_text(
+                __import__("json").dumps({"symbols": symbols}))
+            self.assertEqual(_sidecar_symbol_definitions(g), symbols)
+
     def test_int_hint_is_kept(self):
         self.assertEqual(self._hints({"s0": {"hint": 16}}), {"s0": 16})
 
@@ -602,10 +667,8 @@ class TestSidecarSymbolHints(unittest.TestCase):
         # isinstance(True, int) is True; a bool must not seed a size-1 hint.
         self.assertEqual(self._hints({"s0": {"hint": True}}), {})
 
-    def test_integral_float_is_coerced(self):
-        r = self._hints({"s0": {"hint": 4.0}})
-        self.assertEqual(r, {"s0": 4})
-        self.assertIsInstance(r["s0"], int)
+    def test_integral_float_is_rejected_not_normalized(self):
+        self.assertEqual(self._hints({"s0": {"hint": 4.0}}), {})
 
     def test_non_integral_and_garbage_are_dropped(self):
         self.assertEqual(

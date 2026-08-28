@@ -199,8 +199,10 @@ def _harvest_shape_env(shape_env: Any) -> dict | None:
     """Graph-level {symbols, guards, captured_dynamic} from a live ShapeEnv.
 
     THE shared harvester (capture_hook + full-graph sidecar both call it).
-    symbols: name -> {hint, range}, FREE backed symbols only — a symbol
-    specialized to one value (range [k,k]) is a baked-in constant, skipped.
+    symbols: name -> {hint, range} for free backed symbols. Unbacked symbols
+    add {unbacked: true}, optional "observed_value", and optional, independent
+    "optimization_hint". A backed symbol specialized to one value (range
+    [k,k]) is a baked-in constant, skipped.
     guards: sympy-printed residual guard exprs, kept only when every free
     symbol is in the table (a guard over a dropped symbol can't be
     evaluated by the consumer). None if nothing is dynamic."""
@@ -208,8 +210,10 @@ def _harvest_shape_env(shape_env: Any) -> dict | None:
         return None
     import sympy
 
-    var_to_val = getattr(shape_env, "backed_var_to_val", None) \
-        or getattr(shape_env, "var_to_val", {}) or {}
+    var_to_val = getattr(shape_env, "backed_var_to_val", None)
+    if var_to_val is None:  # compatibility with older torch ShapeEnv
+        var_to_val = getattr(shape_env, "var_to_val", {})
+    var_to_val = var_to_val or {}
     var_to_range = getattr(shape_env, "var_to_range", {}) or {}
 
     # Symbols specialized to one value (range [k,k]) -> {sympy.Symbol: int}.
@@ -219,72 +223,52 @@ def _harvest_shape_env(shape_env: Any) -> dict | None:
     # that constraint instead of silently losing it.
     specialized: dict = {}
 
-    def _record(sym, hint, *, unbacked, hint_source):
+    hint_overrides = getattr(shape_env, "var_to_hint_override", {}) or {}
+
+    def _record(sym, hint=None, *, unbacked):
         rng = var_to_range.get(sym)
         lo = _jsonable_range_bound(getattr(rng, "lower", None)) if rng is not None else None
         hi = _jsonable_range_bound(getattr(rng, "upper", None)) if rng is not None else None
         if not unbacked and lo is not None and hi is not None and lo == hi:
             specialized[sym] = lo   # remember the baked-in constant
             return  # backed symbol specialized to a constant — not free
-        # A non-integer hint (e.g. a Float size_hint) is a bug upstream of
-        # us; record it truthfully rounded but flag it, never silently
-        # truncate to a wrong shape.
-        ihint = int(hint)
-        entry = {"hint": ihint, "range": [lo, hi]}
-        if unbacked and ihint != hint:
-            entry["hint_noninteger"] = str(hint)
+        entry = {"range": [lo, hi]}
+        if hint is not None:
+            ihint = int(hint)
+            if ihint != hint:
+                raise ValueError(
+                    f"symbol {sym} has non-integer observed value {hint!r}")
+            entry["observed_value" if unbacked else "hint"] = ihint
         if unbacked:
-            # Unbacked (data-dependent) symbol: the bench still needs a
-            # concrete value, but it is NOT an observed shape. unbacked=True
-            # + hint_source tell the consumer how much to trust the hint:
-            #   observed       — real runtime value (propagate_real_tensors);
-            #                    a legitimate single-point bench.
-            #   size_hint      — derived from backed subs / static eval.
-            #   range_fallback — arbitrary placeholder (range floor); a single
-            #                    measurement is noise — sweep or exclude from
-            #                    the static-vs-dynamic gap table.
+            # Backing, an observed runtime point, and a perf-only optimization
+            # hint are three separate facts. Never turn a range boundary or an
+            # optimizer hint into a captured benchmark point.
             entry["unbacked"] = True
-            entry["hint_source"] = hint_source
+            optimization_hint = hint_overrides.get(sym)
+            if optimization_hint is not None:
+                if (not isinstance(optimization_hint, int)
+                        or isinstance(optimization_hint, bool)):
+                    raise ValueError(
+                        f"symbol {sym} has non-integer optimization hint "
+                        f"{optimization_hint!r}")
+                entry["optimization_hint"] = optimization_hint
         symbols[str(sym)] = entry
 
     symbols = {}
     for sym, val in var_to_val.items():
-        _record(sym, val, unbacked=False, hint_source="observed")
+        _record(sym, val, unbacked=False)
 
     # Unbacked symbols (u0, u1 — from data-dependent ops: nonzero/item/unique/
-    # masked-index) carry no real value. Take the most faithful tier
-    # available: a real propagated runtime value, else size_hint, else the
-    # range floor. Rare in fusion regions (data-dependent ops are extern), but
-    # if one lands in a captured expr it MUST be in the table — else _eval_dim
-    # raises 'unbound symbol' at load.
+    # masked-index) have no guarding hint. Real-tensor propagation may provide
+    # the value that actually occurred; when it does not, keep the symbol and
+    # range but omit "hint", requiring an explicit benchmark binding later.
     is_unbacked = getattr(shape_env, "is_unbacked_symint", None)
-    size_hint = getattr(shape_env, "size_hint", None)
     real_vals = getattr(shape_env, "real_tensor_prop_unbacked_vals", {}) or {}
     if is_unbacked is not None:
         for sym in list(var_to_range):
             if sym in var_to_val or not is_unbacked(sym):
                 continue
-            hint, src = None, None
-            if sym in real_vals:                       # tier 1: observed
-                hint, src = real_vals[sym], "observed"
-            elif size_hint is not None:                # tier 2: derived
-                # size_hint can RAISE on data-dependent paths even with
-                # allow_none (it reaches _make_data_dependent_error /
-                # safe_expand). A throw here must NOT lose the whole harvest
-                # — fall through to the range tier.
-                try:
-                    h = size_hint(sym, allow_none=True)
-                except Exception:
-                    h = None
-                if h is not None:
-                    hint, src = h, "size_hint"
-            if hint is None:                           # tier 3: range floor
-                rng = var_to_range.get(sym)
-                hint = _jsonable_range_bound(getattr(rng, "lower", None))
-                src = "range_fallback"
-            if hint is None:
-                continue  # no usable value at all — skip (loud at load)
-            _record(sym, hint, unbacked=True, hint_source=src)
+            _record(sym, real_vals.get(sym), unbacked=True)
 
     if not symbols:
         return None
@@ -1532,7 +1516,10 @@ def _strip_runnable_boilerplate(content: str) -> str:
     return re.sub(r"^mod\s*=\s*Repro\(\)\s*$", "", content, flags=re.MULTILINE)
 
 
-def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
+def load_full_graph_definition(
+    graph_path: str | Path,
+    symbol_bindings: dict[str, int] | None = None,
+) -> FullGraphDefinition:
     import torch
     import torch.fx as fx
     import torch.nn
@@ -1583,9 +1570,26 @@ def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     # are retained on disk, only the in-memory definition is specialized.
     symbols = sidecar.get("symbols")
     if symbols:
-        from input_codec import evaluate_spec
-        hint_bindings = {n: s["hint"] for n, s in symbols.items()}
-        input_specs = [evaluate_spec(s, hint_bindings) for s in input_specs]
+        from input_codec import (
+            _symbol_point_value,
+            evaluate_spec,
+            validate_bindings,
+        )
+        effective = {
+            name: value
+            for name, definition in symbols.items()
+            if isinstance(
+                (value := _symbol_point_value(definition)), int)
+            and not isinstance(value, bool)
+        }
+        effective.update(symbol_bindings or {})
+        missing = sorted(set(symbols) - set(effective))
+        if missing:
+            raise ValueError(
+                f"{path} needs explicit symbol_bindings for {missing}; "
+                "these unbacked symbols had no observed capture point")
+        validate_bindings(symbols, effective, sidecar.get("guards"))
+        input_specs = [evaluate_spec(s, effective) for s in input_specs]
 
     return FullGraphDefinition(
         path=path,

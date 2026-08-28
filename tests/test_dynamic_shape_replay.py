@@ -21,6 +21,9 @@ for p in (str(ROOT), str(ROOT / "scripts")):
 import torch  # noqa: E402
 
 from dynamic_shape_replay import (  # noqa: E402
+    _backed_args,
+    _backed_replay_plan_for_repro,
+    _backed_repro,
     _eval_shape_env_expr,
     _shape_env_repro,
     _shape_env_spec_for_repro,
@@ -87,6 +90,89 @@ class TestShapeEnvPlayback(unittest.TestCase):
             with self.assertRaises((AssertionError, RuntimeError)):
                 compiled(torch.zeros(6, 3), 6, 6)
             torch._dynamo.reset()
+
+    def test_backed_replay_derives_symint_and_keeps_guard_out_of_graph(self):
+        class UsesInt(torch.nn.Module):
+            def forward(self, x, n):
+                return x + n
+
+        with tempfile.TemporaryDirectory() as td:
+            repro = self._write_guarded(Path(td))
+            plan = _backed_replay_plan_for_repro(repro)
+            self.assertIsNotNone(plan)
+            self.assertEqual(plan["kept"], (0,))
+
+            graphs = []
+
+            def backend(gm, _example_inputs):
+                graphs.append(gm)
+                return gm.forward
+
+            compiled = torch.compile(
+                _backed_repro(UsesInt(), plan), backend=backend)
+
+            def invoke(size, raw_int):
+                inputs = [torch.zeros(size, 3), raw_int]
+                return compiled(*_backed_args(inputs, plan))
+
+            invoke(8, 8)
+            invoke(12, 12)
+            self.assertEqual(len(graphs), 1)
+            self.assertFalse(any(
+                node.op == "call_function"
+                and "_assert_scalar" in str(node.target)
+                for node in graphs[0].graph.nodes
+            ))
+            # The lifted raw int is not a compiled argument: the callable
+            # re-derives it from x.size(0), preserving the model relationship.
+            self.assertTrue(torch.equal(
+                invoke(8, 999), torch.full((8, 3), 8.0)))
+            with self.assertRaises(RuntimeError):
+                invoke(6, 6)  # violates Eq(Mod(s0, 4), 0)
+            torch._dynamo.reset()
+
+    def test_unbacked_metadata_prevents_backed_replay(self):
+        """A tensor occurrence is a possible source, not symbol provenance."""
+        with tempfile.TemporaryDirectory() as td:
+            repro = self._write_guarded(Path(td))
+            shapes_path = Path(repro).parent / "shapes.json"
+            data = json.loads(shapes_path.read_text())
+            data["symbols"]["s0"]["observed_value"] = (
+                data["symbols"]["s0"].pop("hint"))
+            data["symbols"]["s0"]["unbacked"] = True
+            shapes_path.write_text(json.dumps(data))
+            self.assertIsNone(_backed_replay_plan_for_repro(repro))
+
+    def test_unbacked_optimization_hint_is_not_a_point(self):
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            (d / "repro.py").write_text("# stub")
+            (d / "shapes.json").write_text(json.dumps({
+                "symbols": {
+                    "s0": {
+                        "range": [0, 64],
+                        "unbacked": True,
+                        "optimization_hint": 16,
+                    },
+                },
+                "guards": [],
+                "points": [{
+                    "shape_hash": "template",
+                    "captured_dynamic": True,
+                    "bindings": {},
+                    "requires_binding": ["s0"],
+                    "models": {"m": {"occurrences": 1}},
+                    "inputs": [[["s0", 3], "f32"], ["I", None, "s0"]],
+                }],
+            }))
+            spec, names, *_ = _shape_env_spec_for_repro(
+                str(d / "repro.py"))
+            self.assertEqual(names, ("s0",))
+            serialized = spec.to_jsonable()
+            self.assertIn(
+                '"optimization_hint": 16',
+                json.dumps(serialized, sort_keys=True),
+            )
 
     def test_shape_env_expression_parser_reuses_safe_boundary(self):
         from torch.fx.experimental.dynamic_spec import IntVar
@@ -198,6 +284,8 @@ class TestShapeEnvPlayback(unittest.TestCase):
             (spec, names, input_count,
              checks, frozen) = _shape_env_spec_for_repro(
                  str(d / "repro.py"), frozen={"s0": 4})
+            self.assertIsNone(_backed_replay_plan_for_repro(
+                str(d / "repro.py"), frozen={"s0": 4}))
             self.assertEqual(names, ("s1",))
             graphs = []
 

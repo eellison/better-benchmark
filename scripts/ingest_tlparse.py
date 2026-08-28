@@ -29,7 +29,7 @@ os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
 
 from saved_graph_replay import (  # noqa: E402
     _build_symbolic_inputs,
-    _sidecar_symbol_hints,
+    _sidecar_symbol_definitions,
     _specs_have_symbols,
 )
 
@@ -443,7 +443,8 @@ def load_graph_module(graph_path: Path):
         dyn_specs = parse_full_graph_inputs(content)
         if dyn_specs and _specs_have_symbols(dyn_specs):
             sym_inputs = _build_symbolic_inputs(
-                dyn_specs, dev, _sidecar_symbol_hints(graph_path))
+                dyn_specs, dev,
+                symbol_definitions=_sidecar_symbol_definitions(graph_path))
             if sym_inputs is not None:
                 fake_mode, inputs = sym_inputs
                 with fake_mode:

@@ -13,10 +13,13 @@ Keeping this code separate makes the ownership boundary explicit:
 """
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
 import torch
+
+from input_codec import _symbol_point_value
 
 
 def _parse_bind_args(bind_args: list | None, flag_name: str = "--bind") -> list:
@@ -101,8 +104,8 @@ def format_binding(binding: dict | None) -> str:
 
 def _parse_freeze_args(freeze_args: list, symbols: dict) -> dict:
     """Parse repeated --freeze values ('s0' or 's0=8', comma-separable) into
-    {name: int}. A bare name freezes at the symbol's table hint. Unknown
-    symbols, non-int values, and hint-less bare freezes error loudly —
+    {name: int}. A bare name freezes at the symbol's observed point value.
+    Unknown symbols, non-int values, and value-less bare freezes error loudly —
     silently freezing the wrong thing benches the wrong artifact."""
     frozen: dict = {}
     for raw in freeze_args or []:
@@ -130,11 +133,11 @@ def _parse_freeze_args(freeze_args: list, symbols: dict) -> dict:
                         f"{frozen[name]} and {fval}")
                 frozen[name] = fval
             else:
-                hint = (symbols[name] or {}).get("hint")
+                hint = _symbol_point_value(symbols[name])
                 if not isinstance(hint, int) or isinstance(hint, bool):
                     raise ValueError(
-                        f"--freeze {name} uses the table hint, but the "
-                        f"symbols table has no int hint for {name!r}; "
+                        f"--freeze {name} uses the observed point value, but "
+                        f"the symbols table has none for {name!r}; "
                         f"freeze explicitly with --freeze {name}=N")
                 if name in frozen and frozen[name] != hint:
                     raise ValueError(
@@ -153,14 +156,15 @@ def _recorded_point_bindings(repro_file: str, overlay: dict | None = None) -> li
     if not shapes_json.exists():
         return []
     data = json.loads(shapes_json.read_text())
+    symbols = set(data.get("symbols") or {})
     out, seen = [], set()
     for point in data.get("points", []):
         if not point.get("captured_dynamic"):
             continue
         b = dict(point.get("bindings") or {})
-        if not b:
-            continue
         b.update(overlay or {})
+        if not b or not symbols.issubset(b):
+            continue
         key = tuple(sorted(b.items()))
         if key not in seen:
             seen.add(key)
@@ -241,15 +245,20 @@ def _shape_env_spec_for_repro(repro_file: str,
     for name in live_names:
         meta = symbols[name] or {}
         lo, hi = meta.get("range") or [None, None]
-        hint = meta.get("hint")
+        hint = _symbol_point_value(meta)
+        optimization_hint = meta.get("optimization_hint")
         for field, val in (("range lower", lo), ("range upper", hi),
-                           ("hint", hint)):
+                           ("hint", hint),
+                           ("optimization hint", optimization_hint)):
             if val is not None and (
                     not isinstance(val, int) or isinstance(val, bool)):
                 raise ValueError(
                     f"symbol {name!r} has non-int {field} {val!r}")
+        if not meta.get("unbacked"):
+            optimization_hint = hint
         values[name] = IntVar(
-            name, min=lo, max=hi, optimization_hint=hint)
+            name, min=lo, max=hi,
+            optimization_hint=optimization_hint)
 
     point = next(
         (p for p in data.get("points", [])
@@ -408,17 +417,27 @@ def _effective_binding_for_row(binding: dict | None, cfg: dict) -> dict:
 
 
 def _symint_expr_evaluator(expr):
-    """Compile a sympy expr into a closure over {symbol_name: value}, built
-    from the CLOSED arithmetic grammar (Integer/Symbol/Add/Mul/Pow with a
-    non-negative int exponent). Evaluation uses plain Python operators so
-    torch SymInt values flow through and stay symbolic under dynamo tracing.
-    Returns None for any node outside the grammar (caller falls back to
-    passing the raw int)."""
+    """Compile a captured expression into direct Python/SymInt operations.
+
+    Unlike ``sympy_interp``, the returned closure is safe to inline into a
+    Dynamo trace: it performs no parsing or graph-side code generation. This
+    matters for backed replay, where a normal Python branch over the resulting
+    SymBool becomes a Dynamo guard without inserting a runtime-assert node
+    that can change Inductor fusion.
+
+    Returns ``None`` for nodes outside the supported closed grammar.
+    """
     import sympy
 
     if isinstance(expr, sympy.Integer):
         v = int(expr)
         return lambda env: v
+    if isinstance(expr, sympy.Float):
+        v = float(expr)
+        return lambda env: v
+    if isinstance(expr, sympy.Rational):
+        numerator, denominator = int(expr.p), int(expr.q)
+        return lambda env: numerator / denominator
     if isinstance(expr, sympy.Symbol):
         name = expr.name
         return lambda env: env[name]
@@ -443,7 +462,269 @@ def _symint_expr_evaluator(expr):
             and int(expr.exp) >= 0:
         base, e = parts[0], int(expr.exp)
         return lambda env: base(env) ** e
+    if isinstance(expr, sympy.Mod):
+        return lambda env: parts[0](env) % parts[1](env)
+    if isinstance(expr, sympy.Equality):
+        return lambda env: parts[0](env) == parts[1](env)
+    if isinstance(expr, sympy.Unequality):
+        return lambda env: parts[0](env) != parts[1](env)
+    if isinstance(expr, sympy.StrictLessThan):
+        return lambda env: parts[0](env) < parts[1](env)
+    if isinstance(expr, sympy.LessThan):
+        return lambda env: parts[0](env) <= parts[1](env)
+    if isinstance(expr, sympy.StrictGreaterThan):
+        return lambda env: parts[0](env) > parts[1](env)
+    if isinstance(expr, sympy.GreaterThan):
+        return lambda env: parts[0](env) >= parts[1](env)
+    if isinstance(expr, sympy.And):
+        def _and(env):
+            result = parts[0](env)
+            for part in parts[1:]:
+                result = result & part(env)
+            return result
+        return _and
+    if isinstance(expr, sympy.Or):
+        def _or(env):
+            result = parts[0](env)
+            for part in parts[1:]:
+                result = result | part(env)
+            return result
+        return _or
+    if isinstance(expr, sympy.Not):
+        return lambda env: ~parts[0](env)
+    if isinstance(expr, sympy.Max):
+        def _max(env):
+            result = parts[0](env)
+            for part in parts[1:]:
+                result = torch.sym_max(result, part(env))
+            return result
+        return _max
+    if isinstance(expr, sympy.Min):
+        def _min(env):
+            result = parts[0](env)
+            for part in parts[1:]:
+                result = torch.sym_min(result, part(env))
+            return result
+        return _min
+
+    name = type(expr).__name__
+    if name in {"FloorDiv", "CleanDiv"}:
+        return lambda env: parts[0](env) // parts[1](env)
+    if name in {"Mod", "PythonMod"}:
+        return lambda env: parts[0](env) % parts[1](env)
+    if name == "ModularIndexing":
+        return lambda env: (
+            parts[0](env) // parts[1](env)) % parts[2](env)
+    if name == "ToFloat":
+        return lambda env: torch.sym_float(parts[0](env))
+    if name in {"floor", "FloorToInt"}:
+        return lambda env: math.floor(parts[0](env))
+    if name in {"ceiling", "CeilToInt"}:
+        return lambda env: math.ceil(parts[0](env))
+    if name == "TruncToInt":
+        return lambda env: math.trunc(parts[0](env))
+    if name in {"Abs", "AbsMax"}:
+        return lambda env: abs(parts[0](env))
     return None
+
+
+def _backed_replay_plan_for_repro(repro_file: str,
+                                   frozen: dict | None = None):
+    """Build a kernel-faithful plan when every live symbol is tensor-backed.
+
+    ``ShapesSpec`` is required for genuinely unbacked symbols, but it models
+    them with deferred runtime assertions. Those assertion nodes can change an
+    otherwise identical Inductor fusion. When capture metadata says every
+    live family symbol is backed *and* each has a bare tensor-dimension source,
+    mark that exact dimension dynamic, re-derive lifted SymInt/shape arguments
+    from it, and express residual relations as ordinary Python branches.
+    Dynamo turns those branches into guards, matching the original graph
+    boundary.
+
+    Returns ``None`` when a symbol/range/expression cannot be represented by
+    this backed path; the caller then uses native ShapesSpec replay.
+    """
+    from input_codec import _sympify_expr
+
+    shapes_path = Path(repro_file).parent / "shapes.json"
+    if not shapes_path.exists():
+        return None
+    data = json.loads(shapes_path.read_text())
+    symbols = data.get("symbols") or {}
+    frozen = dict(frozen or {})
+    live_names = tuple(sorted(set(symbols) - set(frozen)))
+    point = next(
+        (p for p in data.get("points", [])
+         if p.get("captured_dynamic") and p.get("inputs") is not None),
+        None,
+    )
+    if point is None or not live_names:
+        return None
+    entries = point["inputs"]
+
+    # Provenance is authoritative. A genuinely unbacked symbol can happen to
+    # appear in a tensor shape after a data-dependent operation; that does not
+    # make it backed. Older artifacts omit the key for backed symbols, which is
+    # the schema convention used by _harvest_shape_env.
+    if any((symbols[name] or {}).get("unbacked") is True
+           for name in live_names):
+        return None
+
+    sources = {}
+    for pos, entry in enumerate(entries):
+        if not (isinstance(entry, list) and entry
+                and isinstance(entry[0], list)):
+            continue
+        for dim, value in enumerate(entry[0]):
+            if value in live_names:
+                sources.setdefault(value, (pos, dim))
+    if set(sources) != set(live_names):
+        return None
+
+    marks = []
+    for name in live_names:
+        meta = symbols[name] or {}
+        lo, hi = meta.get("range") or [None, None]
+        if lo == 2 and hi is None:
+            bounds = None  # plain mark_dynamic is exactly [2, +inf)
+        elif (isinstance(lo, int) and not isinstance(lo, bool)
+              and isinstance(hi, int) and not isinstance(hi, bool)
+              and lo < hi):
+            bounds = (lo, hi)
+        else:
+            # Half-open 0/1-capable ranges and hint-less ranges cannot be
+            # represented safely by mark_dynamic on this torch version.
+            return None
+        marks.append((*sources[name], bounds))
+
+    def evaluator(text):
+        expr = _sympify_expr(text, symbols)
+        if any(s.name not in symbols for s in expr.free_symbols):
+            return None
+        return _symint_expr_evaluator(expr)
+
+    derived = {}
+    for pos, entry in enumerate(entries):
+        if (isinstance(entry, list) and entry and entry[0] == "I"
+                and len(entry) > 2 and isinstance(entry[2], str)):
+            fn = evaluator(entry[2])
+            if fn is None:
+                return None
+            derived[pos] = fn
+        elif (isinstance(entry, list) and len(entry) > 1
+              and entry[0] == "S" and isinstance(entry[1], list)
+              and any(isinstance(value, str) for value in entry[1])):
+            fns = []
+            for value in entry[1]:
+                fn = evaluator(value) if isinstance(value, str) else (
+                    lambda _env, value=value: value)
+                if fn is None:
+                    return None
+                fns.append(fn)
+            derived[pos] = (
+                lambda env, fns=tuple(fns): [fn(env) for fn in fns])
+
+    checks = []
+    for pos, entry in enumerate(entries):
+        if not (isinstance(entry, list) and entry
+                and isinstance(entry[0], list)):
+            continue
+        for dim, value in enumerate(entry[0]):
+            if not isinstance(value, str):
+                continue
+            if sources.get(value) == (pos, dim):
+                continue
+            fn = evaluator(value)
+            if fn is None:
+                return None
+            checks.append((pos, "size", dim, value, fn))
+        options = entry[2] if len(entry) > 2 else {}
+        for dim, value in enumerate((options or {}).get("st", [])):
+            if isinstance(value, str):
+                fn = evaluator(value)
+                if fn is None:
+                    return None
+                checks.append((pos, "stride", dim, value, fn))
+        offset = (options or {}).get("off")
+        if isinstance(offset, str):
+            fn = evaluator(offset)
+            if fn is None:
+                return None
+            checks.append((pos, "storage_offset", None, offset, fn))
+
+    guards = []
+    for text in data.get("guards") or []:
+        fn = evaluator(text)
+        if fn is None:
+            return None
+        guards.append((text, fn))
+
+    kept = tuple(pos for pos in range(len(entries)) if pos not in derived)
+    kept_index = {original: current for current, original in enumerate(kept)}
+    if any(pos not in kept_index for pos, _dim, _bounds in marks):
+        return None
+    return {
+        "input_count": len(entries),
+        "kept": kept,
+        "markings": tuple(
+            (kept_index[pos], dim, bounds) for pos, dim, bounds in marks),
+        "sources": tuple(
+            (name, pos, dim) for name, (pos, dim) in sorted(sources.items())),
+        "derived": tuple(sorted(derived.items())),
+        "checks": tuple(checks),
+        "guards": tuple(guards),
+        "frozen": frozen,
+    }
+
+
+def _backed_repro(inner, plan):
+    """Reconstruct the captured call from backed tensor dimensions."""
+    class BackedRepro(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.inner = inner
+
+        def forward(self, *args):
+            full = [None] * plan["input_count"]
+            for pos, value in zip(plan["kept"], args):
+                full[pos] = value
+            values = dict(plan["frozen"])
+            for name, pos, dim in plan["sources"]:
+                values[name] = full[pos].size(dim)
+            for pos, fn in plan["derived"]:
+                full[pos] = fn(values)
+            for pos, kind, dim, expression, fn in plan["checks"]:
+                tensor = full[pos]
+                actual = (
+                    tensor.size(dim) if kind == "size"
+                    else tensor.stride(dim) if kind == "stride"
+                    else tensor.storage_offset()
+                )
+                if actual != fn(values):
+                    raise RuntimeError(
+                        f"captured {kind} relation {expression!r} failed")
+            for text, fn in plan["guards"]:
+                # A normal SymBool branch becomes a Dynamo guard. Do not use
+                # torch._check/expect_true here: their runtime-assert nodes
+                # can split an otherwise fused Inductor kernel.
+                if not fn(values):
+                    raise RuntimeError(f"captured guard {text!r} failed")
+            return self.inner(*full)
+
+    return BackedRepro()
+
+
+def _backed_args(inputs, plan):
+    """Select the compiled call arguments and mark exact backed dimensions."""
+    args = [inputs[pos] for pos in plan["kept"]]
+    for pos, dim, bounds in plan["markings"]:
+        tensor = args[pos]
+        if bounds is None:
+            torch._dynamo.mark_dynamic(tensor, dim)
+        else:
+            torch._dynamo.mark_dynamic(
+                tensor, dim, min=bounds[0], max=bounds[1])
+    return args
 
 
 def _symbols_and_guards_for_repro(repro_file: str) -> tuple[dict, list]:
@@ -483,8 +764,27 @@ def _distinct_dynamic_bindings(repro_file, rows, n=2,
     from input_codec import bindings_satisfy
 
     symbols, guards = _symbols_and_guards_for_repro(repro_file)
-    hint = {name: s["hint"] for name, s in (symbols or {}).items()
-            if isinstance(s.get("hint"), int)}
+    hint = {
+        name: value
+        for name, definition in (symbols or {}).items()
+        if isinstance(
+            (value := _symbol_point_value(definition)), int)
+        and not isinstance(value, bool)
+    }
+    row_bindings = [
+        (binding if binding is not None else config.get("bindings")) or {}
+        for _label, binding, config in rows
+    ]
+    for name in symbols:
+        if name not in hint:
+            value = next(
+                (binding[name] for binding in row_bindings
+                 if isinstance(binding.get(name), int)
+                 and not isinstance(binding.get(name), bool)),
+                None,
+            )
+            if value is not None:
+                hint[name] = value
     frozen = dict(frozen or {})
     if frozen:
         # Frozen symbols are compile-time constants: candidates vary
@@ -497,6 +797,11 @@ def _distinct_dynamic_bindings(repro_file, rows, n=2,
             from input_codec import bindings_satisfy as _bs
             return ([dict(frozen)]
                     if _bs(symbols, dict(frozen), guards) else [None])
+    missing_seed = sorted(set(symbols) - set(hint) - set(frozen))
+    if missing_seed:
+        raise ValueError(
+            "dynamic warmup needs an explicit binding for symbols without "
+            f"an observed point: {missing_seed}")
     if not hint:
         # No symbol table (hand-written dynamic shapes.json) — fall back to
         # the --bind rows' bindings, distinct ones first.
