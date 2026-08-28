@@ -14,11 +14,12 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Any
 
 import torch
 import torch._inductor.config as inductor_config
 import torch._inductor.inductor_prims  # noqa: F401
+
+from dynamic_shape_replay import _symbols_and_guards_for_repro
 
 
 UNVERSIONED_REPRO_VERSION = 0
@@ -124,6 +125,8 @@ def _parse_shapes_json(shapes_path: Path,
         # compact encoding existed; the string is documentation otherwise.
         compact = point.get("inputs")
         symbols = data.get("symbols") or {}
+        if symbol_bindings is None and point.get("requires_binding"):
+            continue
         if compact is not None and (symbols or symbol_bindings):
             # Dynamic repro: instantiate symbolic entries (at the point's
             # recorded bindings, or the caller's). Range/guard violations
@@ -140,6 +143,23 @@ def _parse_shapes_json(shapes_path: Path,
             from input_codec import spec_from_compact
             specs = [spec_from_compact(e) for e in compact]
             cfg = {"inputs": specs}
+            if symbols:
+                from input_codec import _symbol_point_value
+                cfg["bindings"] = dict(
+                    symbol_bindings
+                    or point.get("bindings")
+                    or {
+                        name: value
+                        for name, meta in symbols.items()
+                        if (value := _symbol_point_value(meta)) is not None
+                    }
+                )
+            # The point's shape_hash travels with the config so the oracle
+            # bench loop can dispatch by hash (a DYNAMIC point's shape is
+            # symbolic and won't shape-match concrete inputs — the hash is the
+            # exact dispatch key). The label embeds the hash for readability;
+            # this is the structured copy callers should thread, not parse.
+            cfg["shape_hash"] = shape_hash
             # alias_group_nbytes must travel with the config — specs
             # carrying alias_group crash generation without it
             # (adversarial review bug #1).
@@ -150,7 +170,7 @@ def _parse_shapes_json(shapes_path: Path,
         try:
             inputs = _eval_signature(signature)
             if inputs:
-                configs[label] = {"inputs": inputs}
+                configs[label] = {"inputs": inputs, "shape_hash": shape_hash}
         except Exception:
             continue
 
@@ -206,7 +226,9 @@ def _make_shape_eval_ns():
 
 def _eval_signature(expr: str) -> list:
     """Eval a T()/S() signature string and return a list of input specs."""
+    from input_codec import _assert_safe_shape_config
     ns = _make_shape_eval_ns()
+    _assert_safe_shape_config(expr)  # code-injection boundary: expr is DATA
     inputs = eval(expr, ns)  # noqa: S307
     if isinstance(inputs, tuple):
         inputs = list(inputs)
@@ -217,6 +239,7 @@ def _eval_signature(expr: str) -> list:
 
 def _parse_shapes_txt(shapes_path: Path) -> dict:
     """Parse shapes.txt by eval'ing each line with T() and S() as constructors."""
+    from input_codec import _assert_safe_shape_config
     _eval_ns = _make_shape_eval_ns()
 
     configs = {}
@@ -232,6 +255,7 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
         expr = line[colon + 1:].strip()
 
         try:
+            _assert_safe_shape_config(expr)  # code-injection boundary: expr is DATA
             inputs = eval(expr, _eval_ns)
             if isinstance(inputs, tuple):
                 inputs = list(inputs)
@@ -243,72 +267,6 @@ def _parse_shapes_txt(shapes_path: Path) -> dict:
             continue
 
     return configs
-
-
-def parse_bind_args(bind_args: list | None) -> list:
-    """Parse repeated --bind values into a list of binding dicts.
-
-    Each element is one --bind occurrence, e.g. "s16=24,s82=24" ->
-    {"s16": 24, "s82": 24}. Returns [] when bind_args is None/empty.
-    Malformed entries raise ValueError (loud beats benchmarking a typo).
-    """
-    out = []
-    for raw in bind_args or []:
-        bindings = {}
-        for part in str(raw).split(","):
-            part = part.strip()
-            if not part:
-                continue
-            if "=" not in part:
-                raise ValueError(
-                    f"--bind entry {part!r} must be symbol=int (e.g. s16=24)")
-            name, _, val = part.partition("=")
-            try:
-                bindings[name.strip()] = int(val)
-            except ValueError:
-                raise ValueError(
-                    f"--bind value for {name.strip()!r} must be an int, "
-                    f"got {val!r}") from None
-        if not bindings:
-            raise ValueError(f"--bind {raw!r} parsed to no bindings")
-        out.append(bindings)
-    return out
-
-
-def resolve_bound_configs(repro_file: str, bindings_list: list,
-                          shape: str | None = None) -> list:
-    """Resolve (label, binding, config) rows for --bind/--dynamic benching.
-
-    One row per (binding set x shape config): each binding set is threaded
-    through load_shape_configs(symbol_bindings=...), which instantiates
-    every symbolic point at that binding (range/guard violations raise).
-    binding=None rows instantiate at each point's recorded bindings (the
-    captured hint — what a plain run measures). `shape` filters to one
-    named config; unknown names raise.
-    """
-    rows = []
-    for binding in (bindings_list or [None]):
-        configs = load_shape_configs(repro_file, symbol_bindings=binding)
-        if shape is not None:
-            if shape not in configs:
-                raise ValueError(
-                    f"--shape {shape!r} not in configs "
-                    f"(have {sorted(configs)})")
-            configs = {shape: configs[shape]}
-        for label, cfg in configs.items():
-            rows.append((label, binding, cfg))
-    if not rows:
-        raise ValueError(
-            f"--bind/--dynamic found no shape configs for {repro_file} "
-            "(needs a shapes.json next to the repro)")
-    return rows
-
-
-def format_binding(binding: dict | None) -> str:
-    """Human/key form of a binding dict: 's16=24,s82=24' or 'hint'."""
-    if not binding:
-        return "hint"
-    return ",".join(f"{k}={v}" for k, v in sorted(binding.items()))
 
 
 def parse_shapes_config(config_str: str) -> list:
@@ -357,6 +315,8 @@ def parse_shapes_config(config_str: str) -> list:
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
             "b8": "b8", "u8": "u8"}
+    from input_codec import _assert_safe_shape_config
+    _assert_safe_shape_config(config_str)  # code-injection boundary: config_str is DATA
     inputs = eval(config_str, _ns)
     if isinstance(inputs, dict):
         inputs = [inputs]
@@ -630,21 +590,35 @@ def count_bytes_adjusted(mod, inputs) -> int:
     return count_bytes_effective(mod, inputs)
 
 
-def count_kernels(mod, inputs, dynamic: bool = False) -> tuple[int, list[str]]:
+def count_kernels(mod, inputs, dynamic: bool | None = False,
+                  second_inputs=None) -> tuple[int, list[str]]:
     """Compile and count how many Triton kernels Inductor generates.
 
-    dynamic=True counts kernels of the dynamic-shapes compilation (the
-    artifact --dynamic benchmarks) instead of the static one. NOTE: this
-    resets dynamo — never call it while a compile-once artifact is live.
+    dynamic: True -> blanket dynamic compile; False -> static; None -> honor
+    whatever the inputs are marked (torch._dynamo.mark_dynamic). NOTE: resets
+    dynamo — never call while a compile-once artifact is live.
+
+    second_inputs: when the inputs carry mark_dynamic dims, dynamo's 0/1/many
+    rule specializes on the FIRST shape; invoking a second (differently-bound,
+    same-marked) input forces generalization so the count reflects the
+    DYNAMIC artifact the bench measures, not the static-specialized one
+    (review R3-2). The kernel set is read from the LAST compile.
     """
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
     torch._dynamo.reset()
     with fresh_inductor_cache():
-        compiled = torch.compile(mod, dynamic=True) if dynamic else torch.compile(mod)
+        if dynamic is None:
+            compiled = torch.compile(mod)        # honor mark_dynamic on inputs
+        elif dynamic:
+            compiled = torch.compile(mod, dynamic=True)
+        else:
+            compiled = torch.compile(mod)
         with torch.no_grad():
             compiled(*inputs)
+            if second_inputs is not None:
+                compiled(*second_inputs)         # force past 0/1/many
             torch.cuda.synchronize()
         cd = cache_dir()
         py_files = sorted(glob.glob(os.path.join(cd, "**", "*.py"), recursive=True), key=os.path.getmtime)
@@ -787,103 +761,9 @@ def _unique_graph_count() -> int:
     return int(counters["stats"]["unique_graphs"])
 
 
-def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
-    """--bind / --dynamic benchmarking path.
-
-    Rows are (config label x binding x mode). Static mode compiles per
-    binding (each point is its own specialized artifact). Dynamic mode
-    compiles ONCE with torch.compile(dynamic=True) and measures the same
-    artifact at every binding — the point: the dynamic kernel's perf
-    across family points. Recompiles between dynamic points are detected
-    via dynamo's unique_graphs counter and recorded per row.
-    """
-    bindings_list = parse_bind_args(parsed.bind)
-    mode = "dynamic" if parsed.dynamic else "static"
-    rows = resolve_bound_configs(repro_file, bindings_list,
-                                 shape=parsed.shape)
-
-    def _inputs_for(binding, cfg):
-        inputs = make_inputs_from_config(cfg)
-        if binding is None:
-            # hint point: legacy shape-param merge applies (configs that
-            # predate S-entries lack lifted params; defaults ARE the hint)
-            inputs = _merge_default_shape_params(
-                inputs, make_inputs_safely(make_inputs_fn))
-        return inputs
-
-    all_results = {}
-    compiled = None  # dynamic mode: ONE artifact across all rows
-    if mode == "dynamic":
-        # Kernel counting recompiles (and resets dynamo), so do it BEFORE
-        # the compile-once artifact exists. The dynamic compilation's
-        # kernel set is binding-independent — count at the first row.
-        _first_label, first_binding, first_cfg = rows[0]
-        n_kernels, kernel_names = count_kernels(
-            repro_cls(), _inputs_for(first_binding, first_cfg), dynamic=True)
-        torch._dynamo.reset()
-        compiled = torch.compile(repro_cls(), dynamic=True)
-
-    for label, binding, cfg in rows:
-        binding_str = format_binding(binding)
-        row_key = f"{label}::{binding_str}::{mode}"
-        inputs = _inputs_for(binding, cfg)
-
-        mod = repro_cls()
-        with torch.no_grad():
-            mod(*inputs)  # eager validation: bad configs fail LOUD here
-
-        graphs_before = _unique_graph_count()
-        if mode == "static":
-            n_kernels, kernel_names = count_kernels(mod, inputs)
-            torch._dynamo.reset()
-            compiled_static = torch.compile(mod)
-            compiled_us = timed_min_us(
-                lambda: compiled_static(*inputs),
-                warmup=parsed.n_warmup, rep=parsed.n_rep)
-            recompiled = None  # fresh compile per row by design
-        else:
-            compiled_us = timed_min_us(
-                lambda: compiled(*inputs),
-                warmup=parsed.n_warmup, rep=parsed.n_rep)
-            graphs_after = _unique_graph_count()
-            is_first_row = not any(
-                r.get("mode") == "dynamic" for r in all_results.values())
-            # First dynamic row pays the one compile; later rows must
-            # reuse the artifact — any new graph is a recompile.
-            recompiled = (graphs_after > graphs_before) and not is_first_row
-            if recompiled:
-                print(f"[{row_key}] WARNING: dynamic artifact recompiled "
-                      f"at this binding (unique_graphs "
-                      f"{graphs_before} -> {graphs_after})")
-
-        print(f"[{row_key}] binding={binding_str} mode={mode} "
-              f"time={compiled_us:8.1f} us kernels={n_kernels}"
-              + (" RECOMPILED" if recompiled else ""))
-
-        all_results[row_key] = {
-            "label": label,
-            "binding": binding,
-            "mode": mode,
-            "compiled_us": compiled_us,
-            "n_kernels": n_kernels,
-            "kernel_names": kernel_names,
-            "recompiled": recompiled,
-        }
-
-    if parsed.output:
-        with open(parsed.output, "w") as f:
-            json.dump(all_results, f, indent=2)
-
-    if parsed.update_perf:
-        hardware = parsed.hardware or _detect_hardware()
-        for row_key, result in all_results.items():
-            perf_entry = {k: v for k, v in result.items()
-                          if k != "kernel_names"}
-            perf_entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-            _save_perf(repro_file, hardware, row_key, perf_entry)
-        print(f"\n[perf] Saved to perf.json under hardware={hardware}")
-
-    return all_results
+def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed):
+    from dynamic_benchmark import _run_bound_benchmark as run
+    return run(repro_file, repro_cls, make_inputs_fn, parsed)
 
 
 def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
@@ -905,20 +785,57 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                         help="Write JSON results to file")
     parser.add_argument("--no-cd", action="store_true",
                         help="Skip coordinate descent tuning")
+    parser.add_argument("--run-at", action="append", default=None,
+                        dest="run_at", metavar="s16=24,s82=24",
+                        help="Measure at this binding (repeatable). On a "
+                             "dynamic repro the artifact is DYNAMIC by "
+                             "default; add --static for a fresh fully "
+                             "specialized compile per --run-at binding. "
+                             "Without --run-at, the family's recorded points "
+                             "are measured.")
     parser.add_argument("--bind", action="append", default=None,
-                        metavar="s16=24,s82=24",
-                        help="Symbol bindings for dynamic repros (shapes.json "
-                             "with a symbols table). Repeatable: each "
-                             "occurrence is one family point. Works with "
-                             "static compile (one compile per binding) or "
-                             "--dynamic (one compile, measured per binding).")
+                        help=argparse.SUPPRESS)   # compat alias of --run-at
+    parser.add_argument("--compile-at", action="append", default=None,
+                        dest="compile_at", metavar="s16=24",
+                        help="Invoke the dynamic artifact at this binding "
+                             "BEFORE measuring (repeatable, exact order; the "
+                             "first is inductor's tuning hint). One "
+                             "--compile-at A with --run-at B is the "
+                             "'compile at A, run at B' experiment — a "
+                             "generalization/recompile at B is reported, "
+                             "never hidden by an injected auto warm shape. "
+                             "Without --compile-at, an automatic two-"
+                             "distinct-shape warm generalizes the artifact.")
+    parser.add_argument("--freeze", action="append", default=None,
+                        metavar="s0[=8]",
+                        help="Freeze this symbol to a compile-time constant "
+                             "(its table hint, or =N), keeping every other "
+                             "symbol dynamic (repeatable). PARTIAL "
+                             "specialization is represented in the native "
+                             "ShapeEnv contract. A "
+                             "--run-at/--compile-at binding that contradicts "
+                             "a frozen value errors loudly; freezing every "
+                             "symbol errors (use --static).")
     parser.add_argument("--dynamic", action="store_true",
-                        help="Compile with torch.compile(dynamic=True) and "
-                             "measure the SAME compiled artifact at every "
-                             "--bind point (CUDAGraph+do_bench min, same "
-                             "methodology as static). Rows record binding, "
-                             "mode, time; recompiles between points are "
-                             "detected and flagged.")
+                        help="Force the dynamic artifact (compat: this is "
+                             "already the DEFAULT for a repro with a symbols "
+                             "table; on a static repro it forces blanket "
+                             "dynamic=True).")
+    parser.add_argument("--static", action="store_true",
+                        help="Fully specialized (never mark_dynamic) static "
+                             "artifacts. Alone: ONE artifact with every "
+                             "symbol bound to symbols[name].hint (the "
+                             "all-hints shortcut; row records the actual "
+                             "binding, e.g. label::s0=8::static). With "
+                             "--run-at: a fresh fully specialized artifact "
+                             "per requested COMPLETE binding. Requires a "
+                             "dynamic repro (a symbols table). Distinct from "
+                             "--all-shapes (every recorded point statically "
+                             "at ITS saved bindings) and the default dynamic "
+                             "replay; conflicts loudly with --dynamic, "
+                             "--compile-at, --freeze, and --all-shapes.")
+    parser.add_argument("--prewarm", action="append", default=None,
+                        help=argparse.SUPPRESS)  # compat alias of --compile-at
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
@@ -931,12 +848,68 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                         help="Disable the per-GPU benchmark lock")
     parsed = parser.parse_args(args)
 
+    # --run-at/--compile-at are the public spellings; --bind/--prewarm are
+    # hidden compat aliases. Mixing spellings for one role in
+    # one invocation is rejected — a command that says both is ambiguous
+    # about intent. After the merge, downstream code reads parsed.bind /
+    # parsed.prewarm (the historical attribute names) with the flag the user
+    # actually typed preserved for error attribution.
+    if parsed.run_at and parsed.bind:
+        parser.error("use --run-at or its compat alias --bind, not both")
+    if parsed.compile_at and parsed.prewarm:
+        parser.error("use --compile-at or its compat alias --prewarm, "
+                     "not both")
+    parsed._run_at_flag = "--run-at" if parsed.run_at else "--bind"
+    parsed._compile_at_flag = ("--compile-at" if parsed.compile_at
+                               else "--prewarm")
+    parsed.bind = parsed.run_at or parsed.bind
+    parsed.prewarm = parsed.compile_at or parsed.prewarm
+
+    # Whether THIS repro is a dynamic family decides the default execution
+    # mode: dynamic families run dynamically with no flags;
+    # static repros keep the historical per-shape static path byte-identical.
+    _repro_is_dynamic = bool(_symbols_and_guards_for_repro(repro_file)[0])
+
+    if parsed.prewarm and not (parsed.dynamic or _repro_is_dynamic):
+        # --compile-at steers the warm sequence of the ONE dynamic artifact;
+        # a static repro's per-shape path compiles fresh per shape and has no
+        # shared warm sequence. Silently discarding it would make
+        # "--compile-at A" and "--compile-at B" produce identical numbers.
+        parser.error(
+            f"{parsed._compile_at_flag} only applies to the dynamic bench "
+            "path; this repro has no symbols table (pass --dynamic to force "
+            f"blanket dynamic, or drop {parsed._compile_at_flag}).")
+    if parsed.static and parsed.dynamic:
+        parser.error(
+            "--static and --dynamic are contradictory: --static compiles "
+            "fresh fully-specialized artifacts, --dynamic measures ONE "
+            "dynamic artifact. Run them as two invocations to compare.")
+    if parsed.static and parsed.prewarm:
+        parser.error(
+            f"--static has no warm sequence to steer (each binding is a "
+            f"fresh fully specialized compile) — drop "
+            f"{parsed._compile_at_flag} or drop --static.")
+    if parsed.static and parsed.freeze:
+        parser.error(
+            "--freeze keeps the non-frozen symbols DYNAMIC; --static "
+            "specializes everything. For a fully static bench use --static "
+            "(optionally with --run-at); for partial specialization drop "
+            "--static.")
+    if parsed.static and parsed.all_shapes:
+        parser.error(
+            "--static compiles fully specialized artifacts at the hints or "
+            "at --run-at bindings; --all-shapes statically benches EVERY "
+            "recorded point at its saved bindings. Pick one.")
+
     def _run_benchmark():
-        if parsed.bind or parsed.dynamic:
-            # Family-point benchmarking: --bind instantiates symbolic
-            # points at explicit bindings; --dynamic measures one
-            # dynamic=True artifact across them. Separate path so the
-            # legacy flow below stays byte-identical when flags absent.
+        if (parsed.bind or parsed.dynamic or parsed.static or parsed.prewarm
+                or parsed.freeze
+                or (_repro_is_dynamic and not parsed.all_shapes)):
+            # Family benchmarking. A DYNAMIC repro routes here by DEFAULT
+            # (no flags -> the native ShapeEnv artifact over its recorded
+            # points); --all-shapes keeps the
+            # legacy per-point static sweep; static repros keep the legacy
+            # flow below byte-identical when flags are absent.
             return _run_bound_benchmark(
                 repro_file, repro_cls, make_inputs_fn, parsed)
 
