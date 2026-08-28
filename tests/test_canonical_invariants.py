@@ -2032,6 +2032,93 @@ def test_dynamic_default_measures_general_kernel_gpu():
             f"{key}: replay structure {_kernel_kinds(row['kernel_names'])} "
             f"!= original {expected_kinds}")
 
+    # The saved-full-graph surface consumes the SAME replay planner. Its raw
+    # SymInt arguments must be re-derived from the marked tensor dimensions,
+    # not passed as specializing Python ints.
+    from full_graph_harness import prepare_full_graph_execution
+    from repro_harness import count_kernels, _unique_graph_count
+
+    full_graph_source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, weight: "f32[64]cuda:0", bias: "f32[64]cuda:0", height: "Sym(s0)", width: "Sym(s1)", x: "f32[64, 64, s0, s1]cuda:0"):
+        view = torch.ops.aten.view.default(
+            x, [64, 32, 2, height * width])
+        var, mean = torch.ops.aten.var_mean.correction(
+            view, [2, 3], correction=0, keepdim=True)
+        normed = torch.ops.aten.mul.Tensor(
+            torch.ops.aten.sub.Tensor(view, mean),
+            torch.ops.aten.rsqrt.default(
+                torch.ops.aten.add.Tensor(var, 1e-5)),
+        )
+        back = torch.ops.aten.view.default(
+            normed, [64, 64, height, width])
+        w = weight[None, :, None, None]
+        b = bias[None, :, None, None]
+        return (torch.ops.aten.add.Tensor(
+            torch.ops.aten.mul.Tensor(back, w), b),)
+'''
+    with tempfile.TemporaryDirectory() as td:
+        graph_path = Path(td) / "full_graph_000.py"
+        graph_path.write_text(full_graph_source)
+        graph_path.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 2,
+            "inputs": [
+                [[64], "f32"],
+                [[64], "f32"],
+                ["I", 8, "s0"],
+                ["I", 32, "s1"],
+                [
+                    [64, 64, "s0", "s1"],
+                    "f32",
+                    {"st": [
+                        "64*s0*s1",
+                        "s0*s1",
+                        "s1",
+                        1,
+                    ]},
+                ],
+            ],
+            "outputs": [[[64, 64, "s0", "s1"], "f32"]],
+            "tensor_attrs": {},
+            "symbols": {
+                "s0": {"hint": 8, "range": [2, None]},
+                "s1": {"hint": 32, "range": [2, None]},
+            },
+            "guards": ["Eq(Mod(s0, 8), 0)"],
+            "captured_dynamic": True,
+        }))
+        execution = prepare_full_graph_execution(graph_path)
+        bindings = [{"s0": 8, "s1": 32}, {"s0": 16, "s1": 40}]
+        with pytest.raises(ValueError, match="violates guard"):
+            execution.args({"s0": 10, "s1": 32})
+        call_args = [execution.args(binding) for binding in bindings]
+        assert all(len(args) == 3 for args in call_args)
+        actual_n, actual_kernels = count_kernels(
+            execution.module,
+            call_args[0],
+            dynamic=None,
+            second_inputs=call_args[1],
+        )
+        assert actual_n == len(expected), (
+            f"full graph emitted {actual_kernels}, original emitted {expected}")
+        assert _kernel_kinds(actual_kernels) == expected_kinds
+
+        torch._dynamo.reset()
+        compiled = torch.compile(execution.module)
+        with torch.no_grad():
+            for args in call_args:
+                compiled(*args)
+            torch.cuda.synchronize()
+        after_warm = _unique_graph_count()
+        with torch.no_grad():
+            for args in call_args:
+                compiled(*args)
+            torch.cuda.synchronize()
+        assert _unique_graph_count() == after_warm, (
+            "saved full graph recompiled at a recorded dynamic point")
+
 
 def test_static_capture_has_no_symbolic_artifacts_gpu():
     """A STATIC compile (no mark_dynamic) must capture with zero symbolic

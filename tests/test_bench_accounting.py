@@ -38,6 +38,7 @@ from full_graph_harness import (
     make_tensor_from_spec,
     parse_full_graph_inputs,
     parse_full_graph_tensor_attrs,
+    prepare_full_graph_execution,
     result_metadata,
     write_full_graph_metadata,
 )
@@ -443,6 +444,104 @@ class GraphModule(torch.nn.Module):
         with torch.no_grad():
             (out,) = instance(*inputs)
         assert out.shape == (2, 2)
+
+
+def test_dynamic_full_graph_reuses_individual_repro_replay_contract():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, n: "Sym(s0)", x: "f32[2, s0]cpu"):
+        view = torch.ops.aten.view.default(x, [2, n])
+        return (torch.ops.aten.mul.Tensor(view, 2),)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 2,
+            "inputs": [
+                ["I", 2, "s0"],
+                [[2, "s0"], "f32", {"dev": "cpu"}],
+            ],
+            "outputs": [[[2, "s0"], "f32", {"dev": "cpu"}]],
+            "tensor_attrs": {},
+            "symbols": {"s0": {"hint": 2, "range": [2, None]}},
+            "guards": [],
+            "captured_dynamic": True,
+        }))
+
+        execution = prepare_full_graph_execution(
+            graph, default_device="cpu")
+        assert execution.dynamic
+        assert execution._plan_kind == "backed"
+        assert execution.warm_bindings() == [{"s0": 2}, {"s0": 4}]
+        metadata = result_metadata(execution.definition)
+        assert metadata["constraints"]["inputs"][1]["shape"] == [2, "s0"]
+        assert metadata["constraints"]["symbols"] == {
+            "s0": {"hint": 2, "range": [2, None]}}
+        queueable, failures = _preflight_full_graphs([graph])
+        assert queueable == [graph]
+        assert failures == {}
+
+        graphs = []
+
+        def backend(gm, _inputs):
+            graphs.append(gm)
+            return gm.forward
+
+        compiled = torch.compile(execution.module, backend=backend)
+        for size in (2, 4):
+            args = execution.args({"s0": size})
+            # The raw SymInt argument is reconstructed from x.size(1), so the
+            # compiled callable receives only the backed tensor source.
+            assert len(args) == 1
+            (out,) = compiled(*args)
+            assert out.shape == (2, size)
+        assert len(graphs) == 1
+        torch._dynamo.reset()
+
+        static_execution = prepare_full_graph_execution(
+            graph, default_device="cpu", dynamic=False)
+        static_args = static_execution.args({"s0": 4})
+        # Static replay preserves the saved call signature; unlike the
+        # dynamic adapter it does not derive/remove the raw SymInt argument.
+        assert len(static_args) == 2
+        assert static_execution.module(*static_args)[0].shape == (2, 4)
+
+        # Provenance remains authoritative on the full-graph path too. An
+        # unobserved unbacked symbol uses ShapesSpec and requires an explicit
+        # initial point; its optimization hint is not promoted to a point.
+        import pytest
+        sidecar = json.loads(graph.with_suffix(".meta.json").read_text())
+        sidecar["symbols"]["s0"] = {
+            "unbacked": True,
+            "range": [0, 64],
+            "optimization_hint": 8,
+        }
+        graph.with_suffix(".meta.json").write_text(json.dumps(sidecar))
+        with pytest.raises(ValueError, match="explicit symbol_bindings"):
+            prepare_full_graph_execution(graph, default_device="cpu")
+        unbacked = prepare_full_graph_execution(
+            graph,
+            default_device="cpu",
+            symbol_bindings={"s0": 3},
+        )
+        assert unbacked._plan_kind == "shape_env"
+        unbacked_graphs = []
+
+        def unbacked_backend(gm, _inputs):
+            unbacked_graphs.append(gm)
+            return gm.forward
+
+        compiled_unbacked = torch.compile(
+            unbacked.module, backend=unbacked_backend)
+        for size in (3, 5):
+            args = unbacked.args({"s0": size})
+            assert len(args) == 3  # raw SymInt, tensor, private root
+            assert compiled_unbacked(*args)[0].shape == (2, size)
+        assert len(unbacked_graphs) == 1
+        torch._dynamo.reset()
 
 
 def test_full_graph_harness_zeros_fallback_for_annotation_only_integer_tensor_attrs():

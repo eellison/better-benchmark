@@ -4,6 +4,8 @@ The saved full graphs are print_readable-style Python modules.  They contain a
 torch.nn.Module subclass with tensor metadata in forward annotations, but no
 canonical make_inputs() helper.  This module reconstructs runnable inputs from
 those annotations so the benchmark runner can time the whole graph directly.
+Dynamic sidecars delegate to ``dynamic_shape_replay``—the same contract
+planner used by partition repros—rather than maintaining a second replay path.
 """
 
 from __future__ import annotations
@@ -24,6 +26,77 @@ class FullGraphDefinition:
     tensor_attrs: dict[str, dict[str, Any]]
     forward_takes_no_inputs: bool
     metadata: dict[str, Any]
+
+
+@dataclass
+class FullGraphExecution:
+    """One saved full graph prepared for static or dynamic execution.
+
+    ``module`` is the callable to compile. ``args(binding)`` materializes the
+    exact inputs for one symbol binding and applies the same replay adapter
+    used by individual repros, including mark_dynamic placement, lifted
+    SymInt reconstruction, ranges, guards, and metadata relations.
+    """
+
+    module: Any
+    definition: FullGraphDefinition
+    symbols: dict[str, dict]
+    guards: list[str]
+    dynamic: bool
+    frozen: dict[str, int]
+    default_device: str
+    _plan_kind: str | None = None
+    _plan: Any = None
+    _live_names: tuple[str, ...] = ()
+    _original_input_count: int = 0
+
+    def args(self, binding: dict[str, int] | None = None) -> tuple[Any, ...]:
+        explicit = dict(binding or {})
+        conflicts = sorted(
+            name for name, value in explicit.items()
+            if name in self.frozen and self.frozen[name] != value
+        )
+        if conflicts:
+            raise ValueError(
+                f"full-graph binding {explicit} contradicts frozen values "
+                f"{self.frozen} on {conflicts}")
+        effective_request = {**explicit, **self.frozen}
+        definition = load_full_graph_definition(
+            self.definition.path,
+            symbol_bindings=effective_request or None,
+        )
+        inputs = make_inputs_from_full_graph_specs(
+            definition.input_specs,
+            default_device=self.default_device,
+        )
+        if not self.dynamic:
+            return inputs
+        effective = definition.metadata.get("symbol_bindings") or {}
+        if self._plan_kind == "backed":
+            from dynamic_shape_replay import _backed_args
+            return tuple(_backed_args(list(inputs), self._plan))
+        if self._plan_kind == "shape_env":
+            return (
+                *inputs[:self._original_input_count],
+                *(effective[name] for name in self._live_names),
+            )
+        raise AssertionError(f"unknown full-graph replay plan {self._plan_kind!r}")
+
+    def warm_bindings(self, n: int = 2) -> list[dict[str, int]]:
+        """Guard-valid bindings that force the general dynamic artifact."""
+        if not self.dynamic:
+            return [dict(self.definition.metadata.get("symbol_bindings") or {})]
+        from dynamic_shape_replay import (
+            _distinct_dynamic_bindings_for_contract,
+        )
+        seed = self.definition.metadata.get("symbol_bindings") or {}
+        return _distinct_dynamic_bindings_for_contract(
+            self.symbols,
+            self.guards,
+            [seed],
+            n=n,
+            frozen=self.frozen,
+        )
 
 
 _DTYPE_SHORT_NAMES = {
@@ -1490,11 +1563,17 @@ def infer_full_graph_source(path: str | Path) -> dict[str, Any]:
 def result_metadata(definition: FullGraphDefinition) -> dict[str, Any]:
     sidecar = definition.metadata.get("sidecar", {})
     constraints = {
-        "inputs": definition.input_specs,
-        "tensor_attrs": definition.tensor_attrs,
+        # Keep the serialized symbolic contract in benchmark results. The
+        # in-memory definition is concretized at one binding for allocation;
+        # reporting that evaluated snapshot would hide the family expressions.
+        "inputs": sidecar.get("inputs") or definition.input_specs,
+        "tensor_attrs": sidecar.get("tensor_attrs") or definition.tensor_attrs,
     }
     if sidecar.get("outputs") is not None:
         constraints["outputs"] = sidecar["outputs"]
+    if sidecar.get("symbols"):
+        constraints["symbols"] = sidecar["symbols"]
+        constraints["guards"] = sidecar.get("guards") or []
 
     return {
         "schema_version": 1,
@@ -1569,6 +1648,7 @@ def load_full_graph_definition(
     # by re-evaluating from the sidecar's symbols table + exprs — the exprs
     # are retained on disk, only the in-memory definition is specialized.
     symbols = sidecar.get("symbols")
+    effective = None
     if symbols:
         from input_codec import (
             _symbol_point_value,
@@ -1600,6 +1680,7 @@ def load_full_graph_definition(
         metadata={
             "source": sidecar.get("source") or infer_full_graph_source(path),
             "sidecar": sidecar,
+            "symbol_bindings": effective,
         },
     )
 
@@ -1986,6 +2067,151 @@ def load_full_graph(
         default_device=default_device,
     )
     return instance, inputs, definition
+
+
+def prepare_full_graph_execution(
+    graph_path_or_definition: str | Path | FullGraphDefinition,
+    *,
+    default_device: str = "cuda",
+    dynamic: bool | None = None,
+    frozen: dict[str, int] | None = None,
+    symbol_bindings: dict[str, int] | None = None,
+) -> FullGraphExecution:
+    """Prepare a saved full graph using the individual-repro replay contract.
+
+    Dynamic sidecars run dynamically by default. Passing ``dynamic=False``
+    requests the historical concrete-at-hints execution. Static sidecars stay
+    static. ``FullGraphExecution.args(binding)`` can then invoke one compiled
+    module at multiple points without rebuilding the artifact. An unobserved
+    unbacked family needs an initial explicit ``symbol_bindings`` point, just
+    as an individual repro needs ``--run-at``.
+
+    Typical compile-at-A/run-at-B use::
+
+        execution = prepare_full_graph_execution(path)
+        compiled = torch.compile(execution.module)
+        compiled(*execution.args({"s0": 8}))
+        compiled(*execution.args({"s0": 16}))
+    """
+    frozen = dict(frozen or {})
+    initial_bindings = dict(symbol_bindings or {})
+    conflicts = sorted(
+        name for name, value in initial_bindings.items()
+        if name in frozen and frozen[name] != value
+    )
+    if conflicts:
+        raise ValueError(
+            f"initial full-graph binding {initial_bindings} contradicts "
+            f"frozen values {frozen} on {conflicts}")
+    initial_bindings.update(frozen)
+
+    definition = (
+        graph_path_or_definition
+        if isinstance(graph_path_or_definition, FullGraphDefinition)
+        else load_full_graph_definition(
+            graph_path_or_definition,
+            symbol_bindings=initial_bindings or None,
+        )
+    )
+    if (isinstance(graph_path_or_definition, FullGraphDefinition)
+            and initial_bindings):
+        definition = load_full_graph_definition(
+            definition.path,
+            symbol_bindings=initial_bindings,
+        )
+    sidecar = definition.metadata.get("sidecar") or {}
+    symbols = sidecar.get("symbols") or {}
+    guards = sidecar.get("guards") or []
+    use_dynamic = bool(symbols) if dynamic is None else bool(dynamic)
+
+    if use_dynamic and not symbols:
+        raise ValueError(
+            f"{definition.path} has no captured symbols table; faithful "
+            "dynamic full-graph replay requires a current metadata sidecar")
+    unknown_frozen = sorted(set(frozen) - set(symbols))
+    if unknown_frozen:
+        raise ValueError(
+            f"full-graph freeze names unknown symbols {unknown_frozen}")
+    if use_dynamic and set(frozen) == set(symbols):
+        raise ValueError(
+            "every full-graph symbol is frozen; use dynamic=False for a "
+            "fully specialized execution")
+
+    instance = instantiate_full_graph(
+        definition, default_device=default_device)
+    if not use_dynamic:
+        return FullGraphExecution(
+            module=instance,
+            definition=definition,
+            symbols=symbols,
+            guards=guards,
+            dynamic=False,
+            frozen=frozen,
+            default_device=default_device,
+        )
+
+    from input_codec import compact_from_spec
+    entries = [
+        compact_from_spec(spec)
+        for spec in (sidecar.get("inputs") or [])
+    ]
+    contract = {
+        "symbols": symbols,
+        "guards": guards,
+        "points": [{
+            "captured_dynamic": True,
+            "inputs": entries,
+        }],
+    }
+    from dynamic_shape_replay import (
+        _backed_replay_plan_from_contract,
+        _backed_repro,
+        _shape_env_repro,
+        _shape_env_spec_from_contract,
+    )
+    backed_plan = _backed_replay_plan_from_contract(
+        contract, frozen=frozen)
+    if backed_plan is not None:
+        return FullGraphExecution(
+            module=_backed_repro(instance, backed_plan),
+            definition=definition,
+            symbols=symbols,
+            guards=guards,
+            dynamic=True,
+            frozen=frozen,
+            default_device=default_device,
+            _plan_kind="backed",
+            _plan=backed_plan,
+            _original_input_count=len(entries),
+        )
+
+    (
+        shape_spec,
+        live_names,
+        original_input_count,
+        metadata_checks,
+        frozen_for_spec,
+    ) = _shape_env_spec_from_contract(contract, frozen=frozen)
+    return FullGraphExecution(
+        module=_shape_env_repro(
+            instance,
+            original_input_count,
+            shape_spec,
+            live_names,
+            metadata_checks,
+            frozen_for_spec,
+        ),
+        definition=definition,
+        symbols=symbols,
+        guards=guards,
+        dynamic=True,
+        frozen=frozen,
+        default_device=default_device,
+        _plan_kind="shape_env",
+        _plan=shape_spec,
+        _live_names=live_names,
+        _original_input_count=original_input_count,
+    )
 
 
 def tensor_bytes(value: Any) -> int:
