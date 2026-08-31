@@ -1256,6 +1256,19 @@ def test_shape_hash_symbolization_identity():
     assert len({h8, h16, h32}) == 3, (h8, h16, h32)
     assert shape_hash_for_placeholders(_symint_point(8)) == h8  # stable
 
+    def _symfloat_point(hint):
+        point = _symint_point(hint)
+        point["arg0_1"] = dict(
+            point["arg0_1"], dtype="symfloat", expr="zuf0")
+        return point
+
+    hf15, hf25 = (
+        shape_hash_for_placeholders(_symfloat_point(h))
+        for h in (1.5, 2.5)
+    )
+    assert hf15 != hf25
+    assert hf15 != shape_hash_for_placeholders(_symint_point(1.5))
+
 
 def test_capture_hook_process_graph_splits_horizontal_fusion_regions():
     if not _partitioner_supports_skip_horizontal_fusion():

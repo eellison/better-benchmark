@@ -45,6 +45,8 @@ from full_graph_harness import (
     _shape_env_of as _shape_env_of,
     _symbolic_block_from_value as _symbolic_block_from_value,
     _harvest_shape_env as _harvest_shape_env,
+    _raise_unsupported_symfloat as _raise_unsupported_symfloat,
+    _symfloat_replay_dtype as _symfloat_replay_dtype,
 )
 # Single source of truth for the emitted version marker: the generated repro
 # template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
@@ -355,21 +357,35 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 shape_env, "real_tensor_prop_unbacked_vals", {}) or {}
             if real_vals:
                 replaced = expr.xreplace(real_vals)
-                if getattr(replaced, "is_number", False):
-                    return int(replaced)
+                if (
+                    isinstance(replaced, (int, float))
+                    and not isinstance(replaced, bool)
+                ) or getattr(replaced, "is_number", False):
+                    return (
+                        float(replaced)
+                        if isinstance(x, torch.SymFloat)
+                        else int(replaced)
+                    )
             if node.hint is not None:
                 return node.hint
             hint_overrides = getattr(
                 shape_env, "var_to_hint_override", {}) or {}
             replaced = expr.xreplace(hint_overrides)
-            if getattr(replaced, "is_number", False):
-                return int(replaced)
+            if (
+                isinstance(replaced, (int, float))
+                and not isinstance(replaced, bool)
+            ) or getattr(replaced, "is_number", False):
+                return (
+                    float(replaced)
+                    if isinstance(x, torch.SymFloat)
+                    else int(replaced)
+                )
             return shape_env.optimization_hint(expr, fallback=2)
         return int(x)
 
     def _storage_key(val):
         try:
-            return id(val.untyped_storage())
+            return int(getattr(val.untyped_storage(), "_cdata"))
         except Exception:
             return None
 
@@ -452,21 +468,32 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                     # rejecting every rebind (R2-1). Read the hint instead.
                     # (We're inside _no_guards, so even reads here can't leak.)
                     ssz = val.untyped_storage().size()
-                    if isinstance(ssz, (torch.SymInt, torch.SymFloat)):
+                    if isinstance(ssz, torch.SymFloat):
+                        _raise_unsupported_symfloat(
+                            f"storage capacity for input {name!r}")
+                    if isinstance(ssz, torch.SymInt):
                         _note_env(ssz)
                         ssz = ssz.node.hint        # int by construction
                     if ssz is not None:
                         placeholder_info[name]["_storage_nbytes"] = int(ssz)
-        elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
+        elif val is not None and isinstance(
+                val, (torch.SymInt, torch.SymFloat)):
             _note_env(val)
             hint = _resolve_sym(val)
             placeholder_info[name] = {
                 "shape": [],
                 "stride": [],
-                "dtype": "symint",
+                "dtype": (
+                    "symfloat"
+                    if isinstance(val, torch.SymFloat)
+                    else "symint"
+                ),
                 "device": "cpu",
                 "hint": hint,
             }
+            if isinstance(val, torch.SymFloat):
+                placeholder_info[name]["float_dtype"] = (
+                    _symfloat_replay_dtype())
             # Live symint input: record its expr ('s0' root, or 's0*s53'
             # derived) so it serializes as ['I', hint, expr], not the old
             # S([hint]) conflation. None for a constant-valued symint.
@@ -533,7 +560,10 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         v = entry
         if isinstance(entry, fx.Node):
             v = (entry.meta or {}).get("val")
-        if isinstance(v, (torch.SymInt, torch.SymFloat)):
+        if isinstance(v, torch.SymFloat):
+            _raise_unsupported_symfloat(
+                "shape-list entry reconstruction")
+        if isinstance(v, torch.SymInt):
             _note_env(v)
             hint = v.node.hint if hasattr(v, "node") and hasattr(v.node, "hint") else int(v)
             if hint is None:
@@ -553,8 +583,10 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         input node, not a plain int."""
         if not isinstance(entry, fx.Node):
             return False
-        return isinstance((entry.meta or {}).get("val"),
-                          (torch.SymInt, torch.SymFloat))
+        value = (entry.meta or {}).get("val")
+        if isinstance(value, torch.SymFloat):
+            _raise_unsupported_symfloat("symbolic shape-list entry")
+        return isinstance(value, torch.SymInt)
 
     def _lift_shape_arg(node, args):
         """For reshape/view ops, lift the shape literal to a parameter.
@@ -581,7 +613,10 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             for e in shape_list:
                 if isinstance(e, fx.Node):
                     v = (e.meta or {}).get("val")
-                    if isinstance(v, (torch.SymInt, torch.SymFloat)):
+                    if isinstance(v, torch.SymFloat):
+                        _raise_unsupported_symfloat(
+                            "inline symbolic shape-list entry")
+                    if isinstance(v, torch.SymInt):
                         _note_env(v)
             return args
         # Static shape list: lift to a _shape_param placeholder as before.
@@ -949,7 +984,7 @@ def _canonical_symbolic_suffixes(placeholder_info: dict) -> dict:
     Returns {} for fully static captures (their hash input must stay
     byte-identical to the historical scheme — the whole static corpus keys
     on it). For dynamic captures, each symbolic placeholder gets a rendering
-    of its shape/stride exprs and symint expr with symbol names CANONICALIZED
+    of its shape/stride exprs and symbolic-scalar expr with symbol names CANONICALIZED
     by first appearance across placeholders in graph order (shape dims, then
     strides, then the symint expr — the same slot discipline as
     merge_captures._canonical_symbol_rename). Dynamo allocates names off a
@@ -1040,22 +1075,21 @@ def shape_hash_for_placeholders(placeholder_info: dict) -> str:
     placeholders therefore append a canonical-symbol expr suffix; static
     captures append nothing and hash exactly as they always have.
 
-    SymInt placeholders additionally hash their concrete HINT (PR80 review
-    finding 2): their historical fields are constant (shape=[], stride=[],
-    dtype=symint) and the expr suffix is binding-blind by design, so two
-    points of a family that differ ONLY in a symint's value (s77=8 vs
-    s77=16, no tensor dim changing with it) hashed identically — the later
-    points were deduped away at process_graph and never reached merge or
-    oracle dispatch. shape_hash is POINT identity, and for a symint the
-    hint IS the point's concrete value (the analogue of a tensor's
-    hint-evaluated shape). Static captures never carry symint placeholders,
+    Symbolic scalar placeholders additionally hash their concrete HINT. Their
+    other fields are constant and the expr suffix is binding-blind, so two
+    points differing only in scalar value would otherwise be deduplicated
+    before merge. The hint is the scalar analogue of a tensor's
+    hint-evaluated shape. Static captures never carry symbolic placeholders,
     so static hashes stay byte-identical.
     """
     suffixes = _canonical_symbolic_suffixes(placeholder_info)
     input_shapes = sorted(
         f"{info.get('shape', '?')}:{info.get('stride', [])}:{info.get('dtype', '?')}"
         + (f":{suffixes[name]}" if name in suffixes else "")
-        + (f":sym={info.get('hint')}" if info.get("dtype") == "symint" else "")
+        + (
+            f":sym={info.get('hint')}"
+            if info.get("dtype") in {"symint", "symfloat"} else ""
+        )
         for name, info in placeholder_info.items()
     )
     return hashlib.md5(json.dumps(input_shapes).encode()).hexdigest()[:8]
@@ -1166,10 +1200,8 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     Input fidelity is the one care point: fake inputs are built EXACTLY from
     placeholder_info (shape, stride, dtype, device) — wrong strides (e.g.
     assuming contiguous for a channels-last tensor) would change which view
-    ops the retrace emits. SymInt inputs (dynamic shapes) are not yet
-    handled here: partitions with symint placeholders return the original
-    sub_gm unchanged (documented limitation; revisit with the dynamic-shapes
-    serialization work).
+    ops the retrace emits. Symbolic scalar inputs are not fabricated here:
+    partitions containing one return the original sub_gm unchanged.
 
     Mutation preservation: zero-user mutating ops (copy_) survive make_fx
     because they are outputs of the extracted sub_gm (the 77a691d80 rule) —
@@ -1209,9 +1241,10 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     fake_inputs = []
 
     for name, info in placeholder_info.items():
-        if info.get("dtype") == "symint":
+        if info.get("dtype") in {"symint", "symfloat"}:
             print(
-                f"[canonicalize] symint placeholder {name!r}: retrace skipped "
+                f"[canonicalize] symbolic scalar placeholder {name!r}: "
+                "retrace skipped "
                 f"(dynamic-shape partitions not yet canonicalized)",
                 file=sys.stderr,
             )
@@ -1493,7 +1526,7 @@ class _CaptureState:
             name: value
             for name, definition in symbols.items()
             if isinstance(
-                (value := _symbol_point_value(definition)), int)
+                (value := _symbol_point_value(definition)), (int, float))
             and not isinstance(value, bool)
         }
         complete_observed_binding = set(hint_bindings) == set(symbols)
@@ -1546,7 +1579,7 @@ class _CaptureState:
                 input_lines.append(f"    {shape_params[name]},  # {name}")
                 continue
             info = placeholder_info.get(name)
-            if info and info["dtype"] != "symint":
+            if info and info["dtype"] not in {"symint", "symfloat"}:
                 shape = info["shape"]
                 stride = info.get("stride", [])
                 dtype = info["dtype"]
@@ -1602,11 +1635,12 @@ class _CaptureState:
                         input_lines.append(
                             f"    torch.randn({shape}, dtype={dtype}, device='{device}'),"
                         )
-            elif info and info.get("dtype") == "symint":
+            elif info and info.get("dtype") in {"symint", "symfloat"}:
                 # SymInt placeholder — emit the concrete hint value as a plain int
                 # This is a scalar dimension (like seq_len) passed to ops like iota/full
                 val = info.get("hint", 1)
-                input_lines.append(f"    {val},  # {name} (symbolic dim)")
+                input_lines.append(
+                    f"    {val},  # {name} ({info['dtype']})")
             else:
                 input_lines.append(f"    torch.tensor(1),  # {name} (unknown shape)")
 
@@ -1687,7 +1721,7 @@ class _CaptureState:
                 compact_inputs.append(["S", dims])
             else:
                 info = placeholder_info.get(name)
-                if info and info["dtype"] != "symint":
+                if info and info["dtype"] not in {"symint", "symfloat"}:
                     spec = {
                         "kind": "tensor",
                         "shape": info["shape"],
@@ -1739,6 +1773,21 @@ class _CaptureState:
                         compact_inputs.append(["I", point_hint, expr])
                     else:
                         compact_inputs.append(["sym", info.get("hint", 1)])
+                elif info and info.get("dtype") == "symfloat":
+                    expr = info.get("expr")
+                    if expr is not None:
+                        compact_inputs.append([
+                            "F",
+                            info.get("hint"),
+                            expr,
+                            info.get("float_dtype", "float32"),
+                        ])
+                    else:
+                        compact_inputs.append([
+                            "flt",
+                            info.get("hint", 1.0),
+                            info.get("float_dtype", "float32"),
+                        ])
 
         # Render the human signature from a CONCRETE (hint-evaluated) copy —
         # render_T can't print expr strings, and the signature is

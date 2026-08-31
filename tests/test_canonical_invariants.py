@@ -740,6 +740,13 @@ def test_alias_group_codec_roundtrip():
     rt = spec_from_compact(entry)
     assert rt["alias_group"] == 0 and rt["storage_offset"] == 2
 
+    import pytest
+    with pytest.raises(ValueError, match="nonnegative integer"):
+        compact_from_spec(dict(spec, alias_group=-1))
+    malformed = [list(entry[0]), entry[1], dict(entry[2], alias="zero")]
+    with pytest.raises(ValueError, match="nonnegative integer"):
+        spec_from_compact(malformed)
+
 
 def test_alias_group_generation_shares_storage():
     """Members of one alias group must be views of ONE buffer at their own
@@ -776,6 +783,42 @@ def test_alias_group_generation_shares_storage():
     assert k.storage_offset() - q.storage_offset() == D
 
 
+def test_partition_alias_group_zero_capacity_and_validation():
+    import pytest
+    from repro_harness import make_inputs_from_config
+
+    empty = {
+        "kind": "tensor",
+        "shape": [0, 3],
+        "dtype": "float32",
+        "stride": [3, 1],
+        "storage_offset": 4,
+        "alias_group": 0,
+        "device": "cpu",
+    }
+    first, second = make_inputs_from_config({
+        "alias_group_nbytes": [0],
+        "inputs": [empty, dict(empty, storage_offset=9)],
+    })
+    assert first.untyped_storage()._cdata == second.untyped_storage()._cdata
+    assert first.untyped_storage().nbytes() == 0
+
+    with pytest.raises(ValueError, match="no recorded nbytes"):
+        make_inputs_from_config({
+            "inputs": [empty],
+        })
+    with pytest.raises(ValueError, match="requires 16 bytes"):
+        make_inputs_from_config({
+            "alias_group_nbytes": [12],
+            "inputs": [dict(
+                empty,
+                shape=[2, 2],
+                stride=[2, 1],
+                storage_offset=0,
+            )],
+        })
+
+
 def test_alias_group_only_for_multiply_referenced():
     """A storage referenced by exactly ONE partition placeholder gets NO
     alias tag (single view == private buffer, grouping is noise). Pins the
@@ -791,6 +834,410 @@ def test_alias_group_only_for_multiply_referenced():
     # no alias_group -> plain generation path; offset alone is fine to drop
     # for a private buffer (behaviorally identical)
     assert t.shape == (4, 4)
+
+
+def test_full_graph_storage_capacity_roundtrip_is_exact():
+    """A private view keeps producer capacity, not only its minimum span."""
+    from full_graph_harness import (
+        _tensor_spec_from_value,
+        make_inputs_from_full_graph_specs,
+    )
+    from input_codec import compact_from_spec, spec_from_compact
+
+    base = torch.empty(128, dtype=torch.float32)
+    view = base.as_strided((3, 4), (10, 1), 5)
+    spec = _tensor_spec_from_value("x", view)
+    first = spec_from_compact(compact_from_spec(spec))
+    second = spec_from_compact(compact_from_spec(first))
+    assert first == second
+    assert first["storage_nbytes"] == 128 * 4
+
+    (restored,) = make_inputs_from_full_graph_specs(
+        [first], default_device="cpu")
+    assert restored.shape == view.shape
+    assert restored.stride() == view.stride()
+    assert restored.storage_offset() == view.storage_offset()
+    assert restored.untyped_storage().nbytes() == view.untyped_storage().nbytes()
+
+    symbolic = dict(first)
+    symbolic["storage_nbytes_expr"] = "4*s0"
+    symbolic["storage_nbytes"] = 32
+    from input_codec import evaluate_spec
+    encoded = compact_from_spec(symbolic)
+    decoded = spec_from_compact(encoded)
+    evaluated = evaluate_spec(
+        decoded, {"s0": 64},
+        {"s0": {"hint": 8, "range": [2, None]}})
+    assert evaluated["storage_nbytes"] == 256
+    assert "storage_nbytes_expr" not in evaluated
+    assert compact_from_spec(spec_from_compact(encoded)) == encoded
+
+
+def test_full_graph_oversized_overlapping_view_replay():
+    from full_graph_harness import (
+        _tensor_spec_from_value,
+        make_inputs_from_full_graph_specs,
+    )
+
+    base = torch.empty(64, dtype=torch.float32)
+    original = base[:3].as_strided((4, 3), (0, 1), 0)
+    spec = _tensor_spec_from_value("expanded", original)
+    (restored,) = make_inputs_from_full_graph_specs(
+        [spec], default_device="cpu")
+
+    assert restored.shape == original.shape
+    assert restored.stride() == original.stride()
+    assert restored.untyped_storage().nbytes() == 64 * 4
+    torch.testing.assert_close(restored[0], restored[3])
+
+
+def test_full_graph_storage_layout_property_sweep():
+    import random
+    from full_graph_harness import (
+        _dense_storage_size,
+        make_inputs_from_full_graph_specs,
+    )
+
+    rng = random.Random(0)
+    dtype_names = (
+        "float16",
+        "float32",
+        "float64",
+        "int32",
+        "int64",
+        "complex64",
+        "bool",
+        "uint8",
+    )
+    for case in range(48):
+        rank = rng.randrange(4)
+        shape = tuple(rng.randrange(5) for _ in range(rank))
+        stride = tuple(rng.randrange(7) for _ in range(rank))
+        offset = rng.randrange(12)
+        dtype_name = dtype_names[case % len(dtype_names)]
+        dtype = getattr(torch, dtype_name)
+        element_size = torch.empty((), dtype=dtype).element_size()
+        required_elements = _dense_storage_size(
+            shape, stride, storage_offset=offset)
+        padding_elements = rng.randrange(8)
+        recorded = (required_elements + padding_elements) * element_size
+        spec = {
+            "kind": "tensor",
+            "name": f"case_{case}",
+            "shape": list(shape),
+            "stride": list(stride),
+            "storage_offset": offset,
+            "dtype": dtype_name,
+            "device": "cpu",
+            "storage_nbytes": recorded,
+        }
+
+        (restored,) = make_inputs_from_full_graph_specs(
+            [spec], default_device="cpu")
+        assert tuple(restored.shape) == shape
+        assert restored.stride() == stride
+        assert restored.storage_offset() == offset
+        assert restored.dtype == dtype
+        assert restored.untyped_storage().nbytes() == recorded
+
+
+def test_full_graph_alias_group_replay_shares_exact_capacity():
+    from full_graph_harness import (
+        graph_constraints_from_gm,
+        make_inputs_from_full_graph_specs,
+    )
+
+    base = torch.empty(96, dtype=torch.float32)
+    q = base.as_strided((4, 4), (12, 1), 0)
+    k = base.as_strided((4, 4), (12, 1), 4)
+    graph = torch.fx.Graph()
+    q_node = graph.placeholder("q")
+    k_node = graph.placeholder("k")
+    q_node.meta["val"] = q
+    k_node.meta["val"] = k
+    graph.output((q_node, k_node))
+    gm = torch.fx.GraphModule({}, graph)
+
+    payload = graph_constraints_from_gm(gm)
+    assert payload["storage_groups"] == [["q", "k"]]
+    assert [spec["alias_group"] for spec in payload["inputs"]] == [0, 0]
+    assert {
+        spec["storage_nbytes"] for spec in payload["inputs"]
+    } == {96 * 4}
+
+    replay_q, replay_k = make_inputs_from_full_graph_specs(
+        payload["inputs"], default_device="cpu")
+    assert replay_q.untyped_storage().data_ptr() \
+        == replay_k.untyped_storage().data_ptr()
+    assert replay_q.untyped_storage().nbytes() == 96 * 4
+
+
+def test_full_graph_storage_group_detection_uses_storage_identity():
+    from full_graph_harness import graph_constraints_from_gm
+
+    graph = torch.fx.Graph()
+    independent_a = graph.placeholder("independent_a")
+    independent_b = graph.placeholder("independent_b")
+    shared_a = graph.placeholder("shared_a")
+    shared_b = graph.placeholder("shared_b")
+    independent_a.meta["val"] = torch.empty(0)
+    independent_b.meta["val"] = torch.empty(0)
+    base = torch.empty(0)
+    shared_a.meta["val"] = base.as_strided((0,), (1,), 0)
+    shared_b.meta["val"] = base.as_strided((0,), (1,), 7)
+    graph.output((independent_a, independent_b, shared_a, shared_b))
+    gm = torch.fx.GraphModule({}, graph)
+
+    payload = graph_constraints_from_gm(gm)
+    assert payload["storage_groups"] == [["shared_a", "shared_b"]]
+    by_name = {spec["name"]: spec for spec in payload["inputs"]}
+    assert "alias_group" not in by_name["independent_a"]
+    assert "alias_group" not in by_name["independent_b"]
+    assert by_name["shared_a"]["alias_group"] == 0
+    assert by_name["shared_b"]["alias_group"] == 0
+
+
+def test_full_graph_alias_groups_handle_overlap_and_mixed_dtypes():
+    from full_graph_harness import make_inputs_from_full_graph_specs
+
+    common = {
+        "kind": "tensor",
+        "device": "cpu",
+        "alias_group": 0,
+        "storage_nbytes": 32,
+    }
+    left, right, bytes_view = make_inputs_from_full_graph_specs([
+        dict(
+            common,
+            name="left",
+            shape=[4],
+            stride=[1],
+            storage_offset=0,
+            dtype="float32",
+        ),
+        dict(
+            common,
+            name="right",
+            shape=[4],
+            stride=[1],
+            storage_offset=2,
+            dtype="float32",
+        ),
+        dict(
+            common,
+            name="bytes",
+            shape=[32],
+            stride=[1],
+            storage_offset=0,
+            dtype="uint8",
+        ),
+    ], default_device="cpu")
+
+    assert left.untyped_storage()._cdata == right.untyped_storage()._cdata
+    assert left.untyped_storage()._cdata == bytes_view.untyped_storage()._cdata
+    assert not torch.isnan(left).any()
+    left[2] = 7.0
+    assert right[0].item() == 7.0
+
+
+def test_full_graph_zero_byte_alias_group_is_valid():
+    from full_graph_harness import make_inputs_from_full_graph_specs
+
+    common = {
+        "kind": "tensor",
+        "shape": [0, 3],
+        "stride": [3, 1],
+        "device": "cpu",
+        "alias_group": 0,
+        "storage_nbytes": 0,
+    }
+    first, second = make_inputs_from_full_graph_specs([
+        dict(common, name="x", dtype="float32", storage_offset=0),
+        dict(common, name="y", dtype="uint8", storage_offset=5),
+    ], default_device="cpu")
+    assert first.untyped_storage()._cdata == second.untyped_storage()._cdata
+    assert first.untyped_storage().nbytes() == 0
+    assert second.untyped_storage().nbytes() == 0
+    assert second.storage_offset() == 5
+
+
+def test_full_graph_legacy_alias_without_capacity_fails_closed():
+    import pytest
+    from full_graph_harness import make_inputs_from_full_graph_specs
+
+    with pytest.raises(ValueError, match="recapture this legacy artifact"):
+        make_inputs_from_full_graph_specs([{
+            "kind": "tensor",
+            "name": "x",
+            "shape": [2, 2],
+            "stride": [2, 1],
+            "storage_offset": 0,
+            "dtype": "float32",
+            "device": "cpu",
+            "alias_group": 0,
+        }], default_device="cpu")
+
+
+def test_full_graph_legacy_storage_groups_restore_alias_tags():
+    import pytest
+    from full_graph_harness import _apply_sidecar_storage_groups
+
+    def tensor(name):
+        return {
+            "kind": "tensor",
+            "name": name,
+            "shape": [2],
+            "stride": [1],
+            "dtype": "float32",
+        }
+
+    sidecar = {
+        "inputs": [tensor("x"), tensor("y")],
+        "storage_groups": [["x", "y"]],
+    }
+    _apply_sidecar_storage_groups(sidecar)
+    assert [spec["alias_group"] for spec in sidecar["inputs"]] == [0, 0]
+
+    conflicting = {
+        "inputs": [dict(tensor("x"), alias_group=3)],
+        "storage_groups": [["x"]],
+    }
+    with pytest.raises(ValueError, match="conflicting alias groups"):
+        _apply_sidecar_storage_groups(conflicting)
+
+    duplicate_inputs = {
+        "inputs": [tensor("x"), tensor("x")],
+        "storage_groups": [["x"]],
+    }
+    with pytest.raises(ValueError, match="duplicate tensor input name"):
+        _apply_sidecar_storage_groups(duplicate_inputs)
+
+    duplicate_member = {
+        "inputs": [tensor("x")],
+        "storage_groups": [["x", "x"]],
+    }
+    with pytest.raises(ValueError, match="duplicate names"):
+        _apply_sidecar_storage_groups(duplicate_member)
+
+    multiple_groups = {
+        "inputs": [tensor("x")],
+        "storage_groups": [["x"], ["x"]],
+    }
+    with pytest.raises(ValueError, match="multiple storage groups"):
+        _apply_sidecar_storage_groups(multiple_groups)
+
+
+def test_full_graph_schema1_storage_group_load_is_idempotent():
+    import json
+    import tempfile
+    from full_graph_harness import (
+        _apply_sidecar_storage_groups,
+        load_full_graph_sidecar,
+        make_inputs_from_full_graph_specs,
+    )
+
+    def tensor(name, offset):
+        return {
+            "kind": "tensor",
+            "name": name,
+            "shape": [2],
+            "stride": [1],
+            "storage_offset": offset,
+            "dtype": "float32",
+            "device": "cpu",
+            "storage_nbytes": 16,
+        }
+
+    with tempfile.TemporaryDirectory() as td:
+        graph_path = Path(td) / "full_graph_legacy.py"
+        graph_path.write_text("""
+import torch
+class Repro(torch.nn.Module):
+    def forward(self, x: "f32[2]cpu", y: "f32[2]cpu"):
+        return x + y
+""")
+        graph_path.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 1,
+            "inputs": [tensor("x", 0), tensor("y", 2)],
+            "outputs": [],
+            "tensor_attrs": {},
+            "storage_groups": [["x", "y"]],
+        }))
+        sidecar = load_full_graph_sidecar(graph_path)
+        first = json.dumps(sidecar, sort_keys=True)
+        _apply_sidecar_storage_groups(sidecar)
+        second = json.dumps(sidecar, sort_keys=True)
+        assert first == second
+
+        x, y = make_inputs_from_full_graph_specs(
+            sidecar["inputs"], default_device="cpu")
+        assert x.untyped_storage()._cdata == y.untyped_storage()._cdata
+        assert x.untyped_storage().nbytes() == 16
+
+
+def test_full_graph_zero_byte_storage_roundtrip():
+    from full_graph_harness import (
+        _tensor_spec_from_value,
+        make_inputs_from_full_graph_specs,
+    )
+
+    original = torch.empty(0, dtype=torch.float32).as_strided(
+        (0, 3), (3, 1), 5)
+    spec = _tensor_spec_from_value("empty", original)
+    assert spec["storage_nbytes"] == 0
+
+    (restored,) = make_inputs_from_full_graph_specs(
+        [spec], default_device="cpu")
+    assert restored.shape == original.shape
+    assert restored.stride() == original.stride()
+    assert restored.storage_offset() == original.storage_offset()
+    assert restored.untyped_storage().nbytes() == 0
+
+
+def test_full_graph_alias_capacity_validation_is_strict():
+    import pytest
+    from full_graph_harness import make_inputs_from_full_graph_specs
+
+    base = {
+        "kind": "tensor",
+        "shape": [2, 2],
+        "stride": [2, 1],
+        "storage_offset": 0,
+        "dtype": "float32",
+        "device": "cpu",
+        "alias_group": 0,
+    }
+    with pytest.raises(ValueError, match="requires 16 bytes"):
+        make_inputs_from_full_graph_specs(
+            [dict(base, name="x", storage_nbytes=12)],
+            default_device="cpu",
+        )
+    with pytest.raises(ValueError, match="not divisible"):
+        make_inputs_from_full_graph_specs(
+            [dict(base, name="x", storage_nbytes=18)],
+            default_device="cpu",
+        )
+    with pytest.raises(ValueError, match="disagree on capacity/device"):
+        make_inputs_from_full_graph_specs([
+            dict(base, name="x", storage_nbytes=16),
+            dict(base, name="y", storage_nbytes=32),
+        ], default_device="cpu")
+    with pytest.raises(ValueError, match="stride rank"):
+        make_inputs_from_full_graph_specs(
+            [dict(base, name="x", stride=[1], storage_nbytes=16)],
+            default_device="cpu",
+        )
+    with pytest.raises(ValueError, match="storage_offset must be nonnegative"):
+        make_inputs_from_full_graph_specs(
+            [dict(base, name="x", storage_offset=-1, storage_nbytes=16)],
+            default_device="cpu",
+        )
+    with pytest.raises(ValueError, match="invalid alias_group"):
+        make_inputs_from_full_graph_specs(
+            [dict(base, name="x", alias_group="zero",
+                  storage_nbytes=16)],
+            default_device="cpu",
+        )
 
 
 def test_symint_and_scalar_inputs_materialize():

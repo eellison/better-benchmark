@@ -16,23 +16,22 @@ mechanisms.
 
 import json
 import time
+import contextlib
 
 import torch
 
 import repro_harness as _harness
 from input_codec import _symbol_point_value
 from dynamic_shape_replay import (
-    _backed_args,
-    _backed_replay_plan_for_repro,
-    _backed_repro,
     _distinct_dynamic_bindings,
+    _dynamic_replay_args,
+    _dynamic_replay_config,
     _effective_binding_for_row,
     _parse_bind_args,
     _parse_freeze_args,
     _recorded_point_bindings,
     _resolve_bound_configs,
-    _shape_env_repro,
-    _shape_env_spec_for_repro,
+    _prepare_dynamic_replay_for_repro,
     _symbols_and_guards_for_repro,
     format_binding,
 )
@@ -88,7 +87,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             missing = sorted(
                 name for name, definition in symbols.items()
                 if not isinstance(
-                    _symbol_point_value(definition), int)
+                    _symbol_point_value(definition), (int, float))
                 or isinstance(
                     _symbol_point_value(definition), bool)
             )
@@ -108,7 +107,8 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             name for name, definition in symbols.items()
             if name not in frozen
             and (
-                not isinstance(_symbol_point_value(definition), int)
+                not isinstance(
+                    _symbol_point_value(definition), (int, float))
                 or isinstance(_symbol_point_value(definition), bool)
             )
         )
@@ -186,6 +186,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         return requested, "explicit"
 
     compiled = None
+    prepared_replay = None
     warm_bindings = []
     warm_source = "auto"
 
@@ -196,47 +197,18 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     prewarmed = False
 
     if mode == "dynamic" and is_family:
-        backed_plan = _backed_replay_plan_for_repro(
-            repro_file, frozen=frozen)
-        count_dynamic = False
-        if backed_plan is not None:
-            shape_model = _backed_repro(repro_cls(), backed_plan)
-            count_dynamic = None  # honor exact mark_dynamic annotations
+        prepared_replay = _prepare_dynamic_replay_for_repro(
+            repro_cls(), repro_file, frozen=frozen)
+        shape_model = prepared_replay["module"]
+        count_dynamic = (
+            None if prepared_replay["kind"] == "backed" else False)
 
-            def backed_artifact_args(inputs, _binding, _config):
-                return _backed_args(inputs, backed_plan)
+        def prepared_artifact_args(inputs, binding, config):
+            effective = _effective_binding_for_row(binding, config)
+            return _dynamic_replay_args(
+                inputs, effective, prepared_replay)
 
-            artifact_args = backed_artifact_args
-        else:
-            (
-                shape_spec,
-                live_symbol_names,
-                original_input_count,
-                metadata_checks,
-                frozen_for_spec,
-            ) = _shape_env_spec_for_repro(repro_file, frozen=frozen)
-            shape_model = _shape_env_repro(
-                repro_cls(),
-                original_input_count,
-                shape_spec,
-                live_symbol_names,
-                metadata_checks,
-                frozen_for_spec,
-            )
-
-            def shape_env_artifact_args(inputs, binding, config):
-                effective = _effective_binding_for_row(binding, config)
-                missing = sorted(set(live_symbol_names) - set(effective))
-                if missing:
-                    raise ValueError(
-                        "cannot invoke dynamic artifact: binding is missing "
-                        f"live symbols {missing}")
-                return [
-                    *inputs,
-                    *(effective[name] for name in live_symbol_names),
-                ]
-
-            artifact_args = shape_env_artifact_args
+        artifact_args = prepared_artifact_args
 
         warm_bindings, warm_source = warm_bindings_for_family()
 
@@ -251,19 +223,21 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             shape_inputs(warm_bindings[1])
             if len(warm_bindings) > 1 else None
         )
-        n_kernels, kernel_names = _harness.count_kernels(
-            shape_model,
-            count_first,
-            dynamic=count_dynamic,
-            second_inputs=count_second,
-        )
+        with _dynamic_replay_config(prepared_replay):
+            n_kernels, kernel_names = _harness.count_kernels(
+                shape_model,
+                count_first,
+                dynamic=count_dynamic,
+                second_inputs=count_second,
+            )
         torch._dynamo.reset()
         if not parsed.count_kernels_only:
-            compiled = torch.compile(shape_model)
-            with torch.no_grad():
-                for binding in warm_bindings:
-                    compiled(*shape_inputs(binding))
-                torch.cuda.synchronize()
+            with _dynamic_replay_config(prepared_replay):
+                compiled = torch.compile(shape_model)
+                with torch.no_grad():
+                    for binding in warm_bindings:
+                        compiled(*shape_inputs(binding))
+                    torch.cuda.synchronize()
             prewarmed = True
 
     elif mode == "dynamic":
@@ -321,7 +295,12 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             # Compile-history warmups run under no_grad. Keep measurement in
             # the same mode; changing grad mode is itself a Dynamo guard and
             # would create a second graph on the first timed point.
-            with torch.no_grad():
+            replay_context = (
+                _dynamic_replay_config(prepared_replay)
+                if prepared_replay is not None
+                else contextlib.nullcontext()
+            )
+            with replay_context, torch.no_grad():
                 compiled_us = _harness.timed_min_us(
                     lambda: compiled(*call_args),
                     warmup=parsed.n_warmup,

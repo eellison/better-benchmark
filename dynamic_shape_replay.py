@@ -14,6 +14,7 @@ Keeping this code separate makes the ownership boundary explicit:
 
 import json
 import math
+import contextlib
 from pathlib import Path
 from typing import Any
 
@@ -53,9 +54,13 @@ def _parse_bind_args(bind_args: list | None, flag_name: str = "--bind") -> list:
             try:
                 bindings[name] = int(val)
             except ValueError:
-                raise ValueError(
-                    f"{flag_name} value for {name!r} must be an int, "
-                    f"got {val!r}") from None
+                try:
+                    bindings[name] = float(val)
+                except ValueError:
+                    raise ValueError(
+                        f"{flag_name} value for {name!r} must be an int or "
+                        "float, "
+                        f"got {val!r}") from None
         if not bindings:
             raise ValueError(f"{flag_name} {raw!r} parsed to no bindings")
         out.append(bindings)
@@ -121,10 +126,14 @@ def _parse_freeze_args(freeze_args: list, symbols: dict) -> dict:
                     f"(family has {sorted(symbols)})")
             if eq:
                 try:
-                    fval = int(val)
+                    fval = (
+                        float(val)
+                        if (symbols[name] or {}).get("kind") == "symfloat"
+                        else int(val)
+                    )
                 except ValueError:
                     raise ValueError(
-                        f"--freeze value for {name!r} must be an int, "
+                        f"--freeze value for {name!r} has the wrong type, "
                         f"got {val!r}") from None
                 if name in frozen and frozen[name] != fval:
                     # Identical repeats are harmless; conflicts are typos.
@@ -134,7 +143,8 @@ def _parse_freeze_args(freeze_args: list, symbols: dict) -> dict:
                 frozen[name] = fval
             else:
                 hint = _symbol_point_value(symbols[name])
-                if not isinstance(hint, int) or isinstance(hint, bool):
+                if (not isinstance(hint, (int, float))
+                        or isinstance(hint, bool)):
                     raise ValueError(
                         f"--freeze {name} uses the observed point value, but "
                         f"the symbols table has none for {name!r}; "
@@ -391,15 +401,16 @@ def _shape_env_repro(inner, original_input_count: int, spec,
             # Private symbol-root args bind composite-only symbols in ShapeEnv;
             # the captured forward still receives its exact original inputs.
             values = dict(frozen or {})
-            values.update({
-                name: args[original_input_count + i]
-                for i, name in enumerate(live_symbol_names)
-            })
-            # Dynamo only wraps arguments that the Python body reads. Touch
-            # every private root so a composite-only symbol is bound before
-            # ShapesSpec finalizes assumptions such as dim == 4*s1.
-            for name in live_symbol_names:
-                torch._check(values[name] == values[name])
+            # Read every root directly in this decorated frame. A nested
+            # comprehension has its own Python frame and, on some Dynamo
+            # versions, the first value read there misses ShapesSpec context
+            # and is silently specialized to its captured Python integer.
+            # Touch each value here as well so composite-only roots are bound
+            # before assumptions such as dim == 4*s1 are finalized.
+            for i, name in enumerate(live_symbol_names):
+                value = args[original_input_count + i]
+                values[name] = value
+                torch._check(value == value)
             for pos, kind, dim, evaluator in metadata_checks:
                 tensor = args[pos]
                 actual = (tensor.stride(dim) if kind == "stride"
@@ -414,7 +425,7 @@ def _effective_binding_for_row(binding: dict | None, cfg: dict) -> dict:
     """Resolve ``binding=None`` (a recorded point) to its actual bindings."""
     effective = binding if binding is not None else cfg.get("bindings")
     if effective and all(
-            isinstance(v, int) and not isinstance(v, bool)
+            isinstance(v, (int, float)) and not isinstance(v, bool)
             for v in effective.values()):
         return dict(effective)
     raise ValueError(
@@ -464,8 +475,7 @@ def _symint_expr_evaluator(expr):
                 r = r * p(env)
             return r
         return _mul
-    if isinstance(expr, sympy.Pow) and isinstance(expr.exp, sympy.Integer) \
-            and int(expr.exp) >= 0:
+    if isinstance(expr, sympy.Pow) and isinstance(expr.exp, sympy.Integer):
         base, e = parts[0], int(expr.exp)
         return lambda env: base(env) ** e
     if isinstance(expr, sympy.Mod):
@@ -593,7 +603,7 @@ def _backed_replay_plan_from_contract(data: dict,
     if set(sources) != set(live_names):
         return None
 
-    marks = []
+    root_mark_bounds = {}
     for name in live_names:
         meta = symbols[name] or {}
         lo, hi = meta.get("range") or [None, None]
@@ -607,13 +617,98 @@ def _backed_replay_plan_from_contract(data: dict,
             # Half-open 0/1-capable ranges and hint-less ranges cannot be
             # represented safely by mark_dynamic on this torch version.
             return None
-        marks.append((*sources[name], bounds))
+        root_mark_bounds[name] = bounds
 
     def evaluator(text):
         expr = _sympify_expr(text, symbols)
+        if frozen:
+            expr = expr.subs({
+                symbol: frozen[symbol.name]
+                for symbol in expr.free_symbols
+                if symbol.name in frozen
+            })
         if any(s.name not in symbols for s in expr.free_symbols):
             return None
         return _symint_expr_evaluator(expr)
+
+    def occurrence_mark_bounds(text):
+        """Bounds suitable for a non-canonical symbolic tensor dimension.
+
+        The canonical bare source owns the exact family range. Secondary
+        occurrences only need to remain symbolic so their relation check does
+        not specialize the canonical root back to the captured hint. Reuse a
+        bare root's exact bounds; for affine/composite dimensions, conservatively
+        bound the expression from the serialized root ranges. If this torch
+        version cannot represent the result, decline the backed path and let
+        ShapesSpec own the complete contract.
+        """
+        if text in root_mark_bounds:
+            return True, root_mark_bounds[text]
+
+        from torch.utils._sympy.value_ranges import ValueRanges, bound_sympy
+        import sympy
+
+        expr = _sympify_expr(text, symbols)
+        if frozen:
+            expr = expr.subs({
+                symbol: frozen[symbol.name]
+                for symbol in expr.free_symbols
+                if symbol.name in frozen
+            })
+        live_free = {
+            symbol for symbol in expr.free_symbols
+            if symbol.name in live_names
+        }
+        if not live_free:
+            return False, None
+        ranges = {}
+        for symbol in live_free:
+            lo, hi = (symbols[symbol.name] or {}).get("range") or [None, None]
+            if lo is None:
+                return None
+            ranges[symbol] = ValueRanges(
+                int(lo),
+                sympy.oo if hi is None else int(hi),
+            )
+        try:
+            value_range = bound_sympy(expr, ranges)
+        except Exception:
+            return None
+
+        lower, upper = value_range.lower, value_range.upper
+        if "oo" in str(lower):
+            return None
+        lower = int(lower)
+        if "oo" in str(upper):
+            # The no-bounds mark_dynamic spelling is [2, +inf). It may widen
+            # a secondary expression's lower bound, but the canonical source
+            # and the relation check still enforce the captured contract.
+            return (True, None) if lower >= 2 else None
+        upper = int(upper)
+        if lower == upper:
+            return False, None
+        if lower < upper:
+            return True, (lower, upper)
+        return None
+
+    # Mark EVERY symbolic tensor-size occurrence, not just the canonical
+    # source. Otherwise an unmarked repeated/affine occurrence specializes at
+    # its hint and its equality check forces the marked source to that same
+    # constant, producing a ConstraintViolationError on the first compile.
+    marks = {}
+    for pos, entry in enumerate(entries):
+        if not (isinstance(entry, list) and entry
+                and isinstance(entry[0], list)):
+            continue
+        for dim, value in enumerate(entry[0]):
+            if not isinstance(value, str):
+                continue
+            mark = occurrence_mark_bounds(value)
+            if mark is None:
+                return None
+            is_dynamic, bounds = mark
+            if is_dynamic:
+                marks[(pos, dim)] = bounds
 
     derived = {}
     for pos, entry in enumerate(entries):
@@ -673,13 +768,14 @@ def _backed_replay_plan_from_contract(data: dict,
 
     kept = tuple(pos for pos in range(len(entries)) if pos not in derived)
     kept_index = {original: current for current, original in enumerate(kept)}
-    if any(pos not in kept_index for pos, _dim, _bounds in marks):
+    if any(pos not in kept_index for pos, _dim in marks):
         return None
     return {
         "input_count": len(entries),
         "kept": kept,
         "markings": tuple(
-            (kept_index[pos], dim, bounds) for pos, dim, bounds in marks),
+            (kept_index[pos], dim, bounds)
+            for (pos, dim), bounds in sorted(marks.items())),
         "sources": tuple(
             (name, pos, dim) for name, (pos, dim) in sorted(sources.items())),
         "derived": tuple(sorted(derived.items())),
@@ -739,6 +835,385 @@ def _backed_args(inputs, plan):
     return args
 
 
+def _symfloat_replay_plan_from_contract(data: dict,
+                                        frozen: dict | None = None):
+    """Build the typed scalar-float layer used outside integer ShapesSpec.
+
+    Python floats specialize in Dynamo. Replay therefore removes live
+    SymFloat ABI arguments, carries each root as a 0-D tensor, and calls
+    ``item()`` inside the compiled frame to recreate a live SymFloat.
+    """
+    from input_codec import _sympify_expr
+
+    symbols = data.get("symbols") or {}
+    frozen = dict(frozen or {})
+    float_names = tuple(sorted(
+        name for name, meta in symbols.items()
+        if (meta or {}).get("kind") == "symfloat" and name not in frozen
+    ))
+    all_float_names = {
+        name for name, meta in symbols.items()
+        if (meta or {}).get("kind") == "symfloat"
+    }
+    if not all_float_names:
+        return None
+    all_dtypes = {
+        name: (symbols[name] or {}).get("dtype", "float32")
+        for name in all_float_names
+    }
+    invalid_dtypes = {
+        name: dtype for name, dtype in all_dtypes.items()
+        if dtype not in {"float32", "float64"}
+    }
+    if invalid_dtypes:
+        raise ValueError(
+            f"SymFloat symbols have unsupported replay dtypes "
+            f"{invalid_dtypes}")
+    if len(set(all_dtypes.values())) > 1:
+        raise ValueError(
+            "one graph captured inconsistent SymFloat dtypes "
+            f"{sorted(set(all_dtypes.values()))}")
+    float_ranges = {}
+    for name in all_float_names:
+        value_range = (symbols[name] or {}).get("range") or [None, None]
+        if (not isinstance(value_range, (list, tuple))
+                or len(value_range) != 2):
+            raise ValueError(
+                f"SymFloat symbol {name!r} has invalid range "
+                f"{value_range!r}")
+        lo, hi = value_range
+        for label, bound in (("minimum", lo), ("maximum", hi)):
+            if (bound is not None
+                    and (not isinstance(bound, (int, float))
+                         or isinstance(bound, bool))):
+                raise ValueError(
+                    f"SymFloat symbol {name!r} has nonnumeric range "
+                    f"{label} {bound!r}")
+        float_ranges[name] = (lo, hi)
+        if name in frozen:
+            value = frozen[name]
+            if (not isinstance(value, (int, float))
+                    or isinstance(value, bool)):
+                raise ValueError(
+                    f"frozen SymFloat {name}={value!r} is not numeric")
+            if lo is not None and value < lo:
+                raise ValueError(
+                    f"frozen SymFloat {name}={value} is below {lo}")
+            if hi is not None and value > hi:
+                raise ValueError(
+                    f"frozen SymFloat {name}={value} is above {hi}")
+    point = next(
+        (p for p in data.get("points", [])
+         if p.get("captured_dynamic") and p.get("inputs") is not None),
+        None,
+    )
+    if point is None:
+        return None
+    entries = point["inputs"]
+    derived = {}
+    float_positions = set()
+    for pos, entry in enumerate(entries):
+        if not (isinstance(entry, list) and entry and entry[0] == "F"):
+            continue
+        if len(entry) != 4:
+            raise ValueError(
+                f"typed SymFloat input {pos} must have four fields")
+        observed = entry[1]
+        if (observed is not None
+                and (not isinstance(observed, (int, float))
+                     or isinstance(observed, bool))):
+            raise ValueError(
+                f"SymFloat input {pos} has invalid observed value "
+                f"{observed!r}")
+        float_positions.add(pos)
+        expr_text = entry[2]
+        if not isinstance(expr_text, str):
+            return None
+        entry_dtype = entry[3]
+        if entry_dtype not in {"float32", "float64"}:
+            raise ValueError(
+                f"SymFloat input {pos} has unsupported dtype "
+                f"{entry_dtype!r}")
+        expression_names = {
+            symbol.name
+            for symbol in _sympify_expr(expr_text, symbols).free_symbols
+            if symbol.name in all_float_names
+        }
+        expression_dtypes = {
+            all_dtypes[name] for name in expression_names
+        }
+        if expression_dtypes and expression_dtypes != {entry_dtype}:
+            raise ValueError(
+                f"SymFloat input {pos} dtype {entry_dtype!r} disagrees "
+                f"with expression symbols {sorted(expression_dtypes)}")
+        expr = _sympify_expr(expr_text, symbols)
+        fn = _symint_expr_evaluator(expr)
+        if fn is None:
+            return None
+        derived[pos] = fn
+
+    # Every live float root must feed a typed scalar entry or a residual guard.
+    referenced = set()
+    for pos in float_positions:
+        expr = _sympify_expr(entries[pos][2], symbols)
+        referenced.update(s.name for s in expr.free_symbols)
+    for text in data.get("guards") or []:
+        expr = _sympify_expr(text, symbols)
+        referenced.update(s.name for s in expr.free_symbols)
+    for name in float_names:
+        lo, hi = float_ranges[name]
+        if lo is not None or hi is not None:
+            referenced.add(name)
+    if not set(float_names).issubset(referenced):
+        return None
+
+    runtime_guards = []
+    integer_guards = []
+    for text in data.get("guards") or []:
+        expr = _sympify_expr(text, symbols)
+        names = {s.name for s in expr.free_symbols}
+        if names & all_float_names:
+            fn = _symint_expr_evaluator(expr)
+            if fn is None:
+                return None
+            runtime_guards.append((text, fn))
+        else:
+            integer_guards.append(text)
+    for name in float_names:
+        lo, hi = float_ranges[name]
+        if lo is not None:
+            runtime_guards.append((
+                f"{name} >= {lo}",
+                lambda env, name=name, lo=lo: env[name] >= lo,
+            ))
+        if hi is not None:
+            runtime_guards.append((
+                f"{name} <= {hi}",
+                lambda env, name=name, hi=hi: env[name] <= hi,
+            ))
+
+    kept = tuple(i for i in range(len(entries)) if i not in float_positions)
+    dtypes = {
+        name: all_dtypes[name]
+        for name in float_names
+    }
+    projected_entries = [entries[i] for i in kept]
+    projected_entries.extend([
+        [[], "f64" if dtypes[name] == "float64" else "f32"]
+        for name in float_names
+    ])
+    integer_symbols = {
+        name: meta for name, meta in symbols.items()
+        if name not in all_float_names
+    }
+    projected = {
+        "symbols": integer_symbols,
+        "guards": integer_guards,
+        "points": [{
+            "captured_dynamic": True,
+            "inputs": projected_entries,
+        }],
+    }
+    return {
+        "input_count": len(entries),
+        "kept": kept,
+        "float_names": float_names,
+        "dtypes": dtypes,
+        "derived": tuple(sorted(derived.items())),
+        "guards": tuple(runtime_guards),
+        "frozen": frozen,
+        "projected": projected,
+        "projected_input_count": len(projected_entries),
+        "int_sources": (),
+    }
+
+
+def _symfloat_args(inputs, binding: dict, plan):
+    """Replace Python float inputs with value-dynamic 0-D tensor roots."""
+    selected = [inputs[pos] for pos in plan["kept"]]
+    device = next(
+        (value.device for value in selected if torch.is_tensor(value)),
+        torch.device("cpu"),
+    )
+    missing = sorted(set(plan["float_names"]) - set(binding))
+    if missing:
+        raise ValueError(f"SymFloat replay binding is missing {missing}")
+    for name in plan["float_names"]:
+        value = binding[name]
+        if (not isinstance(value, (int, float))
+                or isinstance(value, bool)):
+            raise ValueError(
+                f"SymFloat replay binding {name}={value!r} is not numeric")
+        dtype = (
+            torch.float64
+            if plan["dtypes"][name] == "float64"
+            else torch.float32
+        )
+        selected.append(torch.tensor(value, dtype=dtype, device=device))
+    return selected
+
+
+def _symfloat_repro(inner, plan):
+    """Reconstruct original scalar-float inputs from 0-D tensor roots."""
+    class SymFloatRepro(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.inner = inner
+
+        def forward(self, *args):
+            full = [None] * plan["input_count"]
+            for pos, value in zip(plan["kept"], args):
+                full[pos] = value
+            values = dict(plan["frozen"])
+            root_start = len(plan["kept"])
+            for i, name in enumerate(plan["float_names"]):
+                values[name] = args[root_start + i].item()
+            for name, pos, dim in plan.get("int_sources", ()):
+                values[name] = args[pos].size(dim)
+            for pos, fn in plan["derived"]:
+                full[pos] = fn(values)
+            for text, fn in plan["guards"]:
+                torch._check(
+                    fn(values),
+                    lambda: f"captured SymFloat guard {text!r} failed",
+                )
+            return self.inner(*full)
+
+    return SymFloatRepro()
+
+
+def _mixed_shape_env_repro(inner, float_plan, spec, live_symbol_names,
+                           metadata_checks=(), frozen=None):
+    """One decorated frame for integer ShapesSpec plus typed float roots."""
+    from torch.fx.experimental.dynamic_spec import dynamic_spec
+
+    class MixedShapeEnvRepro(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.inner = inner
+
+        @dynamic_spec(spec)
+        def forward(self, *args):
+            values = dict(frozen or {})
+            projected_count = float_plan["projected_input_count"]
+            for i, name in enumerate(live_symbol_names):
+                value = args[projected_count + i]
+                values[name] = value
+                torch._check(value == value)
+            root_start = len(float_plan["kept"])
+            for i, name in enumerate(float_plan["float_names"]):
+                values[name] = args[root_start + i].item()
+            for pos, kind, dim, evaluator in metadata_checks:
+                tensor = args[pos]
+                actual = (tensor.stride(dim) if kind == "stride"
+                          else tensor.storage_offset())
+                torch._check(actual == evaluator(values))
+
+            full = [None] * float_plan["input_count"]
+            for pos, value in zip(float_plan["kept"], args):
+                full[pos] = value
+            for pos, fn in float_plan["derived"]:
+                full[pos] = fn(values)
+            for text, fn in float_plan["guards"]:
+                torch._check(fn(values))
+            return self.inner(*full)
+
+    return MixedShapeEnvRepro()
+
+
+def _prepare_dynamic_replay_from_contract(inner, data: dict,
+                                          frozen: dict | None = None):
+    """Prepare one composable integer/SymFloat dynamic replay artifact."""
+    float_plan = _symfloat_replay_plan_from_contract(data, frozen=frozen)
+    contract = float_plan["projected"] if float_plan is not None else data
+    target = _symfloat_repro(inner, float_plan) if float_plan else inner
+
+    backed = _backed_replay_plan_from_contract(contract, frozen=frozen)
+    if backed is not None:
+        if float_plan:
+            float_plan["int_sources"] = backed["sources"]
+        return {
+            "module": _backed_repro(target, backed),
+            "kind": "backed",
+            "backed": backed,
+            "float": float_plan,
+            "live_names": (),
+        }
+
+    integer_symbols = contract.get("symbols") or {}
+    live_integer_symbols = set(integer_symbols) - set(frozen or {})
+    if live_integer_symbols:
+        spec, names, count, checks, frozen_for_spec = (
+            _shape_env_spec_from_contract(contract, frozen=frozen)
+        )
+        module = (
+            _mixed_shape_env_repro(
+                inner, float_plan, spec, names, checks, frozen_for_spec)
+            if float_plan else
+            _shape_env_repro(
+                inner, count, spec, names, checks, frozen_for_spec)
+        )
+        return {
+            "module": module,
+            "kind": "shape_env",
+            "backed": None,
+            "float": float_plan,
+            "live_names": names,
+        }
+
+    if float_plan is None:
+        raise ValueError("dynamic replay contract has no live symbols")
+    return {
+        "module": target,
+        "kind": "symfloat",
+        "backed": None,
+        "float": float_plan,
+        "live_names": (),
+    }
+
+
+def _prepare_dynamic_replay_for_repro(inner, repro_file: str,
+                                      frozen: dict | None = None):
+    shapes_path = Path(repro_file).parent / "shapes.json"
+    if not shapes_path.exists():
+        raise ValueError(f"dynamic replay needs {shapes_path}")
+    return _prepare_dynamic_replay_from_contract(
+        inner, json.loads(shapes_path.read_text()), frozen=frozen)
+
+
+def _dynamic_replay_args(inputs, binding: dict, prepared):
+    args = (
+        _symfloat_args(inputs, binding, prepared["float"])
+        if prepared["float"] else list(inputs)
+    )
+    if prepared["kind"] == "backed":
+        return _backed_args(args, prepared["backed"])
+    if prepared["kind"] == "shape_env":
+        return [
+            *args,
+            *(binding[name] for name in prepared["live_names"]),
+        ]
+    return args
+
+
+@contextlib.contextmanager
+def _dynamic_replay_config(prepared):
+    """Scope the compiler settings required by typed SymFloat reconstruction."""
+    float_plan = prepared.get("float")
+    if not float_plan:
+        yield
+        return
+    dtypes = set(float_plan["dtypes"].values())
+    if len(dtypes) > 1:
+        raise ValueError(
+            f"one graph captured inconsistent SymFloat dtypes {sorted(dtypes)}")
+    use_fp64 = dtypes == {"float64"}
+    with torch._dynamo.config.patch(capture_scalar_outputs=True), \
+            torch._inductor.config.patch(
+                _use_fp64_for_unbacked_floats=use_fp64):
+        yield
+
+
 def _symbols_and_guards_for_repro(repro_file: str) -> tuple[dict, list]:
     """(symbols_table, guards) from a dynamic repro's shapes.json, or ({}, [])
     for a static repro / shapes.txt. Used to validate generated warmup
@@ -796,7 +1271,7 @@ def _distinct_dynamic_bindings_for_contract(
         name: value
         for name, definition in (symbols or {}).items()
         if isinstance(
-            (value := _symbol_point_value(definition)), int)
+            (value := _symbol_point_value(definition)), (int, float))
         and not isinstance(value, bool)
     }
     row_bindings = list(seed_bindings or [])
@@ -804,7 +1279,7 @@ def _distinct_dynamic_bindings_for_contract(
         if name not in hint:
             value = next(
                 (binding[name] for binding in row_bindings
-                 if isinstance(binding.get(name), int)
+                 if isinstance(binding.get(name), (int, float))
                  and not isinstance(binding.get(name), bool)),
                 None,
             )

@@ -2809,7 +2809,7 @@ def bench_full_graph_one(repro_path):
     # Compile default
     inductor_metrics.reset()
     torch._dynamo.reset()
-    compiled = torch.compile(instance)
+    compiled = execution.compile()
     with gpu_setup_lock():
         with torch.no_grad():
             (
@@ -2827,7 +2827,7 @@ def bench_full_graph_one(repro_path):
         inductor_config.coordinate_descent_tuning = True
         try:
             torch._dynamo.reset()
-            compiled_cd = torch.compile(instance)
+            compiled_cd = execution.compile()
             with gpu_setup_lock():
                 with torch.no_grad():
                     graph_cd, cd_is_graph, _cd_recompiled = (
