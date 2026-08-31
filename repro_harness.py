@@ -397,20 +397,33 @@ def make_inputs_from_config(config: dict) -> list:
     Footprint and locality then match the model instead of giving every
     view a private storage.
     """
-    group_nbytes = config.get("alias_group_nbytes") or []
-    group_storage: dict[int, torch.Tensor] = {}
+    group_nbytes = config.get("alias_group_nbytes")
+    group_storage: dict[int, tuple[torch.Tensor, torch.device]] = {}
 
-    def _group_buffer(g: int, device) -> torch.Tensor:
+    def _group_buffer(g: int, device) -> tuple[torch.Tensor, int]:
+        if (not isinstance(g, int) or isinstance(g, bool) or g < 0):
+            raise ValueError(f"invalid alias_group {g!r}")
+        if group_nbytes is None or g >= len(group_nbytes):
+            raise ValueError(
+                f"alias_group {g} has no recorded nbytes "
+                f"(alias_group_nbytes={group_nbytes})")
+        nbytes = group_nbytes[g]
+        if (not isinstance(nbytes, int) or isinstance(nbytes, bool)
+                or nbytes < 0):
+            raise ValueError(
+                f"alias_group {g} has invalid recorded nbytes "
+                f"{nbytes!r}")
+        requested_device = torch.device(device)
         if g not in group_storage:
-            nbytes = group_nbytes[g] if g < len(group_nbytes) else 0
-            if nbytes <= 0:
-                raise ValueError(
-                    f"alias_group {g} has no recorded nbytes "
-                    f"(alias_group_nbytes={group_nbytes})")
-            buf = torch.empty(nbytes, dtype=torch.uint8, device=device)
-            buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
-            group_storage[g] = buf
-        return group_storage[g]
+            buf = torch.zeros(
+                nbytes, dtype=torch.uint8, device=requested_device)
+            group_storage[g] = (buf, requested_device)
+        buf, captured_device = group_storage[g]
+        if requested_device != captured_device:
+            raise ValueError(
+                f"alias_group {g} members disagree on device: "
+                f"{captured_device} != {requested_device}")
+        return buf, nbytes
 
     def _contiguous_stride_local(shape):
         st = [1] * len(shape)
@@ -420,6 +433,9 @@ def make_inputs_from_config(config: dict) -> list:
 
     result = []
     for spec in config["inputs"]:
+        if spec.get("kind") == "symfloat":
+            result.append(float(spec["value"]))
+            continue
         if spec.get("kind") == "shape":
             result.append(spec["dims"])
             continue
@@ -443,7 +459,20 @@ def make_inputs_from_config(config: dict) -> list:
             stride = spec.get("stride") or _contiguous_stride_local(shape)
             device = spec.get("device", "cuda")
             offset = int(spec.get("storage_offset", 0))
-            buf = _group_buffer(spec["alias_group"], device)
+            buf, nbytes = _group_buffer(spec["alias_group"], device)
+            element_size = torch.empty((), dtype=dtype).element_size()
+            if nbytes % element_size:
+                raise ValueError(
+                    f"alias_group {spec['alias_group']} capacity {nbytes} "
+                    f"is not divisible by {dtype} element size "
+                    f"{element_size}")
+            from full_graph_harness import _dense_storage_size
+            required = _dense_storage_size(
+                tuple(shape), stride, storage_offset=offset) * element_size
+            if required > nbytes:
+                raise ValueError(
+                    f"alias_group {spec['alias_group']} view requires "
+                    f"{required} bytes but capture recorded {nbytes}")
             typed = buf.view(dtype) if dtype != torch.uint8 else buf
             result.append(typed.as_strided(shape, stride, offset))
             continue

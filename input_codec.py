@@ -121,9 +121,44 @@ def _exprs_from_slots(slots: list) -> list | None:
     return out if any(e is not None for e in out) else None
 
 
+def _validate_symfloat_dtype(dtype) -> str:
+    if dtype not in {"float32", "float64"}:
+        raise ValueError(f"unsupported SymFloat dtype {dtype!r}")
+    return dtype
+
+
+def _validate_symfloat_value(value, *, allow_none: bool):
+    if value is None and allow_none:
+        return value
+    if (not isinstance(value, (int, float))
+            or isinstance(value, bool)):
+        raise ValueError(f"invalid SymFloat value {value!r}")
+    return value
+
+
+def _validate_alias_group(group) -> int:
+    if (not isinstance(group, int) or isinstance(group, bool)
+            or group < 0):
+        raise ValueError(
+            f"alias_group must be a nonnegative integer, got {group!r}")
+    return group
+
+
 def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     """Verbose spec dict -> compact JSON entry (lossless)."""
     kind = spec.get("kind", "tensor")
+    if kind == "symfloat":
+        hint = spec.get("value", spec.get("hint"))
+        dtype = _validate_symfloat_dtype(spec.get("dtype", "float32"))
+        if spec.get("expr") is not None:
+            _validate_symfloat_value(hint, allow_none=True)
+            if (not isinstance(spec["expr"], str)
+                    or not spec["expr"].strip()):
+                raise ValueError(
+                    f"invalid SymFloat expression {spec['expr']!r}")
+            return ["F", hint, spec["expr"], dtype]
+        _validate_symfloat_value(hint, allow_none=False)
+        return ["flt", hint, dtype]
     if kind == "shape":
         return ["S", list(spec["dims"])]
     if kind == "symint":
@@ -187,7 +222,7 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
         # Members of one alias group are views of ONE storage (packed-qkv
         # saved views): generation must allocate a single buffer per group
         # and as_strided each member at its offset.
-        opts["alias"] = spec["alias_group"]
+        opts["alias"] = _validate_alias_group(spec["alias_group"])
     extras = {k: v for k, v in spec.items()
               if k not in _KNOWN_KEYS and v is not None}
     if extras:
@@ -199,6 +234,34 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
 
 def spec_from_compact(entry: list, name: str | None = None) -> dict:
     """Compact JSON entry -> verbose spec dict (the in-memory format)."""
+    if entry and entry[0] == "F":
+        if len(entry) != 4:
+            raise ValueError(
+                "typed SymFloat entry must be "
+                "['F', observed-or-null, expression, dtype]")
+        _validate_symfloat_value(entry[1], allow_none=True)
+        if not isinstance(entry[2], str) or not entry[2].strip():
+            raise ValueError(
+                f"invalid SymFloat expression {entry[2]!r}")
+        spec = {
+            "kind": "symfloat",
+            "name": name,
+            "value": entry[1],
+            "expr": entry[2],
+            "dtype": _validate_symfloat_dtype(entry[3]),
+        }
+        return spec
+    if entry and entry[0] == "flt":
+        if len(entry) != 3:
+            raise ValueError(
+                "constant SymFloat entry must be ['flt', value, dtype]")
+        _validate_symfloat_value(entry[1], allow_none=False)
+        return {
+            "kind": "symfloat",
+            "name": name,
+            "value": entry[1],
+            "dtype": _validate_symfloat_dtype(entry[2]),
+        }
     if entry and entry[0] == "S":
         return {"kind": "shape", "name": name, "dims": list(entry[1])}
     if entry and entry[0] == "sym":
@@ -261,7 +324,7 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
         spec["exact"] = True
         spec["data"] = opts["data"]
     if "alias" in opts:
-        spec["alias_group"] = opts["alias"]
+        spec["alias_group"] = _validate_alias_group(opts["alias"])
     if "n" in opts and name is None:
         spec["name"] = opts["n"]
     spec.update(opts.get("x", {}))
@@ -279,6 +342,8 @@ def render_T(entry_or_spec) -> str:
         return f"S([{entry[1]}])"
     if entry[0] == "sc":
         return f"Sc({entry[1]})"
+    if isinstance(entry[0], str) and entry[0] in {"F", "flt"}:
+        return f"Sf({entry[1]})"
     shape, dtype = entry[0], entry[1]
     opts = entry[2] if len(entry) > 2 else {}
     kwargs = []
@@ -565,10 +630,14 @@ def _sympify_expr(text, symbols: dict | None = None):
         subs = {}
         for s in free:
             lo = None
+            kind = None
             if symbols and s.name in symbols:
                 rng = symbols[s.name].get("range") or [None, None]
                 lo = rng[0]
-            if lo is not None and lo >= 1:
+                kind = symbols[s.name].get("kind")
+            if kind == "symfloat":
+                subs[s] = sympy.Symbol(s.name, real=True)
+            elif lo is not None and lo >= 1:
                 subs[s] = sympy.Symbol(s.name, integer=True, positive=True)
             else:
                 subs[s] = sympy.Symbol(s.name, integer=True, nonnegative=True)
@@ -580,7 +649,7 @@ def is_symbolic_entry(entry) -> bool:
     """True if a compact entry contains symbolic dims/strides or is symint."""
     if not isinstance(entry, list) or not entry:
         return False
-    if entry[0] == "I":
+    if isinstance(entry[0], str) and entry[0] in {"I", "F"}:
         return True
     if entry[0] == "S" and len(entry) > 1 and isinstance(entry[1], list):
         return any(isinstance(d, str) for d in entry[1])
@@ -617,6 +686,23 @@ def _eval_dim(dim, bindings: dict):
     return int(val)
 
 
+def _eval_scalar(expr_text, bindings: dict,
+                 symbols: dict | None = None) -> float:
+    """Evaluate a typed SymFloat expression under numeric root bindings."""
+    expr = _sympify_expr(expr_text, symbols)
+    free = expr.free_symbols
+    missing = [str(s) for s in free if str(s) not in bindings]
+    if missing:
+        raise ValueError(
+            f"unbound symbols {missing} in scalar expr {expr_text!r}")
+    value = expr.subs({s: bindings[s.name] for s in free})
+    if not getattr(value, "is_number", False):
+        raise ValueError(
+            f"scalar expr {expr_text!r} did not evaluate to a number "
+            f"under {bindings} (got {value!r})")
+    return float(value)
+
+
 def binding_violation(symbols: dict, bindings: dict,
                       guards: list | None = None) -> str | None:
     """Return a reason string for the first range/guard violation under
@@ -631,13 +717,19 @@ def binding_violation(symbols: dict, bindings: dict,
         if sym is None:
             return (f"binding for unknown symbol {name!r} "
                     f"(table has {sorted(symbols)})")
-        if not isinstance(val, int):
+        is_float = sym.get("kind") == "symfloat"
+        expected = (int, float) if is_float else int
+        if (not isinstance(val, expected)
+                or isinstance(val, bool)):
             # A hint-less / unresolved symbol can reach here as None (e.g.
             # instantiate_point on a symbols entry with no hint). Report it as a
             # violation rather than raising `None < lo` — this predicate is
             # documented never to raise so callers can search for a valid
             # binding without exceptions for control flow.
-            return f"binding {name}={val!r} is not an int"
+            return (
+                f"binding {name}={val!r} is not "
+                f"{'numeric' if is_float else 'an int'}"
+            )
         lo, hi = (sym.get("range") or [None, None])
         if lo is not None and val < lo:
             return f"{name}={val} below range min {lo}"
@@ -686,7 +778,8 @@ def validate_bindings(symbols: dict, bindings: dict,
         raise ValueError(reason)
 
 
-def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
+def evaluate_symbolic_entry(entry: list, bindings: dict,
+                            symbols: dict | None = None) -> list:
     """Evaluate a (possibly symbolic) compact entry to a fully static one.
 
     ["I", hint, expr] -> ["sc", value] semantics are NOT applied here; symint
@@ -700,6 +793,22 @@ def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
         hint = entry[1]
         expr = entry[2] if len(entry) > 2 else None
         return ["sym", _eval_dim(expr, bindings) if expr is not None else hint]
+    if entry[0] == "F":
+        if len(entry) != 4:
+            raise ValueError(
+                "typed SymFloat entry must be "
+                "['F', observed-or-null, expression, dtype]")
+        hint = entry[1]
+        _validate_symfloat_value(hint, allow_none=True)
+        expr = entry[2]
+        if not isinstance(expr, str) or not expr.strip():
+            raise ValueError(f"invalid SymFloat expression {expr!r}")
+        dtype = _validate_symfloat_dtype(entry[3])
+        return [
+            "flt",
+            _eval_scalar(expr, bindings, symbols),
+            dtype,
+        ]
     if entry[0] == "S":
         # lifted shape param with symbolic dims: evaluate each slot
         return ["S", [_eval_dim(d, bindings) for d in entry[1]]]
@@ -718,19 +827,26 @@ def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
     return out
 
 
-def evaluate_spec(spec: dict, bindings: dict) -> dict:
+def evaluate_spec(spec: dict, bindings: dict,
+                  symbols: dict | None = None) -> dict:
     """Evaluate a VERBOSE spec dict's symbolic shape/stride at a binding,
     returning a concrete spec (symbolic dims/strides -> ints, 'symbolic'
     block dropped). Static specs pass through. A symint spec with an 'expr'
     resolves to {'kind':'symint','value':...}. Reuses _eval_dim — one
     evaluator for compact entries AND verbose specs."""
-    if spec.get("kind") == "symint" and spec.get("expr") is not None:
+    if spec.get("kind") in {"symint", "symfloat"} \
+            and spec.get("expr") is not None:
         out = dict(spec)
-        out["value"] = _eval_dim(spec["expr"], bindings)
+        out["value"] = (
+            _eval_scalar(spec["expr"], bindings, symbols)
+            if spec["kind"] == "symfloat"
+            else _eval_dim(spec["expr"], bindings)
+        )
         out.pop("expr", None)
         return out
-    symbolic = spec.get("symbolic")
-    if not symbolic:
+    symbolic = spec.get("symbolic") or {}
+    storage_nbytes_expr = spec.get("storage_nbytes_expr")
+    if not symbolic and storage_nbytes_expr is None:
         return spec
     out = dict(spec)
     out.pop("symbolic", None)
@@ -744,6 +860,10 @@ def evaluate_spec(spec: dict, bindings: dict) -> dict:
                          for d in _overlay_exprs(base, symbolic["stride_exprs"])]
     if symbolic.get("offset_expr"):
         out["storage_offset"] = _eval_dim(symbolic["offset_expr"], bindings)
+    if storage_nbytes_expr is not None:
+        out["storage_nbytes"] = _eval_dim(
+            storage_nbytes_expr, bindings)
+        out.pop("storage_nbytes_expr", None)
     return out
 
 
@@ -769,4 +889,7 @@ def instantiate_point(point: dict, symbols: dict,
             f"point needs explicit bindings for unobserved symbols {missing}")
     if eff:
         validate_bindings(symbols or {}, eff, guards)
-    return [evaluate_symbolic_entry(e, eff) for e in point.get("inputs", [])]
+    return [
+        evaluate_symbolic_entry(e, eff, symbols)
+        for e in point.get("inputs", [])
+    ]

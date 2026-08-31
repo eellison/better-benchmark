@@ -119,7 +119,7 @@ def _canonical_symbol_rename(inputs, guards, extra_names=None) -> dict:
                 for s in e[2].get("st", []):
                     note(s)
                 note(e[2].get("off"))
-        elif e[0] == "I":                          # ['I', hint, expr]
+        elif e[0] in {"I", "F"}:                   # typed scalar expr
             if len(e) > 2:
                 note(e[2])
         elif e[0] == "S":                          # ['S', [dims...]]
@@ -193,10 +193,13 @@ def _rename_symbols_in_inputs(inputs, rename: dict):
         if not isinstance(e, list) or not e:
             out.append(e)
             continue
-        if e[0] == "I":                      # ['I', hint, expr]
-            out.append([e[0], e[1],
-                        _slot(e[2]) if len(e) > 2 else e[2]] if len(e) > 2
-                       else e)
+        if isinstance(e[0], str) and e[0] in {"I", "F"}:
+            if len(e) > 2:
+                rewritten = [e[0], e[1], _slot(e[2])]
+                rewritten.extend(e[3:])
+                out.append(rewritten)
+            else:
+                out.append(e)
         elif e[0] == "S":                    # ['S', [dims...]]
             out.append([e[0], [_slot(d) for d in e[1]]])
         elif isinstance(e[0], list):         # [shape, dtype, opts?]
@@ -388,7 +391,7 @@ def _write_shapes_json(
         name: value
         for name, definition in symbols.items()
         if isinstance(
-            (value := _symbol_point_value(definition)), int)
+            (value := _symbol_point_value(definition)), (int, float))
         and not isinstance(value, bool)
     } if symbols else None)
     required_bindings = (
@@ -713,13 +716,19 @@ def _hintfree_inputs_signature(inputs) -> str:
     This is the second identity component: a pointwise region's forward BODY
     references no shapes at all (only annotations do), so [64,128,s0,s1] and
     [64,s0,s1,s2] emit byte-identical bodies. Their symbolic input structure
-    is what tells the families apart. ['I', hint, expr] symint entries drop
-    the hint slot (a binding value); tensor dims/strides are already exprs or
-    family-invariant ints."""
+    is what tells the families apart. Typed symbolic scalar entries drop the
+    hint slot (a binding value) while retaining their kind/expression/dtype;
+    tensor dims/strides are already exprs or family-invariant ints."""
     entries = []
     for e in (inputs or []):
         if isinstance(e, list) and e and e[0] == "I":
             entries.append(["I", e[2] if len(e) > 2 else None])
+        elif isinstance(e, list) and e and e[0] == "F":
+            entries.append([
+                "F",
+                e[2] if len(e) > 2 else None,
+                e[3] if len(e) > 3 else "float32",
+            ])
         else:
             entries.append(e)
     return json.dumps(entries, sort_keys=True)
@@ -729,6 +738,8 @@ def _symbol_family_definition(definition: dict | None) -> dict:
     """Hint-blind symbol metadata that changes the compiled family."""
     definition = definition or {}
     return {
+        "kind": definition.get("kind", "symint"),
+        "dtype": definition.get("dtype"),
         "range": definition.get("range"),
         "unbacked": definition.get("unbacked") is True,
         "optimization_hint": definition.get("optimization_hint"),
