@@ -24,9 +24,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+from benchmark_provenance import semantic_benchmark_config
+
 REGRESSION_THRESHOLD = 0.05  # 5%
 RESERVED_TOP_LEVEL_KEYS = {"_metadata", "__failures__", "__summary__"}
 RESERVED_RESULT_LABELS = {"__graph__"}
+_RUN_CONFIG_KEY = "__bench_report_run_config__"
 
 
 @dataclass
@@ -41,6 +44,13 @@ class KernelDelta:
 def load_results(path: Path) -> dict[str, dict]:
     """Load a sweep results JSON. Returns {kernel_name: {compiled_us, memcopy_sol_us, ...}}."""
     data = json.loads(path.read_text())
+    metadata = data.get("_metadata", {})
+    if not isinstance(metadata, dict):
+        raise ValueError(f"{path}: _metadata must be an object")
+    run_config = metadata.get("benchmark_config", {})
+    if not isinstance(run_config, dict):
+        raise ValueError(f"{path}: _metadata.benchmark_config must be an object")
+
     results = {}
     for key, val in data.items():
         if key in RESERVED_TOP_LEVEL_KEYS or not isinstance(val, dict):
@@ -65,14 +75,53 @@ def load_results(path: Path) -> dict[str, dict]:
             ):
                 continue
             name = base_name if label == "default" else f"{base_name}[{label}]"
-            results[name] = result
+            loaded_result = dict(result)
+            loaded_result[_RUN_CONFIG_KEY] = dict(run_config)
+            results[name] = loaded_result
     return results
+
+
+def _result_compile_policy(result: dict) -> dict:
+    policy = result.get("compile_policy", {})
+    if not isinstance(policy, dict):
+        raise ValueError("result compile_policy must be an object")
+    return policy
+
+
+def _result_benchmark_config(result: dict) -> dict:
+    """Return only result-affecting config for local comparison identity."""
+    config = result.get(_RUN_CONFIG_KEY, {})
+    return semantic_benchmark_config(config)
+
+
+def _comparison_context(result: dict) -> dict:
+    return {
+        "compile_policy": _result_compile_policy(result),
+        "benchmark_config": _result_benchmark_config(result),
+    }
 
 
 def compute_deltas(base: dict, head: dict) -> list[KernelDelta]:
     """Compute per-kernel deltas between base and head results."""
     deltas = []
     common_keys = set(base.keys()) & set(head.keys())
+    incompatible = [
+        name
+        for name in sorted(common_keys)
+        if _comparison_context(base[name]) != _comparison_context(head[name])
+    ]
+    if incompatible:
+        examples = ", ".join(incompatible[:5])
+        suffix = (
+            f" (and {len(incompatible) - 5} more)"
+            if len(incompatible) > 5
+            else ""
+        )
+        raise ValueError(
+            "refusing to compare results with different compile policy/config: "
+            f"{examples}{suffix}"
+        )
+
     for name in sorted(common_keys):
         base_us = base[name].get("compiled_us", 0)
         head_us = head[name].get("compiled_us", 0)
@@ -155,7 +204,6 @@ def write_ci_json(deltas: list[KernelDelta], head_results: dict, output_path: Pa
         compiled_us = result.get("compiled_us", 0)
         sol_us = result.get("memcopy_sol_us", 0)
         gap = result.get("gap_default", 0)
-
         records.append({
             "benchmark": {
                 "name": "inductor-kernel-benchmark",
@@ -210,10 +258,12 @@ def main():
 
     if args.compare:
         base_path, head_path = Path(args.compare[0]), Path(args.compare[1])
-        base = load_results(base_path)
-        head = load_results(head_path)
-
-        deltas = compute_deltas(base, head)
+        try:
+            base = load_results(base_path)
+            head = load_results(head_path)
+            deltas = compute_deltas(base, head)
+        except ValueError as exc:
+            parser.error(str(exc))
         md = render_markdown(deltas, title=args.title)
         print(md)
 

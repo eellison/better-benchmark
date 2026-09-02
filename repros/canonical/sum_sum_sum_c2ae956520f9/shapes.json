@@ -19,6 +19,11 @@
     },
     {
       "shape_hash": "cf12eab2",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "timm/train/dm_nfnet_f0": {
           "occurrences": 1

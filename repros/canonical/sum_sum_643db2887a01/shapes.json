@@ -270,6 +270,11 @@
     },
     {
       "shape_hash": "18f48531",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "timm/train/mobilenetv3_large_100": {
           "occurrences": 2

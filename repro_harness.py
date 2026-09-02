@@ -13,11 +13,12 @@ import os
 import re
 import sys
 import time
+from collections.abc import Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
 import torch
-import torch._inductor.config as inductor_config
 import torch._inductor.inductor_prims  # noqa: F401
 
 
@@ -32,6 +33,10 @@ _REPRO_VERSION_RE = re.compile(
     r"^_repro_version\s*=\s*(\d+)\s*(?:#.*)?$",
 )
 _REPRO_VERSION_ASSIGN_RE = re.compile(r"^_repro_version\s*=.*$", re.MULTILINE)
+_SUPPORTED_COMPILE_POLICY_KEYS = frozenset({"inductor"})
+_SUPPORTED_COMPILE_POLICY_INDUCTOR_OPTIONS = frozenset(
+    {"emulate_precision_casts"}
+)
 
 
 def parse_repro_version(source: str) -> int:
@@ -51,6 +56,149 @@ def parse_repro_version(source: str) -> int:
 def read_repro_version(repro_path: str | Path) -> int:
     """Read the repro format version from a repro.py path."""
     return parse_repro_version(Path(repro_path).read_text())
+
+
+def normalize_compile_policy(
+    policy: Any,
+    *,
+    source: str = "compile policy",
+) -> dict[str, Any]:
+    """Validate and normalize one JSON-serializable compile policy."""
+    if policy is None:
+        return {}
+    if not isinstance(policy, Mapping):
+        raise TypeError(f"{source} must be a mapping")
+    if not all(isinstance(key, str) for key in policy):
+        raise TypeError(f"{source} keys must be strings")
+
+    unknown_policy = set(policy) - _SUPPORTED_COMPILE_POLICY_KEYS
+    if unknown_policy:
+        raise ValueError(
+            f"unsupported {source} keys: "
+            + ", ".join(sorted(unknown_policy))
+        )
+
+    options = policy.get("inductor", {})
+    if not isinstance(options, Mapping):
+        raise TypeError(f"{source}['inductor'] must be a mapping")
+    if not all(isinstance(key, str) for key in options):
+        raise TypeError(f"{source}['inductor'] keys must be strings")
+    unknown_options = (
+        set(options) - _SUPPORTED_COMPILE_POLICY_INDUCTOR_OPTIONS
+    )
+    if unknown_options:
+        raise ValueError(
+            f"unsupported per-point Inductor options in {source}: "
+            + ", ".join(sorted(unknown_options))
+        )
+    if (
+        "emulate_precision_casts" in options
+        and not isinstance(options["emulate_precision_casts"], bool)
+    ):
+        raise TypeError(
+            "per-point emulate_precision_casts policy must be a bool"
+        )
+    return {"inductor": dict(options)} if options else {}
+
+
+def compile_policy_from_config(
+    shape_config: Mapping | None,
+) -> dict[str, Any]:
+    """Return the validated compile policy carried by one input point."""
+    if shape_config is None:
+        return {}
+    if not isinstance(shape_config, Mapping):
+        raise TypeError("shape config must be a mapping")
+    return normalize_compile_policy(
+        shape_config.get("compile_policy"),
+        source="shape config compile_policy",
+    )
+
+
+def default_shape_config(repro_file: str | Path) -> dict | None:
+    """Return the first input point config used by generated ``make_inputs``."""
+    return next(iter(load_shape_configs(str(repro_file)).values()), None)
+
+
+def compile_repro(
+    repro: Any,
+    *,
+    compile_policy: Mapping | None = None,
+    **compile_kwargs,
+):
+    """Compile a repro with an explicit, point-local compile policy."""
+    normalized_policy = normalize_compile_policy(
+        compile_policy,
+        source="compile_policy",
+    )
+    policy_options = normalized_policy.get("inductor", {})
+    backend = compile_kwargs.get("backend")
+    if policy_options and backend not in (None, "inductor"):
+        raise ValueError(
+            "compile_policy declares Inductor options but "
+            f"torch.compile backend is {backend!r}"
+        )
+
+    explicit_options = compile_kwargs.pop("options", None)
+    if explicit_options is not None and not isinstance(explicit_options, Mapping):
+        raise TypeError("torch.compile options must be a mapping or None")
+    options = {}
+    for raw_key, value in (explicit_options or {}).items():
+        if not isinstance(raw_key, str):
+            raise TypeError("torch.compile option names must be strings")
+        # PyTorch accepts CLI-style hyphenated aliases by normalizing them
+        # before applying options.  Normalize here too so an alias cannot
+        # evade the policy conflict check below.
+        key = raw_key.replace("-", "_")
+        if key in options and options[key] != value:
+            raise ValueError(
+                f"conflicting torch.compile option aliases for {key!r}"
+            )
+        options[key] = value
+    for key, value in policy_options.items():
+        if key in options and options[key] != value:
+            raise ValueError(
+                f"compile option {key!r} conflicts with compile_policy"
+            )
+        options[key] = value
+    if options:
+        compile_kwargs["options"] = options
+    return torch.compile(repro, **compile_kwargs)
+
+
+@contextmanager
+def preserve_compile_environment():
+    """Restore process state that lazy Inductor compilation may mutate.
+
+    ``torch.compile(options={"emulate_precision_casts": True})`` scopes the
+    Inductor config correctly, but Triton's lazy compiler also selects CUDA's
+    libdevice by mutating both ``TRITON_LIBDEVICE_PATH`` and a process-global
+    Triton knob.  Persistent benchmark workers must restore those values at
+    the workload boundary or the next repro can inherit eager-numerics state.
+    """
+    missing = object()
+    env_name = "TRITON_LIBDEVICE_PATH"
+    prior_env = os.environ.get(env_name, missing)
+
+    triton_knobs = None
+    prior_knob = missing
+    try:
+        from triton import knobs
+
+        triton_knobs = knobs
+        prior_knob = knobs.nvidia.libdevice_path
+    except (AttributeError, ImportError):
+        pass
+
+    try:
+        yield
+    finally:
+        if prior_env is missing:
+            os.environ.pop(env_name, None)
+        else:
+            os.environ[env_name] = prior_env
+        if triton_knobs is not None and prior_knob is not missing:
+            triton_knobs.nvidia.libdevice_path = prior_knob
 
 
 def load_shape_configs(repro_file: str, symbol_bindings: dict | None = None) -> dict:
@@ -118,6 +266,14 @@ def _parse_shapes_json(shapes_path: Path,
         # Use last component of model path for brevity
         model_short = first_model.rsplit("/", 1)[-1] if first_model else ""
         label = f"{model_short}_{shape_hash}" if model_short else shape_hash
+        point_policy = (
+            normalize_compile_policy(
+                point["compile_policy"],
+                source=f"{shapes_path} point {shape_hash} compile_policy",
+            )
+            if "compile_policy" in point
+            else None
+        )
 
         # Prefer the structured compact entries (input_codec) — the data.
         # Signature-eval is the fallback for points written before the
@@ -145,12 +301,17 @@ def _parse_shapes_json(shapes_path: Path,
             # (adversarial review bug #1).
             if point.get("alias_group_nbytes"):
                 cfg["alias_group_nbytes"] = point["alias_group_nbytes"]
+            if point_policy is not None:
+                cfg["compile_policy"] = point_policy
             configs[label] = cfg
             continue
         try:
             inputs = _eval_signature(signature)
             if inputs:
-                configs[label] = {"inputs": inputs}
+                cfg = {"inputs": inputs}
+                if point_policy is not None:
+                    cfg["compile_policy"] = point_policy
+                configs[label] = cfg
         except Exception:
             continue
 
@@ -630,7 +791,12 @@ def count_bytes_adjusted(mod, inputs) -> int:
     return count_bytes_effective(mod, inputs)
 
 
-def count_kernels(mod, inputs, dynamic: bool = False) -> tuple[int, list[str]]:
+def count_kernels(
+    mod,
+    inputs,
+    dynamic: bool = False,
+    compile_policy: Mapping | None = None,
+) -> tuple[int, list[str]]:
     """Compile and count how many Triton kernels Inductor generates.
 
     dynamic=True counts kernels of the dynamic-shapes compilation (the
@@ -642,7 +808,15 @@ def count_kernels(mod, inputs, dynamic: bool = False) -> tuple[int, list[str]]:
 
     torch._dynamo.reset()
     with fresh_inductor_cache():
-        compiled = torch.compile(mod, dynamic=True) if dynamic else torch.compile(mod)
+        compiled = (
+            compile_repro(
+                mod,
+                dynamic=True,
+                compile_policy=compile_policy,
+            )
+            if dynamic
+            else compile_repro(mod, compile_policy=compile_policy)
+        )
         with torch.no_grad():
             compiled(*inputs)
             torch.cuda.synchronize()
@@ -681,6 +855,11 @@ def _save_perf(repro_file: str, hardware: str, shape_label: str, result: dict):
 
     if hardware not in perf:
         perf[hardware] = {}
+
+    normalize_compile_policy(
+        result.get("compile_policy"),
+        source="result compile_policy",
+    )
 
     perf[hardware][shape_label] = result
 
@@ -761,14 +940,33 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     all_results = {}
     compiled = None  # dynamic mode: ONE artifact across all rows
     if mode == "dynamic":
+        policies = {
+            json.dumps(compile_policy_from_config(cfg), sort_keys=True)
+            for _label, _binding, cfg in rows
+        }
+        if len(policies) != 1:
+            raise ValueError(
+                "one dynamic artifact cannot span input points with "
+                "different compile policies"
+            )
         # Kernel counting recompiles (and resets dynamo), so do it BEFORE
         # the compile-once artifact exists. The dynamic compilation's
         # kernel set is binding-independent — count at the first row.
         _first_label, first_binding, first_cfg = rows[0]
+        dynamic_mod = repro_cls()
+        dynamic_policy = compile_policy_from_config(first_cfg)
         n_kernels, kernel_names = count_kernels(
-            repro_cls(), _inputs_for(first_binding, first_cfg), dynamic=True)
+            dynamic_mod,
+            _inputs_for(first_binding, first_cfg),
+            dynamic=True,
+            compile_policy=dynamic_policy,
+        )
         torch._dynamo.reset()
-        compiled = torch.compile(repro_cls(), dynamic=True)
+        compiled = compile_repro(
+            dynamic_mod,
+            dynamic=True,
+            compile_policy=dynamic_policy,
+        )
 
     for label, binding, cfg in rows:
         binding_str = format_binding(binding)
@@ -776,14 +974,22 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         inputs = _inputs_for(binding, cfg)
 
         mod = repro_cls()
+        point_policy = compile_policy_from_config(cfg)
         with torch.no_grad():
             mod(*inputs)  # eager validation: bad configs fail LOUD here
 
         graphs_before = _unique_graph_count()
         if mode == "static":
-            n_kernels, kernel_names = count_kernels(mod, inputs)
+            n_kernels, kernel_names = count_kernels(
+                mod,
+                inputs,
+                compile_policy=point_policy,
+            )
             torch._dynamo.reset()
-            compiled_static = torch.compile(mod)
+            compiled_static = compile_repro(
+                mod,
+                compile_policy=point_policy,
+            )
             compiled_us = _bench_cudagraph_min_us(
                 compiled_static, inputs, parsed.n_warmup, parsed.n_rep)
             recompiled = None  # fresh compile per row by design
@@ -809,6 +1015,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             "label": label,
             "binding": binding,
             "mode": mode,
+            "compile_policy": point_policy,
             "compiled_us": compiled_us,
             "n_kernels": n_kernels,
             "kernel_names": kernel_names,
@@ -831,6 +1038,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     return all_results
 
 
+@preserve_compile_environment()
 def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     """Full benchmark entry point for canonical repros.
 
@@ -900,7 +1108,8 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
 
         for name in shape_names:
             if name is not None:
-                inputs = make_inputs_from_config(configs[name])
+                shape_config = configs[name]
+                inputs = make_inputs_from_config(shape_config)
                 label = name
                 # If shapes.json doesn't include shape params but forward() expects them,
                 # merge shape params from _default_make_inputs at the correct positions
@@ -923,10 +1132,12 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                                 merged.append(di)
                     inputs = merged
             else:
+                shape_config = next(iter(configs.values()), None)
                 inputs = make_inputs_safely(make_inputs_fn)
                 label = "default"
 
             mod = repro_cls()
+            point_policy = compile_policy_from_config(shape_config)
 
             with torch.no_grad():
                 eager_out = mod(*inputs)
@@ -936,13 +1147,18 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             if total_bytes_naive > total_bytes * 1.1:
                 print(f"\n[{label}] Bytes adjusted: {total_bytes_naive/1e6:.1f} MB naive -> {total_bytes/1e6:.1f} MB actual")
 
-            n_kernels, kernel_names = count_kernels(mod, inputs)
+            n_kernels, kernel_names = count_kernels(
+                mod,
+                inputs,
+                compile_policy=point_policy,
+            )
             print(f"\n[{label}] Kernels generated: {n_kernels}")
             for kn in kernel_names:
                 print(f"  {kn}")
 
             if parsed.count_kernels_only:
                 all_results[label] = {
+                    "compile_policy": point_policy,
                     "n_kernels": n_kernels,
                     "kernel_names": kernel_names,
                     "total_bytes": total_bytes,
@@ -959,7 +1175,10 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
 
             # Compiled (default heuristics) with CUDAGraph replay
             torch._dynamo.reset()
-            compiled = torch.compile(mod)
+            compiled = compile_repro(
+                mod,
+                compile_policy=point_policy,
+            )
             with torch.no_grad():
                 for _ in range(3):
                     compiled(*inputs)
@@ -974,9 +1193,12 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             # Compiled with coordinate descent tuning
             cd_us = None
             if not parsed.no_cd:
-                inductor_config.coordinate_descent_tuning = True
                 torch._dynamo.reset()
-                compiled_cd = torch.compile(mod)
+                compiled_cd = compile_repro(
+                    mod,
+                    compile_policy=point_policy,
+                    options={"coordinate_descent_tuning": True},
+                )
                 with torch.no_grad():
                     for _ in range(3):
                         compiled_cd(*inputs)
@@ -987,7 +1209,6 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                     torch.cuda.synchronize()
                 cd_ms = do_bench(lambda: g_cd.replay(), warmup=parsed.n_warmup, rep=parsed.n_rep, return_mode="min")
                 cd_us = cd_ms * 1000
-                inductor_config.coordinate_descent_tuning = False
 
             print(f"\n[{label}] Kernel data: {total_bytes / 1024:.1f} KB (read+write)")
             print(f"[{label}] Memcopy SOL (same size): {sol_us:8.1f} us")
@@ -999,6 +1220,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 print(f"[{label}] Gap (CD / SOL):          {cd_us / sol_us:8.2f}x")
 
             all_results[label] = {
+                "compile_policy": point_policy,
                 "compiled_us": compiled_us,
                 "coord_descent_us": cd_us,
                 "memcopy_sol_us": sol_us,

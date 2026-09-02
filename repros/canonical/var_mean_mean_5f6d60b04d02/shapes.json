@@ -2,6 +2,11 @@
   "points": [
     {
       "shape_hash": "79146166",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "torchbench/train/resnet18": {
           "occurrences": 1
@@ -19,6 +24,11 @@
     },
     {
       "shape_hash": "8881253b",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "torchbench/train/resnet50": {
           "occurrences": 1
@@ -36,6 +46,11 @@
     },
     {
       "shape_hash": "c99f0cec",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "torchbench/train/resnext50_32x4d": {
           "occurrences": 1
@@ -53,6 +68,11 @@
     },
     {
       "shape_hash": "77734290",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "torchbench/train/phlippe_resnet": {
           "occurrences": 1
@@ -70,6 +90,11 @@
     },
     {
       "shape_hash": "f7eda15e",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "torchbench/train/resnet152": {
           "occurrences": 1

@@ -33,8 +33,17 @@ try:
     inputs = [x.cuda() if hasattr(x, 'cuda') else x for x in inputs]
 
     # Compile
+    from repro_harness import (
+        compile_repro,
+        compile_policy_from_config,
+        default_shape_config,
+    )
+
     t0 = time.time()
-    compiled = torch.compile(model)
+    compile_policy = compile_policy_from_config(
+        default_shape_config(repro_path),
+    )
+    compiled = compile_repro(model, compile_policy=compile_policy)
     # Warmup (triggers compilation)
     for _ in range(3):
         out = compiled(*inputs)

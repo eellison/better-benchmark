@@ -12,8 +12,15 @@ os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
 import torch
 import torch._dynamo
 import torch._inductor.metrics as metrics
+from repro_harness import (
+    compile_repro,
+    compile_policy_from_config,
+    default_shape_config,
+    preserve_compile_environment,
+)
 
 
+@preserve_compile_environment()
 def count_kernels(repro_path: Path) -> int | None:
     metrics.reset()
     try:
@@ -25,11 +32,17 @@ def count_kernels(repro_path: Path) -> int | None:
         spec.loader.exec_module(mod)
 
         instance = mod.Repro()
+        compile_policy = compile_policy_from_config(
+            default_shape_config(repro_path)
+        )
         make_fn = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
         inputs = make_fn()
 
         torch._dynamo.reset()
-        compiled = torch.compile(instance)
+        compiled = compile_repro(
+            instance,
+            compile_policy=compile_policy,
+        )
         with torch.no_grad():
             compiled(*inputs)
             torch.cuda.synchronize()

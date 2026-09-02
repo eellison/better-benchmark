@@ -35,6 +35,8 @@ from pathlib import Path
 
 import torch
 
+from repro_harness import preserve_compile_environment
+
 if __name__ == "__main__":
     sys.modules.setdefault("oracle_harness", sys.modules[__name__])
 
@@ -1054,6 +1056,7 @@ def check_oracle_all_shapes(
 # Benchmarking
 # ---------------------------------------------------------------------------
 
+@preserve_compile_environment()
 def bench_oracle(
     oracle_forward,
     instance,
@@ -1063,6 +1066,7 @@ def bench_oracle(
     warmup: int = 25,
     rep: int = 200,
     rounds: int = 5,
+    compile_policy: dict | None = None,
     _skip_numerics_gate: bool = False,
     numerics_optout: dict | None = None,
     disable_gpu_lock: bool = False,
@@ -1108,9 +1112,13 @@ def bench_oracle(
     Returns:
         Dict with repro_id, oracle_us, compile_us, ratio, status — plus a
         "dispatch" field when the oracle module uses oracle_impl registration
-        (tier > 1 / fallback=True means the selected implementation was tuned
-        for different hardware and/or shape, so the floor may be soft).
+            (tier > 1 / fallback=True means the selected implementation was tuned
+            for different hardware and/or shape, so the floor may be soft).
     """
+    from repro_harness import compile_repro, normalize_compile_policy
+
+    compile_policy = normalize_compile_policy(compile_policy)
+
     # --- Resolve oracle_impl dispatch (no-op for unmigrated oracles) ---
     dispatch_info = None
     try:
@@ -1118,6 +1126,7 @@ def bench_oracle(
     except OracleDispatchError as e:
         result = {
             "repro_id": repro_id,
+            "compile_policy": compile_policy,
             "status": "NO_ORACLE_FOR_SHAPE",
             "error": str(e)[:300],
         }
@@ -1128,13 +1137,12 @@ def bench_oracle(
 
     if device.type != "cuda":
         return _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id,
-                                 warmup=warmup, rep=rep)
+                                 warmup=warmup, rep=rep,
+                                 compile_policy=compile_policy)
 
     from triton.testing import do_bench
 
     # --- Compile with coordinate_descent + capture CUDAGraph (MANDATORY) ---
-    import torch._inductor.config as cfg
-    cfg.coordinate_descent_tuning = True
     # Fresh dynamo state per shape, matching the repro path (bench_parallel.py).
     # Without this, bench_oracle_all_shapes recompiles shapes 2..N DYNAMICally on
     # the same code object: the symbolic kernel (bf16[512,s44,s56,...]) gets
@@ -1144,7 +1152,11 @@ def bench_oracle(
     # shape is the faithful measurement.
     import torch._dynamo
     torch._dynamo.reset()
-    compiled = torch.compile(instance)
+    compiled = compile_repro(
+        instance,
+        compile_policy=compile_policy,
+        options={"coordinate_descent_tuning": True},
+    )
     with torch.no_grad():
         for _ in range(5):
             compiled(*inputs)
@@ -1156,6 +1168,7 @@ def bench_oracle(
     if compile_warnings:
         result = {
             "repro_id": repro_id,
+            "compile_policy": compile_policy,
             "status": "INVALID_CUDAGRAPH_WARNING",
             "warning_source": "compiled",
             "warnings": compile_warnings[:5],
@@ -1177,6 +1190,7 @@ def bench_oracle(
     if oracle_warnings:
         result = {
             "repro_id": repro_id,
+            "compile_policy": compile_policy,
             "status": "INVALID_CUDAGRAPH_WARNING",
             "warning_source": "oracle",
             "warnings": oracle_warnings[:5],
@@ -1201,6 +1215,7 @@ def bench_oracle(
             else:
                 result = {
                     "repro_id": repro_id,
+                    "compile_policy": compile_policy,
                     "status": "NUMERICS_WORSE_THAN_COMPILED",
                     "numerics_gate": numerics_result,
                 }
@@ -1256,6 +1271,7 @@ def bench_oracle(
 
     result = {
         "repro_id": repro_id,
+        "compile_policy": compile_policy,
         "oracle_us": round(best_oracle_us, 2),
         "compile_us": round(best_compile_us, 2),
         "ratio": round(ratio, 3),
@@ -1287,12 +1303,23 @@ def bench_oracle(
     return result
 
 
-def _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id, *, warmup, rep):
+def _bench_oracle_cpu(
+    oracle_forward,
+    instance,
+    inputs,
+    repro_id,
+    *,
+    warmup,
+    rep,
+    compile_policy,
+):
     """Fallback for CPU-only benchmarks (no CUDAGraph)."""
+    from repro_harness import compile_repro
+
     with torch.no_grad():
         oracle_us = _do_bench(lambda: oracle_forward(inputs), torch.device("cpu"),
                               warmup=warmup, rep=rep)
-    compiled = torch.compile(instance)
+    compiled = compile_repro(instance, compile_policy=compile_policy)
     with torch.no_grad():
         for _ in range(5):
             compiled(*inputs)
@@ -1302,6 +1329,7 @@ def _bench_oracle_cpu(oracle_forward, instance, inputs, repro_id, *, warmup, rep
     status = "GOOD" if ratio > 1.05 else ("BAD_ORACLE" if ratio < 0.95 else "AT_FLOOR")
     result = {
         "repro_id": repro_id,
+        "compile_policy": compile_policy,
         "oracle_us": round(oracle_us, 2),
         "compile_us": round(compile_us, 2),
         "ratio": round(ratio, 3),
@@ -1397,9 +1425,18 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
     Returns:
         List of result dicts from bench_oracle, one per shape config.
     """
-    from repro_harness import load_shape_configs, make_inputs_from_config
+    from repro_harness import (
+        compile_policy_from_config,
+        load_shape_configs,
+        make_inputs_from_config,
+    )
 
     repro_dir = Path(repro_dir)
+    if "compile_policy" in kwargs:
+        raise TypeError(
+            "bench_oracle_all_shapes derives compile_policy from each "
+            "input point"
+        )
     # Honor a reviewed numerics opt-out recorded in this dir's meta.json, unless
     # the caller passed one explicitly. Loaded once and applied to every shape.
     if "numerics_optout" not in kwargs:
@@ -1412,13 +1449,27 @@ def bench_oracle_all_shapes(oracle_forward, repro_dir, repro_id, **kwargs):
         # No shape configs found — just run with default inputs
         inputs = get_inputs(repro_dir)
         instance = get_repro_instance(repro_dir)
-        return [bench_oracle(oracle_forward, instance, inputs, repro_id, **kwargs)]
+        return [bench_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            repro_id,
+            compile_policy={},
+            **kwargs,
+        )]
 
     results = []
     for label, config in configs.items():
         inputs = make_inputs_from_config(config)
         instance = get_repro_instance(repro_dir)
-        result = bench_oracle(oracle_forward, instance, inputs, f"{repro_id}_{label}", **kwargs)
+        result = bench_oracle(
+            oracle_forward,
+            instance,
+            inputs,
+            f"{repro_id}_{label}",
+            compile_policy=compile_policy_from_config(config),
+            **kwargs,
+        )
         results.append(result)
     return results
 
@@ -1839,7 +1890,11 @@ def _runner_main(argv=None):
                   "gate. Results are NOT validated and should not be used "
                   "for official floor measurements.", file=sys.stderr)
 
-        from repro_harness import load_shape_configs, make_inputs_from_config
+        from repro_harness import (
+            compile_policy_from_config,
+            load_shape_configs,
+            make_inputs_from_config,
+        )
 
         repro_file = d / "repro.py"
         configs = load_shape_configs(str(repro_file))
@@ -1861,6 +1916,7 @@ def _runner_main(argv=None):
                 bench_results.append(
                     bench_oracle(fn, instance, inputs, repro_id,
                                  warmup=args.warmup, rep=args.rep,
+                                 compile_policy={},
                                  numerics_optout=optout,
                                  disable_gpu_lock=args.disable_gpu_lock))
             else:
@@ -1885,6 +1941,9 @@ def _runner_main(argv=None):
                     bench_results.append(
                         bench_oracle(fn, instance, inputs, point_id,
                                      warmup=args.warmup, rep=args.rep,
+                                     compile_policy=(
+                                         compile_policy_from_config(config)
+                                     ),
                                      numerics_optout=optout,
                                      disable_gpu_lock=args.disable_gpu_lock))
                 else:
