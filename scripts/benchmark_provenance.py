@@ -33,4 +33,11 @@ def semantic_benchmark_config(config: dict | None) -> dict:
             if not isinstance(value, dict):
                 raise ValueError(f"benchmark config {key} must be an object")
             normalized["inductor_config"] = dict(value)
+    # Result-affecting: a sweep with a backend registered is not the same run
+    # as one without, so results from the two must not merge into each other.
+    worker_init = config.get("worker_init")
+    if worker_init:
+        if not isinstance(worker_init, list):
+            raise ValueError("benchmark config worker_init must be an array")
+        normalized["worker_init"] = list(worker_init)
     return normalized
