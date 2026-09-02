@@ -72,15 +72,16 @@ def make_inputs(mod):
         torch.randn = old_randn
 
 
-def _count_kernels(mod, inputs):
+def _count_kernels(mod, inputs, compile_policy):
     import torch
     import torch._dynamo
+    from repro_harness import compile_repro
     from torch._inductor.utils import fresh_inductor_cache
     from torch._inductor.codecache import cache_dir
 
     torch._dynamo.reset()
     with fresh_inductor_cache():
-        compiled = torch.compile(mod)
+        compiled = compile_repro(mod, compile_policy=compile_policy)
         with torch.no_grad():
             compiled(*inputs)
             torch.cuda.synchronize()
@@ -97,6 +98,11 @@ def _count_kernels(mod, inputs):
 
 def load_repro(path):
     import torch
+    from repro_harness import (
+        compile_policy_from_config,
+        default_shape_config,
+    )
+
     spec = importlib.util.spec_from_file_location("repro", path)
     mod = importlib.util.module_from_spec(spec)
     mod.device = torch.device
@@ -106,7 +112,8 @@ def load_repro(path):
     mod.device = torch.device
     mod.inf = math.inf
     mod.nan = math.nan
-    return mod.Repro(), make_inputs(mod)
+    compile_policy = compile_policy_from_config(default_shape_config(path))
+    return mod.Repro(), make_inputs(mod), compile_policy
 
 
 def _cuda_graph_time(fn, inputs, n_warmup=10, n_iter=200):
@@ -135,14 +142,18 @@ def _cuda_graph_time(fn, inputs, n_warmup=10, n_iter=200):
     return elapsed
 
 
-def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
+def _benchmark_one_impl(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     import torch
     import torch._dynamo
-    import torch._inductor.config as inductor_config
     from byte_accounting import count_bytes_effective, count_bytes_naive
+    from repro_harness import compile_repro
+    # NOT ported to repro_harness.timed_min_us: these do_bench calls use the
+    # triton default return_mode='mean' (no return_mode kwarg), which differs
+    # from the canonical min-of-rep recipe. Behavior is preserved as-is; the
+    # timed region is covered by the gpu_lock acquired in main().
     from triton.testing import do_bench
 
-    mod, inputs = load_repro(repro_path)
+    mod, inputs, compile_policy = load_repro(repro_path)
 
     with torch.no_grad():
         eager_out = mod(*inputs)
@@ -155,7 +166,7 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
             f"-> {total_bytes/1e6:.1f} MB effective"
         )
 
-    n_kernels = _count_kernels(mod, inputs)
+    n_kernels = _count_kernels(mod, inputs, compile_policy)
 
     # SOL: memcopy same total bytes
     copy_elems = max(total_bytes // (2 * 4), 256)
@@ -167,7 +178,7 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
 
     # Compiled (default heuristics)
     torch._dynamo.reset()
-    compiled = torch.compile(mod)
+    compiled = compile_repro(mod, compile_policy=compile_policy)
     if use_cuda_graph:
         compiled_us = _cuda_graph_time(compiled, inputs, n_warmup, n_rep)
     else:
@@ -179,9 +190,12 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
         compiled_us = compiled_ms * 1000
 
     # Compiled with coordinate descent tuning
-    inductor_config.coordinate_descent_tuning = True
     torch._dynamo.reset()
-    compiled_cd = torch.compile(mod)
+    compiled_cd = compile_repro(
+        mod,
+        compile_policy=compile_policy,
+        options={"coordinate_descent_tuning": True},
+    )
     if use_cuda_graph:
         cd_us = _cuda_graph_time(compiled_cd, inputs, n_warmup, n_rep)
     else:
@@ -189,9 +203,12 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
             for _ in range(3):
                 compiled_cd(*inputs)
             torch.cuda.synchronize()
-        cd_ms = do_bench(lambda: compiled_cd(*inputs), warmup=n_warmup, rep=n_rep)
+        cd_ms = do_bench(
+            lambda: compiled_cd(*inputs),
+            warmup=n_warmup,
+            rep=n_rep,
+        )
         cd_us = cd_ms * 1000
-    inductor_config.coordinate_descent_tuning = False
 
     print(f"\nKernel data: {total_bytes / 1024:.1f} KB (read+write)")
     print(f"Kernels generated: {n_kernels}")
@@ -202,12 +219,25 @@ def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     print(f"Gap (CD / SOL):          {cd_us / sol_us:8.2f}x")
 
     return {
+        "compile_policy": compile_policy,
         "compiled_us": compiled_us,
         "coord_descent_us": cd_us,
         "memcopy_sol_us": sol_us,
         "total_bytes": total_bytes,
         "n_kernels": n_kernels,
     }
+
+
+def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
+    from repro_harness import preserve_compile_environment
+
+    with preserve_compile_environment():
+        return _benchmark_one_impl(
+            repro_path,
+            n_warmup=n_warmup,
+            n_rep=n_rep,
+            use_cuda_graph=use_cuda_graph,
+        )
 
 
 def main():
@@ -242,6 +272,7 @@ def main():
                         "coord_descent_us": round(result["coord_descent_us"], 1),
                         "memcpy_sol_us": round(result["memcopy_sol_us"], 1),
                         "total_bytes": result["total_bytes"],
+                        "compile_policy": result["compile_policy"],
                     }
                     meta["num_kernels"] = result["n_kernels"]
                     with open(meta_path, "w") as f:

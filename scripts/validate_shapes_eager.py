@@ -5,7 +5,9 @@ For each canonical repro:
 1. Load shapes (from shapes.txt, shapes.json, or embedded _shapes_config)
 2. For each shape config, generate inputs via parse_shapes_config / make_inputs_from_config
 3. Run Repro()(*inputs) in eager mode
-4. Check output is a valid tensor (not NaN/Inf)
+4. Record whether eager output contains NaN/Inf. Nonfinite values are not an
+   eager-execution failure: correctness comparisons must match their masks
+   against a reference output.
 
 Uses subprocess isolation to avoid CUDA state poisoning between repros.
 """
@@ -74,25 +76,33 @@ try:
             if isinstance(output, torch.Tensor):
                 has_nan = torch.isnan(output).any().item()
                 has_inf = torch.isinf(output).any().item()
-                valid = not has_nan and not has_inf
                 results.append({{
                     "config": "default/_shapes_config",
-                    "status": "pass" if valid else "output_invalid",
-                    "details": f"nan={{has_nan}}, inf={{has_inf}}" if not valid else None,
+                    "status": "pass",
+                    "nonfinite": (
+                        {{"nan": has_nan, "inf": has_inf}}
+                        if has_nan or has_inf else None
+                    ),
                     "n_inputs": len(inputs),
                     "output_shape": list(output.shape),
                 }})
             elif isinstance(output, (tuple, list)):
                 # Multiple outputs
-                all_valid = True
+                nonfinite_outputs = []
                 for i, o in enumerate(output):
                     if isinstance(o, torch.Tensor):
-                        if torch.isnan(o).any().item() or torch.isinf(o).any().item():
-                            all_valid = False
-                            break
+                        has_nan = torch.isnan(o).any().item()
+                        has_inf = torch.isinf(o).any().item()
+                        if has_nan or has_inf:
+                            nonfinite_outputs.append({{
+                                "output": i,
+                                "nan": has_nan,
+                                "inf": has_inf,
+                            }})
                 results.append({{
                     "config": "default/_shapes_config",
-                    "status": "pass" if all_valid else "output_invalid",
+                    "status": "pass",
+                    "nonfinite": nonfinite_outputs or None,
                     "n_inputs": len(inputs),
                 }})
             else:
@@ -153,17 +163,32 @@ try:
             if isinstance(output, torch.Tensor):
                 has_nan = torch.isnan(output).any().item()
                 has_inf = torch.isinf(output).any().item()
-                valid = not has_nan and not has_inf
-                results.append({{
-                    "config": config_name,
-                    "status": "pass" if valid else "output_invalid",
-                    "details": f"nan={{has_nan}}, inf={{has_inf}}" if not valid else None,
-                    "n_inputs": len(inputs),
-                }})
-            else:
                 results.append({{
                     "config": config_name,
                     "status": "pass",
+                    "nonfinite": (
+                        {{"nan": has_nan, "inf": has_inf}}
+                        if has_nan or has_inf else None
+                    ),
+                    "n_inputs": len(inputs),
+                }})
+            else:
+                nonfinite_outputs = []
+                if isinstance(output, (tuple, list)):
+                    for i, o in enumerate(output):
+                        if isinstance(o, torch.Tensor):
+                            has_nan = torch.isnan(o).any().item()
+                            has_inf = torch.isinf(o).any().item()
+                            if has_nan or has_inf:
+                                nonfinite_outputs.append({{
+                                    "output": i,
+                                    "nan": has_nan,
+                                    "inf": has_inf,
+                                }})
+                results.append({{
+                    "config": config_name,
+                    "status": "pass",
+                    "nonfinite": nonfinite_outputs or None,
                     "n_inputs": len(inputs),
                 }})
         except Exception as e:
@@ -312,7 +337,7 @@ def main():
     pass_count = 0
     fail_count = 0
     skip_count = 0
-    invalid_count = 0
+    nonfinite_count = 0
     error_categories = {}
 
     start_time = time.time()
@@ -328,6 +353,8 @@ def main():
                 all_results.append(result)
                 for r in result.get("results", []):
                     total_configs += 1
+                    if r.get("nonfinite"):
+                        nonfinite_count += 1
                     status = r.get("status", "unknown")
                     if status == "pass":
                         pass_count += 1
@@ -335,8 +362,6 @@ def main():
                         fail_count += 1
                         err_type = r.get("error_type", "Unknown")
                         error_categories[err_type] = error_categories.get(err_type, 0) + 1
-                    elif status == "output_invalid":
-                        invalid_count += 1
                     else:
                         skip_count += 1
                 if args.verbose:
@@ -350,6 +375,8 @@ def main():
 
             for r in result.get("results", []):
                 total_configs += 1
+                if r.get("nonfinite"):
+                    nonfinite_count += 1
                 status = r.get("status", "unknown")
                 if status == "pass":
                     pass_count += 1
@@ -357,8 +384,6 @@ def main():
                     fail_count += 1
                     err_type = r.get("error_type", "Unknown")
                     error_categories[err_type] = error_categories.get(err_type, 0) + 1
-                elif status == "output_invalid":
-                    invalid_count += 1
                 else:
                     skip_count += 1
 
@@ -377,7 +402,7 @@ def main():
     print(f"Total configs:     {total_configs}")
     print(f"  PASS:            {pass_count}")
     print(f"  FAIL:            {fail_count}")
-    print(f"  INVALID OUTPUT:  {invalid_count}")
+    print(f"  NONFINITE:       {nonfinite_count} (observed, not a failure)")
     print(f"  SKIP:            {skip_count}")
     print(f"Pass rate:         {pass_count/max(total_configs,1)*100:.1f}%")
     print(f"Time:              {elapsed:.1f}s")
@@ -427,7 +452,7 @@ def main():
                     "total_configs": total_configs,
                     "pass": pass_count,
                     "fail": fail_count,
-                    "invalid_output": invalid_count,
+                    "nonfinite": nonfinite_count,
                     "skip": skip_count,
                     "pass_rate": pass_count / max(total_configs, 1),
                     "error_categories": error_categories,

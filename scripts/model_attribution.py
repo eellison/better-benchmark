@@ -66,7 +66,12 @@ from triton.testing import do_bench
 
 from model_graph_accounting import analyze_graph, trace_full_graph
 from full_graph_harness import load_full_graph
-from repro_harness import parse_shapes_config
+from repro_harness import (
+    compile_repro,
+    compile_policy_from_config,
+    parse_shapes_config,
+    preserve_compile_environment,
+)
 
 N_WARMUP = 10
 N_REP = 50
@@ -127,6 +132,17 @@ def _bench_replay(fn) -> float:
 # Fusible side: canonical repro points
 # ============================================================================
 
+@preserve_compile_environment()
+def _bench_fusible_point(instance, inputs, compile_policy) -> float:
+    torch._dynamo.reset()
+    compiled = compile_repro(
+        instance,
+        compile_policy=compile_policy,
+        options={"coordinate_descent_tuning": True},
+    )
+    return _bench_replay(lambda: compiled(*inputs))
+
+
 def bench_fusible_points(needed: set[tuple[str, str]],
                          canonical_dir: Path) -> dict[tuple[str, str], float]:
     """Bench each needed (pattern_hash, shape_hash) point exactly once."""
@@ -149,11 +165,16 @@ def bench_fusible_points(needed: set[tuple[str, str]],
             from input_codec import spec_from_compact
             from repro_harness import make_inputs_from_config
             specs = [spec_from_compact(e) for e in pt["inputs"]]
+            shape_config = {"inputs": specs}
+            if "compile_policy" in pt:
+                shape_config["compile_policy"] = pt["compile_policy"]
             inputs = [t.cuda() if isinstance(t, torch.Tensor) else t
-                      for t in make_inputs_from_config({"inputs": specs})]
-            torch._dynamo.reset()
-            compiled = torch.compile(mod.Repro())
-            times[key] = _bench_replay(lambda: compiled(*inputs))
+                      for t in make_inputs_from_config(shape_config)]
+            times[key] = _bench_fusible_point(
+                mod.Repro(),
+                inputs,
+                compile_policy_from_config(shape_config),
+            )
     return times
 
 

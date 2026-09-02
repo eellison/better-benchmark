@@ -2,6 +2,11 @@
   "points": [
     {
       "shape_hash": "77702286",
+      "compile_policy": {
+        "inductor": {
+          "emulate_precision_casts": true
+        }
+      },
       "models": {
         "hf/train/AlbertForMaskedLM": {
           "occurrences": 1

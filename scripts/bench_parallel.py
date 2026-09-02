@@ -78,6 +78,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from gpu_lock import gpu_lock_for_kind, discover_gpus, matching_gpus
+from benchmark_provenance import semantic_benchmark_config
 
 
 # Shared inductor cache — all workers read/write the same cache so repeated
@@ -102,6 +103,19 @@ _DEFAULT_SHAPE_TOKEN = "__default__"
 def _normalize_shape_label(label: str) -> str:
     """Return the stable result label for a shape task."""
     return "default" if label == _DEFAULT_SHAPE_TOKEN else label
+
+
+def _benchmark_config_metadata(args: argparse.Namespace) -> dict:
+    """Return the effective result-affecting and execution configuration."""
+    return {
+        "combo_kernels": args.combo_kernels,
+        "combo_kernel_per_subkernel_blocks": args.combo_kernels,
+        "multi_kernel": args.multi_kernel,
+        "coordinate_descent": not args.no_cd,
+        "strict_gpu_lock": args.strict_gpu_lock,
+        "gpus": args.gpus,
+        "workers_per_gpu": args.workers_per_gpu,
+    }
 
 
 def _make_shape_task_key(dir_path: str, shape_label: str) -> str:
@@ -902,6 +916,58 @@ def _metric_result_items(results: dict):
             yield label, result
 
 
+def _uniform_compile_policy(results: dict) -> dict | None:
+    """Return one point policy, or None when a payload mixes policies."""
+    policy = None
+    saw_point = False
+    for _label, result in _metric_result_items(results):
+        point_policy = result.get("compile_policy", {})
+        if not isinstance(point_policy, dict):
+            raise ValueError("result compile_policy must be an object")
+        if not saw_point:
+            policy = point_policy
+            saw_point = True
+        elif point_policy != policy:
+            return None
+    return dict(policy or {})
+
+
+def _compile_policy_allows_overlay(
+    prior_results: dict,
+    incoming_results: dict,
+) -> bool:
+    """Whether partial incoming results can retain prior shape measurements."""
+    for results in (prior_results, incoming_results):
+        for _label, result in _metric_result_items(results):
+            policy = result.get("compile_policy", {})
+            if not isinstance(policy, dict):
+                raise ValueError("result compile_policy must be an object")
+    # Policies are point-local: incoming labels replace matching prior labels,
+    # while unmeasured labels retain their own recorded policy.
+    return True
+
+
+def _tagged_perf_context_allows_overlay(
+    prior_results: dict,
+    incoming_results: dict,
+    incoming_config: dict,
+) -> bool:
+    """Whether a perf tag can retain shapes not present in this partial run."""
+    if not _compile_policy_allows_overlay(
+        prior_results,
+        incoming_results,
+    ):
+        return False
+    expected_config = semantic_benchmark_config(incoming_config)
+    for _label, result in _metric_result_items(prior_results):
+        stored_config = result.get("benchmark_config", {})
+        if not isinstance(stored_config, dict):
+            raise ValueError("stored benchmark_config must be an object")
+        if semantic_benchmark_config(stored_config) != expected_config:
+            return False
+    return True
+
+
 def _success_items(payload: dict):
     for key, value in payload.items():
         if key not in _RESERVED_TOP_LEVEL_KEYS:
@@ -1211,6 +1277,7 @@ def _write_results_output(
     repro_failed: int | None = None,
     repro_skipped: int | None = None,
     extra_inductor_config: dict | None = None,
+    config_metadata: dict | None = None,
 ):
     summary = _build_run_summary(
         point_total=total,
@@ -1223,18 +1290,20 @@ def _write_results_output(
         repro_failed=repro_failed,
         repro_skipped=repro_skipped,
     )
+    metadata = _run_metadata(
+        workload_kind=workload_kind,
+        n_results=summary["repros"]["ok"],
+        n_repros=summary["repros"]["ok"],
+        extra_inductor_config=extra_inductor_config,
+    )
+    metadata["benchmark_config"] = dict(config_metadata or {})
     _atomic_write_json(
         output_path,
         _results_payload(
             all_results,
             failures,
             summary,
-            _run_metadata(
-                workload_kind=workload_kind,
-                n_results=summary["repros"]["ok"],
-                n_repros=summary["repros"]["ok"],
-                extra_inductor_config=extra_inductor_config,
-            ),
+            metadata,
         ),
     )
 
@@ -1315,12 +1384,19 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
         valid_compile: list[float] = []
         n_total_points = 0
         n_bad_oracle = 0
+        compile_policies = []
         for label, point in _metric_result_items(results):
             n_total_points += 1
             status = point.get("status")
             us = point.get("oracle_us")
             compile_us = point.get("compile_us")
             ratio = point.get("ratio")
+            point_policy = point.get("compile_policy", {})
+            if not isinstance(point_policy, dict):
+                raise ValueError(
+                    f"{dir_name}[{label}] compile_policy must be an object"
+                )
+            compile_policies.append(point_policy)
             # dispatch.fallback marks a cross-hardware fallback (no matching
             # tuned impl for the running GPU); preserve it for visibility.
             fallback = None
@@ -1333,6 +1409,8 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
                 "ratio": ratio,
                 "status": status,
             }
+            if point_policy:
+                points[label]["compile_policy"] = point_policy
             # Key per-shape data by the trailing shape-hash token of the label.
             shape_hash = label.rsplit("_", 1)[-1]
             shape_entry = {
@@ -1342,6 +1420,8 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
                 "status": status,
                 "fallback": fallback,
             }
+            if point_policy:
+                shape_entry["compile_policy"] = point_policy
             existing = points_by_shape.get(shape_hash)
             # If two labels collapse to the same shape_hash, keep the valid /
             # faster oracle point (prefer a usable floor over a bad one).
@@ -1378,6 +1458,11 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
         }
         if valid_compile:
             entry["compile_us"] = round(_median(valid_compile), 2)
+        if compile_policies and all(
+            policy == compile_policies[0]
+            for policy in compile_policies[1:]
+        ) and compile_policies[0]:
+            entry["compile_policy"] = compile_policies[0]
         flat[dir_name] = entry
     if failures:
         flat["__failures__"] = failures
@@ -1587,6 +1672,7 @@ def _merge_into_baseline(
     partial_repros: set[str] | None = None,
     complete_repros: set[str] | None = None,
     extra_inductor_config: dict | None = None,
+    config_metadata: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     import fcntl
@@ -1604,6 +1690,7 @@ def _merge_into_baseline(
                 partial_repros=partial_repros,
                 complete_repros=complete_repros,
                 extra_inductor_config=extra_inductor_config,
+                config_metadata=config_metadata,
             )
         finally:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
@@ -1659,6 +1746,7 @@ def _merge_into_baseline_locked(
     partial_repros: set[str] | None = None,
     complete_repros: set[str] | None = None,
     extra_inductor_config: dict | None = None,
+    config_metadata: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     partial_repros = partial_repros or set()
@@ -1715,6 +1803,7 @@ def _merge_into_baseline_locked(
                     if requested_inductor_config
                     else {}
                 ),
+                "benchmark_config": dict(config_metadata or {}),
             },
         )
         _atomic_write_json(baseline_path, payload)
@@ -1732,6 +1821,19 @@ def _merge_into_baseline_locked(
             f"configurations: baseline={existing_inductor_config!r}, "
             f"new={requested_inductor_config!r}"
         )
+    old_config = old_meta.get("benchmark_config", {})
+    if not isinstance(old_config, dict):
+        raise ValueError("stored benchmark_config metadata must be an object")
+    if existing:
+        if new_results and (
+            semantic_benchmark_config(old_config)
+            != semantic_benchmark_config(config_metadata)
+        ):
+            raise ValueError(
+                "Cannot merge results with different benchmark configurations"
+            )
+    else:
+        old_meta["benchmark_config"] = dict(config_metadata or {})
     metadata_kind = old_meta.get("workload_kind")
     content_kind = _infer_workload_kind_from_payload(
         existing,
@@ -1764,6 +1866,7 @@ def _merge_into_baseline_locked(
             and isinstance(prior_results, dict)
             and isinstance(results, dict)
         ):
+            _compile_policy_allows_overlay(prior_results, results)
             # --merge-into is an overlay: a focused/default-only rerun must
             # not discard shape points already present for this repro.
             existing[repro_path] = {**prior_results, **results}
@@ -1872,7 +1975,14 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
     import importlib.util
     import math
     from byte_accounting import count_bytes_effective
+    from repro_harness import (
+        compile_repro,
+        compile_policy_from_config,
+        default_shape_config,
+        preserve_compile_environment,
+    )
 
+    @preserve_compile_environment()
     def load_and_bench(repro_path: str, all_shapes: bool, no_cd: bool,
                        n_warmup: int, n_rep: int) -> dict:
         spec = importlib.util.spec_from_file_location("repro", repro_path)
@@ -1910,6 +2020,11 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                 inputs = make_inputs_safely(make_inputs_fn)
 
             instance = repro_cls()
+            compile_policy = compile_policy_from_config(
+                configs[name]
+                if name is not None
+                else default_shape_config(repro_path)
+            )
             with torch.no_grad():
                 eager_out = instance(*inputs)
 
@@ -1929,7 +2044,10 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
 
             # Compiled
             torch._dynamo.reset()
-            compiled = torch.compile(instance)
+            compiled = compile_repro(
+                instance,
+                compile_policy=compile_policy,
+            )
             with torch.no_grad():
                 for _ in range(3):
                     compiled(*inputs)
@@ -1944,9 +2062,12 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             # Coord descent
             cd_us = None
             if not no_cd:
-                inductor_config.coordinate_descent_tuning = True
                 torch._dynamo.reset()
-                compiled_cd = torch.compile(instance)
+                compiled_cd = compile_repro(
+                    instance,
+                    compile_policy=compile_policy,
+                    options={"coordinate_descent_tuning": True},
+                )
                 with torch.no_grad():
                     for _ in range(3):
                         compiled_cd(*inputs)
@@ -1957,9 +2078,9 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                     rep=n_rep,
                     return_mode="min",
                 ) * 1000
-                inductor_config.coordinate_descent_tuning = False
 
             results[label] = {
+                "compile_policy": compile_policy,
                 "compiled_us": compiled_us,
                 "coord_descent_us": cd_us,
                 "memcopy_sol_us": sol_us,
@@ -2169,6 +2290,7 @@ def main():
                              "(useful for back-to-back sweeps). By default we reset on exit any "
                              "GPUs we locked. Only the GPUs we actually locked are ever reset.")
     args = parser.parse_args()
+    benchmark_config = _benchmark_config_metadata(args)
 
     try:
         extra_inductor_config = _parse_inductor_config(args.inductor_config)
@@ -2319,6 +2441,7 @@ def main():
                     elapsed=elapsed_total,
                     workload_kind=workload_kind,
                     extra_inductor_config=extra_inductor_config,
+                    config_metadata=benchmark_config,
                 )
                 print(f"[output] Wrote {args.output}")
             if args.merge_into:
@@ -2328,6 +2451,7 @@ def main():
                     preflight_failures,
                     workload_kind=workload_kind,
                     extra_inductor_config=extra_inductor_config,
+                    config_metadata=benchmark_config,
                 )
             return
 
@@ -2545,6 +2669,7 @@ def main():
                 repro_failed=snap_repro_counts[2],
                 repro_skipped=snap_repro_counts[3],
                 extra_inductor_config=extra_inductor_config,
+                config_metadata=benchmark_config,
             )
 
     # Wait for workers
@@ -2612,9 +2737,17 @@ def main():
                 perf[hardware] = {}
             if tag not in perf[hardware]:
                 perf[hardware][tag] = {}
+            elif not _tagged_perf_context_allows_overlay(
+                perf[hardware][tag],
+                results,
+                benchmark_config,
+            ):
+                perf[hardware][tag] = {}
+            semantic_config = semantic_benchmark_config(benchmark_config)
             for shape_label, r in _metric_result_items(results):
                 entry = {k: v for k, v in r.items()}
                 entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+                entry["benchmark_config"] = semantic_config
                 perf[hardware][tag][shape_label] = entry
             perf_path.write_text(json.dumps(perf, indent=2))
         print(f"[perf] Updated perf.json for {len(all_results)} repros (hardware={hardware}, tag={tag})")
@@ -2665,6 +2798,7 @@ def main():
             repro_failed=repro_counts[2],
             repro_skipped=repro_counts[3],
             extra_inductor_config=extra_inductor_config,
+            config_metadata=benchmark_config,
         )
         print(f"[output] Wrote {args.output}")
 
@@ -2682,6 +2816,7 @@ def main():
             partial_repros=merge_partial_repros,
             complete_repros=merge_complete_repros,
             extra_inductor_config=extra_inductor_config,
+            config_metadata=benchmark_config,
         )
 
 
@@ -2980,7 +3115,11 @@ from oracle_harness import (
     get_repro_instance,
     _INVALID_STATUSES,
 )
-from repro_harness import load_shape_configs, make_inputs_from_config
+from repro_harness import (
+    compile_policy_from_config,
+    load_shape_configs,
+    make_inputs_from_config,
+)
 import torch._inductor.config as inductor_config
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
@@ -3018,6 +3157,10 @@ def bench_oracle_point(canonical_dir, shape_label):
 
     if shape_label == DEFAULT_SHAPE_TOKEN or not configs:
         # Dir with no shape configs: single default point.
+        instance = get_repro_instance(d)
+        compile_policy = compile_policy_from_config(
+            next(iter(configs.values()), None)
+        )
         check = {{}}
         if not SKIP_CHECK:
             check = check_oracle_all_shapes(fn, d, repro_id, skip_stochastic=True)
@@ -3026,17 +3169,21 @@ def bench_oracle_point(canonical_dir, shape_label):
             passed = all(v not in ("fail", False) for v in check.values())
         if passed:
             inputs = get_inputs(d)
-            instance = get_repro_instance(d)
             return {{"default": bench_oracle(
-                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP)}}
+                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP,
+                compile_policy=compile_policy)}}
         return {{"default": {{"repro_id": repro_id,
+                             "compile_policy": compile_policy,
                              "status": "UNVERIFIED_NUMERICS"}}}}
 
     if shape_label not in configs:
         return {{shape_label: {{"repro_id": repro_id + "_" + shape_label,
+                               "compile_policy": {{}},
                                "status": "NO_ORACLE_FOR_SHAPE"}}}}
 
     config = configs[shape_label]
+    instance = get_repro_instance(d)
+    compile_policy = compile_policy_from_config(config)
     point_id = repro_id + "_" + shape_label
     passed = True
     if not SKIP_CHECK:
@@ -3046,10 +3193,11 @@ def bench_oracle_point(canonical_dir, shape_label):
         passed = all(v not in ("fail", False) for v in check.values())
     if passed:
         inputs = make_inputs_from_config(config)
-        instance = get_repro_instance(d)
         return {{shape_label: bench_oracle(
-            fn, instance, inputs, point_id, warmup=WARMUP, rep=REP)}}
+            fn, instance, inputs, point_id, warmup=WARMUP, rep=REP,
+            compile_policy=compile_policy)}}
     return {{shape_label: {{"repro_id": point_id,
+                           "compile_policy": compile_policy,
                            "status": "UNVERIFIED_NUMERICS"}}}}
 
 def bench_oracle_dir(canonical_dir):
@@ -3065,31 +3213,37 @@ def bench_oracle_dir(canonical_dir):
 
     results = {{}}
     if not configs:
+        instance = get_repro_instance(d)
+        compile_policy = {{}}
         passed = True
         if not SKIP_CHECK:
             passed = all(v not in ("fail", False) for v in check.values())
         if passed:
             inputs = get_inputs(d)
-            instance = get_repro_instance(d)
             results["default"] = bench_oracle(
-                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP)
+                fn, instance, inputs, repro_id, warmup=WARMUP, rep=REP,
+                compile_policy=compile_policy)
         else:
             results["default"] = {{"repro_id": repro_id,
+                                   "compile_policy": compile_policy,
                                    "status": "UNVERIFIED_NUMERICS"}}
         return results
 
     for label, config in configs.items():
+        instance = get_repro_instance(d)
+        compile_policy = compile_policy_from_config(config)
         point_id = f"{{repro_id}}_{{label}}"
         passed = True
         if not SKIP_CHECK:
             passed = check.get(label) not in ("fail", False)
         if passed:
             inputs = make_inputs_from_config(config)
-            instance = get_repro_instance(d)
             results[label] = bench_oracle(
-                fn, instance, inputs, point_id, warmup=WARMUP, rep=REP)
+                fn, instance, inputs, point_id, warmup=WARMUP, rep=REP,
+                compile_policy=compile_policy)
         else:
             results[label] = {{"repro_id": point_id,
+                               "compile_policy": compile_policy,
                                "status": "UNVERIFIED_NUMERICS"}}
     return results
 
@@ -3155,7 +3309,7 @@ import torch._inductor.config as inductor_config
 import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
-from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+from repro_harness import compile_policy_from_config, compile_repro, load_shape_configs, make_inputs_from_config, make_inputs_safely, preserve_compile_environment
 from byte_accounting import count_bytes_effective
 from full_graph_harness import load_full_graph_definition, load_full_graph, result_metadata, tensor_bytes
 from torch._inductor.utils import fresh_cache
@@ -3509,15 +3663,14 @@ def bench_full_graph_one(repro_path):
     graph_cd = None
     cd_is_graph = False
     if do_cd:
-        inductor_config.coordinate_descent_tuning = True
-        try:
-            torch._dynamo.reset()
-            compiled_cd = torch.compile(instance)
-            with gpu_setup_lock():
-                with torch.no_grad():
-                    graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
-        finally:
-            inductor_config.coordinate_descent_tuning = False
+        torch._dynamo.reset()
+        compiled_cd = torch.compile(
+            instance,
+            options={{"coordinate_descent_tuning": True}},
+        )
+        with gpu_setup_lock():
+            with torch.no_grad():
+                graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
 
     bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
     bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
@@ -3632,6 +3785,7 @@ def bench_full_graph_one(repro_path):
         result["default"]["memory_snapshot"] = memory_snapshot
     return result
 
+@preserve_compile_environment()
 def bench_one(task_key):
     if SHAPE_SEP in task_key:
         repro_path, selected_shape = task_key.rsplit(SHAPE_SEP, 1)
@@ -3650,6 +3804,11 @@ def bench_one(task_key):
 
     all_results = {{}}
     for shape_name, shape_config in shape_items:
+        compile_policy = compile_policy_from_config(
+            shape_config
+            if shape_config is not None
+            else next(iter(configs.values()), None)
+        )
         with gpu_setup_lock():
             if shape_config is not None:
                 inputs = make_inputs_from_config(shape_config)
@@ -3671,7 +3830,10 @@ def bench_one(task_key):
         # Compile default
         inductor_metrics.reset()
         torch._dynamo.reset()
-        compiled = torch.compile(instance)
+        compiled = compile_repro(
+            instance,
+            compile_policy=compile_policy,
+        )
         with gpu_setup_lock():
             with torch.no_grad():
                 graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
@@ -3694,13 +3856,18 @@ def bench_one(task_key):
         graph_cd = None
         cd_is_graph = False
         if do_cd:
-            inductor_config.coordinate_descent_tuning = True
             torch._dynamo.reset()
-            compiled_cd = torch.compile(instance)
+            compiled_cd = compile_repro(
+                instance,
+                compile_policy=compile_policy,
+                options={{"coordinate_descent_tuning": True}},
+            )
             with gpu_setup_lock():
                 with torch.no_grad():
-                    graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
-            inductor_config.coordinate_descent_tuning = False
+                    graph_cd, cd_is_graph = _capture_cudagraph(
+                        compiled_cd,
+                        inputs,
+                    )
 
         # Build callables for timing
         bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
@@ -3741,6 +3908,7 @@ def bench_one(task_key):
             cd_us = min(cd_times) if cd_times else None
 
         all_results[label] = {{
+            "compile_policy": compile_policy,
             "compiled_us": compiled_us,
             "coord_descent_us": cd_us,
             "memcopy_sol_us": sol_us,
@@ -3833,7 +4001,7 @@ mod.inf = math.inf
 mod.nan = math.nan
 spec.loader.exec_module(mod)
 
-from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+from repro_harness import compile_policy_from_config, compile_repro, load_shape_configs, make_inputs_from_config, make_inputs_safely
 from byte_accounting import count_bytes_effective
 
 instance = mod.Repro()
@@ -3870,6 +4038,11 @@ def _make_bench_callable(graph_or_fn, is_graph, inps):
 
 all_results = {{}}
 for shape_name, shape_config in shape_items:
+    compile_policy = compile_policy_from_config(
+        shape_config
+        if shape_config is not None
+        else next(iter(configs.values()), None)
+    )
     if shape_config is not None:
         inputs = make_inputs_from_config(shape_config)
         label = shape_name
@@ -3889,7 +4062,10 @@ for shape_name, shape_config in shape_items:
     # Compile default
     inductor_metrics.reset()
     torch._dynamo.reset()
-    compiled = torch.compile(instance)
+    compiled = compile_repro(
+        instance,
+        compile_policy=compile_policy,
+    )
     with torch.no_grad():
         graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
     n_kernels = inductor_metrics.generated_kernel_count
@@ -3899,12 +4075,17 @@ for shape_name, shape_config in shape_items:
     graph_cd = None
     cd_is_graph = False
     if do_cd:
-        inductor_config.coordinate_descent_tuning = True
         torch._dynamo.reset()
-        compiled_cd = torch.compile(instance)
+        compiled_cd = compile_repro(
+            instance,
+            compile_policy=compile_policy,
+            options={{"coordinate_descent_tuning": True}},
+        )
         with torch.no_grad():
-            graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
-        inductor_config.coordinate_descent_tuning = False
+            graph_cd, cd_is_graph = _capture_cudagraph(
+                compiled_cd,
+                inputs,
+            )
 
     # Build callables for timing
     bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
@@ -3943,6 +4124,7 @@ for shape_name, shape_config in shape_items:
     cd_us = min(cd_times) if cd_times else None
 
     all_results[label] = {{
+        "compile_policy": compile_policy,
         "compiled_us": compiled_us,
         "coord_descent_us": cd_us,
         "memcopy_sol_us": sol_us,
@@ -3990,6 +4172,19 @@ def _run_compare(paths: list[Path], tag_a: str, tag_b: str):
                 b_us = b.get("coord_descent_us") or b.get("compiled_us")
 
                 if a_us and b_us:
+                    a_context = {
+                        "compile_policy": a.get("compile_policy", {}),
+                        "benchmark_config": a.get("benchmark_config", {}),
+                    }
+                    b_context = {
+                        "compile_policy": b.get("compile_policy", {}),
+                        "benchmark_config": b.get("benchmark_config", {}),
+                    }
+                    if a_context != b_context:
+                        raise ValueError(
+                            "Cannot compare tagged results with different "
+                            f"compile policy/config: {name}[{shape}]"
+                        )
                     speedup = a_us / b_us
                     diffs.append({
                         "name": name,

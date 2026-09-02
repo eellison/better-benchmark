@@ -38,6 +38,11 @@ import torch._inductor.metrics as inductor_metrics  # noqa: E402
 from torch._dynamo.utils import counters  # noqa: E402
 
 from oracle_harness import _capture_graph, _gpu_exclusive_lock, _time_graph  # noqa: E402
+from repro_harness import (  # noqa: E402
+    compile_repro,
+    compile_policy_from_config,
+    default_shape_config,
+)
 
 FULL_GRAPH = REPO / "repros/models/torchbench/train/squeezenet1_1/full_graph_001.py"
 CANONICAL_REPRO = REPO / "repros/canonical/sum_sum_3219a09ab96a/repro.py"
@@ -79,7 +84,10 @@ def _load_canonical_repro_workload():
     mod.inf = math.inf
     mod.nan = math.nan
     spec.loader.exec_module(mod)
-    return mod.Repro(), mod.make_inputs()
+    compile_policy = compile_policy_from_config(
+        default_shape_config(CANONICAL_REPRO),
+    )
+    return mod.Repro(), mod.make_inputs(), compile_policy
 
 
 def _flatten_tensors(out):
@@ -117,15 +125,18 @@ def main() -> None:
 
     if args.mode == "full_graph":
         instance, inputs = _load_full_graph_workload()
+        compile_policy = {}
     else:
-        instance, inputs = _load_canonical_repro_workload()
-
-    inductor_config.coordinate_descent_tuning = True
+        instance, inputs, compile_policy = _load_canonical_repro_workload()
 
     inductor_metrics.reset()
     counters.clear()
     torch._dynamo.reset()
-    compiled = torch.compile(instance)
+    compiled = compile_repro(
+        instance,
+        compile_policy=compile_policy,
+        options={"coordinate_descent_tuning": True},
+    )
 
     with torch.no_grad():
         compiled_out = compiled(*inputs)

@@ -125,7 +125,15 @@ import torch._inductor.config as inductor_config
 import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
-from repro_harness import load_shape_configs, make_inputs_from_config, make_inputs_safely
+from repro_harness import (
+    compile_repro,
+    compile_policy_from_config,
+    default_shape_config,
+    load_shape_configs,
+    make_inputs_from_config,
+    make_inputs_safely,
+    preserve_compile_environment,
+)
 from byte_accounting import count_bytes_effective
 
 N_WARMUP = {args_dict["n_warmup"]}
@@ -337,6 +345,9 @@ def compare_one(repro_path):
     spec.loader.exec_module(mod)
 
     instance = mod.Repro()
+    compile_policy = compile_policy_from_config(
+        default_shape_config(repro_path)
+    )
     make_inputs_fn = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
     inputs = make_inputs_safely(make_inputs_fn)
 
@@ -347,12 +358,18 @@ def compare_one(repro_path):
     # --- Compile and capture CUDAGraph for each config ---
     graphs = []  # list of (graph, fallback_fn) tuples
     for config_pairs in CONFIGS:
-        saved = _save_config_state(config_pairs)
-        _apply_config(config_pairs)
-        torch._dynamo.reset()
-        compiled = torch.compile(instance)
-        graph, fallback = _capture_cudagraph(compiled, inputs)
-        _restore_config_state(saved)
+        with preserve_compile_environment():
+            saved = _save_config_state(config_pairs)
+            try:
+                _apply_config(config_pairs)
+                torch._dynamo.reset()
+                compiled = compile_repro(
+                    instance,
+                    compile_policy=compile_policy,
+                )
+                graph, fallback = _capture_cudagraph(compiled, inputs)
+            finally:
+                _restore_config_state(saved)
         graphs.append((graph, fallback))
 
     # --- Quick estimate to choose rep count ---
@@ -393,6 +410,7 @@ def compare_one(repro_path):
         }}
 
     return {{
+        "compile_policy": compile_policy,
         "configs": configs_result,
         "total_bytes": total_bytes,
         "rounds": N_ROUNDS,
