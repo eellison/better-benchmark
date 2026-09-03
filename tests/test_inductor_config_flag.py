@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
 
@@ -11,6 +12,27 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from bench_parallel import _parse_inductor_config, _unknown_inductor_config_names
+
+
+def test_cli_compare_mode_smoke(tmp_path):
+    """Exercise post-parse setup through a real, GPU-free CLI invocation."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "bench_parallel.py"),
+            str(tmp_path),
+            "--compare",
+            "baseline",
+            "candidate",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "No repro.py files found." in result.stdout
 
 
 def test_parse_literals():
