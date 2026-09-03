@@ -1,0 +1,190 @@
+"""cuTile port of var_mean_c0088addea6c: GPT-2 dropout + residual + LayerNorm.
+
+Shape bf8decda: input [8192, 768] bf16, residual [8, 1024, 768] f32,
+HIDDEN=768, SEED_INDEX=17, EPS=1e-5. Output: gt, add, normalized, affine_bf16,
+affine_bf16.permute(1, 0), div=invstd/HIDDEN.
+"""
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+import cuda.tile as ct
+
+from oracle_harness import oracle_impl
+
+
+SEED_INDEX = 17
+DROPOUT_SCALE = 1.1111111111111112
+EPS = 1.0e-5
+
+
+@ct.kernel
+def _dropout_residual_ln_kernel(
+    flat_ptr,        # bf16 (rows, HIDDEN)
+    random_ptr,      # f32 (rows, HIDDEN)
+    residual_ptr,    # f32 (rows, HIDDEN)
+    weight_ptr,      # f32 (HIDDEN,)
+    bias_ptr,        # f32 (HIDDEN,)
+    gt_ptr,          # b8 (rows*HIDDEN,)
+    add_ptr,         # f32 (rows*HIDDEN,)
+    normalized_ptr,  # f32 (rows*HIDDEN,)
+    affine_ptr,      # bf16 (rows*HIDDEN,)
+    div_ptr,         # f32 (rows,)
+    HIDDEN: ct.Constant[int],
+    BLOCK_H: ct.Constant[int],
+):
+    row = ct.bid(0)
+    flat = ct.load(flat_ptr, index=(row, 0), shape=(1, BLOCK_H),
+                   padding_mode=ct.PaddingMode.ZERO)
+    random_f = ct.load(random_ptr, index=(row, 0), shape=(1, BLOCK_H),
+                       padding_mode=ct.PaddingMode.ZERO)
+    residual = ct.load(residual_ptr, index=(row, 0), shape=(1, BLOCK_H),
+                       padding_mode=ct.PaddingMode.ZERO)
+
+    rand_bf = ct.astype(random_f, ct.bfloat16)
+    threshold = ct.full((1, BLOCK_H), 0.1, dtype=ct.bfloat16)
+    keep = rand_bf > threshold
+
+    cols = ct.arange(BLOCK_H, dtype=ct.int32)
+    col_mask = ct.reshape(cols < HIDDEN, (1, BLOCK_H))
+    scatter_idx = ct.reshape(row * HIDDEN + cols, (1, BLOCK_H))
+    ct.scatter(gt_ptr, scatter_idx, keep, mask=col_mask)
+
+    zero_bf = ct.zeros((1, BLOCK_H), dtype=ct.bfloat16)
+    dropped_bf = ct.where(keep, flat, zero_bf)
+    scaled_bf = ct.astype(ct.astype(dropped_bf, ct.float32) * DROPOUT_SCALE, ct.bfloat16)
+    add_val = ct.astype(scaled_bf, ct.float32) + residual
+    ct.scatter(add_ptr, scatter_idx, add_val, mask=col_mask)
+
+    zero_f = ct.zeros((1, BLOCK_H), dtype=ct.float32)
+    x_masked = ct.where(col_mask, add_val, zero_f)
+    mean = ct.sum(x_masked) * (1.0 / HIDDEN)
+    centered = add_val - mean
+    centered_masked = ct.where(col_mask, centered, zero_f)
+    var = ct.sum(centered_masked * centered_masked) * (1.0 / HIDDEN)
+    invstd = ct.rsqrt(var + EPS)
+    normalized = centered * invstd
+    ct.scatter(normalized_ptr, scatter_idx, normalized, mask=col_mask)
+
+    weight = ct.astype(ct.load(weight_ptr, index=(0,), shape=(BLOCK_H,),
+                               padding_mode=ct.PaddingMode.ZERO), ct.float32)
+    bias = ct.astype(ct.load(bias_ptr, index=(0,), shape=(BLOCK_H,),
+                             padding_mode=ct.PaddingMode.ZERO), ct.float32)
+    weight_2d = ct.reshape(weight, (1, BLOCK_H))
+    bias_2d = ct.reshape(bias, (1, BLOCK_H))
+    affine = normalized * weight_2d + bias_2d
+    affine_bf = ct.astype(affine, ct.bfloat16)
+    ct.scatter(affine_ptr, scatter_idx, affine_bf, mask=col_mask)
+
+    ct.store(div_ptr, index=(row,), tile=ct.reshape(invstd * (1.0 / HIDDEN), (1,)))
+
+
+def _contiguous_stride(shape):
+    stride = []
+    running = 1
+    for dim in reversed(shape):
+        stride.append(running)
+        running *= int(dim)
+    return tuple(reversed(stride))
+
+
+def _as_shape(shape, numel=None):
+    dims = [int(dim) for dim in shape]
+    if numel is not None:
+        known = 1
+        infer = -1
+        for i, d in enumerate(dims):
+            if d == -1:
+                infer = i
+            else:
+                known *= d
+        if infer >= 0:
+            dims[infer] = numel // known
+    return tuple(dims)
+
+
+def _state_u64(state, start):
+    return int.from_bytes(bytes(state[start : start + 8].tolist()), "little")
+
+
+def _put_state_u64(state, start, value):
+    state[start : start + 8] = torch.tensor(
+        list(int(value).to_bytes(8, "little", signed=False)),
+        dtype=state.dtype,
+        device=state.device,
+    )
+
+
+def _inductor_random_for_eager_check(shape, seed, *, device):
+    if torch.cuda.is_current_stream_capturing():
+        return torch.ops.prims.inductor_random.default(shape, seed, "rand")
+    numel = 1
+    for dim in shape:
+        numel *= int(dim)
+    props = torch.cuda.get_device_properties(device)
+    block_size = 256
+    unroll = 4
+    curand4_engine_calls = 4
+    blocks_per_sm = props.max_threads_per_multi_processor // block_size
+    grid = min(
+        (numel + block_size - 1) // block_size,
+        props.multi_processor_count * blocks_per_sm,
+    )
+    advance = (
+        ((numel - 1) // (block_size * grid * unroll) + 1)
+        * curand4_engine_calls
+        * 2
+    )
+    state = torch.cuda.get_rng_state(device)
+    offset = _state_u64(state, 8)
+    if offset >= advance:
+        rewound = state.clone()
+        _put_state_u64(rewound, 8, offset - advance)
+        torch.cuda.set_rng_state(rewound, device)
+        random = torch.ops.prims.inductor_random.default(shape, seed, "rand")
+        torch.cuda.set_rng_state(state, device)
+        return random
+    return torch.ops.prims.inductor_random.default(shape, seed, "rand")
+
+
+@oracle_impl(hardware="B200", point="bf8decda", BLOCK_H=1024)
+def oracle_forward(inputs, *, BLOCK_H: int):
+    arg0_1, arg1_1, arg2_1, arg3_1, arg4_1, shape0, shape1, shape2 = inputs
+    norm_shape = _as_shape(shape0)
+    random_shape = _as_shape(shape1)
+    out_shape = _as_shape(shape2, numel=arg0_1.numel())
+    rows = int(arg0_1.shape[0])
+    hidden = int(arg0_1.shape[1])
+    device = arg0_1.device
+    div_shape = (norm_shape[0], norm_shape[1], 1)
+
+    gt = torch.empty_strided(norm_shape, _contiguous_stride(norm_shape),
+                             device=device, dtype=torch.bool)
+    add = torch.empty_strided(norm_shape, _contiguous_stride(norm_shape),
+                              device=device, dtype=torch.float32)
+    normalized = torch.empty_strided(norm_shape, _contiguous_stride(norm_shape),
+                                     device=device, dtype=torch.float32)
+    affine_bf16 = torch.empty_strided(out_shape, _contiguous_stride(out_shape),
+                                      device=device, dtype=torch.bfloat16)
+    div = torch.empty_strided(div_shape, _contiguous_stride(div_shape),
+                              device=device, dtype=torch.float32)
+
+    seed = torch.ops.prims.inductor_lookup_seed.default(arg1_1, SEED_INDEX)
+    random = _inductor_random_for_eager_check(random_shape, seed, device=device)
+    random_2d = random.view(rows, hidden)
+    resid_2d = arg2_1.view(rows, hidden)
+    total_elems = rows * hidden
+
+    gt_flat = gt.view(total_elems)
+    add_flat = add.view(total_elems)
+    normalized_flat = normalized.view(total_elems)
+    affine_flat = affine_bf16.view(total_elems)
+    div_1d = div.view(rows)
+
+    stream = torch.cuda.current_stream()
+    ct.launch(
+        stream, (rows, 1, 1), _dropout_residual_ln_kernel,
+        (arg0_1, random_2d, resid_2d, arg3_1, arg4_1,
+         gt_flat, add_flat, normalized_flat, affine_flat, div_1d,
+         hidden, BLOCK_H),
+    )
+    return gt, add, normalized, affine_bf16, affine_bf16.permute(1, 0), div
