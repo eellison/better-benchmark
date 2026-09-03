@@ -108,6 +108,7 @@ def _normalize_shape_label(label: str) -> str:
 def _benchmark_config_metadata(args: argparse.Namespace) -> dict:
     """Return the effective result-affecting and execution configuration."""
     return {
+        "worker_init": list(args.worker_init or []),
         "coordinate_descent": not args.no_cd,
         "strict_gpu_lock": args.strict_gpu_lock,
         "gpus": args.gpus,
@@ -2123,6 +2124,26 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             })
 
 
+def _worker_init_source(args_dict: dict) -> str:
+    """Source running the --worker-init specs, for embedding in a worker.
+
+    Empty when none were given, so a worker without them is byte-for-byte
+    what it was before the flag existed.
+    """
+    specs = args_dict.get("worker_init") or []
+    if not specs:
+        return ""
+    pairs = [(mod, attr) for mod, _, attr in (s.partition(":") for s in specs)]
+    return f"""
+# --worker-init: import each module here, in this worker, and call the named
+# attribute on it. Before any compilation, so a registration reaches every
+# torch.compile the worker goes on to do.
+import importlib as _bb_importlib
+for _bb_module, _bb_attr in {pairs!r}:
+    getattr(_bb_importlib.import_module(_bb_module), _bb_attr)()
+"""
+
+
 def _parse_inductor_config(pairs):
     """Parse repeated NAME=VALUE strings into a {name: python_value} dict.
 
@@ -2213,6 +2234,13 @@ def main():
         default=False,
         help="Also measure compiled_nocudagraphs_us via direct call (noisy; off by default)",
     )
+    parser.add_argument("--worker-init", action="append",
+                        metavar="MODULE:CALLABLE", default=None,
+                        help="Import MODULE in every worker and call CALLABLE "
+                             "on it, before any compilation. Repeatable. For "
+                             "registering an out-of-tree Inductor backend or "
+                             "lowering, which --inductor-config cannot do. "
+                             "Example: --worker-init mypkg.backend:install")
     parser.add_argument("--inductor-config", action="append", metavar="NAME=VALUE",
                         default=None,
                         help="Set an arbitrary torch._inductor.config.<NAME> for the "
@@ -2293,6 +2321,8 @@ def main():
         extra_inductor_config = _parse_inductor_config(args.inductor_config)
     except ValueError as exc:
         parser.error(str(exc))
+
+    worker_init = list(args.worker_init or [])
     _unknown_cfg = _unknown_inductor_config_names(extra_inductor_config)
     if _unknown_cfg:
         parser.error(
@@ -2511,6 +2541,17 @@ def main():
     print(f"  Prefetch: enabled (overlaps module loading with GPU timing)")
     if extra_inductor_config:
         print(f"  Extra inductor config: {extra_inductor_config}")
+    if worker_init:
+        print(f"  Worker init: {', '.join(worker_init)}")
+        if not (
+            extra_inductor_config.get("force_disable_caches")
+            or not args.share_cache
+        ):
+            print(
+                "  NOTE: --worker-init with a shared, enabled Inductor cache. "
+                "A registration outside the cache key will not invalidate it, "
+                "so a later sweep can be served an earlier one's graphs."
+            )
     print()
 
     # Fill task queue (use regular queue since workers are threads)
@@ -2532,6 +2573,7 @@ def main():
         "strict_gpu_lock": args.strict_gpu_lock,
         "n_workers": n_workers,
         "extra_inductor_config": extra_inductor_config,
+        "worker_init": worker_init,
         "workload_kind": workload_kind,
         "compile_time": args.compile_time,
         "peak_memory": args.peak_memory,
@@ -3098,6 +3140,7 @@ def _oracle_worker_script(gpu_idx: str, args_dict: dict) -> str:
     """
     skip_check = bool(args_dict.get("oracle_skip_check", False))
     extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
+    worker_init_source = _worker_init_source(args_dict)
     return f'''
 import sys, json, os, io
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -3120,6 +3163,7 @@ from repro_harness import (
 import torch._inductor.config as inductor_config
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
+{worker_init_source}
 
 WARMUP = {args_dict["n_warmup"]}
 REP = {args_dict["n_rep"]}
@@ -3296,6 +3340,7 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     stream).
     """
     extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
+    worker_init_source = _worker_init_source(args_dict)
     shape_selector_source = inspect.getsource(_shape_items_for_task)
     return f'''
 import builtins, contextlib, fcntl, gc, io, re, sys, json, os, tempfile, threading, time
@@ -3327,6 +3372,7 @@ COMPILED_NOCUDAGRAPHS = {args_dict.get("compiled_nocudagraphs", False)}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
+{worker_init_source}
 
 # --- Prefetch infrastructure ---
 # Pre-imports the next repro module while the current one is being timed.
@@ -3978,6 +4024,7 @@ for line in sys.stdin:
 def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
     """Generate a self-contained benchmark script for one repro."""
     extra_inductor_config = args_dict.get("extra_inductor_config", {}) or {}
+    worker_init_source = _worker_init_source(args_dict)
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
@@ -3990,6 +4037,7 @@ import importlib.util, math
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
+{worker_init_source}
 
 spec = importlib.util.spec_from_file_location("repro", "{repro_path}")
 mod = importlib.util.module_from_spec(spec)
