@@ -14,16 +14,13 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from bench_parallel import _parse_inductor_config, _unknown_inductor_config_names
 
 
-def test_cli_compare_mode_smoke(tmp_path):
-    """Exercise post-parse setup through a real, GPU-free CLI invocation."""
+def test_cli_smoke_without_repros(tmp_path):
+    """Exercise normal benchmark startup without requiring a GPU."""
     result = subprocess.run(
         [
             sys.executable,
             str(ROOT / "scripts" / "bench_parallel.py"),
             str(tmp_path),
-            "--compare",
-            "baseline",
-            "candidate",
         ],
         cwd=ROOT,
         capture_output=True,
