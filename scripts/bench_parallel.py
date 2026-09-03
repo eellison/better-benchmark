@@ -108,9 +108,6 @@ def _normalize_shape_label(label: str) -> str:
 def _benchmark_config_metadata(args: argparse.Namespace) -> dict:
     """Return the effective result-affecting and execution configuration."""
     return {
-        "combo_kernels": args.combo_kernels,
-        "combo_kernel_per_subkernel_blocks": args.combo_kernels,
-        "multi_kernel": args.multi_kernel,
         "coordinate_descent": not args.no_cd,
         "strict_gpu_lock": args.strict_gpu_lock,
         "gpus": args.gpus,
