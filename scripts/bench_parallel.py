@@ -3145,6 +3145,15 @@ def _oracle_worker_script(gpu_idx: str, args_dict: dict) -> str:
 import sys, json, os, io
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
 
+# Isolate the result pipe before imports or --worker-init can write to stdout.
+# Keep a private dup of the original stdout for results; point fd 1 (and Python
+# stdout) at stderr so native and Python diagnostics cannot corrupt the JSON
+# protocol.
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+
 import torch  # noqa: F401  (init CUDA in this subprocess)
 from pathlib import Path
 from oracle_harness import (
@@ -3170,14 +3179,6 @@ REP = {args_dict["n_rep"]}
 SKIP_CHECK = {skip_check}
 SHAPE_SEP = {_SHAPE_TASK_SEP!r}
 DEFAULT_SHAPE_TOKEN = {_DEFAULT_SHAPE_TOKEN!r}
-
-# Isolate the result pipe from any stdout pollution (bench_oracle /
-# check_oracle_all_shapes print JSON + progress to fd 1). Keep a private dup of
-# the original stdout for results; point fd 1 (and python stdout) at stderr.
-_result_fd = os.dup(1)
-_result_file = os.fdopen(_result_fd, "w", buffering=1)
-os.dup2(2, 1)
-sys.stdout = sys.stderr
 
 def bench_oracle_point(canonical_dir, shape_label):
     """Bench ONE (dir, shape) point — the sharded task unit.
@@ -3345,6 +3346,14 @@ def _persistent_worker_script(gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import builtins, contextlib, fcntl, gc, io, re, sys, json, os, tempfile, threading, time
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
+
+# Dedicated result fd: preserve the original stdout pipe for results, then
+# redirect fd 1 before imports or --worker-init can emit diagnostics. Native
+# and Python stdout now go to stderr and cannot corrupt the JSON protocol.
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config
@@ -3972,17 +3981,6 @@ def bench_one(task_key):
 # the result belongs to the expected repro path. This prevents misattribution
 # when stdout gets polluted by stray prints from module loading or torch internals.
 #
-# Dedicated result fd: results are the ONLY thing written to the parent's
-# result pipe. We preserve the original stdout pipe as a private fd, then point
-# fd 1 itself at stderr (os.dup2). This isolates the result pipe from ALL stdout
-# pollution -- including native C/C++ writes to fd 1 from torch/triton/CUDA,
-# which a Python-only ``sys.stdout`` redirect cannot catch. Any such writes now
-# land on stderr (drained separately by the parent), never the result stream.
-_result_fd = os.dup(1)  # private dup of the original stdout pipe (for results)
-_result_file = os.fdopen(_result_fd, "w", buffering=1)  # line-buffered
-os.dup2(2, 1)  # fd 1 -> stderr: native + stray fd-1 writes go to stderr, not results
-sys.stdout = sys.stderr  # python-level prints -> stderr too
-
 for line in sys.stdin:
     line = line.strip()
     if not line or line == "EXIT":
@@ -4028,6 +4026,13 @@ def _worker_script(repro_path: str, gpu_idx: str, args_dict: dict) -> str:
     return f'''
 import sys, json, os
 os.environ["CUDA_VISIBLE_DEVICES"] = "{gpu_idx}"
+
+# Preserve stdout for the JSON result, then redirect worker diagnostics before
+# imports or --worker-init can write to the protocol pipe.
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
 
 import torch, torch._dynamo
 import torch._inductor.config as inductor_config
@@ -4179,7 +4184,8 @@ for shape_name, shape_config in shape_items:
         "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
     }}
 
-print(json.dumps(all_results))
+_result_file.write(json.dumps(all_results) + "\\n")
+_result_file.flush()
 '''
 
 
