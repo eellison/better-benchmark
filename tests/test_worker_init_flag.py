@@ -12,6 +12,13 @@ import pytest
 import torch
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from bench_parallel import (  # noqa: E402
+    _oracle_worker_script,
+    _persistent_worker_script,
+    _worker_script,
+)
 
 
 REPRO = """
@@ -34,9 +41,31 @@ import os
 
 
 def install():
+    print("worker init diagnostic")
     with open(os.environ["WORKER_INIT_MARKER"], "a") as fh:
         fh.write(f"{os.getpid()}\\n")
 """
+
+
+def test_worker_stdout_is_redirected_before_init_hook():
+    args = {
+        "all_shapes": False,
+        "no_cd": True,
+        "n_warmup": 1,
+        "n_rep": 1,
+        "strict_gpu_lock": False,
+        "worker_init": ["init_probe:install"],
+    }
+    scripts = [
+        _oracle_worker_script("0", args),
+        _persistent_worker_script("0", args),
+        _worker_script("/tmp/repro.py", "0", args),
+    ]
+
+    for script in scripts:
+        redirect = script.index("os.dup2(2, 1)")
+        init_hook = script.index("for _bb_module, _bb_attr")
+        assert redirect < init_hook
 
 
 def test_worker_init_runs_in_the_worker(tmp_path):
