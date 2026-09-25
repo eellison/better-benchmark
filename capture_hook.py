@@ -80,6 +80,10 @@ TRANSPARENT_OPS = {
     torch.ops.aten.as_strided.default,
 }
 
+ALLOCATION_ONLY_OPS = {
+    torch.ops.aten.empty.memory_format,
+}
+
 
 def partition_node_is_supported(node: fx.Node) -> bool:
     """Capture-pipeline fusibility test for a single node.
@@ -175,6 +179,29 @@ def partition_has_real_compute(nodes) -> bool:
     return False
 
 
+def partition_is_standalone_allocation_only(nodes) -> bool:
+    """Whether a component only returns uninitialized allocation metadata.
+
+    An allocation feeding any node outside the component is retained: that
+    consumer may be a scatter, ``index_put``, or custom writer that defines
+    the buffer's values. Only components whose non-view work is an allocation
+    and whose external users are graph outputs are safe to omit standalone.
+    """
+    node_set = set(nodes)
+    compute = [
+        node
+        for node in nodes
+        if node.op == "call_function" and node.target not in TRANSPARENT_OPS
+    ]
+    if not compute or any(node.target not in ALLOCATION_ONLY_OPS for node in compute):
+        return False
+    return not any(
+        user not in node_set and user.op != "output"
+        for node in nodes
+        for user in node.users
+    )
+
+
 def _split_connected_components(nodes):
     """Split a list of nodes into connected components by data flow."""
     from collections import deque
@@ -254,7 +281,12 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
             split_components.extend(_split_connected_components(comp))
         components = split_components
 
-    return [comp for comp in components if partition_has_real_compute(comp)]
+    return [
+        comp
+        for comp in components
+        if partition_has_real_compute(comp)
+        and not partition_is_standalone_allocation_only(comp)
+    ]
 
 
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):

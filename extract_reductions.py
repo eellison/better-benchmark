@@ -1089,10 +1089,14 @@ def _extract_regions_from_gm(
             print(f"    {op}: {count}")
 
     from torch._inductor.fx_passes.fusion_regions import is_view_node
+    from capture_hook import partition_is_standalone_allocation_only
 
     for comp in components:
         # Skip partitions that are all views/reshapes — no kernel generated
-        if all(is_view_node(n) or n.op != "call_function" for n in comp):
+        if (
+            all(is_view_node(n) or n.op != "call_function" for n in comp)
+            or partition_is_standalone_allocation_only(comp)
+        ):
             continue
 
         is_reduction = _has_reduction(comp)
