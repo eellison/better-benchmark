@@ -498,6 +498,143 @@ class ReproPolicyTests(unittest.TestCase):
             {"combo_kernels": False},
         )
 
+    def _numerics_check(self, enabled=True):
+        return {
+            "enabled": enabled,
+            "seeds": 1 if enabled else 0,
+            "method": "torch._dynamo.utils.same" if enabled else None,
+            "tolerance": 1e-2 if enabled else None,
+            "reference": "fp64_or_eager" if enabled else None,
+        }
+
+    def _merge_numerics(self, baseline, new_results, new_failures, config):
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline_path = Path(tmp) / "baseline.json"
+            if baseline is not None:
+                baseline_path.write_text(json.dumps(baseline))
+            _merge_into_baseline_locked(
+                baseline_path,
+                new_results,
+                new_failures,
+                workload_kind="repro",
+                config_metadata=config,
+            )
+            return json.loads(baseline_path.read_text())
+
+    def test_merge_rejects_numerics_checked_into_unchecked_results(self):
+        baseline = {
+            "_metadata": {"benchmark_config": {}},
+            "repros/canonical/base/repro.py": {"default": {"compiled_us": 10.0}},
+        }
+        with self.assertRaisesRegex(ValueError, "different benchmark"):
+            self._merge_numerics(
+                baseline,
+                {"repros/canonical/head/repro.py": {"default": {"compiled_us": 9.0}}},
+                {},
+                {"numerics_check": self._numerics_check()},
+            )
+
+    def test_disabled_numerics_check_matches_legacy_baseline(self):
+        baseline = {
+            "_metadata": {"benchmark_config": {}},
+            "repros/canonical/base/repro.py": {"default": {"compiled_us": 10.0}},
+        }
+        merged = self._merge_numerics(
+            baseline,
+            {"repros/canonical/head/repro.py": {"default": {"compiled_us": 9.0}}},
+            {},
+            {"numerics_check": self._numerics_check(enabled=False)},
+        )
+        self.assertNotIn("numerics_check", merged["_metadata"])
+
+    def test_failure_only_merge_rejects_different_numerics_check(self):
+        numerics_failure = {
+            "repros/canonical/failed/repro.py": {
+                "status": "failed",
+                "error": "numerics failed",
+                "failure_classification": "numerics_failed",
+            },
+        }
+        for baseline in (
+            {
+                "_metadata": {"benchmark_config": {}},
+                "repros/canonical/base/repro.py": {"default": {"compiled_us": 10.0}},
+            },
+            {
+                "_metadata": {"benchmark_config": {}},
+                "__failures__": {
+                    "repros/canonical/old/repro.py": {
+                        "status": "failed",
+                        "error": "compile failed",
+                    },
+                },
+            },
+        ):
+            with self.subTest(keys=sorted(baseline)):
+                with self.assertRaisesRegex(ValueError, "numerics_check"):
+                    self._merge_numerics(
+                        baseline,
+                        {},
+                        numerics_failure,
+                        {"numerics_check": self._numerics_check()},
+                    )
+
+    def test_unchecked_failure_only_merge_adopts_new_config(self):
+        baseline = {
+            "_metadata": {"benchmark_config": {"coordinate_descent": True}},
+            "__failures__": {
+                "repros/canonical/old/repro.py": {
+                    "status": "failed",
+                    "error": "compile failed",
+                },
+            },
+        }
+        config = {"coordinate_descent": False}
+        merged = self._merge_numerics(
+            baseline,
+            {"repros/canonical/head/repro.py": {"default": {"compiled_us": 9.0}}},
+            {},
+            config,
+        )
+        self.assertEqual(merged["_metadata"]["benchmark_config"], config)
+        self.assertNotIn("numerics_check", merged["_metadata"])
+
+    def test_merge_writes_top_level_numerics_check(self):
+        config = {"numerics_check": self._numerics_check()}
+        fresh = self._merge_numerics(
+            None,
+            {"repros/canonical/head/repro.py": {"default": {"compiled_us": 9.0}}},
+            {},
+            config,
+        )
+        self.assertEqual(fresh["_metadata"]["numerics_check"], config["numerics_check"])
+
+        stale = {
+            "_metadata": {
+                "benchmark_config": dict(config),
+            },
+            "repros/canonical/base/repro.py": {"default": {"compiled_us": 10.0}},
+        }
+        merged = self._merge_numerics(
+            stale,
+            {"repros/canonical/head/repro.py": {"default": {"compiled_us": 9.0}}},
+            {},
+            config,
+        )
+        self.assertEqual(merged["_metadata"]["numerics_check"], config["numerics_check"])
+
+        empty = {"_metadata": {"numerics_check": self._numerics_check()}}
+        refreshed = self._merge_numerics(
+            empty,
+            {"repros/canonical/head/repro.py": {"default": {"compiled_us": 9.0}}},
+            {},
+            {"numerics_check": self._numerics_check(enabled=False)},
+        )
+        self.assertEqual(
+            refreshed["_metadata"]["numerics_check"],
+            self._numerics_check(enabled=False),
+        )
+
     def test_merge_preserves_other_points_when_compile_policy_changes(self):
         repro_path = "repros/canonical/example/repro.py"
         baseline = {

@@ -40,4 +40,11 @@ def semantic_benchmark_config(config: dict | None) -> dict:
         if not isinstance(worker_init, list):
             raise ValueError("benchmark config worker_init must be an array")
         normalized["worker_init"] = list(worker_init)
+    # Result-affecting: the numerics gate decides which points are timed and
+    # which become numerics failures. Disabled and legacy-missing are the same.
+    numerics_check = config.get("numerics_check")
+    if numerics_check is not None and not isinstance(numerics_check, dict):
+        raise ValueError("benchmark config numerics_check must be an object")
+    if numerics_check and numerics_check.get("enabled"):
+        normalized["numerics_check"] = dict(numerics_check)
     return normalized
