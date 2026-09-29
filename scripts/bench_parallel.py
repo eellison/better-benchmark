@@ -3696,6 +3696,9 @@ def _get_or_load_full_graph(repro_path):
     with _prefetch_lock:
         cached = _prefetch_cache.pop(repro_path, None)
     definition = cached if cached is not None else load_full_graph_definition(repro_path)
+    # Synthetic inputs and module attributes draw from the global torch RNG,
+    # whose state otherwise depends on which graphs this worker ran before.
+    torch.manual_seed(0)
     instance, inputs, definition = load_full_graph(definition, default_device="cuda")
     return instance, inputs, definition
 

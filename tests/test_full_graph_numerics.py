@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import pytest
@@ -589,6 +590,33 @@ def test_worker_reports_structured_numerics_on_success_and_failure():
     assert 'variant="coordinate_descent"' in full_graph
     assert '"failed_variant": getattr(e, "failed_variant", None)' in script
     assert '"numerics": getattr(e, "numerics", None)' in script
+
+
+def test_full_graph_inputs_are_seeded_independent_of_worker_rng_state():
+    source = _worker_script(full_graphs=True)
+    helper = "def _get_or_load_full_graph" + source.split(
+        "def _get_or_load_full_graph", 1
+    )[1].split("\n\n", 1)[0]
+
+    def load_full_graph(definition, **kwargs):
+        return object(), (torch.randn(8), torch.randint(0, 10, (3,))), definition
+
+    namespace = {
+        "torch": torch,
+        "_prefetch_lock": threading.Lock(),
+        "_prefetch_cache": {},
+        "load_full_graph_definition": lambda path: path,
+        "load_full_graph": load_full_graph,
+    }
+    exec(helper, namespace)
+    load = namespace["_get_or_load_full_graph"]
+
+    torch.manual_seed(1234)
+    _, first, _ = load("graph.py")
+    torch.randn(100)
+    _, second, _ = load("graph.py")
+
+    assert all(torch.equal(a, b) for a, b in zip(first, second))
 
 
 def test_parent_preserves_structured_numerics_failure_fields():
