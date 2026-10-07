@@ -73,12 +73,14 @@ import tempfile
 import time
 from pathlib import Path
 
-_REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+for _import_root in (_REPO_ROOT, _SCRIPT_DIR):
+    if str(_import_root) not in sys.path:
+        sys.path.insert(0, str(_import_root))
 
-from gpu_lock import gpu_lock_for_kind, discover_gpus, matching_gpus
-from benchmark_provenance import semantic_benchmark_config
+from gpu_lock import discover_gpus, matching_gpus  # noqa: E402
+from benchmark_provenance import semantic_benchmark_config  # noqa: E402
 
 
 # Shared inductor cache — all workers read/write the same cache so repeated
@@ -105,15 +107,45 @@ def _normalize_shape_label(label: str) -> str:
     return "default" if label == _DEFAULT_SHAPE_TOKEN else label
 
 
+def _numerics_check_metadata(args: argparse.Namespace) -> dict:
+    seeds = 1 if getattr(args, "full_graphs", False) else getattr(args, "numerics_seeds", 1)
+    from full_graph_harness import NUMERICS_METHOD, NUMERICS_TOLERANCE
+
+    return {
+        "enabled": True,
+        "seeds": seeds,
+        "method": NUMERICS_METHOD,
+        "tolerance": NUMERICS_TOLERANCE,
+        "reference": "fp64_or_eager",
+    }
+
+
+def _numerics_check_enabled(config: dict | None) -> bool:
+    numerics_check = (config or {}).get("numerics_check")
+    return isinstance(numerics_check, dict) and bool(numerics_check.get("enabled"))
+
+
+def _sync_numerics_check_metadata(metadata: dict) -> None:
+    """Mirror benchmark_config.numerics_check at the top level of _metadata."""
+    numerics_check = metadata.get("benchmark_config", {}).get("numerics_check")
+    if numerics_check is None:
+        metadata.pop("numerics_check", None)
+    else:
+        metadata["numerics_check"] = numerics_check
+
+
 def _benchmark_config_metadata(args: argparse.Namespace) -> dict:
     """Return the effective result-affecting and execution configuration."""
-    return {
+    config = {
         "worker_init": list(args.worker_init or []),
         "coordinate_descent": not args.no_cd,
         "strict_gpu_lock": args.strict_gpu_lock,
         "gpus": args.gpus,
         "workers_per_gpu": args.workers_per_gpu,
     }
+    if getattr(args, "check_numerics", False):
+        config["numerics_check"] = _numerics_check_metadata(args)
+    return config
 
 
 def _make_shape_task_key(dir_path: str, shape_label: str) -> str:
@@ -1295,6 +1327,7 @@ def _write_results_output(
         extra_inductor_config=extra_inductor_config,
     )
     metadata["benchmark_config"] = dict(config_metadata or {})
+    _sync_numerics_check_metadata(metadata)
     _atomic_write_json(
         output_path,
         _results_payload(
@@ -1804,6 +1837,7 @@ def _merge_into_baseline_locked(
                 "benchmark_config": dict(config_metadata or {}),
             },
         )
+        _sync_numerics_check_metadata(payload["_metadata"])
         _atomic_write_json(baseline_path, payload)
         print(f"[merge-into] Wrote {baseline_path} ({len(new_results)} repros)")
         return
@@ -1822,16 +1856,27 @@ def _merge_into_baseline_locked(
     old_config = old_meta.get("benchmark_config", {})
     if not isinstance(old_config, dict):
         raise ValueError("stored benchmark_config metadata must be an object")
-    if existing:
-        if new_results and (
-            semantic_benchmark_config(old_config)
-            != semantic_benchmark_config(config_metadata)
-        ):
+    numerics_checked = _numerics_check_enabled(old_config) or _numerics_check_enabled(
+        config_metadata
+    )
+    if existing or (old_failures and numerics_checked):
+        old_semantic = semantic_benchmark_config(old_config)
+        new_semantic = semantic_benchmark_config(config_metadata)
+        if new_results and old_semantic != new_semantic:
             raise ValueError(
                 "Cannot merge results with different benchmark configurations"
             )
+        # Failure-only merges may come from a different execution config, but
+        # the numerics gate decides whether a point fails at all.
+        if new_failures and old_semantic.get("numerics_check") != new_semantic.get(
+            "numerics_check"
+        ):
+            raise ValueError(
+                "Cannot merge failures with a different numerics_check configuration"
+            )
     else:
         old_meta["benchmark_config"] = dict(config_metadata or {})
+    _sync_numerics_check_metadata(old_meta)
     metadata_kind = old_meta.get("workload_kind")
     content_kind = _infer_workload_kind_from_payload(
         existing,
@@ -2234,6 +2279,17 @@ def main():
         default=False,
         help="Also measure compiled_nocudagraphs_us via direct call (noisy; off by default)",
     )
+    parser.add_argument("--check-numerics", action="store_true",
+                        help="Before timing each partition shape point or full "
+                             "graph, require the default and coordinate-descent "
+                             "compiled artifacts to match eager under "
+                             "torch._dynamo.utils.same with a float64 eager "
+                             "reference (eager alone when no float64 "
+                             "reference can be built).")
+    parser.add_argument("--numerics-seeds", type=int, default=1,
+                        help="Deterministic input seeds per partition point for "
+                             "--check-numerics (default: 1). Full graphs have one "
+                             "fixed input sample, so they are checked once.")
     parser.add_argument("--worker-init", action="append",
                         metavar="MODULE:CALLABLE", default=None,
                         help="Import MODULE in every worker and call CALLABLE "
@@ -2315,6 +2371,13 @@ def main():
                              "(useful for back-to-back sweeps). By default we reset on exit any "
                              "GPUs we locked. Only the GPUs we actually locked are ever reset.")
     args = parser.parse_args()
+    if args.check_numerics and args.oracles:
+        parser.error("--check-numerics is not supported with --oracles")
+    if args.numerics_seeds < 1:
+        parser.error("--numerics-seeds must be at least 1")
+    if args.full_graphs and args.numerics_seeds != 1:
+        parser.error("--numerics-seeds does not apply to --full-graphs: a full "
+                     "graph has one fixed input sample and is checked once")
     benchmark_config = _benchmark_config_metadata(args)
 
     try:
@@ -2567,6 +2630,8 @@ def main():
         "all_shapes": args.all_shapes,
         "no_cd": args.no_cd,
         "compiled_nocudagraphs": args.compiled_nocudagraphs,
+        "check_numerics": args.check_numerics,
+        "numerics_seeds": args.numerics_seeds,
         "n_warmup": args.n_warmup,
         "n_rep": args.n_rep,
         "share_cache": args.share_cache,
@@ -2670,8 +2735,14 @@ def main():
                 "reason": result.get("reason") or result.get("error", ""),
                 "hint": result.get("hint") or "Inspect worker stderr or rerun this workload directly.",
             }
-            if result.get("exception_type"):
-                failure["exception_type"] = result["exception_type"]
+            for key in (
+                "exception_type",
+                "failure_classification",
+                "failed_variant",
+                "numerics",
+            ):
+                if result.get(key) is not None:
+                    failure[key] = result[key]
             failures[result["repro"]] = failure
             print(f"  [{done+failed}/{len(repros)}] FAIL gpu={result['gpu']}  "
                   f"{result['elapsed']:.1f}s  {repro_name}: {result['error'][:80]}", flush=True)
@@ -3062,6 +3133,11 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
                             "reason": error_payload.get("reason"),
                             "hint": error_payload.get("hint"),
                             "exception_type": error_payload.get("exception_type"),
+                            "failure_classification": error_payload.get(
+                                "failure_classification"
+                            ),
+                            "failed_variant": error_payload.get("failed_variant"),
+                            "numerics": error_payload.get("numerics"),
                         })
                         continue
                     result_queue.put({
@@ -3362,7 +3438,7 @@ from triton.testing import do_bench
 import importlib.util, math
 from repro_harness import compile_policy_from_config, compile_repro, load_shape_configs, make_inputs_from_config, make_inputs_safely, preserve_compile_environment
 from byte_accounting import count_bytes_effective
-from full_graph_harness import load_full_graph_definition, load_full_graph, result_metadata, tensor_bytes
+from full_graph_harness import FullGraphNumericsError, load_full_graph_definition, load_full_graph, make_inputs_from_full_graph_specs, result_metadata, run_numerics_gate, tensor_bytes
 from torch._inductor.utils import fresh_cache
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
@@ -3378,6 +3454,8 @@ MEMORY_SNAPSHOT = {args_dict.get("memory_snapshot", False)}
 MEMORY_SNAPSHOT_DIR = {args_dict.get("memory_snapshot_dir", "memory_snapshots")!r}
 TAG = {args_dict.get("tag", "latest")!r}
 COMPILED_NOCUDAGRAPHS = {args_dict.get("compiled_nocudagraphs", False)}
+CHECK_NUMERICS = {args_dict.get("check_numerics", False)}
+NUMERICS_SEEDS = {args_dict.get("numerics_seeds", 1)}
 
 # --inductor-config knobs (dotted names ok; names validated in the parent).
 inductor_config.load_config({extra_inductor_config!r})
@@ -3652,13 +3730,17 @@ def _make_bench_callable(graph_or_fn, is_graph, inps):
 def bench_full_graph_one(repro_path):
     instance, inputs, _definition = _get_or_load_full_graph(repro_path)
 
-    with gpu_setup_lock():
-        with torch.no_grad():
-            eager_out = instance(*inputs)
-        torch.cuda.synchronize()
-        input_bytes = tensor_bytes(inputs)
-        output_bytes = tensor_bytes(eager_out)
-        del eager_out
+    def make_numerics_inputs():
+        return make_inputs_from_full_graph_specs(_definition.input_specs, default_device="cuda")
+
+    if not CHECK_NUMERICS:
+        with gpu_setup_lock():
+            with torch.no_grad():
+                eager_out = instance(*inputs)
+            torch.cuda.synchronize()
+            input_bytes = tensor_bytes(inputs)
+            output_bytes = tensor_bytes(eager_out)
+            del eager_out
 
     # Compile default
     inductor_metrics.reset()
@@ -3668,13 +3750,25 @@ def bench_full_graph_one(repro_path):
     if {args_dict.get("compile_time", False)}:
         with fresh_cache():
             _t0 = time.perf_counter()
-            compiled = torch.compile(instance)
+            compiled = torch.compile(instance, fullgraph=CHECK_NUMERICS)
             with torch.no_grad():
                 compiled(*inputs)
             torch.cuda.synchronize()
             compile_time_s = time.perf_counter() - _t0
     else:
-        compiled = torch.compile(instance)
+        compiled = torch.compile(instance, fullgraph=CHECK_NUMERICS)
+    numerics = None
+    if CHECK_NUMERICS:
+        # Checking requires fullgraph: graph breaks would leave eager code in the
+        # "compiled" artifact being checked.
+        with gpu_setup_lock():
+            numerics, eager_out = run_numerics_gate(
+                instance, compiled, make_numerics_inputs, label="default compiled",
+                variant="default", seeds=1)
+            torch.cuda.synchronize()
+            input_bytes = tensor_bytes(inputs)
+            output_bytes = tensor_bytes(eager_out)
+            del eager_out
     with gpu_setup_lock():
         with torch.no_grad():
             graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
@@ -3714,13 +3808,24 @@ def bench_full_graph_one(repro_path):
     do_cd = not {args_dict["no_cd"]}
     graph_cd = None
     cd_is_graph = False
+    cd_numerics = None
     if do_cd:
         torch._dynamo.reset()
         compiled_cd = torch.compile(
             instance,
+            fullgraph=CHECK_NUMERICS,
             options={{"coordinate_descent_tuning": True}},
         )
         with gpu_setup_lock():
+            if CHECK_NUMERICS:
+                cd_numerics, _ = run_numerics_gate(
+                    instance,
+                    compiled_cd,
+                    make_numerics_inputs,
+                    label="coordinate-descent compiled",
+                    variant="coordinate_descent",
+                    seeds=1,
+                )
             with torch.no_grad():
                 graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
 
@@ -3825,6 +3930,10 @@ def bench_full_graph_one(repro_path):
             "gap_cd": None,
         }}
     }}
+    if numerics is not None:
+        result["default"]["numerics"] = numerics
+    if cd_numerics is not None:
+        result["default"]["coord_descent_numerics"] = cd_numerics
     if COMPILED_NOCUDAGRAPHS:
         result["default"]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
     if {args_dict.get("compile_time", False)}:
@@ -3861,14 +3970,15 @@ def bench_one(task_key):
             if shape_config is not None
             else next(iter(configs.values()), None)
         )
-        with gpu_setup_lock():
+        def make_point_inputs(shape_config=shape_config):
             if shape_config is not None:
-                inputs = make_inputs_from_config(shape_config)
-                label = shape_name
-            else:
-                make_inputs_fn = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
-                inputs = make_inputs_safely(make_inputs_fn)
-                label = "default"
+                return make_inputs_from_config(shape_config)
+            make_inputs_fn = mod.make_inputs if hasattr(mod, "make_inputs") else mod._default_make_inputs
+            return make_inputs_safely(make_inputs_fn)
+
+        label = shape_name if shape_config is not None else "default"
+        with gpu_setup_lock():
+            inputs = make_point_inputs()
 
             with torch.no_grad():
                 eager_out = instance(*inputs)
@@ -3886,7 +3996,12 @@ def bench_one(task_key):
             instance,
             compile_policy=compile_policy,
         )
+        numerics = None
         with gpu_setup_lock():
+            if CHECK_NUMERICS:
+                numerics, _ = run_numerics_gate(
+                    instance, compiled, make_point_inputs, label="default compiled",
+                    variant="default", seeds=NUMERICS_SEEDS)
             with torch.no_grad():
                 graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
         n_kernels = inductor_metrics.generated_kernel_count
@@ -3907,6 +4022,7 @@ def bench_one(task_key):
         do_cd = not {args_dict["no_cd"]}
         graph_cd = None
         cd_is_graph = False
+        cd_numerics = None
         if do_cd:
             torch._dynamo.reset()
             compiled_cd = compile_repro(
@@ -3915,6 +4031,11 @@ def bench_one(task_key):
                 options={{"coordinate_descent_tuning": True}},
             )
             with gpu_setup_lock():
+                if CHECK_NUMERICS:
+                    cd_numerics, _ = run_numerics_gate(
+                        instance, compiled_cd, make_point_inputs,
+                        label="coordinate-descent compiled",
+                        variant="coordinate_descent", seeds=NUMERICS_SEEDS)
                 with torch.no_grad():
                     graph_cd, cd_is_graph = _capture_cudagraph(
                         compiled_cd,
@@ -3971,6 +4092,10 @@ def bench_one(task_key):
         }}
         if COMPILED_NOCUDAGRAPHS:
             all_results[label]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
+        if numerics is not None:
+            all_results[label]["numerics"] = numerics
+        if cd_numerics is not None:
+            all_results[label]["coord_descent_numerics"] = cd_numerics
 
     return all_results
 
@@ -4004,15 +4129,26 @@ for line in sys.stdin:
             _result_file.write(f"CUDA_ERROR: {{str(e)[:1000]}}\\n")
             _result_file.flush()
             sys.exit(1)  # die so parent respawns
+        _category = (
+            "numerics_failed" if isinstance(e, FullGraphNumericsError) else "runtime_error"
+        )
+        _hint = (
+            "Inspect eager and compiled outputs before benchmarking this workload."
+            if _category == "numerics_failed"
+            else "Inspect worker stderr or rerun this workload directly."
+        )
         _result_file.write(json.dumps({{
             "_repro": line,
             "__error__": {{
                 "status": "failed",
-                "category": "runtime_error",
+                "category": _category,
                 "exception_type": type(e).__name__,
                 "error": str(e)[:1000],
                 "reason": "worker failed while benchmarking workload",
-                "hint": "Inspect worker stderr or rerun this workload directly.",
+                "hint": _hint,
+                "failure_classification": getattr(e, "classification", None),
+                "failed_variant": getattr(e, "failed_variant", None),
+                "numerics": getattr(e, "numerics", None),
             }},
         }}) + "\\n")
         _result_file.flush()

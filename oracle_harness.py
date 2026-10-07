@@ -35,6 +35,7 @@ from pathlib import Path
 
 import torch
 
+from numerics import anchored_gate
 from repro_harness import preserve_compile_environment
 
 if __name__ == "__main__":
@@ -1547,56 +1548,35 @@ def _anchored_numerics_gate(
     per non-stochastic float output. Violation means the oracle uses a
     formulation substitution (fast exp, exp2-softmax, etc.).
     """
-    result = {
-        "pass": True,
-        "per_output": [],
-        "worst_output_idx": None,
-        "ref_precision": ref_precision,
+    return anchored_gate(
+        oracle_outs, compiled_outs, ref_outs, stochastic,
+        leaf_check=_oracle_leaf_check, ref_precision=ref_precision)
+
+
+def _oracle_leaf_check(idx, o_oracle, o_compiled, o_ref):
+    if not o_ref.is_floating_point():
+        return {"skip": "non_float"}, None
+
+    # Cast to f64 for comparison
+    ref_f64 = o_ref.double()
+    oracle_f64 = o_oracle.double()
+    compiled_f64 = o_compiled.double()
+
+    err_oracle = (oracle_f64 - ref_f64).abs().max().item()
+    err_compiled = (compiled_f64 - ref_f64).abs().max().item()
+    ref_absmax = ref_f64.abs().max().item()
+    ref_absmax_scale = max(ref_absmax, 1.0)  # avoid 0-scale
+
+    threshold = max(3.0 * err_compiled, 1e-5 * ref_absmax_scale)
+    passes = err_oracle <= threshold
+    fields = {
+        "err_oracle": err_oracle,
+        "err_compiled": err_compiled,
+        "threshold": threshold,
+        "ref_absmax": ref_absmax,
+        "pass": passes,
     }
-    worst_ratio = 0.0
-
-    for i, (o_oracle, o_compiled, o_ref) in enumerate(
-        zip(oracle_outs, compiled_outs, ref_outs)
-    ):
-        entry = {"idx": i}
-        if i in stochastic:
-            entry["skip"] = "stochastic"
-            result["per_output"].append(entry)
-            continue
-        if not o_ref.is_floating_point():
-            entry["skip"] = "non_float"
-            result["per_output"].append(entry)
-            continue
-
-        # Cast to f64 for comparison
-        ref_f64 = o_ref.double()
-        oracle_f64 = o_oracle.double()
-        compiled_f64 = o_compiled.double()
-
-        err_oracle = (oracle_f64 - ref_f64).abs().max().item()
-        err_compiled = (compiled_f64 - ref_f64).abs().max().item()
-        ref_absmax = ref_f64.abs().max().item()
-        ref_absmax_scale = max(ref_absmax, 1.0)  # avoid 0-scale
-
-        threshold = max(3.0 * err_compiled, 1e-5 * ref_absmax_scale)
-        passes = err_oracle <= threshold
-
-        entry["err_oracle"] = err_oracle
-        entry["err_compiled"] = err_compiled
-        entry["threshold"] = threshold
-        entry["ref_absmax"] = ref_absmax
-        entry["pass"] = passes
-
-        if not passes:
-            result["pass"] = False
-            ratio = err_oracle / max(err_compiled, 1e-30)
-            if ratio > worst_ratio:
-                worst_ratio = ratio
-                result["worst_output_idx"] = i
-
-        result["per_output"].append(entry)
-
-    return result
+    return fields, err_oracle / max(err_compiled, 1e-30)
 
 
 def _time_graph(graph, warmup, rep):

@@ -16,6 +16,504 @@ from pathlib import Path
 from typing import Any
 
 
+FULL_GRAPH_NUMERICS_SEED = 0
+NUMERICS_METHOD = "torch._dynamo.utils.same"
+# One graph-wide ``tol`` (dynamo's higher-tolerance tier): output dtype does not
+# reveal internal low-precision casts, and the check targets flagrant errors.
+NUMERICS_TOLERANCE = 1e-2
+_MAX_NUMERICS_DETAILS = 8
+
+
+class FullGraphNumericsError(RuntimeError):
+    """Raised when compiled outputs do not match eager outputs."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        classification: str | None = None,
+        seed_record: dict[str, Any] | None = None,
+    ):
+        super().__init__(message)
+        self.classification = classification
+        self.seed_record = seed_record
+        self.numerics: dict[str, Any] | None = None
+        self.failed_variant: str | None = None
+
+
+def _float64_inputs(inputs: Any) -> Any:
+    """Float64 copies of the float tensors in ``inputs``; repeated tensors stay shared."""
+    import torch
+    from torch.utils._pytree import tree_map
+
+    copies: dict[int, Any] = {}
+
+    def upcast(value: Any) -> Any:
+        if not (isinstance(value, torch.Tensor) and value.is_floating_point()):
+            return value
+        if id(value) not in copies:
+            copies[id(value)] = value.to(torch.float64, copy=True)
+        return copies[id(value)]
+
+    return tree_map(upcast, inputs)
+
+
+def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -> Any:
+    """Run ``fn`` on fresh inputs from ``make_inputs`` and return a copy of its outputs.
+
+    Inputs and the run are both seeded with ``seed``. Outputs are cloned so a
+    later run cannot overwrite them through state they alias.
+    """
+    import torch
+    from torch.utils._pytree import tree_map
+
+    torch.manual_seed(seed)
+    inputs = make_inputs()
+    if upcast:
+        inputs = _float64_inputs(inputs)
+    torch.manual_seed(seed)
+    with torch.no_grad():
+        out = fn(*inputs)
+    return tree_map(
+        lambda v: v.clone() if isinstance(v, torch.Tensor) else v, out
+    )
+
+
+def rng_dependent_output_leaves(
+    fn: Any, make_inputs: Any, seed: int = FULL_GRAPH_NUMERICS_SEED
+) -> set[int] | None:
+    """Return flattened output leaf indices that depend on an RNG op.
+
+    Eager and compiled code use different RNG implementations even for the
+    same seed, so these leaves cannot be compared. Dependence is tracked
+    dynamically during one eager run because FX tracing constant-folds RNG
+    ops whose arguments are not graph inputs. Returns ``None`` when the
+    detection run fails.
+    """
+    import torch
+
+    from numerics import scan_rng_dependence
+
+    torch.manual_seed(seed)
+    inputs = make_inputs()
+    torch.manual_seed(seed)
+    return scan_rng_dependence(fn, inputs)
+
+
+def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> Any | None:
+    """Run a float64 copy of ``fn`` on float64 copies of the float inputs.
+
+    Float-to-float casts inside ``fn`` also produce float64. Returns ``None``
+    when the float64 run fails (unsupported dtype, OOM, ...).
+    """
+    import copy
+
+    import torch
+
+    from numerics import float64_casts_mode
+
+    try:
+        fn64 = copy.deepcopy(fn)
+        if isinstance(fn64, torch.nn.Module):
+            fn64 = fn64.double()
+        with float64_casts_mode():
+            return _run_seeded(fn64, make_inputs, seed, upcast=True)
+    except Exception:
+        return None
+
+
+def _comparable(value: Any) -> Any:
+    """``value`` as a real float tensor that supports isfinite/isinf: complex
+    becomes its real view and float8 becomes float32."""
+    import torch
+
+    if value.is_complex():
+        return torch.view_as_real(value.resolve_conj())
+    if value.element_size() == 1:
+        return value.float()
+    return value
+
+
+def _reference_covers_eager(
+    reference: Any, baseline: Any, skip_leaves: set[int] | frozenset[int]
+) -> bool:
+    """True unless the fp64 run cannot anchor eager's float outputs.
+
+    That is when a float output's shape differs (e.g. a bitcast view of an
+    upcast input) or a value finite in eager is nonfinite in the fp64 run
+    (e.g. fp64 NaN from cancellation that eager rounds away).
+    """
+    import torch
+    from torch.utils._pytree import tree_flatten
+
+    reference_leaves, reference_spec = tree_flatten(reference)
+    baseline_leaves, baseline_spec = tree_flatten(baseline)
+    if reference_spec != baseline_spec:
+        return False
+    for index, (ref, expected) in enumerate(zip(reference_leaves, baseline_leaves)):
+        if index in skip_leaves or not (
+            isinstance(expected, torch.Tensor)
+            and (expected.is_floating_point() or expected.is_complex())
+        ):
+            continue
+        if not isinstance(ref, torch.Tensor) or ref.shape != expected.shape:
+            return False
+        if (_comparable(expected).isfinite() & ~_comparable(ref).isfinite()).any():
+            return False
+    return True
+
+
+def _float_leaf_mismatch(
+    reference: Any | None, baseline: Any, candidate: Any
+) -> tuple[str | None, dict[str, float]]:
+    """Return ``(mismatch, errors)`` for one float leaf; ``mismatch`` is None on pass."""
+    import torch
+    from torch._dynamo.utils import rmse, same
+
+    baseline, candidate = _comparable(baseline), _comparable(candidate)
+    if reference is not None:
+        reference = _comparable(reference)
+        if (baseline.isfinite() & ~reference.isfinite()).any():
+            return "fp64 reference is nonfinite where eager is finite", {}
+        # Where eager overflows but fp64 is finite, eager is the inaccurate one
+        # (e.g. fp16 intermediates that compiled code keeps in fp32).
+        keep = baseline.isfinite() | ~reference.isfinite()
+        if not keep.all():
+            baseline, candidate, reference = (
+                baseline[keep], candidate[keep], reference[keep]
+            )
+
+    if not (
+        torch.equal(candidate.isnan(), baseline.isnan())
+        and torch.equal(candidate.isinf(), baseline.isinf())
+        and torch.equal(candidate[candidate.isinf()], baseline[baseline.isinf()])
+    ):
+        return "nonfinite values differ from eager", {}
+    # Nonfinite positions already match eager exactly; ``same`` fails any leaf
+    # whose RMSE is NaN, so it only sees the finite positions.
+    finite = baseline.isfinite()
+    if not finite.any():
+        return None, {}
+    if not finite.all():
+        baseline = baseline[finite]
+        candidate = candidate[finite]
+        if reference is not None:
+            reference = reference[finite]
+    if reference is None:
+        if same(baseline, candidate, tol=NUMERICS_TOLERANCE):
+            return None, {}
+        diff = (candidate.double() - baseline.double()).abs().max().item()
+        return (
+            f"max_abs_diff_vs_eager={diff:.3e} (tol={NUMERICS_TOLERANCE:g})",
+            {"max_abs_diff_vs_eager": diff},
+        )
+    reference = reference.double()
+    if same(baseline, candidate, fp64_ref=reference, tol=NUMERICS_TOLERANCE):
+        return None, {}
+    err_compiled = rmse(reference, candidate.double()).item()
+    err_eager = rmse(reference, baseline.double()).item()
+    return (
+        f"rmse_vs_fp64={err_compiled:.3e} "
+        f"(eager_rmse_vs_fp64={err_eager:.3e}, tol={NUMERICS_TOLERANCE:g})",
+        {"err_compiled": err_compiled, "err_eager": err_eager},
+    )
+
+
+def _full_graph_leaf_check(
+    skip_leaves: set[int] | frozenset[int], has_reference: bool
+):
+    """Per-leaf rule for :func:`numerics.anchored_gate` (candidate = compiled)."""
+    import torch
+
+    def fail(detail: str, errors: dict[str, float] | None = None, ratio=math.inf):
+        return {**(errors or {}), "pass": False, "detail": detail}, ratio
+
+    def check(index: int, got: Any, expected: Any, ref: Any):
+        if isinstance(expected, torch.Tensor) != isinstance(got, torch.Tensor):
+            return fail("tensor/non-tensor mismatch")
+        if not isinstance(expected, torch.Tensor):
+            both_nan = (
+                isinstance(expected, float)
+                and isinstance(got, float)
+                and math.isnan(expected)
+                and math.isnan(got)
+            )
+            if expected != got and not both_nan:
+                return fail(f"{got!r} != {expected!r}")
+            return {"pass": True}, None
+        if expected.shape != got.shape:
+            return fail(f"shape {list(got.shape)} != {list(expected.shape)}")
+        if expected.dtype != got.dtype:
+            return fail(f"dtype {got.dtype} != {expected.dtype}")
+        if index in skip_leaves:
+            return {"skip": "stochastic"}, None
+        if not (expected.is_floating_point() or expected.is_complex()):
+            if not torch.equal(expected, got):
+                return fail(f"{expected.dtype} values differ")
+            return {"pass": True}, None
+        if has_reference and (
+            not isinstance(ref, torch.Tensor) or ref.shape != expected.shape
+        ):
+            return fail("fp64 reference shape differs from eager")
+        mismatch, errors = _float_leaf_mismatch(ref, expected, got)
+        if mismatch is None:
+            return {"pass": True}, None
+        if "err_compiled" in errors:
+            ratio = errors["err_compiled"] / max(errors["err_eager"], 1e-30)
+        else:
+            ratio = errors.get("max_abs_diff_vs_eager", math.inf) / NUMERICS_TOLERANCE
+        return fail(
+            f"{mismatch} shape={list(expected.shape)} dtype={expected.dtype}",
+            errors,
+            ratio,
+        )
+
+    return check
+
+
+def compare_output_records(
+    reference: Any | None,
+    baseline: Any,
+    candidate: Any,
+    *,
+    skip_leaves: set[int] | frozenset[int] = frozenset(),
+) -> dict[str, Any]:
+    """Per-leaf records for :func:`compare_outputs`, in the oracle gate's format.
+
+    Returns :func:`numerics.anchored_gate`'s dict (``pass``, ``per_output``,
+    ``worst_output_idx``, ``ref_precision``: ``"f64"`` or ``"eager"``). Failing
+    records carry a ``detail`` message, plus ``err_compiled``/``err_eager``
+    (RMSE vs fp64) or ``max_abs_diff_vs_eager``. A structure mismatch has no
+    per-leaf records and a top-level ``detail``.
+    """
+    from torch.utils._pytree import tree_flatten
+
+    from numerics import anchored_gate
+
+    ref_precision = "eager" if reference is None else "f64"
+
+    def structure_failure(detail: str) -> dict[str, Any]:
+        return {
+            "pass": False,
+            "per_output": [],
+            "worst_output_idx": None,
+            "ref_precision": ref_precision,
+            "detail": detail,
+        }
+
+    baseline_leaves, baseline_spec = tree_flatten(baseline)
+    candidate_leaves, candidate_spec = tree_flatten(candidate)
+    if candidate_spec != baseline_spec:
+        return structure_failure(f"output structure differs: {str(candidate_spec)[:500]}")
+    if reference is None:
+        reference_leaves = [None] * len(baseline_leaves)
+    else:
+        reference_leaves, reference_spec = tree_flatten(reference)
+        if reference_spec != baseline_spec:
+            return structure_failure("fp64 reference output structure differs from eager")
+    return anchored_gate(
+        candidate_leaves,
+        baseline_leaves,
+        reference_leaves,
+        frozenset(),
+        leaf_check=_full_graph_leaf_check(skip_leaves, reference is not None),
+        ref_precision=ref_precision,
+    )
+
+
+def _details(records: dict[str, Any]) -> list[str]:
+    details = [records["detail"]] if "detail" in records else []
+    details += [
+        f"leaf {entry['idx']}: {entry['detail']}"
+        for entry in records["per_output"]
+        if entry.get("pass") is False
+    ]
+    if len(details) > _MAX_NUMERICS_DETAILS:
+        extra = len(details) - _MAX_NUMERICS_DETAILS
+        details = details[:_MAX_NUMERICS_DETAILS] + [f"... {extra} more"]
+    return details
+
+
+def _failing_records(records: dict[str, Any]) -> list[dict[str, Any]]:
+    failing = [e for e in records["per_output"] if e.get("pass") is False]
+    return failing[:_MAX_NUMERICS_DETAILS]
+
+
+def compare_outputs(
+    reference: Any | None,
+    baseline: Any,
+    candidate: Any,
+    *,
+    skip_leaves: set[int] | frozenset[int] = frozenset(),
+) -> tuple[bool, list[str]]:
+    """Compare nested outputs the way ``torch._dynamo.utils.same`` does.
+
+    ``reference`` is a float64 eager run, ``baseline`` the native-precision
+    eager run and ``candidate`` the compiled run. Float leaves pass
+    ``same(baseline, candidate, fp64_ref=reference, tol=NUMERICS_TOLERANCE)``
+    or, with ``reference=None``, ``same(baseline, candidate,
+    tol=NUMERICS_TOLERANCE)``. A nonfinite fp64 value where eager is finite is
+    a mismatch, nonfinite values must match eager exactly, and ``same`` only
+    sees positions finite in eager. Non-float leaves must equal eager exactly.
+    Structure, shape and dtype must match eager. Leaf indices in
+    ``skip_leaves`` are only checked for shape and dtype.
+
+    Returns ``(matches, details)`` where ``details`` is bounded to a few
+    messages so failure records stay small for large graphs.
+    """
+    records = compare_output_records(
+        reference, baseline, candidate, skip_leaves=skip_leaves
+    )
+    return records["pass"], _details(records)
+
+
+def validate_full_graph_numerics(
+    eager_fn: Any,
+    compiled_fn: Any,
+    make_inputs: Any,
+    *,
+    label: str = "compiled",
+    seed: int = FULL_GRAPH_NUMERICS_SEED,
+    skip_output_leaves: set[int] | frozenset[int] = frozenset(),
+) -> tuple[Any, str]:
+    """Compare the outputs of one seeded eager/compiled sample.
+
+    Every run (eager, float64 reference, compiled, eager rerun) gets fresh
+    inputs from ``make_inputs`` under ``seed``. Outputs are compared against
+    the float64 eager run; when no usable float64 reference exists (the
+    float64 run fails, or is nonfinite where eager is finite) the comparison
+    falls back to eager alone. On mismatch, eager is rerun to distinguish
+    eager nondeterminism from a stable compiled mismatch. ``skip_output_leaves``
+    indexes the flattened outputs, e.g. from RNG detection.
+
+    Returns ``(eager_output, reference)`` where ``reference`` is ``"fp64"`` or
+    ``"eager"``.
+    """
+    eager = _run_seeded(eager_fn, make_inputs, seed)
+    skip = frozenset(skip_output_leaves)
+    reference = _fp64_reference(eager_fn, make_inputs, seed)
+    if reference is not None and not _reference_covers_eager(reference, eager, skip):
+        reference = None
+    reference_kind = "eager" if reference is None else "fp64"
+    compiled = _run_seeded(compiled_fn, make_inputs, seed)
+    records = compare_output_records(reference, eager, compiled, skip_leaves=skip)
+    if not records["pass"]:
+        eager_repeat = _run_seeded(eager_fn, make_inputs, seed)
+        eager_stable, _ = compare_outputs(
+            reference, eager, eager_repeat, skip_leaves=skip
+        )
+        classification = (
+            "stable_eager_vs_compiled_mismatch"
+            if eager_stable
+            else "eager_self_instability"
+        )
+        details = _details(records)
+        raise FullGraphNumericsError(
+            f"{label} output mismatch (seed={seed}, dynamo same vs "
+            f"{reference_kind}, {classification}): {'; '.join(details)}",
+            classification=classification,
+            seed_record={
+                "seed": seed,
+                "pass": False,
+                "reference": reference_kind,
+                "failure_classification": classification,
+                "eager_self_check": {"pass": eager_stable},
+                "diagnostics": details,
+                "worst_output_idx": records["worst_output_idx"],
+                "per_output": _failing_records(records),
+            },
+        )
+    return eager, reference_kind
+
+
+def run_numerics_gate(
+    eager_fn: Any,
+    compiled_fn: Any,
+    make_inputs: Any,
+    *,
+    label: str,
+    variant: str,
+    seeds: int,
+    non_semantic_output_leaves: set[int] | frozenset[int] = frozenset(),
+) -> tuple[dict[str, Any], Any]:
+    """Validate ``compiled_fn`` against eager (``torch._dynamo.utils.same``) for seeds ``0..seeds-1``.
+
+    ``make_inputs`` is called, after seeding the global RNG, for every run.
+    Every seed runs even after a failure so the summary always holds one
+    record per seed. Returns ``(summary, first_eager_output)``; on failure
+    raises the first ``FullGraphNumericsError`` with ``numerics`` and
+    ``failed_variant`` attached.
+
+    Seeds without a usable float64 reference are compared against eager
+    alone; ``reference`` in the summary records which anchor was used.
+    Status is ``numerics_unavailable`` rather than ``pass`` when RNG-dependent
+    output leaves are not listed in ``non_semantic_output_leaves`` (an
+    explicit output contract) or RNG detection failed.
+    """
+    records: list[dict[str, Any]] = []
+    first_error: FullGraphNumericsError | None = None
+    first_eager_out = None
+    rng_leaves = rng_dependent_output_leaves(eager_fn, make_inputs)
+    reference_kinds: set[str] = set()
+    for seed in range(seeds):
+        try:
+            eager_out, reference_kind = validate_full_graph_numerics(
+                eager_fn,
+                compiled_fn,
+                make_inputs,
+                label=label,
+                seed=seed,
+                skip_output_leaves=rng_leaves or frozenset(),
+            )
+        except FullGraphNumericsError as exc:
+            records.append(exc.seed_record)
+            reference_kinds.add(exc.seed_record["reference"])
+            first_error = first_error or exc
+            continue
+        reference_kinds.add(reference_kind)
+        if first_eager_out is None:
+            first_eager_out = eager_out
+        del eager_out
+        records.append(
+            {
+                "seed": seed,
+                "pass": True,
+                "reference": reference_kind,
+                "failure_classification": None,
+                "eager_self_check": None,
+                "diagnostics": [],
+                "worst_output_idx": None,
+                "per_output": [],
+            }
+        )
+    skipped = sorted(rng_leaves or ())
+    unjustified = [leaf for leaf in skipped if leaf not in non_semantic_output_leaves]
+    if first_error:
+        status = "fail"
+    elif unjustified or rng_leaves is None:
+        status = "numerics_unavailable"
+    else:
+        status = "pass"
+    summary = {
+        "status": status,
+        "seeds": records,
+        "method": NUMERICS_METHOD,
+        "tolerance": NUMERICS_TOLERANCE,
+        "reference": (
+            next(iter(reference_kinds)) if len(reference_kinds) == 1 else "mixed"
+        ),
+        "fp64_reference_available": reference_kinds == {"fp64"},
+        "rng_detection_ok": rng_leaves is not None,
+        "skipped_rng_output_leaves": skipped,
+        "unjustified_skipped_output_leaves": unjustified,
+    }
+    if first_error is not None:
+        first_error.numerics = summary
+        first_error.failed_variant = variant
+        raise first_error
+    return summary, first_eager_out
+
+
 @dataclass(frozen=True)
 class FullGraphDefinition:
     path: Path
