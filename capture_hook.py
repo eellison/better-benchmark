@@ -41,6 +41,7 @@ from full_graph_harness import (
     infer_permutation_indices_from_gm,
     placeholder_info_from_gm,
 )
+from replay_dependencies import replay_dependencies
 # Single source of truth for the emitted version marker: the generated repro
 # template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
 # future format bump (changing only the constant) can never leave this writer
@@ -1539,6 +1540,7 @@ if __name__ == "__main__":
                             "source": infer_full_graph_source(full_graph_path),
                             "node_accounting": graph_node_accounting(
                                 gm, components),
+                            "replay_dependencies": replay_dependencies(gm),
                         },
                         index_bounds=index_bounds,
                         permutation_indices=permutation_indices,
