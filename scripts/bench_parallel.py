@@ -1668,10 +1668,35 @@ def _full_graph_preflight_error(path: Path, exc: Exception) -> dict:
     }
 
 
+def _replay_dependency_reasons(definition, has_worker_init: bool) -> list[dict[str, str]]:
+    """Blocked replay dependencies recorded in the sidecar at export time.
+
+    A --worker-init hook may register custom ops in the workers, so with one a
+    missing op is only a warning.
+    """
+    from replay_dependencies import check_replay_dependencies
+
+    sidecar = (definition.metadata or {}).get("sidecar") or {}
+    reasons = []
+    for item in check_replay_dependencies(sidecar)["blocked"]:
+        if has_worker_init and item["category"] == "missing_custom_op":
+            print(
+                f"  [preflight] {definition.path}: {item['reason']}; "
+                "assuming --worker-init provides it",
+                file=sys.stderr,
+            )
+            continue
+        reasons.append(
+            {"category": item["category"], "reason": item["reason"], "hint": item["hint"]}
+        )
+    return reasons
+
+
 def _preflight_full_graphs(
     repros: list[Path],
     *,
     allow_unsafe: bool = False,
+    worker_init: list[str] | tuple[str, ...] = (),
 ) -> tuple[list[Path], dict[str, dict]]:
     from full_graph_harness import load_full_graph_definition
 
@@ -1680,7 +1705,8 @@ def _preflight_full_graphs(
     for repro_path in repros:
         try:
             definition = load_full_graph_definition(repro_path)
-            reasons = _classify_full_graph_definition(
+            reasons = _replay_dependency_reasons(definition, bool(worker_init))
+            reasons += _classify_full_graph_definition(
                 definition,
                 allow_unsafe=allow_unsafe,
             )
@@ -2506,6 +2532,7 @@ def main():
         repros, preflight_failures = _preflight_full_graphs(
             repros,
             allow_unsafe=args.allow_unsafe_full_graphs,
+            worker_init=args.worker_init or [],
         )
         preflight_failed, skipped = _failure_status_counts(preflight_failures)
         if preflight_failures:
