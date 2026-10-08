@@ -244,7 +244,8 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
 
-    Uses CapabilityBasedPartitioner + is_fusible_node (from
+    Uses CapabilityBasedPartitioner (the pruned copy in fusion_partitioner,
+    same partitions, much faster on large graphs) + is_fusible_node (from
     torch._inductor.fx_passes.fusion_regions) + create_op_support, with
     transparent view ops allowed inside partitions and horizontal fusion
     disabled (via skip_horizontal_fusion when available, otherwise a
@@ -256,8 +257,11 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
     """
     import inspect
 
-    from torch.fx.passes.infra.partitioner import CapabilityBasedPartitioner
     from torch.fx.passes.operator_support import create_op_support
+
+    from fusion_partitioner import (
+        PrunedCapabilityBasedPartitioner as CapabilityBasedPartitioner,
+    )
 
     def _is_supported(_submodules, node):
         return partition_node_is_supported(node)
