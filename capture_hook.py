@@ -181,25 +181,22 @@ def partition_has_real_compute(nodes) -> bool:
 
 
 def partition_is_standalone_allocation_only(nodes) -> bool:
-    """Whether a component only returns uninitialized allocation metadata.
+    """Whether a component, extracted on its own, only returns uninitialized
+    allocations.
 
-    An allocation feeding any node outside the component is retained: that
-    consumer may be a scatter, ``index_put``, or custom writer that defines
-    the buffer's values. Only components whose non-view work is an allocation
-    and whose external users are graph outputs are safe to omit standalone.
+    Such a repro has no values to compare and nothing to time. That holds
+    whoever consumes the buffer: a writer inside the component (``index_put``,
+    a scatter) is compute, so the component is not allocation-only; a writer
+    outside it, such as a user Triton kernel's output buffer, is either in
+    another partition, which takes the buffer as an input, or not fusible.
     """
-    node_set = set(nodes)
     compute = [
         node
         for node in nodes
         if node.op == "call_function" and node.target not in TRANSPARENT_OPS
     ]
-    if not compute or any(node.target not in ALLOCATION_ONLY_OPS for node in compute):
-        return False
-    return not any(
-        user not in node_set and user.op != "output"
-        for node in nodes
-        for user in node.users
+    return bool(compute) and all(
+        node.target in ALLOCATION_ONLY_OPS for node in compute
     )
 
 
