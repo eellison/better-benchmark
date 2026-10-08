@@ -990,6 +990,28 @@ def test_alias_group_generation_shares_storage():
     assert k.storage_offset() - q.storage_offset() == D
 
 
+def test_alias_group_float_buffer_is_finite():
+    """A float alias group is filled with normal values, not raw byte noise,
+    which reinterpreted as fp16/bf16 includes NaN/Inf bit patterns."""
+    import torch
+    from repro_harness import make_inputs_from_config
+
+    N, D = 64, 32
+    for dtype in ("float16", "bfloat16"):
+        config = {
+            "alias_group_nbytes": [N * 2 * D * 2],
+            "inputs": [
+                {"kind": "tensor", "shape": [N, D], "dtype": dtype,
+                 "stride": [2 * D, 1], "storage_offset": off, "alias_group": 0,
+                 "device": "cpu"}
+                for off in (0, D)
+            ],
+        }
+        a, b = make_inputs_from_config(config)
+        assert a.untyped_storage().data_ptr() == b.untyped_storage().data_ptr()
+        assert torch.isfinite(a).all() and torch.isfinite(b).all(), dtype
+
+
 def test_alias_group_only_for_multiply_referenced():
     """A storage referenced by exactly ONE partition placeholder gets NO
     alias tag (single view == private buffer, grouping is noise). Pins the

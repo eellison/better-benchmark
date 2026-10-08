@@ -601,7 +601,7 @@ def make_inputs_from_config(config: dict) -> list:
     group_nbytes = config.get("alias_group_nbytes") or []
     group_storage: dict[int, torch.Tensor] = {}
 
-    def _group_buffer(g: int, device) -> torch.Tensor:
+    def _group_buffer(g: int, device, dtype=None) -> torch.Tensor:
         if g not in group_storage:
             nbytes = group_nbytes[g] if g < len(group_nbytes) else 0
             if nbytes <= 0:
@@ -609,7 +609,11 @@ def make_inputs_from_config(config: dict) -> list:
                     f"alias_group {g} has no recorded nbytes "
                     f"(alias_group_nbytes={group_nbytes})")
             buf = torch.empty(nbytes, dtype=torch.uint8, device=device)
-            buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
+            if dtype is not None and dtype.is_floating_point and nbytes % dtype.itemsize == 0:
+                # Raw byte noise viewed as a float dtype includes NaN/Inf bit patterns.
+                buf.view(dtype).normal_()
+            else:
+                buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
             group_storage[g] = buf
         return group_storage[g]
 
@@ -644,7 +648,7 @@ def make_inputs_from_config(config: dict) -> list:
             stride = spec.get("stride") or _contiguous_stride_local(shape)
             device = spec.get("device", "cuda")
             offset = int(spec.get("storage_offset", 0))
-            buf = _group_buffer(spec["alias_group"], device)
+            buf = _group_buffer(spec["alias_group"], device, dtype)
             typed = buf.view(dtype) if dtype != torch.uint8 else buf
             result.append(typed.as_strided(shape, stride, offset))
             continue
