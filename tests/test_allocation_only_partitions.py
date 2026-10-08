@@ -52,7 +52,6 @@ def test_extraction_retains_empty_consumed_by_index_put(monkeypatch):
         lambda node: node in supported,
     )
 
-    assert not capture_hook.partition_is_standalone_allocation_only([allocation])
     assert not capture_hook.partition_is_standalone_allocation_only(
         [allocation, writer]
     )
@@ -61,7 +60,11 @@ def test_extraction_retains_empty_consumed_by_index_put(monkeypatch):
     assert set(partitions[0]) == supported
 
 
-def test_extraction_retains_empty_for_external_custom_writer(monkeypatch):
+def test_extraction_omits_empty_written_by_external_kernel(monkeypatch):
+    """An output buffer filled by a non-fusible writer (e.g. a user Triton
+    kernel) extracts to a bare allocation, whose repro returns uninitialized
+    memory; the writer is outside every fusible partition."""
+
     def custom_writer(buffer):
         return buffer
 
@@ -76,7 +79,26 @@ def test_extraction_retains_empty_for_external_custom_writer(monkeypatch):
         lambda node: node is allocation,
     )
 
-    assert not capture_hook.partition_is_standalone_allocation_only([allocation])
-    partitions = capture_hook.get_fusion_partitions(module)
-    assert len(partitions) == 1
-    assert partitions[0] == [allocation]
+    assert capture_hook.partition_is_standalone_allocation_only([allocation])
+    assert capture_hook.get_fusion_partitions(module) == []
+
+
+def test_extraction_omits_viewed_empty_written_by_external_kernel(monkeypatch):
+    def custom_writer(buffer):
+        return buffer
+
+    graph = fx.Graph()
+    allocation = _empty(graph)
+    view = graph.call_function(torch.ops.aten.view.default, args=(allocation, [2, 2]))
+    writer = graph.call_function(custom_writer, args=(view,))
+    graph.output(writer)
+    module = fx.GraphModule({}, graph)
+    supported = {allocation, view}
+    monkeypatch.setattr(
+        capture_hook,
+        "partition_node_is_supported",
+        lambda node: node in supported,
+    )
+
+    assert capture_hook.partition_is_standalone_allocation_only([allocation, view])
+    assert capture_hook.get_fusion_partitions(module) == []
