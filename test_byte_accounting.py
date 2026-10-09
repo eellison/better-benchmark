@@ -153,6 +153,44 @@ class TestEffectiveByteAccounting(unittest.TestCase):
         expected = self._bytes(src) + self._bytes(index) + self._bytes(out)
         self.assertEqual(actual, expected)
 
+    def test_broadcast_output_charges_distinct_elements(self):
+        class Repro(torch.nn.Module):
+            def forward(self, x):
+                return torch.ops.aten.expand.default(x * 2.0, [128, 32, 16])
+
+        x = torch.randn(1, 32, 16)
+        expected = self._bytes(x) + self._bytes(x)  # read x, write one [1, 32, 16]
+        self.assertEqual(count_bytes_effective(Repro(), [x]), expected)
+
+    def test_aliased_outputs_charge_one_write(self):
+        class Repro(torch.nn.Module):
+            def forward(self, x):
+                y = x * 2.0
+                e = torch.ops.aten.expand.default(y, [8, 32])
+                return y, e, torch.ops.aten.expand.default(y, [8, 32]), torch.ops.aten.view.default(y, [256])
+
+        x = torch.randn(8, 32)
+        self.assertEqual(count_bytes_effective(Repro(), [x]), 2 * self._bytes(x))
+
+    def test_output_view_of_input_is_not_a_write(self):
+        class Repro(torch.nn.Module):
+            def forward(self, x):
+                return x.sum(dim=1), torch.ops.aten.slice.Tensor(x, 1, 0, 64)
+
+        x = torch.randn(8, 128)
+        out = x.sum(dim=1)
+        self.assertEqual(count_bytes_effective(Repro(), [x]), self._bytes(x) + self._bytes(out))
+
+    def test_output_view_of_mutated_input_is_a_write(self):
+        class Repro(torch.nn.Module):
+            def forward(self, buf, x):
+                torch.ops.aten.copy_.default(buf, x * 2.0)
+                return torch.ops.aten.slice.Tensor(buf, 0, 0, 4)
+
+        buf, x = torch.randn(8, 16), torch.randn(8, 16)
+        actual = count_bytes_effective(Repro(), [buf, x])
+        self.assertEqual(actual, self._bytes(buf) + self._bytes(x) + 4 * 16 * 4)
+
 
 if __name__ == "__main__":
     unittest.main()

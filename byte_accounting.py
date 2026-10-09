@@ -33,6 +33,38 @@ def tensor_alias_key(tensor: torch.Tensor) -> tuple[int, int, int, int]:
     )
 
 
+def covered_nbytes(tensor: torch.Tensor) -> int:
+    """Bytes of distinct memory a tensor reaches: broadcast (stride-0) dims
+    repeat the same elements and are not counted."""
+    n = 1
+    for size, stride in zip(tensor.shape, tensor.stride()):
+        if stride != 0:
+            n *= size
+    return (n if tensor.numel() else 0) * tensor.element_size()
+
+
+def _span(tensor: torch.Tensor) -> tuple[int, int]:
+    """[start, end) byte range of a tensor within its storage."""
+    es = tensor.element_size()
+    start = tensor.storage_offset() * es
+    if tensor.numel() == 0:
+        return start, start
+    last = sum((size - 1) * stride for size, stride in zip(tensor.shape, tensor.stride()) if stride > 0)
+    return start, start + (last + 1) * es
+
+
+def _union_length(spans: list[tuple[int, int]]) -> int:
+    total, end = 0, None
+    for lo, hi in sorted(spans):
+        if end is None or lo >= end:
+            total += hi - lo
+            end = hi
+        elif hi > end:
+            total += hi - end
+            end = hi
+    return total
+
+
 def count_unique_tensor_bytes(values: Any) -> int:
     """Count tensor bytes in a nested output, de-duping exact tensor aliases."""
     seen = set()
@@ -167,6 +199,7 @@ class _EffectiveByteCounter(TorchDispatchMode):
         self._full_read_roots: set[int] = set()
         self._sparse_read_bytes: dict[int, int] = {}
         self._output_write_bytes: dict[int, int] = {}
+        self._mutated_roots: set[int] = set()
 
     def _root(self, tid: int) -> int:
         seen = set()
@@ -213,6 +246,15 @@ class _EffectiveByteCounter(TorchDispatchMode):
             self._track_external_input(tensor)
 
         result = func(*args, **kwargs)
+
+        schema = getattr(func, "_schema", None)
+        if schema is not None and schema.is_mutable:
+            for i, arg in enumerate(schema.arguments):
+                if arg.alias_info is None or not arg.alias_info.is_write:
+                    continue
+                value = args[i] if i < len(args) else kwargs.get(arg.name)
+                for tensor in _iter_tensors(value):
+                    self._mutated_roots.add(self._root(id(tensor)))
 
         # Keep all intermediate tensors alive to prevent id() reuse
         for tensor in _iter_tensors(result):
@@ -266,7 +308,12 @@ class _EffectiveByteCounter(TorchDispatchMode):
         return total
 
     def _output_bytes(self, outputs: Any) -> int:
+        # Outputs are charged per storage: views of one buffer (an expand, a
+        # reshape, the buffer itself) are one write, of at most the bytes their
+        # spans cover. Outputs that are views of an input nobody wrote are not
+        # writes at all.
         seen = set()
+        by_storage: dict[int, list[torch.Tensor]] = {}
         total = 0
         for tensor in _iter_tensors(outputs):
             key = tensor_alias_key(tensor)
@@ -274,19 +321,22 @@ class _EffectiveByteCounter(TorchDispatchMode):
                 continue
             seen.add(key)
             root = self._root(id(tensor))
-            if root in self._input_bytes and id(tensor) not in self._produced:
+            if root in self._input_bytes and root not in self._mutated_roots:
                 continue
             if id(tensor) in self._output_write_bytes:
                 # Only charge sparse write bytes if this tensor IS the
                 # sparse-update result (same shape). If this is a downstream
                 # reduction of that result, charge actual output size.
-                sparse_bytes = self._output_write_bytes[id(tensor)]
-                actual_bytes = tensor_nbytes(tensor)
-                # If actual output is much smaller than the sparse write
-                # (e.g., a reduction of an index_put result), charge actual
-                total += min(sparse_bytes, actual_bytes)
-            else:
-                total += tensor_nbytes(tensor)
+                total += min(self._output_write_bytes[id(tensor)], tensor_nbytes(tensor))
+                continue
+            try:
+                storage = tensor.untyped_storage().data_ptr()
+            except RuntimeError:
+                storage = tensor.data_ptr()
+            by_storage.setdefault(storage, []).append(tensor)
+        for tensors in by_storage.values():
+            covered = sum(covered_nbytes(t) for t in tensors)
+            total += min(covered, _union_length([_span(t) for t in tensors]))
         return total
 
     def total(self, outputs: Any) -> int:
