@@ -330,16 +330,19 @@ def collect_extern_points(gm, graph=None) -> dict[tuple[str, str], dict]:
     When `graph` (the full_graph_*.py path) is given, each point also
     records ("graph", node.name): a stable, reproducible handle so the op
     can be re-found and benched in an isolated subprocess (make_fx node
-    names are deterministic across traces of the same graph).
+    names are deterministic across traces of the same graph). Nodes the
+    graph's capture left to runtime constant folding are then not points.
     """
     from capture_hook import get_fusion_partitions, partition_node_is_supported
+    from model_graph_accounting import constant_folded_nodes
 
+    folded = constant_folded_nodes(gm, graph) if graph is not None else set()
     partitioned: set = set()
-    for comp in get_fusion_partitions(gm):
+    for comp in get_fusion_partitions(gm, excluded=folded):
         partitioned.update(comp)
     points: dict[tuple[str, str], dict] = {}
     for node in gm.graph.nodes:
-        if node.op != "call_function" or node in partitioned:
+        if node.op != "call_function" or node in partitioned or node in folded:
             continue
         if partition_node_is_supported(node):
             continue
@@ -800,9 +803,11 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
     e2e_total = 0.0
     e2e_failed: list[str] = []
     n_e2e_ok = 0
+    n_constant_folded = 0
     for g in graphs:
         gm = trace_full_graph(g)
         acc = analyze_graph(gm, str(g), g.stem)
+        n_constant_folded += sum(acc.constant_folded_ops.values())
         fus_occ.update((o.pattern_hash, o.shape_hash) for o in acc.occurrences)
         for key, info in collect_extern_points(gm, graph=g).items():
             extern_occ[key] += info["count"]
@@ -869,10 +874,13 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
     # e2e_total (some graph segfaulted, e.g. SDPA-backward fed fabricated
     # RNG state) would divide parts by an undersized denominator. Report
     # null ratios + e2e_complete=False in that case rather than a wrong one.
+    # The e2e replay of a full graph also runs the work capture left to
+    # runtime constant folding, which neither side of `parts` includes, so
+    # the ratios are null for such models too.
     e2e_complete = not e2e_failed
-    ratio_raw = round(parts / e2e_total, 3) if (e2e_complete and e2e_total) else None
-    ratio_corrected = (round(corrected / e2e_total, 3)
-                       if (e2e_complete and e2e_total) else None)
+    e2e_comparable = e2e_complete and e2e_total and not n_constant_folded
+    ratio_raw = round(parts / e2e_total, 3) if e2e_comparable else None
+    ratio_corrected = round(corrected / e2e_total, 3) if e2e_comparable else None
     return {
         "e2e_us": round(e2e_total, 1),
         "e2e_complete": e2e_complete,
@@ -888,6 +896,7 @@ def attribute_model(model_dir: Path, canonical_dir: Path,
         "n_fusible_points": len(fus_occ),
         "n_extern_occurrences": sum(extern_occ.values()),
         "n_extern_points": len(extern_occ),
+        "n_constant_folded_nodes": n_constant_folded,
         "fusible_unmatched": [f"{p}/{s} x{n}"
                               for (p, s), n in sorted(fus_unmatched.items())],
         "extern_unmatched": [f"{t} x{n}"

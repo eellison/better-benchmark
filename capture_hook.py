@@ -100,7 +100,8 @@ def partition_node_is_supported(node: fx.Node) -> bool:
     return is_fusible_node(node)
 
 
-def graph_node_accounting(gm: fx.GraphModule, components=None) -> dict:
+def graph_node_accounting(gm: fx.GraphModule, components=None,
+                          constant_folded=None) -> dict:
     """Exhaustive fusibility classification of every call_function node.
 
     Serialized into each full_graph_*.meta.json so the capture-time
@@ -117,8 +118,11 @@ def graph_node_accounting(gm: fx.GraphModule, components=None) -> dict:
           neither side of the attribution identity
       non_fusible: extern/fallback (BLAS, cuDNN, sdpa, ...) -> the
           extern side of model_attribution
+      constant_folded: (only when ``constant_folded`` is given) computed
+          once at load time by runtime constant folding, so neither a
+          per-call kernel nor an extern
 
-    All three buckets log the aggregate op-target -> count set (graph
+    Every bucket logs the aggregate op-target -> count set (graph
     level, never per-partition — partition contents live in the canonical
     repros). A misclassification in EITHER direction is then visible in
     the artifact: an extern op wrongly marked fusible shows up in the
@@ -134,6 +138,8 @@ def graph_node_accounting(gm: fx.GraphModule, components=None) -> dict:
         "fusible_unpartitioned": collections.Counter(),
         "non_fusible": collections.Counter(),
     }
+    if constant_folded is not None:
+        buckets["constant_folded"] = collections.Counter()
     total = 0
     for node in gm.graph.nodes:
         if node.op != "call_function":
@@ -146,7 +152,9 @@ def graph_node_accounting(gm: fx.GraphModule, components=None) -> dict:
         else:
             name = (f"{getattr(node.target, '__module__', '')}."
                     f"{getattr(node.target, '__name__', node.target)}").lstrip(".")
-        if node in partitioned:
+        if constant_folded is not None and node in constant_folded:
+            buckets["constant_folded"][name] += 1
+        elif node in partitioned:
             buckets["fusible_in_partition"][name] += 1
         elif partition_node_is_supported(node):
             buckets["fusible_unpartitioned"][name] += 1
@@ -237,7 +245,7 @@ def _split_connected_components(nodes):
     return result_components
 
 
-def get_fusion_partitions(gm: fx.GraphModule) -> list:
+def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
 
@@ -250,6 +258,9 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
     the returned list corresponds 1:1 to the canonical repros process_graph()
     would capture.
 
+    ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
+    partition, as if they were not fusible.
+
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
     import inspect
@@ -260,8 +271,10 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
         PrunedCapabilityBasedPartitioner as CapabilityBasedPartitioner,
     )
 
+    excluded = excluded or ()
+
     def _is_supported(_submodules, node):
-        return partition_node_is_supported(node)
+        return node not in excluded and partition_node_is_supported(node)
 
     support = create_op_support(_is_supported)
     _part_kwargs = dict(allows_single_node_partition=True)
@@ -289,6 +302,132 @@ def get_fusion_partitions(gm: fx.GraphModule) -> list:
         if partition_has_real_compute(comp)
         and not partition_is_standalone_allocation_only(comp)
     ]
+
+
+def graph_input_kind(gm: fx.GraphModule) -> str:
+    """What produced a post-grad graph's placeholders, from their AOTAutograd
+    input descriptors (``placeholder.meta["desc"]``):
+
+      aot: an AOTAutograd graph (inference, or either half of a training
+          graph: Inductor's ``is_inference`` tells them apart)
+      subgraph: no placeholder has a descriptor (a higher-order op's body)
+      no_metadata: this PyTorch has no input descriptors
+    """
+    try:
+        from torch._functorch._aot_autograd.descriptors import AOTInput
+    except ImportError:
+        return "no_metadata"
+    descs = [n.meta.get("desc") for n in gm.graph.find_nodes(op="placeholder")]
+    if descs and not any(isinstance(d, AOTInput) for d in descs):
+        return "subgraph"
+    return "aot"
+
+
+def _is_module_state_source(source) -> bool:
+    from torch._dynamo.source import NNModuleSource
+
+    while source is not None:
+        if isinstance(source, NNModuleSource):
+            return True
+        source = getattr(source, "base", None)
+    return False
+
+
+def flat_graph_inputs(gm: fx.GraphModule, input_sources=None) -> dict | None:
+    """The placeholders of an AOTAutograd graph mapped to (position in
+    AOTAutograd's flat inputs, whether it holds module state, whether the
+    graph mutates it); None when the compile has no AOTAutograd metadata.
+
+    Module state is what an exported program lifts as parameters, buffers
+    and tensor constants, i.e. what AOTInductor folds: the parameters and
+    buffers AOTAutograd lifted itself (``ParamAOTInput``/``BufferAOTInput``),
+    and Dynamo graph inputs (``PlainAOTInput``) reached through an
+    ``nn.Module`` (``input_sources``: the Dynamo source of each Dynamo graph
+    input). A parameter passed as a forward argument, a
+    ``mark_static_address`` input, or a tensor reached through a non-module
+    argument is a user input.
+    """
+    from torch._functorch._aot_autograd.descriptors import (
+        BufferAOTInput,
+        ParamAOTInput,
+        PlainAOTInput,
+    )
+
+    context = torch._guards.TracingContext.try_get()
+    meta = getattr(context, "fw_metadata", None) if context else None
+    if meta is None:
+        return None
+    n_lifted = len(getattr(context, "params_flat", None) or ())
+    inputs = {}
+    n_lifted_seen = 0
+    for node in gm.graph.find_nodes(op="placeholder"):
+        desc = node.meta.get("desc")
+        if isinstance(desc, (ParamAOTInput, BufferAOTInput)):
+            pos, state = n_lifted_seen, True
+            n_lifted_seen += 1
+        elif isinstance(desc, PlainAOTInput):
+            pos = n_lifted + desc.idx
+            source = (input_sources[desc.idx]
+                      if input_sources is not None and desc.idx < len(input_sources) else None)
+            state = _is_module_state_source(source)
+        else:
+            continue
+        if pos < len(meta.input_info):
+            info = meta.input_info[pos]
+            inputs[node] = (pos, state, bool(info.mutates_data or info.mutates_metadata))
+    return inputs
+
+
+def runtime_constant_nodes(gm: fx.GraphModule, constant_placeholders) -> set:
+    """Nodes that AOTInductor's runtime constant folding
+    (``aot_inductor.use_runtime_constant_folding``) computes once when the model
+    loads instead of on every call: everything derived only from constants
+    (``constant_placeholders`` and ``get_attr`` nodes).
+
+    Uses Inductor's own ``constant_graph_tag`` with the placeholders as lifted
+    constants: the same tagging rule (no input-less constructors, no RNG or
+    higher-order ops, torchbind objects left alone, ...) AOTInductor applies
+    when it splits off its constant graph. AOTInductor applies it to the graph
+    after all post-grad passes, with real constant values, so the two can
+    differ where those passes change constant-only work or the result is not
+    a tensor (e.g. ``item()`` of a parameter reduction).
+    """
+    from torch._inductor.constant_folding import (
+        CONST_MODULE_TAG,
+        META_TAG,
+        constant_graph_tag,
+    )
+    from torch._library.fake_class_registry import FakeScriptObject
+    from torch.utils import _pytree as pytree
+
+    def _skip(node):
+        if node.op == "get_attr":
+            # AOTInductor's split_const_gm leaves torchbind objects in the model.
+            return isinstance(node.target, str) and (
+                node.target.startswith("_torchbind_obj")
+                or isinstance(node.meta.get("val", None), FakeScriptObject)
+            )
+        # skip_constructors: Inductor generates constructors (full, arange, ...)
+        # better than it would read a folded tensor. With lifted constants the
+        # folder sees placeholders, not tensors, so its own constructor check
+        # would skip every node; this is the same rule stated on the graph.
+        return node.op == "call_function" and not any(
+            isinstance(a, fx.Node) for a in pytree.arg_tree_leaves(*node.args, **node.kwargs)
+        )
+
+    constant_graph_tag(
+        gm,
+        skip_constructors=False,
+        lifted_constant_names=[n.name for n in constant_placeholders],
+        skip_folding_node_fn=_skip,
+    )
+    folded = {
+        n for n in gm.graph.nodes
+        if n.op == "call_function" and n.meta.get(META_TAG) == CONST_MODULE_TAG
+    }
+    for n in gm.graph.nodes:
+        n.meta.pop(META_TAG, None)
+    return folded
 
 
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
@@ -1131,8 +1270,26 @@ def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
 
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
-                 validate: bool = True, capture_only: bool = False):
+                 validate: bool = True, capture_only: bool = False,
+                 constant_folding: bool = False):
         self.output_dir = output_dir
+        # The compiled model folds constants at load time (AOTInductor's
+        # use_runtime_constant_folding): constant-only work is not per-call
+        # work, so it is kept out of the captured regions.
+        self.constant_folding = constant_folding
+        self.constant_folded_nodes = 0
+        self.constant_folding_graphs = 0
+        self.constant_folding_skipped = {"training": 0, "subgraph": 0, "no_metadata": 0}
+        # Storages that some graph of this session mutates, and the storages
+        # already treated as constants (-> (graph number, name)). Keys are
+        # data_ptr()s, so one session should capture one model: a freed
+        # model's addresses can be reused. Mutation in eager code is
+        # invisible here.
+        self._mutated_storages: set = set()
+        self._folded_storages: dict = {}
+        self._graphs_seen = 0
+        self._input_sources: list | None = None
+        self._warned: set[str] = set()
         self.label = label
         self.graph_dir = graph_dir
         self.validate = validate
@@ -1164,6 +1321,104 @@ class _CaptureState:
             else:
                 real_tensors.append(None)
         self._real_inputs_stash = real_tensors
+
+    def stash_input_sources(self, model):
+        """Store the Dynamo source of each graph input of the module being
+        compiled (None for a graph not produced by Dynamo)."""
+        if not self.constant_folding:
+            return
+        if isinstance(model, fx.GraphModule) and "dynamo_compile_id" in model.meta:
+            self._input_sources = [getattr(n, "_dynamo_source", None)
+                                   for n in model.graph.find_nodes(op="placeholder")]
+        else:
+            self._input_sources = None
+
+    def _warn_once(self, key: str, message: str):
+        if key not in self._warned:
+            self._warned.add(key)
+            print(f"[capture_hook] WARNING: {message}", file=sys.stderr)
+
+    def _storage_and_name(self, node: fx.Node, pos: int) -> tuple[int | None, str]:
+        """The ``data_ptr`` of the storage behind a placeholder (its identity
+        across graphs; None when there is no real tensor) and a name for
+        messages."""
+        from torch._functorch._aot_autograd.descriptors import PlainAOTInput
+
+        desc = node.meta["desc"]
+        if isinstance(desc, PlainAOTInput):
+            tensors = self._real_inputs_stash or []
+            tensor = tensors[desc.idx] if desc.idx < len(tensors) else None
+            source = (self._input_sources[desc.idx]
+                      if self._input_sources and desc.idx < len(self._input_sources) else None)
+            name = getattr(source, "name", None)
+            name = name() if callable(name) else name
+        else:
+            params = getattr(torch._guards.TracingContext.get(), "params_flat", None) or ()
+            tensor = params[pos] if pos < len(params) else None
+            name = desc.target
+        if isinstance(tensor, torch.Tensor) and not _is_fake_or_meta(tensor):
+            return tensor.untyped_storage().data_ptr(), name or node.name
+        return None, name or node.name
+
+    def runtime_constant_folding(self, gm: fx.GraphModule, is_inference) -> tuple[set, list] | None:
+        """The nodes runtime constant folding computes at load time, and the
+        constant placeholders they derive from; None when this graph is not
+        folded.
+
+        Only inference forward graphs are folded: training graphs recompute
+        everything each step, and a higher-order op's body sees its operands,
+        not the model's constants. A placeholder is a constant when it holds
+        module state (``flat_graph_inputs``) whose storage no graph of this
+        session mutates, through any input. A storage mutated by a graph
+        compiled after it was folded is recorded as a drop.
+        """
+        self._graphs_seen += 1
+        kind = graph_input_kind(gm)
+        inputs = flat_graph_inputs(gm, self._input_sources) if kind == "aot" else None
+        storages = {node: (state, mutated, *self._storage_and_name(node, pos))
+                    for node, (pos, state, mutated) in (inputs or {}).items()}
+        for _, mutated, storage, _ in storages.values():
+            if storage is None or not mutated:
+                continue
+            if storage in self._folded_storages:
+                graph, folded_name = self._folded_storages[storage]
+                self.dropped.append({
+                    "filename": None,
+                    "pattern_hash": None,
+                    "shape_hash": None,
+                    "reason": (f"constant folding: graph {graph} folded work on "
+                               f"{folded_name} as a load-time constant, but graph "
+                               f"{self._graphs_seen} mutates it; recapture without "
+                               f"constant_folding or as a single graph"),
+                })
+            self._mutated_storages.add(storage)
+        constants = [node for node, (state, mutated, storage, _) in storages.items()
+                     if state and not mutated and storage not in self._mutated_storages]
+
+        if kind == "subgraph":
+            self.constant_folding_skipped["subgraph"] += 1
+            return None
+        if is_inference is False:
+            self.constant_folding_skipped["training"] += 1
+            return None
+        if inputs is None or is_inference is None:
+            self.constant_folding_skipped["no_metadata"] += 1
+            self._warn_once("no_metadata", "constant folding requested but a compile has "
+                            "no AOTAutograd input metadata; its regions are all captured")
+            return None
+
+        self.constant_folding_graphs += 1
+        if self.constant_folding_graphs == 2:
+            self._warn_once("graphs", "constant folding with more than one inference graph: "
+                            "folding assumes no module state it folds is modified between "
+                            "calls, which this hook only checks within compiled graphs")
+        folded = runtime_constant_nodes(gm, constants)
+        self.constant_folded_nodes += len(folded)
+        for node in constants:
+            _, _, storage, name = storages[node]
+            if storage is not None and any(user in folded for user in node.users):
+                self._folded_storages.setdefault(storage, (self._graphs_seen, name))
+        return folded, constants
 
     def get_observed_stats_for_placeholders(
         self, gm: fx.GraphModule, placeholder_info: dict[str, dict]
@@ -1500,8 +1755,12 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
-    def process_graph(self, gm: fx.GraphModule):
-        """Called by the hook for each post-grad graph. Partitions and captures."""
+    def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
+        """Called by the hook for each post-grad graph. Partitions and captures.
+
+        ``is_inference`` is what Inductor passes inference-aware custom passes
+        (None when unknown, which disables constant folding for the graph).
+        """
         # Compute observed stats for the full graph's integer/bool placeholders
         # using the stashed real inputs from compile_fx.
         full_graph_placeholder_info = placeholder_info_from_gm(gm)
@@ -1509,9 +1768,18 @@ if __name__ == "__main__":
             gm, full_graph_placeholder_info
         )
 
+        folded = None
+        constant_inputs = None
+        if self.constant_folding:
+            folding = self.runtime_constant_folding(gm, is_inference)
+            if folding is not None:
+                folded, constants = folding
+                placeholders = list(gm.graph.find_nodes(op="placeholder"))
+                constant_inputs = sorted(placeholders.index(n) for n in constants)
+
         # Partition ONCE; both the metadata sidecar (node_accounting) and the
         # capture loop below consume the same components.
-        components = get_fusion_partitions(gm)
+        components = get_fusion_partitions(gm, excluded=folded)
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
@@ -1540,8 +1808,10 @@ if __name__ == "__main__":
                         extra={
                             "source": infer_full_graph_source(full_graph_path),
                             "node_accounting": graph_node_accounting(
-                                gm, components),
+                                gm, components, constant_folded=folded),
                             "replay_dependencies": replay_dependencies(gm),
+                            **({"constant_inputs": constant_inputs}
+                               if constant_inputs is not None else {}),
                         },
                         index_bounds=index_bounds,
                         permutation_indices=permutation_indices,
@@ -1706,6 +1976,12 @@ if __name__ == "__main__":
             "n_captured": len(self.captured),
             "n_dropped": len(self.dropped),
         }
+        if self.constant_folding:
+            payload["constant_folding"] = {
+                "folded_nodes": self.constant_folded_nodes,
+                "inference_graphs": self.constant_folding_graphs,
+                "skipped_graphs": dict(self.constant_folding_skipped),
+            }
         tmp_path = index_path + ".tmp"
         with open(tmp_path, "w") as f:
             json.dump(payload, f, indent=2)
@@ -1723,7 +1999,8 @@ _active_state: _CaptureState | None = None
 
 
 def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
-                         validate: bool = True, capture_only: bool = False):
+                         validate: bool = True, capture_only: bool = False,
+                         constant_folding: bool = False):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -1735,9 +2012,19 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         capture_only: If True, raise _CaptureComplete after capture to skip
             expensive inductor compilation. Caller should catch the error.
         validate: If True, run eager validation on captured repros (can trigger CUDA errors).
+        constant_folding: Set when the model is deployed with AOTInductor's
+            runtime constant folding (aot_inductor.use_runtime_constant_folding):
+            in inference graphs, work derived only from module parameters,
+            buffers and tensor attributes runs once at load time, so it is left
+            out of the captured regions (see ``runtime_constant_folding``).
+            Folding assumes that state is not modified between calls; a
+            mutation in eager code is not detected. Merging does not remove a
+            model's earlier points, so recapture into a clean model entry when
+            switching this flag.
     """
     global _active_state
-    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate, capture_only=capture_only)
+    _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate,
+                                  capture_only=capture_only, constant_folding=constant_folding)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 
@@ -1745,7 +2032,7 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         """Raised after successful capture to skip expensive compilation."""
         pass
 
-    def _capture_pass(graph_or_gm):
+    def _capture_pass(graph_or_gm, is_inference=None):
         if isinstance(graph_or_gm, fx.GraphModule):
             gm = graph_or_gm
         elif isinstance(graph_or_gm, fx.Graph):
@@ -1757,7 +2044,7 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
             return graph_or_gm
 
         try:
-            _active_state.process_graph(copy.deepcopy(gm))
+            _active_state.process_graph(copy.deepcopy(gm), is_inference=is_inference)
         except Exception as e:
             # A whole-graph processing failure loses EVERY region in the
             # graph — record it as a drop so the fail-hard gate (run_recapture
@@ -1779,11 +2066,33 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
             _active_state.finalize()
             raise _CaptureComplete()
 
+        if _inference_aware_pass is not None and isinstance(_old_pass, _inference_aware_pass):
+            return _old_pass(graph_or_gm, is_inference=is_inference)
         if callable(_old_pass):
             return _old_pass(graph_or_gm)
         return graph_or_gm
 
-    inductor_config.post_grad_custom_pre_pass = _capture_pass
+    # Inductor tells an inference-aware pass whether the graph is an inference
+    # graph, which constant folding needs.
+    try:
+        from torch._inductor.custom_graph_pass import (
+            CustomInferenceAwareGraphPass as _inference_aware_pass,
+        )
+    except ImportError:
+        _inference_aware_pass = None
+    if _inference_aware_pass is not None:
+        class _InferenceAwareCapturePass(_inference_aware_pass):
+            def __call__(self, graph, is_inference=None):
+                return _capture_pass(graph, is_inference)
+
+            def uuid(self):
+                # No uuid: the FX graph cache bypasses the compile, as it
+                # does for a plain callable.
+                return None
+
+        inductor_config.post_grad_custom_pre_pass = _InferenceAwareCapturePass()
+    else:
+        inductor_config.post_grad_custom_pre_pass = _capture_pass
     inductor_config.force_disable_caches = True
 
     # Install compile_fx wrapper to stash real example inputs for observed-stats.
@@ -1795,6 +2104,7 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         """Wrapper that stashes real inputs before calling the real compile_fx."""
         if _active_state is not None:
             _active_state.stash_real_inputs(example_inputs_)
+            _active_state.stash_input_sources(model_)
         return _original_compile_fx(model_, example_inputs_, **kwargs)
 
     _compile_fx_module.compile_fx = _capture_compile_fx

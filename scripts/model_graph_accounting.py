@@ -83,6 +83,8 @@ class GraphAccounting:
     call_function_count: int = 0
     occurrences: list[PartitionOccurrence] = field(default_factory=list)
     non_fusible_ops: list[NonFusibleOp] = field(default_factory=list)
+    # op target -> count of nodes left to runtime constant folding at capture
+    constant_folded_ops: dict[str, int] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
 
@@ -143,6 +145,26 @@ def trace_full_graph(graph_path: Path, device: str = "cuda"):
         return make_fx(instance, tracing_mode="real")(*inputs)
 
 
+def constant_folded_nodes(gm, graph_path) -> set:
+    """Nodes of a traced full graph that capture left out because runtime
+    constant folding computes them at load time: the sidecar records the
+    constant placeholders (``constant_inputs``), and the capture-time rule
+    is re-applied to this trace."""
+    from capture_hook import runtime_constant_nodes
+    from full_graph_harness import load_full_graph_sidecar
+
+    sidecar = load_full_graph_sidecar(graph_path)
+    positions = sidecar.get("constant_inputs")
+    if positions is None:
+        return set()
+    placeholders = list(gm.graph.find_nodes(op="placeholder"))
+    if len(placeholders) != len(sidecar.get("inputs") or ()):
+        raise ValueError(
+            f"{graph_path}: traced graph has {len(placeholders)} inputs, sidecar "
+            f"{len(sidecar.get('inputs') or ())}; cannot map constant_inputs")
+    return runtime_constant_nodes(gm, [placeholders[i] for i in positions])
+
+
 # ============================================================================
 # Core analysis: REUSES the capture pipeline's partitioner + hashing
 # ============================================================================
@@ -195,7 +217,8 @@ def analyze_graph(gm, graph_path: str, graph_name: str) -> GraphAccounting:
     acc = GraphAccounting(graph_path=graph_path, graph_name=graph_name)
 
     partitioned_nodes: set = set()
-    components = get_fusion_partitions(gm)
+    folded = constant_folded_nodes(gm, graph_path)
+    components = get_fusion_partitions(gm, excluded=folded)
 
     for comp in components:
         partitioned_nodes.update(comp)
@@ -248,6 +271,10 @@ def analyze_graph(gm, graph_path: str, graph_name: str) -> GraphAccounting:
             continue
         acc.call_function_count += 1
         if node in partitioned_nodes:
+            continue
+        if node in folded:
+            name = _target_name(node.target)
+            acc.constant_folded_ops[name] = acc.constant_folded_ops.get(name, 0) + 1
             continue
         if partition_node_is_supported(node):
             # Fusible/transparent node the partitioner chose not to place in
