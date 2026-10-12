@@ -396,7 +396,7 @@ def _has_unsafe_integer_inputs(specs: list[dict], sidecar: dict | None) -> bool:
         if spec.get("exact") and "data" in spec:
             continue
         gen = spec.get("gen") or spec.get("generator") or {}
-        if gen.get("kind") in ("index", "permutation") and spec.get("constraint_source") == "graph_inference":
+        if gen.get("kind") in ("index", "permutation", "runs") and spec.get("constraint_source") == "graph_inference":
             continue
         return True
     return False
@@ -447,7 +447,7 @@ def update_sidecar_with_constraints(
 
         # Already has graph-inferred constraints?
         gen = spec.get("gen") or spec.get("generator") or {}
-        if gen.get("kind") in ("index", "permutation") and spec.get("constraint_source") == "graph_inference":
+        if gen.get("kind") in ("index", "permutation", "runs") and spec.get("constraint_source") == "graph_inference":
             already_ok += 1
             continue
 

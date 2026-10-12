@@ -1579,7 +1579,7 @@ def _is_graph_inferred_integer_input(spec: dict) -> bool:
         return True
     generator = spec.get("gen") or spec.get("generator") or {}
     return (
-        generator.get("kind") in {"index", "permutation"}
+        generator.get("kind") in {"index", "permutation", "runs"}
         and spec.get("constraint_source") == "graph_inference"
     )
 

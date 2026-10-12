@@ -334,6 +334,11 @@ def _make_shape_eval_ns():
     def Perm(size=None):
         return {"kind": "permutation", "size": None if size is None else int(size)}
 
+    def Runs(high, low=0, unique=1, runs=1, sorted=False):
+        return {"kind": "runs", "low": int(low), "high": int(high),
+                "n_unique": int(unique), "n_runs": int(runs),
+                "sorted": bool(sorted)}
+
     def T(shape, dtype, stride=None, max=None, gen=None, constraint=None, index=None):
         spec = {
             "kind": "tensor",
@@ -359,7 +364,7 @@ def _make_shape_eval_ns():
     def S(dims):
         return {"kind": "shape", "dims": dims}
 
-    return {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
+    return {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm, "Runs": Runs,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
             "b8": "b8", "u8": "u8"}
@@ -488,6 +493,11 @@ def parse_shapes_config(config_str: str) -> list:
     def Perm(size=None):
         return {"kind": "permutation", "size": None if size is None else int(size)}
 
+    def Runs(high, low=0, unique=1, runs=1, sorted=False):
+        return {"kind": "runs", "low": int(low), "high": int(high),
+                "n_unique": int(unique), "n_runs": int(runs),
+                "sorted": bool(sorted)}
+
     def T(shape, dtype, stride=None, max=None, gen=None, constraint=None, index=None):
         spec = {
             "kind": "tensor",
@@ -513,7 +523,7 @@ def parse_shapes_config(config_str: str) -> list:
     def S(dims):
         return {"kind": "shape", "dims": dims}
 
-    _ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm,
+    _ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm, "Runs": Runs,
             "torch": torch,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
@@ -541,6 +551,93 @@ def _numel(shape: list[int]) -> int:
     for dim in shape:
         result *= dim
     return result
+
+
+def _sample_unique(low: int, high: int, k: int) -> torch.Tensor:
+    """``k`` distinct int64 values in [low, high), sorted: ``k`` sorted draws
+    from [0, span - k] plus 0..k-1 are strictly increasing and below span.
+    Output shapes never depend on the drawn values, so this also runs under
+    FakeTensorMode (the capture write gate rebuilds inputs there)."""
+    draws = torch.randint(0, high - low - k + 1, (k,)).sort().values
+    return draws + torch.arange(k) + low
+
+
+def _make_runs_tensor(n: int, gen: dict, dtype, device) -> torch.Tensor:
+    """``n`` integer ids in [low, high) with the recorded structure: ``n_unique``
+    distinct values in ``n_runs`` runs, non-decreasing if ``sorted`` (one run
+    per value), else with adjacent runs differing and every value appearing
+    when ``n_runs >= n_unique``. Run lengths are near-equal: the counts are
+    reproduced, not the run-length distribution."""
+    low = int(gen.get("low", 0))
+    high = max(int(gen.get("high", low + 1)), low + 1)
+    if not dtype.is_floating_point and dtype != torch.bool:
+        info = torch.iinfo(dtype)
+        low = max(low, info.min)
+        high = max(min(high, info.max + 1), low + 1)
+    k = max(1, min(int(gen.get("n_unique", 1)), high - low, n))
+    values = _sample_unique(low, high, k)
+    if gen.get("sorted"):
+        run_values = values
+    else:
+        runs = max(1, min(int(gen.get("n_runs", k)), n))
+        if k == 1:
+            picks = torch.zeros(runs, dtype=torch.int64)
+        else:
+            # Every value appears (a permutation first, adjacent picks
+            # distinct by construction), then a walk that never repeats the
+            # previous value.
+            first = torch.randperm(k)[:runs]
+            rest = runs - first.numel()
+            if rest > 0:
+                steps = torch.randint(1, k, (rest,))
+                walk = (first[-1] + torch.cumsum(steps, 0)) % k
+                picks = torch.cat([first, walk])
+            else:
+                picks = first
+        run_values = values[picks]
+    # The first n % runs runs are one longer. Integer repeats keep the output
+    # shape data-independent (see _sample_unique).
+    longer, length = n % run_values.numel(), n // run_values.numel()
+    ids = torch.cat([run_values[:longer].repeat_interleave(length + 1),
+                     run_values[longer:].repeat_interleave(length)])
+    return ids.to(dtype=dtype, device=device)
+
+
+def _layout_overlaps(shape, stride) -> bool:
+    """Whether distinct logical elements of a strided layout share memory
+    (e.g. a stride-0 expanded dim)."""
+    dims = sorted((st, sz) for sz, st in zip(shape, stride) if sz > 1)
+    extent = 1
+    for st, sz in dims:
+        if st < extent:
+            return True
+        extent = st * sz
+    return False
+
+
+def _make_runs_input(shape, stride, gen: dict, dtype, device,
+                     storage_offset: int = 0) -> torch.Tensor:
+    """A ``runs`` tensor whose structure holds in logical (row-major) order,
+    the order compute_observed_stats measured it in. Overlapping layouts
+    (expanded dims) can't hold arbitrary logical values, so the storage the
+    view reaches is generated directly (an outer-dim expansion then repeats
+    the inner runs). The ``storage_offset`` elements before the view are
+    padding."""
+    shape = list(shape)
+    if stride and _layout_overlaps(shape, stride):
+        reached = _make_runs_tensor(_storage_size_for_strided(shape, stride),
+                                    gen, dtype, device)
+    else:
+        values = _make_runs_tensor(_numel(shape), gen, dtype, device).reshape(shape)
+        if not stride and not storage_offset:
+            return values
+        stride = stride or values.stride()
+        reached = torch.empty(_storage_size_for_strided(shape, stride),
+                              dtype=dtype, device=device)
+        reached.as_strided(shape, stride).copy_(values)
+    if storage_offset:
+        reached = torch.cat([reached.new_zeros(storage_offset), reached])
+    return reached.as_strided(shape, stride, storage_offset)
 
 
 def _generation_spec(spec: dict) -> dict | None:
@@ -659,6 +756,12 @@ def make_inputs_from_config(config: dict) -> list:
         stride = spec.get("stride")
         device = spec.get("device", "cuda")
         gen = _generation_spec(spec)
+
+        if gen and gen.get("kind") == "runs":
+            # Any integer dtype (incl. unsigned): ids are drawn in int64 and
+            # clamped to the dtype's range.
+            result.append(_make_runs_input(shape, stride, gen, dtype, device))
+            continue
 
         if dtype in (torch.int64, torch.int32, torch.int16, torch.int8):
             if gen and gen.get("kind") == "constant":

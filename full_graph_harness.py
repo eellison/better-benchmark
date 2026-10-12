@@ -999,7 +999,7 @@ def _tensor_spec_from_value(
         "storage_offset": _concrete_int(value.storage_offset(), default=0),
         "generator": generator,
     }
-    if generator.get("kind") in {"index", "permutation"}:
+    if generator.get("kind") in {"index", "permutation", "runs"}:
         spec["gen"] = generator
         spec["constraint_source"] = "graph_inference" if gen_override else "dtype_shape_default"
     exact = _exact_tensor_payload(value) if include_exact else None
@@ -1058,6 +1058,18 @@ def _scalar_spec_from_value(name: str, value: Any) -> dict[str, Any]:
     return {"kind": "scalar", "name": name, "value": 1}
 
 
+def _index_gen_for_placeholder(bound: int, value: Any, observed: dict | None):
+    """Index generator for an integer placeholder: ``runs`` when the observed
+    real values are run-structured (input_codec.index_gen_from_observed),
+    else uniform ids in [0, bound). Float placeholders feeding index math
+    keep the uniform spec."""
+    from input_codec import index_gen_from_observed
+
+    if value.dtype.is_floating_point or _dtype_name(value.dtype) == "bool":
+        return {"kind": "index", "low": 0, "high": bound}
+    return index_gen_from_observed(bound, observed)
+
+
 def graph_constraints_from_gm(
     gm: Any,
     *,
@@ -1097,22 +1109,19 @@ def graph_constraints_from_gm(
                     }
                     constraint_source = "graph_inference"
                 elif node.name in index_bounds:
-                    gen_override = {
-                        "kind": "index",
-                        "low": 0,
-                        "high": int(index_bounds[node.name]),
-                    }
+                    # Same rule as region capture, so region and full-graph
+                    # benchmarks feed this input the same id distribution.
+                    gen_override = _index_gen_for_placeholder(
+                        int(index_bounds[node.name]), value,
+                        observed_stats.get(node.name))
                     constraint_source = "graph_inference"
                 elif node.name in observed_stats:
                     # Observed-value fallback: use observed max + 1 as bound
                     obs = observed_stats[node.name]
                     dtype_name = _dtype_name(value.dtype)
                     if _is_integer_or_bool_dtype_name(dtype_name):
-                        gen_override = {
-                            "kind": "index",
-                            "low": 0,
-                            "high": int(obs["max"]) + 1,
-                        }
+                        gen_override = _index_gen_for_placeholder(
+                            int(obs["max"]) + 1, value, obs)
                         constraint_source = "observed"
                 else:
                     # No inference bound and no observation
@@ -2195,6 +2204,11 @@ def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda")
             storage_offset=storage_offset,
             size=generator.get("size"),
         )
+    if generator.get("kind") == "runs":
+        from repro_harness import _make_runs_input
+
+        return _make_runs_input(shape, _effective_stride(shape, stride), generator,
+                                dtype, dev, storage_offset=storage_offset)
     if generator.get("kind") == "index":
         low = int(generator.get("low", 0))
         high = int(generator.get("high", 100))

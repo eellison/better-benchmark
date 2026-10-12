@@ -49,6 +49,54 @@ def _long_dtype(name: str) -> str:
     return LONG_DTYPE.get(name, name)
 
 
+# Real values count as run-structured (e.g. a request->candidate map: each id
+# repeated in one run) when they have at most 1/RUNS_MIN_LENGTH_RATIO of the
+# runs that i.i.d. uniform ids over the same unique values would have. The
+# margin keeps uniform data with few unique values (mean run length k/(k-1),
+# 2 for binary ids) from flipping between captures.
+RUNS_MIN_LENGTH_RATIO = 2
+
+
+def index_gen_from_observed(bound: int, observed: dict | None) -> dict:
+    """Generation spec for an integer index input bounded by ``bound``.
+
+    Uniform ids in [0, bound) unless the real values repeat in runs, sorted
+    or not: a single repeated value, or at most 1/RUNS_MIN_LENGTH_RATIO of
+    the runs expected of uniform ids over ``n_unique`` values,
+    1 + (numel - 1) * (n_unique - 1) / n_unique. Then a ``runs`` spec
+    keeps the unique count, run count and sortedness, with values drawn
+    within the observed range. Values without repeats (e.g. arange position
+    ids, single elements) and values entirely outside [0, bound) keep the
+    uniform spec; partially out-of-range values get a ``runs`` spec with the
+    range clipped to [0, bound) (the unique count is capped to fit when
+    generating).
+    """
+    gen = {"kind": "index", "low": 0, "high": bound}
+    if not observed or "n_runs" not in observed:
+        return gen
+    numel, n_runs, k = observed["numel"], observed["n_runs"], observed["n_unique"]
+    if numel < 2:
+        return gen
+    # n_runs * ratio <= 1 + (numel - 1) * (k - 1) / k, in integers.
+    if k > 1 and n_runs * RUNS_MIN_LENGTH_RATIO * k > k + (numel - 1) * (k - 1):
+        return gen
+    low = max(0, observed["min"])
+    high = min(bound, observed["max"] + 1)
+    if high <= low:
+        return gen
+    return {"kind": "runs", "low": low, "high": high,
+            "n_unique": k, "n_runs": n_runs,
+            "sorted": observed["sorted"]}
+
+
+def runs_gen_rank(gen: dict) -> tuple:
+    """Total order over ``runs`` specs of one input, most structured first:
+    fewer runs, then sorted, then fewer unique values, then the range. Used
+    to pick one deterministically when several captures disagree."""
+    return (int(gen["n_runs"]), not gen["sorted"], int(gen["n_unique"]),
+            int(gen["low"]), int(gen["high"]))
+
+
 def _gen_to_compact(gen: dict) -> list | None:
     kind = gen.get("kind")
     if kind in (None, "randn"):
@@ -66,6 +114,9 @@ def _gen_to_compact(gen: dict) -> list | None:
         return ["offsets", int(gen.get("high", 1))]
     if kind == "constant":
         return ["const", gen.get("value", 0)]
+    if kind == "runs":
+        return ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
+                int(gen["n_runs"]), int(bool(gen["sorted"]))]
     return [kind] + [v for k, v in sorted(gen.items()) if k != "kind"]
 
 
@@ -82,6 +133,9 @@ def _gen_from_compact(c: list) -> dict:
         return {"kind": "offsets", "high": c[1]}
     if kind == "const":
         return {"kind": "constant", "value": c[1]}
+    if kind == "runs":
+        return {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
+                "n_runs": c[4], "sorted": bool(c[5])}
     return {"kind": kind}
 
 
@@ -202,6 +256,9 @@ def render_T(entry_or_spec) -> str:
             kwargs.append(f"gen=Perm({g[1] if len(g) > 1 else ''})")
         elif g[0] == "offsets":
             kwargs.append(f"gen=Offsets({g[1]})")
+        elif g[0] == "runs":
+            kwargs.append(f"gen=Runs({g[2]}, low={g[1]}, unique={g[3]}, "
+                          f"runs={g[4]}, sorted={bool(g[5])})")
     suffix = f", {', '.join(kwargs)}" if kwargs else ""
     return f"T({shape}, {dtype}{suffix})"
 

@@ -98,12 +98,14 @@ def test_compute_observed_stats_basic():
     # Int tensor
     t = torch.tensor([0, 3, 1, 2, 3], dtype=torch.int64)
     stats = compute_observed_stats(t)
-    assert stats == {"min": 0, "max": 3, "n_unique": 4}, f"Got {stats}"
+    assert stats == {"min": 0, "max": 3, "n_unique": 4, "numel": 5,
+                     "sorted": False, "n_runs": 5}, f"Got {stats}"
 
     # Bool tensor
     t_bool = torch.tensor([True, False, True, True], dtype=torch.bool)
     stats = compute_observed_stats(t_bool)
-    assert stats == {"min": 0, "max": 1, "n_unique": 2}, f"Got {stats}"
+    assert stats == {"min": 0, "max": 1, "n_unique": 2, "numel": 4,
+                     "sorted": False, "n_runs": 3}, f"Got {stats}"
 
     # Empty tensor
     t_empty = torch.tensor([], dtype=torch.int64)
@@ -116,7 +118,8 @@ def test_compute_observed_stats_basic():
     # Int8 tensor
     t_int8 = torch.tensor([0, 1, 5, 8, 5], dtype=torch.int8)
     stats = compute_observed_stats(t_int8)
-    assert stats == {"min": 0, "max": 8, "n_unique": 4}, f"Got {stats}"
+    assert {k: stats[k] for k in ("min", "max", "n_unique")} == {
+        "min": 0, "max": 8, "n_unique": 4}, f"Got {stats}"
 
     # 2-D int tensor (permutation-like)
     t_2d = torch.tensor([[0, 1, 2], [3, 4, 5]], dtype=torch.int64)
