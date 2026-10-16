@@ -231,6 +231,41 @@ for line in sys.stdin:
 '''
 
 
+def _import_probe_worker_script(gpu_idx: str, args_dict: dict) -> str:
+    return r'''
+import json
+import os
+import sys
+
+_result_fd = os.dup(1)
+_result_file = os.fdopen(_result_fd, "w", buffering=1)
+os.dup2(2, 1)
+sys.stdout = sys.stderr
+
+import bb_parent_path_probe
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line or line == "EXIT":
+        break
+    if line.startswith("PREFETCH:"):
+        continue
+    result = {
+        "_repro": line,
+        "default": {
+            "compiled_us": bb_parent_path_probe.VALUE,
+            "coord_descent_us": None,
+            "memcopy_sol_us": 1.0,
+            "total_bytes": 4,
+            "gap_default": 1.0,
+            "gap_cd": None,
+        },
+    }
+    _result_file.write(json.dumps(result) + "\n")
+    _result_file.flush()
+'''
+
+
 def _shape_protocol_worker_script(gpu_idx: str, args_dict: dict) -> str:
     return r'''
 import json
@@ -794,6 +829,46 @@ def test_locked_worker_recovers_after_failures_and_releases_gpu_lock(monkeypatch
         finally:
             fcntl.flock(fd, fcntl.LOCK_UN)
             os.close(fd)
+
+
+def test_locked_worker_inherits_parent_import_path(monkeypatch, tmp_path):
+    """Workers import what the parent can import, even when the parent's
+    sys.path was extended at runtime rather than through PYTHONPATH (as a
+    packaged binary's launcher does before clearing PYTHONPATH)."""
+    extra = tmp_path / "extra"
+    extra.mkdir()
+    (extra / "bb_parent_path_probe.py").write_text("VALUE = 7.0\n")
+    monkeypatch.syspath_prepend(str(extra))
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+    monkeypatch.setenv("INDUCTOR_GPU_BENCH_LOCK_DIR", str(tmp_path / "locks"))
+
+    repro = tmp_path / "ok_probe" / "repro.py"
+    repro.parent.mkdir()
+    repro.write_text("# fake repro\n")
+    task_queue = queue.Queue()
+    task_queue.put(repro)
+    result_queue = queue.Queue()
+
+    _locked_worker(
+        {"index": "0", "name": "Fake GPU", "kind": "fake"},
+        task_queue,
+        result_queue,
+        {
+            "root": str(tmp_path),
+            "all_shapes": False,
+            "no_cd": True,
+            "n_warmup": 1,
+            "n_rep": 1,
+            "share_cache": False,
+            "strict_gpu_lock": False,
+            "n_workers": 1,
+            "_persistent_worker_script_factory": _import_probe_worker_script,
+        },
+    )
+
+    result = result_queue.get_nowait()
+    assert result["status"] == "ok", result
+    assert result["results"]["default"]["compiled_us"] == 7.0
 
 
 def main() -> int:

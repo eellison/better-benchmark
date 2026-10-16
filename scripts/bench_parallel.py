@@ -2957,6 +2957,22 @@ def main():
         )
 
 
+def _worker_env() -> dict[str, str]:
+    """Environment for a worker interpreter launched with sys.executable.
+
+    A packaged binary (e.g. a buck .par) sets sys.path and the runtime library
+    path in its launcher and then clears PYTHONPATH/LD_LIBRARY_PATH, so a bare
+    sys.executable cannot import torch. Reuse what Inductor passes to its own
+    compile subprocesses: the parent's sys.path and library path.
+    """
+    from torch._inductor.utils import get_ld_library_path, python_subprocess_env
+
+    env = python_subprocess_env()
+    if ld_library_path := get_ld_library_path():
+        env["LD_LIBRARY_PATH"] = ld_library_path
+    return env
+
+
 def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
     """Run persistent worker subprocess on a GPU, respawn on CUDA error.
 
@@ -2970,7 +2986,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
     import threading
 
     if True:  # was: with gpu_lock(...) — now using inductor-level lock instead
-        env = os.environ.copy()
+        env = _worker_env()
         env["CUDA_VISIBLE_DEVICES"] = gpu["index"]
         # Enable the per-GPU exclusive lock used by inductor benchmark calls
         # and the direct harness CUDA setup/timing sections below.
