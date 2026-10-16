@@ -457,6 +457,11 @@ def _generation_expr(spec: dict) -> str | None:
             return f"Index({high})"
         return f"Index({high}, low={low})"
 
+    if gen.get("kind") == "runs":
+        return (f"Runs({int(gen['high'])}, low={int(gen.get('low', 0))}, "
+                f"unique={int(gen['n_unique'])}, runs={int(gen['n_runs'])}, "
+                f"sorted={bool(gen['sorted'])})")
+
     return None
 
 

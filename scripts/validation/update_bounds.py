@@ -60,6 +60,12 @@ def _index_gen(high: int, low: int = 0) -> dict[str, Any]:
     return {"kind": "index", "low": int(low), "high": int(high)}
 
 
+def _runs_gen(high: int, low: int = 0, unique: int = 1, runs: int = 1,
+              sorted: bool = False) -> dict[str, Any]:
+    return {"kind": "runs", "low": int(low), "high": int(high),
+            "n_unique": int(unique), "n_runs": int(runs), "sorted": bool(sorted)}
+
+
 def _perm_gen(size: int | None = None) -> dict[str, Any]:
     return {"kind": "permutation", "size": None if size is None else int(size)}
 
@@ -111,6 +117,7 @@ def parse_compact_config(expr: str) -> list[dict[str, Any]]:
         "S": _shape_spec,
         "Index": _index_gen,
         "Perm": _perm_gen,
+        "Runs": _runs_gen,
         **{name: name for name in _DTYPE_TO_TORCH},
     }
     value = eval(expr, ns)
@@ -154,6 +161,10 @@ def _generation_expr(spec: dict[str, Any]) -> str | None:
         if low == 0:
             return f"Index({high})"
         return f"Index({high}, low={low})"
+    if gen.get("kind") == "runs":
+        return (f"Runs({int(gen['high'])}, low={int(gen.get('low', 0))}, "
+                f"unique={int(gen['n_unique'])}, runs={int(gen['n_runs'])}, "
+                f"sorted={bool(gen['sorted'])})")
     return None
 
 

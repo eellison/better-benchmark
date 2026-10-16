@@ -41,6 +41,7 @@ from full_graph_harness import (
     infer_permutation_indices_from_gm,
     placeholder_info_from_gm,
 )
+from input_codec import index_gen_from_observed
 from replay_dependencies import replay_dependencies
 # Single source of truth for the emitted version marker: the generated repro
 # template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
@@ -1079,10 +1080,18 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     return sub_gm, placeholder_info, shape_params
 
 
-def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
+def compute_partition_pattern(
+    comp: list, gm: fx.GraphModule, observed_stats: dict | None = None,
+) -> dict | None:
     """Extract one partition's subgraph, canonicalize it (one make_fx
     retrace — see canonicalize_subgraph), and compute the capture-pipeline
     hashes FROM THE CANONICAL FORM.
+
+    ``observed_stats`` ({full-graph placeholder name: compute_observed_stats})
+    is attached as info["observed"] to the integer/bool inputs BEFORE
+    canonicalization: the extracted subgraph still uses full-graph names,
+    while canonicalization renames placeholders positionally (arg0_1, ...)
+    and carries the info dicts along by position.
 
     Returns dict with pattern_hash, shape_hash, sub_gm (canonical),
     placeholder_info, shape_params — or None if extraction fails.
@@ -1091,6 +1100,11 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
     if result is None:
         return None
     sub_gm, placeholder_info, shape_params = result
+    for name, info in placeholder_info.items():
+        dtype = info.get("dtype", "")
+        if observed_stats and name in observed_stats and (
+                "int" in dtype or "bool" in dtype):
+            info["observed"] = observed_stats[name]
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
     return {
@@ -1105,9 +1119,12 @@ def compute_partition_pattern(comp: list, gm: fx.GraphModule) -> dict | None:
 def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
     """Compute observed-value stats for an integer/bool tensor.
 
-    Returns {"min": int, "max": int, "n_unique": int} or None if the tensor
-    is not integer/bool dtype or is empty. Keeps it cheap: single pass with
-    .min()/.max()/.unique().numel() on the real tensor.
+    Returns {"min", "max", "n_unique", "numel", "sorted", "n_runs"} or None if
+    the tensor is not integer/bool dtype or is empty. ``sorted`` (flattened
+    values non-decreasing) and ``n_runs`` (maximal runs of equal adjacent
+    values) describe index structure such as a request->candidate map, where
+    each id repeats in one run: regenerating those as uniform random ids
+    changes the kernel's cache behavior.
     """
     if tensor.numel() == 0:
         return None
@@ -1124,6 +1141,9 @@ def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
             "min": int(t_flat.min().item()),
             "max": int(t_flat.max().item()),
             "n_unique": int(t_flat.unique().numel()),
+            "numel": int(t_flat.numel()),
+            "sorted": bool((t_flat[1:] >= t_flat[:-1]).all().item()),
+            "n_runs": int((t_flat[1:] != t_flat[:-1]).sum().item()) + 1,
         }
     except Exception:
         return None
@@ -1389,8 +1409,8 @@ class _CaptureState:
                         spec["gen"] = {"kind": "permutation",
                                        "size": permutation_indices[name]}
                     elif "int" in info["dtype"] and bound:
-                        spec["gen"] = {"kind": "index", "low": 0,
-                                       "high": bound}
+                        spec["gen"] = index_gen_from_observed(
+                            bound, info.get("observed"))
                     elif info.get("gen"):
                         # Inference attached a gen directly (float->index
                         # chains: OPT position ids derive from a float
@@ -1585,22 +1605,13 @@ if __name__ == "__main__":
             # extracted+hashed directly here, bypassing canonicalization,
             # which is how live-cut hashes diverged from artifact/retrace
             # hashes (the resnet18 live-vs-artifact hash drift, fixed 2026-06).
-            pattern = compute_partition_pattern(comp, gm)
+            pattern = compute_partition_pattern(
+                comp, gm, observed_stats=self._current_observed_stats)
             if pattern is None:
                 continue
             sub_gm = pattern["sub_gm"]
             placeholder_info = pattern["placeholder_info"]
             shape_params = pattern["shape_params"]
-
-            # Attach observed stats to placeholder_info for integer/bool inputs.
-            # The subgraph's placeholders inherit names from the full graph's nodes,
-            # so we can match by name to the full-graph observed stats.
-            if self._current_observed_stats:
-                for ph_name, info in placeholder_info.items():
-                    dtype = info.get("dtype", "")
-                    if "int" in dtype or "bool" in dtype:
-                        if ph_name in self._current_observed_stats:
-                            info["observed"] = self._current_observed_stats[ph_name]
 
             origin_ops = sorted(str(n.target) for n in comp if n.op == "call_function")
 

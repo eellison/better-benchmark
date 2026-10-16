@@ -72,6 +72,57 @@ def _compute_shape_hash(signature: str) -> str:
     return hashlib.sha256(signature.encode()).hexdigest()[:8]
 
 
+def _upgrade_runs_gens(base: list, other: list) -> list:
+    """Settle generators between two inputs lists of one point.
+
+    The shape hash ignores generators, so a point merged before index
+    structure was recorded (or by a model whose index had none) keeps uniform
+    ``index`` ids forever unless upgraded here. Per input position: a
+    graph-inferred constraint (``perm``, ``const``, ...) beats ``runs``,
+    which beats ``index``, which beats no generator; between two ``runs``
+    specs the lowest input_codec.runs_gen_rank wins, and between two
+    ``index`` specs the smallest ``high`` (the bound least likely to index
+    out of range). Any remaining tie goes to the smaller encoding. The
+    choice is symmetric, so generators do not depend on merge order. Other
+    options come from ``base``.
+
+    Picking the most structured ``runs`` is optimistic: when one model's ids
+    are uniform and another's repeat, every occurrence of the shared point is
+    timed with the cache-friendlier distribution.
+    """
+    from input_codec import runs_gen_rank, _gen_from_compact
+
+    def gen_of(entry):
+        if isinstance(entry, list) and len(entry) > 2 and isinstance(entry[2], dict):
+            return entry[2].get("gen")
+        return None
+
+    def key(gen):
+        if not gen:
+            return (3,)
+        if gen[0] == "runs":
+            rank = runs_gen_rank(_gen_from_compact(gen))
+        elif gen[0] == "index":
+            rank = (int(gen[2]), int(gen[1]))
+        else:
+            rank = ()
+        tier = {"runs": 1, "index": 2}.get(gen[0], 0)
+        return (tier, rank, json.dumps(gen))
+
+    if len(base) != len(other):
+        return base
+    merged = []
+    for old, cand in zip(base, other):
+        old_gen, new_gen = gen_of(old), gen_of(cand)
+        if (not isinstance(old, list) or not isinstance(cand, list)
+                or old[:2] != cand[:2] or key(old_gen) <= key(new_gen)):
+            merged.append(old)
+            continue
+        old_opts = old[2] if len(old) > 2 else {}
+        merged.append(old[:2] + [{**old_opts, "gen": new_gen}])
+    return merged
+
+
 def _write_shapes_json(
     repro_dir: Path,
     shape_hash: str,
@@ -130,13 +181,15 @@ def _write_shapes_json(
         elif inputs is not None and existing_point.get("inputs") != inputs:
             # Richer recapture (alias tags) REPLACES a pre-alias inputs
             # list — never silently discard fidelity (review bug #2).
+            # Generators are then settled per input (_upgrade_runs_gens).
             def _has_alias(entries):
                 return any(isinstance(e, list) and len(e) > 2
                            and isinstance(e[2], dict) and "alias" in e[2]
                            for e in entries)
-            if _has_alias(inputs) and not _has_alias(
-                    existing_point.get("inputs") or []):
-                existing_point["inputs"] = inputs
+            base, other = existing_point.get("inputs") or [], inputs
+            if _has_alias(inputs) and not _has_alias(base):
+                base, other = other, base
+            existing_point["inputs"] = _upgrade_runs_gens(base, other)
         if alias_group_nbytes and not existing_point.get("alias_group_nbytes"):
             existing_point["alias_group_nbytes"] = alias_group_nbytes
     else:
