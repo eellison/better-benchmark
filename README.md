@@ -219,6 +219,17 @@ The hook:
 - Lifts shape params from reshape/view/expand targets so repros run across shapes
 - Validates each captured repro runs in eager before writing
 
+For a model deployed with AOTInductor's runtime constant folding, pass
+`constant_folding=True`: in inference graphs, work derived only from module
+parameters, buffers and tensor attributes runs once at load time, so it is left
+out of the regions and of model accounting. Merging does not remove a model's
+earlier points, so recapture into a clean model entry when switching it.
+Capture through `torch.compile`: a graph compiled by `aoti_compile_and_package`
+itself has no AOTAutograd input metadata and is captured whole. Folding needs
+one capture session per model (constants are tracked by storage address), and
+`model_attribution` reports null region+extern/e2e ratios for a model with
+folded work, since its e2e replay still runs that work.
+
 ## Benchmarking Architecture
 
 <details>
