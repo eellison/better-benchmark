@@ -145,6 +145,8 @@ def _benchmark_config_metadata(args: argparse.Namespace) -> dict:
     }
     if getattr(args, "check_numerics", False):
         config["numerics_check"] = _numerics_check_metadata(args)
+    if getattr(args, "input_seed", None) is not None:
+        config["input_seed"] = args.input_seed
     return config
 
 
@@ -2339,6 +2341,8 @@ def main():
                         help="Hardware label for perf.json (auto-detected if not set)")
     parser.add_argument("--n-warmup", type=int, default=25)
     parser.add_argument("--n-rep", type=int, default=100)
+    parser.add_argument("--input-seed", type=int, default=None,
+                        help="Reset the RNG before generating each repro shape's inputs")
     parser.add_argument("--share-cache", action="store_true", default=True,
                         help="Share inductor cache across workers (default: enabled)")
     parser.add_argument("--no-share-cache", dest="share_cache", action="store_false",
@@ -2661,6 +2665,7 @@ def main():
         "numerics_seeds": args.numerics_seeds,
         "n_warmup": args.n_warmup,
         "n_rep": args.n_rep,
+        "input_seed": args.input_seed,
         "share_cache": args.share_cache,
         "strict_gpu_lock": args.strict_gpu_lock,
         "n_workers": n_workers,
@@ -4008,6 +4013,8 @@ def bench_one(task_key):
 
         label = shape_name if shape_config is not None else "default"
         with gpu_setup_lock():
+            if {args_dict.get("input_seed")!r} is not None:
+                torch.manual_seed({args_dict.get("input_seed")!r})
             inputs = make_point_inputs()
 
             with torch.no_grad():
@@ -4113,6 +4120,7 @@ def bench_one(task_key):
         all_results[label] = {{
             "compile_policy": compile_policy,
             "compiled_us": compiled_us,
+            "cudagraph_captured": default_is_graph,
             "coord_descent_us": cd_us,
             "memcopy_sol_us": sol_us,
             "total_bytes": total_bytes,
