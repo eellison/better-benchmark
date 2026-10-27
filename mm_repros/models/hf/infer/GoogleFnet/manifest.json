@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GoogleFnet",
+  "patterns": [
+    "79447dc53d91",
+    "e6c915c55c45",
+    "fd095483008b"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

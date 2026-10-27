@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "BERT_pytorch",
+  "patterns": [
+    "62d736a37d1c",
+    "9e1c93836137"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

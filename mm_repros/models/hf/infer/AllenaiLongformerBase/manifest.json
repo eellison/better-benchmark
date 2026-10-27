@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "AllenaiLongformerBase",
+  "patterns": [
+    "5460cbd218c6",
+    "71544bc04528"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json"
+  },
+  "mode": "infer"
+}

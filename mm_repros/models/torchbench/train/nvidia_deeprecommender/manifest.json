@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "nvidia_deeprecommender",
+  "patterns": [
+    "4f2b279ce082",
+    "c17328a9f362"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

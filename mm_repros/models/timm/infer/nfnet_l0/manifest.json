@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "nfnet_l0",
+  "patterns": [
+    "c4ffb252a8ea"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

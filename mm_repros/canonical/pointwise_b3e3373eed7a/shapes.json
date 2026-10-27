@@ -1,0 +1,18 @@
+{
+  "points": [
+    {
+      "shape_hash": "e3368a89",
+      "models": {
+        "timm/infer/mobilenetv3_large_100": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[512,1280,1,1],"bf16"],
+        [[1000,1280],"bf16"],
+        [[1000],"bf16"],
+        ["S",[512,1280]]
+      ]
+    }
+  ]
+}

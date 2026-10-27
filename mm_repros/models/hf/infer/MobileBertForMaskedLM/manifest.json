@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MobileBertForMaskedLM",
+  "patterns": [
+    "c377b4a966c3"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

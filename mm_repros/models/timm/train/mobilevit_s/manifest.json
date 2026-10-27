@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilevit_s",
+  "patterns": [
+    "1ebfe6b74795",
+    "203e8c399e6a",
+    "2066854b35ee",
+    "24ce41abcd6c",
+    "253f4b082738",
+    "3a03771cb3d0",
+    "4c6aaadccb3d",
+    "5b64957a2f20",
+    "62678496d57b",
+    "84af95ce1654",
+    "946c99c67ba3",
+    "9d70ef95c13a",
+    "9d99ed51c7ba",
+    "a300e9ebff90",
+    "a3369b9db047",
+    "b28c1e54ec8d",
+    "c6a3493ff327",
+    "ec1717277915",
+    "ec25b2ef3df9"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GoogleFnet",
+  "patterns": [
+    "029657d5f781",
+    "0c86edfd7d1a",
+    "0d4ab0fb2868",
+    "2b70dc3e6bb3",
+    "3a63d066ab21",
+    "539f543ae407",
+    "81f1d07334a1",
+    "8b3ecefe9c84",
+    "92aad20b5e1b",
+    "9a5ca43ab22f",
+    "c41d310b7b9c",
+    "cdc51234ebf3",
+    "d997bc00cece",
+    "e5acca51b7d7",
+    "e5d2e4491955",
+    "f3c910b8805f"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

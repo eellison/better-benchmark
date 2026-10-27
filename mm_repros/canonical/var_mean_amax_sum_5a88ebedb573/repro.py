@@ -1,0 +1,1725 @@
+"""
+Standalone repro captured via capture_hook.
+Label: ElectraForCausalLM
+Pattern hash: 5a88ebedb573
+Shape hash: a1dd6a72
+"""
+import sys
+from pathlib import Path
+
+import torch
+import torch._inductor.inductor_prims  # noqa: F401
+from math import inf, nan
+from torch import device
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+
+_repro_version = 3
+# Input shapes/strides/dtypes live in the sibling shapes.json (structured,
+# one entry per point); forward()'s annotations document the default shapes
+# inline. Default inputs = the first shapes.json point.
+
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "i64[1, 512]", arg1_1: "i64[1, 512]", arg2_1: "f32[30522, 128]", arg3_1: "i64[64, 512]", arg4_1: "f32[2, 128]", arg5_1: "f32[512, 128]", arg6_1: "f32[128]", arg7_1: "f32[128]", arg8_1: "f32[256]", arg9_1: "f32[256, 128]", arg10_1: "f32[256]", arg11_1: "f32[256, 256]", arg12_1: "f32[256]", arg13_1: "f32[256, 256]", arg14_1: "f32[256]", arg15_1: "f32[256, 256]", arg16_1: "f32[256]", arg17_1: "f32[256, 256]", arg18_1: "f32[256]", arg19_1: "f32[256]", arg20_1: "f32[1024]", arg21_1: "f32[1024, 256]", arg22_1: "f32[256]", arg23_1: "f32[256, 1024]", arg24_1: "f32[256]", arg25_1: "f32[256]", arg26_1: "f32[256]", arg27_1: "f32[256, 256]", arg28_1: "f32[256]", arg29_1: "f32[256, 256]", arg30_1: "f32[256]", arg31_1: "f32[256, 256]", arg32_1: "f32[256]", arg33_1: "f32[256, 256]", arg34_1: "f32[256]", arg35_1: "f32[256]", arg36_1: "f32[1024]", arg37_1: "f32[1024, 256]", arg38_1: "f32[256]", arg39_1: "f32[256, 1024]", arg40_1: "f32[256]", arg41_1: "f32[256]", arg42_1: "f32[256]", arg43_1: "f32[256, 256]", arg44_1: "f32[256]", arg45_1: "f32[256, 256]", arg46_1: "f32[256]", arg47_1: "f32[256, 256]", arg48_1: "f32[256]", arg49_1: "f32[256, 256]", arg50_1: "f32[256]", arg51_1: "f32[256]", arg52_1: "f32[1024]", arg53_1: "f32[1024, 256]", arg54_1: "f32[256]", arg55_1: "f32[256, 1024]", arg56_1: "f32[256]", arg57_1: "f32[256]", arg58_1: "f32[256]", arg59_1: "f32[256, 256]", arg60_1: "f32[256]", arg61_1: "f32[256, 256]", arg62_1: "f32[256]", arg63_1: "f32[256, 256]", arg64_1: "f32[256]", arg65_1: "f32[256, 256]", arg66_1: "f32[256]", arg67_1: "f32[256]", arg68_1: "f32[1024]", arg69_1: "f32[1024, 256]", arg70_1: "f32[256]", arg71_1: "f32[256, 1024]", arg72_1: "f32[256]", arg73_1: "f32[256]", arg74_1: "f32[256]", arg75_1: "f32[256, 256]", arg76_1: "f32[256]", arg77_1: "f32[256, 256]", arg78_1: "f32[256]", arg79_1: "f32[256, 256]", arg80_1: "f32[256]", arg81_1: "f32[256, 256]", arg82_1: "f32[256]", arg83_1: "f32[256]", arg84_1: "f32[1024]", arg85_1: "f32[1024, 256]", arg86_1: "f32[256]", arg87_1: "f32[256, 1024]", arg88_1: "f32[256]", arg89_1: "f32[256]", arg90_1: "f32[256]", arg91_1: "f32[256, 256]", arg92_1: "f32[256]", arg93_1: "f32[256, 256]", arg94_1: "f32[256]", arg95_1: "f32[256, 256]", arg96_1: "f32[256]", arg97_1: "f32[256, 256]", arg98_1: "f32[256]", arg99_1: "f32[256]", arg100_1: "f32[1024]", arg101_1: "f32[1024, 256]", arg102_1: "f32[256]", arg103_1: "f32[256, 1024]", arg104_1: "f32[256]", arg105_1: "f32[256]", arg106_1: "f32[256]", arg107_1: "f32[256, 256]", arg108_1: "f32[256]", arg109_1: "f32[256, 256]", arg110_1: "f32[256]", arg111_1: "f32[256, 256]", arg112_1: "f32[256]", arg113_1: "f32[256, 256]", arg114_1: "f32[256]", arg115_1: "f32[256]", arg116_1: "f32[1024]", arg117_1: "f32[1024, 256]", arg118_1: "f32[256]", arg119_1: "f32[256, 1024]", arg120_1: "f32[256]", arg121_1: "f32[256]", arg122_1: "f32[256]", arg123_1: "f32[256, 256]", arg124_1: "f32[256]", arg125_1: "f32[256, 256]", arg126_1: "f32[256]", arg127_1: "f32[256, 256]", arg128_1: "f32[256]", arg129_1: "f32[256, 256]", arg130_1: "f32[256]", arg131_1: "f32[256]", arg132_1: "f32[1024]", arg133_1: "f32[1024, 256]", arg134_1: "f32[256]", arg135_1: "f32[256, 1024]", arg136_1: "f32[256]", arg137_1: "f32[256]", arg138_1: "f32[256]", arg139_1: "f32[256, 256]", arg140_1: "f32[256]", arg141_1: "f32[256, 256]", arg142_1: "f32[256]", arg143_1: "f32[256, 256]", arg144_1: "f32[256]", arg145_1: "f32[256, 256]", arg146_1: "f32[256]", arg147_1: "f32[256]", arg148_1: "f32[1024]", arg149_1: "f32[1024, 256]", arg150_1: "f32[256]", arg151_1: "f32[256, 1024]", arg152_1: "f32[256]", arg153_1: "f32[256]", arg154_1: "f32[256]", arg155_1: "f32[256, 256]", arg156_1: "f32[256]", arg157_1: "f32[256, 256]", arg158_1: "f32[256]", arg159_1: "f32[256, 256]", arg160_1: "f32[256]", arg161_1: "f32[256, 256]", arg162_1: "f32[256]", arg163_1: "f32[256]", arg164_1: "f32[1024]", arg165_1: "f32[1024, 256]", arg166_1: "f32[256]", arg167_1: "f32[256, 1024]", arg168_1: "f32[256]", arg169_1: "f32[256]", arg170_1: "f32[256]", arg171_1: "f32[256, 256]", arg172_1: "f32[256]", arg173_1: "f32[256, 256]", arg174_1: "f32[256]", arg175_1: "f32[256, 256]", arg176_1: "f32[256]", arg177_1: "f32[256, 256]", arg178_1: "f32[256]", arg179_1: "f32[256]", arg180_1: "f32[1024]", arg181_1: "f32[1024, 256]", arg182_1: "f32[256]", arg183_1: "f32[256, 1024]", arg184_1: "f32[256]", arg185_1: "f32[256]", arg186_1: "f32[256]", arg187_1: "f32[256, 256]", arg188_1: "f32[256]", arg189_1: "f32[256, 256]", arg190_1: "f32[256]", arg191_1: "f32[256, 256]", arg192_1: "f32[256]", arg193_1: "f32[256, 256]", arg194_1: "f32[256]", arg195_1: "f32[256]", arg196_1: "f32[1024]", arg197_1: "f32[1024, 256]", arg198_1: "f32[256]", arg199_1: "f32[256, 1024]", arg200_1: "f32[256]", arg201_1: "f32[256]", arg202_1: "f32[128]", arg203_1: "f32[128, 256]", arg204_1: "f32[128]", arg205_1: "f32[128]", arg206_1: "f32[30522]", arg207_1: "i64[64, 512]", _shape_param_0, _shape_param_1, _shape_param_2, _shape_param_3, _shape_param_4, _shape_param_5, _shape_param_6, _shape_param_7, _shape_param_8, _shape_param_9, _shape_param_10, _shape_param_11, _shape_param_12, _shape_param_13, _shape_param_14, _shape_param_15, _shape_param_16, _shape_param_17, _shape_param_18, _shape_param_19, _shape_param_20, _shape_param_21, _shape_param_22, _shape_param_23, _shape_param_24, _shape_param_25, _shape_param_26, _shape_param_27, _shape_param_28, _shape_param_29, _shape_param_30, _shape_param_31, _shape_param_32, _shape_param_33, _shape_param_34, _shape_param_35, _shape_param_36, _shape_param_37, _shape_param_38, _shape_param_39, _shape_param_40, _shape_param_41, _shape_param_42, _shape_param_43, _shape_param_44, _shape_param_45, _shape_param_46, _shape_param_47, _shape_param_48, _shape_param_49, _shape_param_50, _shape_param_51, _shape_param_52, _shape_param_53, _shape_param_54, _shape_param_55, _shape_param_56, _shape_param_57, _shape_param_58, _shape_param_59, _shape_param_60, _shape_param_61, _shape_param_62, _shape_param_63, _shape_param_64, _shape_param_65, _shape_param_66, _shape_param_67, _shape_param_68, _shape_param_69, _shape_param_70, _shape_param_71, _shape_param_72, _shape_param_73, _shape_param_74, _shape_param_75, _shape_param_76, _shape_param_77, _shape_param_78, _shape_param_79, _shape_param_80, _shape_param_81, _shape_param_82, _shape_param_83, _shape_param_84, _shape_param_85, _shape_param_86, _shape_param_87, _shape_param_88, _shape_param_89, _shape_param_90, _shape_param_91, _shape_param_92, _shape_param_93, _shape_param_94, _shape_param_95, _shape_param_96, _shape_param_97, _shape_param_98, _shape_param_99, _shape_param_100, _shape_param_101, _shape_param_102, _shape_param_103, _shape_param_104, _shape_param_105, _shape_param_106, _shape_param_107, _shape_param_108, _shape_param_109, _shape_param_110, _shape_param_111, _shape_param_112, _shape_param_113, _shape_param_114, _shape_param_115, _shape_param_116, _shape_param_117, _shape_param_118, _shape_param_119, _shape_param_120, _shape_param_121, _shape_param_122, _shape_param_123, _shape_param_124, _shape_param_125, _shape_param_126, _shape_param_127, _shape_param_128, _shape_param_129, _shape_param_130, _shape_param_131, _shape_param_132, _shape_param_133, _shape_param_134, _shape_param_135, _shape_param_136, _shape_param_137, _shape_param_138, _shape_param_139, _shape_param_140, _shape_param_141, _shape_param_142, _shape_param_143, _shape_param_144, _shape_param_145, _shape_param_146, _shape_param_147, _shape_param_148, _shape_param_149, _shape_param_150, _shape_param_151, _shape_param_152, _shape_param_153, _shape_param_154, _shape_param_155, _shape_param_156, _shape_param_157, _shape_param_158, _shape_param_159, _shape_param_160, _shape_param_161, _shape_param_162, _shape_param_163, _shape_param_164, _shape_param_165, _shape_param_166, _shape_param_167, _shape_param_168, _shape_param_169, _shape_param_170, _shape_param_171, _shape_param_172, _shape_param_173, _shape_param_174, _shape_param_175, _shape_param_176, _shape_param_177, _shape_param_178, _shape_param_179, _shape_param_180, _shape_param_181, _shape_param_182, _shape_param_183, _shape_param_184, _shape_param_185, _shape_param_186, _shape_param_187, _shape_param_188, _shape_param_189, _shape_param_190, _shape_param_191, _shape_param_192, _shape_param_193, _shape_param_194, _shape_param_195, _shape_param_196, _shape_param_197, _shape_param_198, _shape_param_199, _shape_param_200, _shape_param_201, _shape_param_202, _shape_param_203, _shape_param_204, _shape_param_205, _shape_param_206, _shape_param_207, _shape_param_208, _shape_param_209, _shape_param_210, _shape_param_211, _shape_param_212, _shape_param_213, _shape_param_214, _shape_param_215, _shape_param_216, _shape_param_217, _shape_param_218, _shape_param_219, _shape_param_220, _shape_param_221, _shape_param_222, _shape_param_223, _shape_param_224, _shape_param_225, _shape_param_226, _shape_param_227, _shape_param_228, _shape_param_229, _shape_param_230, _shape_param_231, _shape_param_232, _shape_param_233, _shape_param_234, _shape_param_235, _shape_param_236, _shape_param_237, _shape_param_238, _shape_param_239, _shape_param_240, _shape_param_241, _shape_param_242, _shape_param_243, _shape_param_244, _shape_param_245, _shape_param_246, _shape_param_247, _shape_param_248, _shape_param_249, _shape_param_250, _shape_param_251, _shape_param_252, _shape_param_253, _shape_param_254, _shape_param_255, _shape_param_256, _shape_param_257, _shape_param_258, _shape_param_259, _shape_param_260, _shape_param_261, _shape_param_262, _shape_param_263, _shape_param_264, _shape_param_265, _shape_param_266, _shape_param_267, _shape_param_268, _shape_param_269, _shape_param_270, _shape_param_271, _shape_param_272, _shape_param_273, _shape_param_274, _shape_param_275, _shape_param_276, _shape_param_277, _shape_param_278, _shape_param_279, _shape_param_280, _shape_param_281, _shape_param_282, _shape_param_283, _shape_param_284, _shape_param_285, _shape_param_286, _shape_param_287, _shape_param_288, _shape_param_289, _shape_param_290, _shape_param_291, _shape_param_292, _shape_param_293, _shape_param_294, _shape_param_295, _shape_param_296, _shape_param_297, _shape_param_298, _shape_param_299, _shape_param_300, _shape_param_301, _shape_param_302, _shape_param_303, _shape_param_304, _shape_param_305, _shape_param_306, _shape_param_307, _shape_param_308, _shape_param_309, _shape_param_310, _shape_param_311, _shape_param_312, _shape_param_313, _shape_param_314, _shape_param_315, _shape_param_316, _shape_param_317, _shape_param_318, _shape_param_319, _shape_param_320, _shape_param_321, _shape_param_322, _shape_param_323, _shape_param_324, _shape_param_325, _shape_param_326, _shape_param_327, _shape_param_328, _shape_param_329, _shape_param_330, _shape_param_331, _shape_param_332, _shape_param_333, _shape_param_334, _shape_param_335):
+        # No stacktrace found for following nodes
+        expand: "i64[1, 512]" = torch.ops.aten.expand.default(arg0_1, [1, -1]);  arg0_1 = None
+        gather: "i64[1, 512]" = torch.ops.aten.gather.default(expand, 1, arg1_1);  expand = None
+        expand_1: "i64[64, 512]" = torch.ops.aten.expand.default(gather, _shape_param_0);  _shape_param_0 = None
+        embedding: "f32[64, 512, 128]" = torch.ops.aten.embedding.default(arg2_1, arg3_1, 0);  arg3_1 = None
+        embedding_1: "f32[64, 512, 128]" = torch.ops.aten.embedding.default(arg4_1, expand_1);  arg4_1 = expand_1 = None
+        add: "f32[64, 512, 128]" = torch.ops.aten.add.Tensor(embedding, embedding_1);  embedding = embedding_1 = None
+        embedding_2: "f32[1, 512, 128]" = torch.ops.aten.embedding.default(arg5_1, arg1_1);  arg5_1 = arg1_1 = None
+        add_1: "f32[64, 512, 128]" = torch.ops.aten.add.Tensor(add, embedding_2);  add = embedding_2 = None
+        var_mean = torch.ops.aten.var_mean.correction(add_1, [2], correction = 0, keepdim = True)
+        getitem: "f32[64, 512, 1]" = var_mean[0]
+        getitem_1: "f32[64, 512, 1]" = var_mean[1];  var_mean = None
+        add_2: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-12);  getitem = None
+        rsqrt: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_2);  add_2 = None
+        sub: "f32[64, 512, 128]" = torch.ops.aten.sub.Tensor(add_1, getitem_1);  add_1 = getitem_1 = None
+        mul: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(sub, rsqrt);  sub = None
+        mul_1: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(mul, arg6_1);  arg6_1 = None
+        add_3: "f32[64, 512, 128]" = torch.ops.aten.add.Tensor(mul_1, arg7_1);  mul_1 = arg7_1 = None
+        inductor_seeds: "i64[37]" = torch.ops.prims.inductor_seeds.default(37, device(type='cuda', index=0))
+        inductor_lookup_seed: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 0)
+        inductor_random: "f32[64, 512, 128]" = torch.ops.prims.inductor_random.default(_shape_param_1, inductor_lookup_seed, 'rand');  _shape_param_1 = inductor_lookup_seed = None
+        gt: "b8[64, 512, 128]" = torch.ops.aten.gt.Scalar(inductor_random, 0.1);  inductor_random = None
+        mul_2: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(gt, add_3);  add_3 = None
+        mul_3: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(mul_2, 1.1111111111111112);  mul_2 = None
+        convert_element_type: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg8_1, torch.bfloat16);  arg8_1 = None
+        convert_element_type_1: "bf16[256, 128]" = torch.ops.prims.convert_element_type.default(arg9_1, torch.bfloat16);  arg9_1 = None
+        convert_element_type_2: "bf16[64, 512, 128]" = torch.ops.prims.convert_element_type.default(mul_3, torch.bfloat16);  mul_3 = None
+        view: "bf16[32768, 128]" = torch.ops.aten.view.default(convert_element_type_2, _shape_param_2);  convert_element_type_2 = _shape_param_2 = None
+        permute: "bf16[128, 256]" = torch.ops.aten.permute.default(convert_element_type_1, [1, 0]);  convert_element_type_1 = None
+        addmm: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type, view, permute);  convert_element_type = None
+        view_1: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm, _shape_param_3);  addmm = _shape_param_3 = None
+        convert_element_type_3: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg10_1, torch.bfloat16);  arg10_1 = None
+        convert_element_type_4: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg11_1, torch.bfloat16);  arg11_1 = None
+        view_2: "bf16[32768, 256]" = torch.ops.aten.view.default(view_1, _shape_param_4);  _shape_param_4 = None
+        permute_1: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_4, [1, 0]);  convert_element_type_4 = None
+        addmm_1: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_3, view_2, permute_1);  convert_element_type_3 = None
+        view_3: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_1, _shape_param_5);  addmm_1 = _shape_param_5 = None
+        view_4: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_3, _shape_param_6);  view_3 = _shape_param_6 = None
+        permute_2: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_4, [0, 2, 1, 3]);  view_4 = None
+        convert_element_type_5: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg12_1, torch.bfloat16);  arg12_1 = None
+        convert_element_type_6: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg13_1, torch.bfloat16);  arg13_1 = None
+        permute_3: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_6, [1, 0]);  convert_element_type_6 = None
+        addmm_2: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_5, view_2, permute_3);  convert_element_type_5 = None
+        view_5: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_2, _shape_param_7);  addmm_2 = _shape_param_7 = None
+        view_6: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_5, _shape_param_8);  view_5 = _shape_param_8 = None
+        permute_4: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_6, [0, 2, 1, 3]);  view_6 = None
+        convert_element_type_7: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg14_1, torch.bfloat16);  arg14_1 = None
+        convert_element_type_8: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg15_1, torch.bfloat16);  arg15_1 = None
+        permute_5: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_8, [1, 0]);  convert_element_type_8 = None
+        addmm_3: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_7, view_2, permute_5);  convert_element_type_7 = None
+        view_7: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_3, _shape_param_9);  addmm_3 = _shape_param_9 = None
+        view_8: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_7, _shape_param_10);  view_7 = _shape_param_10 = None
+        permute_6: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_8, [0, 2, 1, 3]);  view_8 = None
+        mul_4: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_2, 0.3535533905932738);  permute_2 = None
+        permute_7: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_4, [0, 1, 3, 2]);  permute_4 = None
+        mul_5: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_7, 0.3535533905932738);  permute_7 = None
+        expand_2: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_4, _shape_param_11);  mul_4 = _shape_param_11 = None
+        clone: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_2, memory_format = torch.contiguous_format);  expand_2 = None
+        view_9: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone, _shape_param_12);  clone = _shape_param_12 = None
+        expand_3: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_5, _shape_param_13);  mul_5 = _shape_param_13 = None
+        clone_1: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_3, memory_format = torch.contiguous_format);  expand_3 = None
+        view_10: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_1, _shape_param_14);  clone_1 = _shape_param_14 = None
+        bmm: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_9, view_10)
+        view_11: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm, _shape_param_15);  _shape_param_15 = None
+        convert_element_type_9: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_11, torch.float32)
+        amax: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_9, [-1], True)
+        sub_1: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_9, amax);  convert_element_type_9 = None
+        exp: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_1);  sub_1 = None
+        sum_1: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp, [-1], True)
+        div: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp, sum_1);  exp = None
+        convert_element_type_10: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div, torch.bfloat16);  div = None
+        eq: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_11, -inf);  view_11 = None
+        logical_not: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq);  eq = None
+        any_1: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not, -1, True);  logical_not = None
+        logical_not_1: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_1);  any_1 = None
+        full: "bf16[64, 4, 512, 512]" = torch.ops.aten.full.default(_shape_param_16, 0, dtype = torch.bfloat16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False);  _shape_param_16 = None
+        where: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_1, full, convert_element_type_10);  convert_element_type_10 = None
+        inductor_lookup_seed_1: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 1)
+        inductor_random_1: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_17, inductor_lookup_seed_1, 'rand');  _shape_param_17 = inductor_lookup_seed_1 = None
+        convert_element_type_11: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_1, torch.bfloat16);  inductor_random_1 = None
+        gt_1: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_11, 0.1);  convert_element_type_11 = None
+        mul_6: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_1, where);  where = None
+        mul_7: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_6, 1.1111111111111112);  mul_6 = None
+        expand_4: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_7, _shape_param_18);  mul_7 = _shape_param_18 = None
+        view_12: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_4, _shape_param_19);  expand_4 = _shape_param_19 = None
+        expand_5: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_6, _shape_param_20);  permute_6 = _shape_param_20 = None
+        clone_2: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_5, memory_format = torch.contiguous_format);  expand_5 = None
+        view_13: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_2, _shape_param_21);  clone_2 = _shape_param_21 = None
+        bmm_1: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_12, view_13)
+        view_14: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_1, _shape_param_22);  bmm_1 = _shape_param_22 = None
+        permute_8: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_14, [0, 2, 1, 3]);  view_14 = None
+        clone_3: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_8, memory_format = torch.contiguous_format);  permute_8 = None
+        view_15: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_3, _shape_param_23);  clone_3 = _shape_param_23 = None
+        convert_element_type_12: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg16_1, torch.bfloat16);  arg16_1 = None
+        convert_element_type_13: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg17_1, torch.bfloat16);  arg17_1 = None
+        view_16: "bf16[32768, 256]" = torch.ops.aten.view.default(view_15, _shape_param_24);  view_15 = _shape_param_24 = None
+        permute_9: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_13, [1, 0]);  convert_element_type_13 = None
+        addmm_4: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_12, view_16, permute_9);  convert_element_type_12 = None
+        view_17: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_4, _shape_param_25);  addmm_4 = _shape_param_25 = None
+        inductor_lookup_seed_2: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 2)
+        inductor_random_2: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_26, inductor_lookup_seed_2, 'rand');  _shape_param_26 = inductor_lookup_seed_2 = None
+        convert_element_type_14: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_2, torch.bfloat16);  inductor_random_2 = None
+        gt_2: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_14, 0.1);  convert_element_type_14 = None
+        mul_8: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_2, view_17);  view_17 = None
+        mul_9: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_8, 1.1111111111111112);  mul_8 = None
+        add_4: "bf16[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_9, view_1);  mul_9 = view_1 = None
+        convert_element_type_15: "f32[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_4, torch.float32)
+        var_mean_1 = torch.ops.aten.var_mean.correction(convert_element_type_15, [2], correction = 0, keepdim = True)
+        getitem_2: "f32[64, 512, 1]" = var_mean_1[0]
+        getitem_3: "f32[64, 512, 1]" = var_mean_1[1];  var_mean_1 = None
+        add_5: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_2, 1e-12);  getitem_2 = None
+        rsqrt_1: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_5);  add_5 = None
+        sub_2: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(convert_element_type_15, getitem_3);  convert_element_type_15 = None
+        mul_10: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_2, rsqrt_1);  sub_2 = None
+        mul_11: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_10, arg18_1);  mul_10 = arg18_1 = None
+        add_6: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_11, arg19_1);  mul_11 = arg19_1 = None
+        convert_element_type_16: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg20_1, torch.bfloat16);  arg20_1 = None
+        convert_element_type_17: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg21_1, torch.bfloat16);  arg21_1 = None
+        convert_element_type_18: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_6, torch.bfloat16)
+        view_18: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_18, _shape_param_27);  convert_element_type_18 = _shape_param_27 = None
+        permute_10: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_17, [1, 0]);  convert_element_type_17 = None
+        addmm_5: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_16, view_18, permute_10);  convert_element_type_16 = None
+        view_19: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_5, _shape_param_28);  _shape_param_28 = None
+        convert_element_type_19: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_19, torch.float32);  view_19 = None
+        mul_12: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_19, 0.5)
+        mul_13: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_19, 0.7071067811865476);  convert_element_type_19 = None
+        erf: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_13);  mul_13 = None
+        add_7: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf, 1);  erf = None
+        mul_14: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_12, add_7);  mul_12 = add_7 = None
+        convert_element_type_20: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_14, torch.bfloat16);  mul_14 = None
+        convert_element_type_21: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg22_1, torch.bfloat16);  arg22_1 = None
+        convert_element_type_22: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg23_1, torch.bfloat16);  arg23_1 = None
+        view_20: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_20, _shape_param_29);  convert_element_type_20 = _shape_param_29 = None
+        permute_11: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_22, [1, 0]);  convert_element_type_22 = None
+        addmm_6: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_21, view_20, permute_11);  convert_element_type_21 = None
+        view_21: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_6, _shape_param_30);  addmm_6 = _shape_param_30 = None
+        inductor_lookup_seed_3: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 3)
+        inductor_random_3: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_31, inductor_lookup_seed_3, 'rand');  _shape_param_31 = inductor_lookup_seed_3 = None
+        convert_element_type_23: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_3, torch.bfloat16);  inductor_random_3 = None
+        gt_3: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_23, 0.1);  convert_element_type_23 = None
+        mul_15: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_3, view_21);  view_21 = None
+        mul_16: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_15, 1.1111111111111112);  mul_15 = None
+        add_8: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_16, add_6);  mul_16 = add_6 = None
+        var_mean_2 = torch.ops.aten.var_mean.correction(add_8, [2], correction = 0, keepdim = True)
+        getitem_4: "f32[64, 512, 1]" = var_mean_2[0]
+        getitem_5: "f32[64, 512, 1]" = var_mean_2[1];  var_mean_2 = None
+        add_9: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_4, 1e-12);  getitem_4 = None
+        rsqrt_2: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_9);  add_9 = None
+        sub_3: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_8, getitem_5);  add_8 = getitem_5 = None
+        mul_17: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_3, rsqrt_2);  sub_3 = None
+        mul_18: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_17, arg24_1);  arg24_1 = None
+        add_10: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_18, arg25_1);  mul_18 = arg25_1 = None
+        convert_element_type_24: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg26_1, torch.bfloat16);  arg26_1 = None
+        convert_element_type_25: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg27_1, torch.bfloat16);  arg27_1 = None
+        convert_element_type_26: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_10, torch.bfloat16)
+        view_22: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_26, _shape_param_32);  convert_element_type_26 = _shape_param_32 = None
+        permute_12: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_25, [1, 0]);  convert_element_type_25 = None
+        addmm_7: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_24, view_22, permute_12);  convert_element_type_24 = None
+        view_23: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_7, _shape_param_33);  addmm_7 = _shape_param_33 = None
+        view_24: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_23, _shape_param_34);  view_23 = _shape_param_34 = None
+        permute_13: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_24, [0, 2, 1, 3]);  view_24 = None
+        convert_element_type_27: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg28_1, torch.bfloat16);  arg28_1 = None
+        convert_element_type_28: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg29_1, torch.bfloat16);  arg29_1 = None
+        permute_14: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_28, [1, 0]);  convert_element_type_28 = None
+        addmm_8: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_27, view_22, permute_14);  convert_element_type_27 = None
+        view_25: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_8, _shape_param_35);  addmm_8 = _shape_param_35 = None
+        view_26: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_25, _shape_param_36);  view_25 = _shape_param_36 = None
+        permute_15: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_26, [0, 2, 1, 3]);  view_26 = None
+        convert_element_type_29: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg30_1, torch.bfloat16);  arg30_1 = None
+        convert_element_type_30: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg31_1, torch.bfloat16);  arg31_1 = None
+        permute_16: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_30, [1, 0]);  convert_element_type_30 = None
+        addmm_9: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_29, view_22, permute_16);  convert_element_type_29 = None
+        view_27: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_9, _shape_param_37);  addmm_9 = _shape_param_37 = None
+        view_28: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_27, _shape_param_38);  view_27 = _shape_param_38 = None
+        permute_17: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_28, [0, 2, 1, 3]);  view_28 = None
+        mul_19: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_13, 0.3535533905932738);  permute_13 = None
+        permute_18: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_15, [0, 1, 3, 2]);  permute_15 = None
+        mul_20: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_18, 0.3535533905932738);  permute_18 = None
+        expand_6: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_19, _shape_param_39);  mul_19 = _shape_param_39 = None
+        clone_4: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_6, memory_format = torch.contiguous_format);  expand_6 = None
+        view_29: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_4, _shape_param_40);  clone_4 = _shape_param_40 = None
+        expand_7: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_20, _shape_param_41);  mul_20 = _shape_param_41 = None
+        clone_5: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_7, memory_format = torch.contiguous_format);  expand_7 = None
+        view_30: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_5, _shape_param_42);  clone_5 = _shape_param_42 = None
+        bmm_2: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_29, view_30)
+        view_31: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_2, _shape_param_43);  bmm_2 = _shape_param_43 = None
+        convert_element_type_31: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_31, torch.float32)
+        amax_1: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_31, [-1], True)
+        sub_4: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_31, amax_1);  convert_element_type_31 = amax_1 = None
+        exp_1: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_4);  sub_4 = None
+        sum_2: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_1, [-1], True)
+        div_1: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_1, sum_2);  exp_1 = sum_2 = None
+        convert_element_type_32: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_1, torch.bfloat16);  div_1 = None
+        eq_1: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_31, -inf);  view_31 = None
+        logical_not_2: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_1);  eq_1 = None
+        any_2: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_2, -1, True);  logical_not_2 = None
+        logical_not_3: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_2);  any_2 = None
+        where_1: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_3, full, convert_element_type_32);  logical_not_3 = convert_element_type_32 = None
+        inductor_lookup_seed_4: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 4)
+        inductor_random_4: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_44, inductor_lookup_seed_4, 'rand');  _shape_param_44 = inductor_lookup_seed_4 = None
+        convert_element_type_33: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_4, torch.bfloat16);  inductor_random_4 = None
+        gt_4: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_33, 0.1);  convert_element_type_33 = None
+        mul_21: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_4, where_1)
+        mul_22: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_21, 1.1111111111111112);  mul_21 = None
+        expand_8: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_22, _shape_param_45);  mul_22 = _shape_param_45 = None
+        view_32: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_8, _shape_param_46);  expand_8 = _shape_param_46 = None
+        expand_9: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_17, _shape_param_47);  permute_17 = _shape_param_47 = None
+        clone_6: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_9, memory_format = torch.contiguous_format);  expand_9 = None
+        view_33: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_6, _shape_param_48);  clone_6 = _shape_param_48 = None
+        bmm_3: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_32, view_33)
+        view_34: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_3, _shape_param_49);  bmm_3 = _shape_param_49 = None
+        permute_19: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_34, [0, 2, 1, 3]);  view_34 = None
+        clone_7: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_19, memory_format = torch.contiguous_format);  permute_19 = None
+        view_35: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_7, _shape_param_50);  clone_7 = _shape_param_50 = None
+        convert_element_type_34: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg32_1, torch.bfloat16);  arg32_1 = None
+        convert_element_type_35: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg33_1, torch.bfloat16);  arg33_1 = None
+        view_36: "bf16[32768, 256]" = torch.ops.aten.view.default(view_35, _shape_param_51);  view_35 = _shape_param_51 = None
+        permute_20: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_35, [1, 0]);  convert_element_type_35 = None
+        addmm_10: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_34, view_36, permute_20);  convert_element_type_34 = None
+        view_37: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_10, _shape_param_52);  addmm_10 = _shape_param_52 = None
+        inductor_lookup_seed_5: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 5)
+        inductor_random_5: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_53, inductor_lookup_seed_5, 'rand');  _shape_param_53 = inductor_lookup_seed_5 = None
+        convert_element_type_36: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_5, torch.bfloat16);  inductor_random_5 = None
+        gt_5: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_36, 0.1);  convert_element_type_36 = None
+        mul_23: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_5, view_37);  view_37 = None
+        mul_24: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_23, 1.1111111111111112);  mul_23 = None
+        add_11: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_24, add_10);  mul_24 = add_10 = None
+        var_mean_3 = torch.ops.aten.var_mean.correction(add_11, [2], correction = 0, keepdim = True)
+        getitem_6: "f32[64, 512, 1]" = var_mean_3[0]
+        getitem_7: "f32[64, 512, 1]" = var_mean_3[1];  var_mean_3 = None
+        add_12: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_6, 1e-12);  getitem_6 = None
+        rsqrt_3: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_12);  add_12 = None
+        sub_5: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_11, getitem_7);  add_11 = getitem_7 = None
+        mul_25: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_5, rsqrt_3);  sub_5 = None
+        mul_26: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_25, arg34_1);  arg34_1 = None
+        add_13: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_26, arg35_1);  mul_26 = arg35_1 = None
+        convert_element_type_37: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg36_1, torch.bfloat16);  arg36_1 = None
+        convert_element_type_38: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg37_1, torch.bfloat16);  arg37_1 = None
+        convert_element_type_39: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_13, torch.bfloat16)
+        view_38: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_39, _shape_param_54);  convert_element_type_39 = _shape_param_54 = None
+        permute_21: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_38, [1, 0]);  convert_element_type_38 = None
+        addmm_11: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_37, view_38, permute_21);  convert_element_type_37 = None
+        view_39: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_11, _shape_param_55);  _shape_param_55 = None
+        convert_element_type_40: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_39, torch.float32);  view_39 = None
+        mul_27: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_40, 0.5)
+        mul_28: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_40, 0.7071067811865476);  convert_element_type_40 = None
+        erf_1: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_28);  mul_28 = None
+        add_14: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_1, 1);  erf_1 = None
+        mul_29: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_27, add_14);  mul_27 = add_14 = None
+        convert_element_type_41: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_29, torch.bfloat16);  mul_29 = None
+        convert_element_type_42: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg38_1, torch.bfloat16);  arg38_1 = None
+        convert_element_type_43: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg39_1, torch.bfloat16);  arg39_1 = None
+        view_40: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_41, _shape_param_56);  convert_element_type_41 = _shape_param_56 = None
+        permute_22: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_43, [1, 0]);  convert_element_type_43 = None
+        addmm_12: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_42, view_40, permute_22);  convert_element_type_42 = None
+        view_41: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_12, _shape_param_57);  addmm_12 = _shape_param_57 = None
+        inductor_lookup_seed_6: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 6)
+        inductor_random_6: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_58, inductor_lookup_seed_6, 'rand');  _shape_param_58 = inductor_lookup_seed_6 = None
+        convert_element_type_44: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_6, torch.bfloat16);  inductor_random_6 = None
+        gt_6: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_44, 0.1);  convert_element_type_44 = None
+        mul_30: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_6, view_41);  view_41 = None
+        mul_31: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_30, 1.1111111111111112);  mul_30 = None
+        add_15: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_31, add_13);  mul_31 = add_13 = None
+        var_mean_4 = torch.ops.aten.var_mean.correction(add_15, [2], correction = 0, keepdim = True)
+        getitem_8: "f32[64, 512, 1]" = var_mean_4[0]
+        getitem_9: "f32[64, 512, 1]" = var_mean_4[1];  var_mean_4 = None
+        add_16: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_8, 1e-12);  getitem_8 = None
+        rsqrt_4: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_16);  add_16 = None
+        sub_6: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_15, getitem_9);  add_15 = getitem_9 = None
+        mul_32: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_6, rsqrt_4);  sub_6 = None
+        mul_33: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_32, arg40_1);  arg40_1 = None
+        add_17: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_33, arg41_1);  mul_33 = arg41_1 = None
+        convert_element_type_45: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg42_1, torch.bfloat16);  arg42_1 = None
+        convert_element_type_46: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg43_1, torch.bfloat16);  arg43_1 = None
+        convert_element_type_47: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_17, torch.bfloat16)
+        view_42: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_47, _shape_param_59);  convert_element_type_47 = _shape_param_59 = None
+        permute_23: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_46, [1, 0]);  convert_element_type_46 = None
+        addmm_13: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_45, view_42, permute_23);  convert_element_type_45 = None
+        view_43: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_13, _shape_param_60);  addmm_13 = _shape_param_60 = None
+        view_44: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_43, _shape_param_61);  view_43 = _shape_param_61 = None
+        permute_24: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_44, [0, 2, 1, 3]);  view_44 = None
+        convert_element_type_48: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg44_1, torch.bfloat16);  arg44_1 = None
+        convert_element_type_49: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg45_1, torch.bfloat16);  arg45_1 = None
+        permute_25: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_49, [1, 0]);  convert_element_type_49 = None
+        addmm_14: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_48, view_42, permute_25);  convert_element_type_48 = None
+        view_45: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_14, _shape_param_62);  addmm_14 = _shape_param_62 = None
+        view_46: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_45, _shape_param_63);  view_45 = _shape_param_63 = None
+        permute_26: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_46, [0, 2, 1, 3]);  view_46 = None
+        convert_element_type_50: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg46_1, torch.bfloat16);  arg46_1 = None
+        convert_element_type_51: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg47_1, torch.bfloat16);  arg47_1 = None
+        permute_27: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_51, [1, 0]);  convert_element_type_51 = None
+        addmm_15: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_50, view_42, permute_27);  convert_element_type_50 = None
+        view_47: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_15, _shape_param_64);  addmm_15 = _shape_param_64 = None
+        view_48: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_47, _shape_param_65);  view_47 = _shape_param_65 = None
+        permute_28: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_48, [0, 2, 1, 3]);  view_48 = None
+        mul_34: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_24, 0.3535533905932738);  permute_24 = None
+        permute_29: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_26, [0, 1, 3, 2]);  permute_26 = None
+        mul_35: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_29, 0.3535533905932738);  permute_29 = None
+        expand_10: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_34, _shape_param_66);  mul_34 = _shape_param_66 = None
+        clone_8: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_10, memory_format = torch.contiguous_format);  expand_10 = None
+        view_49: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_8, _shape_param_67);  clone_8 = _shape_param_67 = None
+        expand_11: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_35, _shape_param_68);  mul_35 = _shape_param_68 = None
+        clone_9: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_11, memory_format = torch.contiguous_format);  expand_11 = None
+        view_50: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_9, _shape_param_69);  clone_9 = _shape_param_69 = None
+        bmm_4: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_49, view_50)
+        view_51: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_4, _shape_param_70);  bmm_4 = _shape_param_70 = None
+        convert_element_type_52: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_51, torch.float32)
+        amax_2: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_52, [-1], True)
+        sub_7: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_52, amax_2);  convert_element_type_52 = amax_2 = None
+        exp_2: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_7);  sub_7 = None
+        sum_3: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_2, [-1], True)
+        div_2: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_2, sum_3);  exp_2 = sum_3 = None
+        convert_element_type_53: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_2, torch.bfloat16);  div_2 = None
+        eq_2: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_51, -inf);  view_51 = None
+        logical_not_4: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_2);  eq_2 = None
+        any_3: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_4, -1, True);  logical_not_4 = None
+        logical_not_5: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_3);  any_3 = None
+        where_2: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_5, full, convert_element_type_53);  logical_not_5 = convert_element_type_53 = None
+        inductor_lookup_seed_7: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 7)
+        inductor_random_7: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_71, inductor_lookup_seed_7, 'rand');  _shape_param_71 = inductor_lookup_seed_7 = None
+        convert_element_type_54: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_7, torch.bfloat16);  inductor_random_7 = None
+        gt_7: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_54, 0.1);  convert_element_type_54 = None
+        mul_36: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_7, where_2)
+        mul_37: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_36, 1.1111111111111112);  mul_36 = None
+        expand_12: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_37, _shape_param_72);  mul_37 = _shape_param_72 = None
+        view_52: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_12, _shape_param_73);  expand_12 = _shape_param_73 = None
+        expand_13: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_28, _shape_param_74);  permute_28 = _shape_param_74 = None
+        clone_10: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_13, memory_format = torch.contiguous_format);  expand_13 = None
+        view_53: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_10, _shape_param_75);  clone_10 = _shape_param_75 = None
+        bmm_5: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_52, view_53)
+        view_54: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_5, _shape_param_76);  bmm_5 = _shape_param_76 = None
+        permute_30: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_54, [0, 2, 1, 3]);  view_54 = None
+        clone_11: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_30, memory_format = torch.contiguous_format);  permute_30 = None
+        view_55: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_11, _shape_param_77);  clone_11 = _shape_param_77 = None
+        convert_element_type_55: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg48_1, torch.bfloat16);  arg48_1 = None
+        convert_element_type_56: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg49_1, torch.bfloat16);  arg49_1 = None
+        view_56: "bf16[32768, 256]" = torch.ops.aten.view.default(view_55, _shape_param_78);  view_55 = _shape_param_78 = None
+        permute_31: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_56, [1, 0]);  convert_element_type_56 = None
+        addmm_16: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_55, view_56, permute_31);  convert_element_type_55 = None
+        view_57: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_16, _shape_param_79);  addmm_16 = _shape_param_79 = None
+        inductor_lookup_seed_8: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 8)
+        inductor_random_8: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_80, inductor_lookup_seed_8, 'rand');  _shape_param_80 = inductor_lookup_seed_8 = None
+        convert_element_type_57: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_8, torch.bfloat16);  inductor_random_8 = None
+        gt_8: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_57, 0.1);  convert_element_type_57 = None
+        mul_38: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_8, view_57);  view_57 = None
+        mul_39: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_38, 1.1111111111111112);  mul_38 = None
+        add_18: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_39, add_17);  mul_39 = add_17 = None
+        var_mean_5 = torch.ops.aten.var_mean.correction(add_18, [2], correction = 0, keepdim = True)
+        getitem_10: "f32[64, 512, 1]" = var_mean_5[0]
+        getitem_11: "f32[64, 512, 1]" = var_mean_5[1];  var_mean_5 = None
+        add_19: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_10, 1e-12);  getitem_10 = None
+        rsqrt_5: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_19);  add_19 = None
+        sub_8: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_18, getitem_11);  add_18 = getitem_11 = None
+        mul_40: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_8, rsqrt_5);  sub_8 = None
+        mul_41: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_40, arg50_1);  arg50_1 = None
+        add_20: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_41, arg51_1);  mul_41 = arg51_1 = None
+        convert_element_type_58: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg52_1, torch.bfloat16);  arg52_1 = None
+        convert_element_type_59: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg53_1, torch.bfloat16);  arg53_1 = None
+        convert_element_type_60: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_20, torch.bfloat16)
+        view_58: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_60, _shape_param_81);  convert_element_type_60 = _shape_param_81 = None
+        permute_32: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_59, [1, 0]);  convert_element_type_59 = None
+        addmm_17: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_58, view_58, permute_32);  convert_element_type_58 = None
+        view_59: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_17, _shape_param_82);  _shape_param_82 = None
+        convert_element_type_61: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_59, torch.float32);  view_59 = None
+        mul_42: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_61, 0.5)
+        mul_43: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_61, 0.7071067811865476);  convert_element_type_61 = None
+        erf_2: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_43);  mul_43 = None
+        add_21: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_2, 1);  erf_2 = None
+        mul_44: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_42, add_21);  mul_42 = add_21 = None
+        convert_element_type_62: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_44, torch.bfloat16);  mul_44 = None
+        convert_element_type_63: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg54_1, torch.bfloat16);  arg54_1 = None
+        convert_element_type_64: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg55_1, torch.bfloat16);  arg55_1 = None
+        view_60: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_62, _shape_param_83);  convert_element_type_62 = _shape_param_83 = None
+        permute_33: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_64, [1, 0]);  convert_element_type_64 = None
+        addmm_18: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_63, view_60, permute_33);  convert_element_type_63 = None
+        view_61: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_18, _shape_param_84);  addmm_18 = _shape_param_84 = None
+        inductor_lookup_seed_9: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 9)
+        inductor_random_9: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_85, inductor_lookup_seed_9, 'rand');  _shape_param_85 = inductor_lookup_seed_9 = None
+        convert_element_type_65: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_9, torch.bfloat16);  inductor_random_9 = None
+        gt_9: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_65, 0.1);  convert_element_type_65 = None
+        mul_45: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_9, view_61);  view_61 = None
+        mul_46: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_45, 1.1111111111111112);  mul_45 = None
+        add_22: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_46, add_20);  mul_46 = add_20 = None
+        var_mean_6 = torch.ops.aten.var_mean.correction(add_22, [2], correction = 0, keepdim = True)
+        getitem_12: "f32[64, 512, 1]" = var_mean_6[0]
+        getitem_13: "f32[64, 512, 1]" = var_mean_6[1];  var_mean_6 = None
+        add_23: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_12, 1e-12);  getitem_12 = None
+        rsqrt_6: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_23);  add_23 = None
+        sub_9: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_22, getitem_13);  add_22 = getitem_13 = None
+        mul_47: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_9, rsqrt_6);  sub_9 = None
+        mul_48: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_47, arg56_1);  arg56_1 = None
+        add_24: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_48, arg57_1);  mul_48 = arg57_1 = None
+        convert_element_type_66: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg58_1, torch.bfloat16);  arg58_1 = None
+        convert_element_type_67: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg59_1, torch.bfloat16);  arg59_1 = None
+        convert_element_type_68: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_24, torch.bfloat16)
+        view_62: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_68, _shape_param_86);  convert_element_type_68 = _shape_param_86 = None
+        permute_34: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_67, [1, 0]);  convert_element_type_67 = None
+        addmm_19: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_66, view_62, permute_34);  convert_element_type_66 = None
+        view_63: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_19, _shape_param_87);  addmm_19 = _shape_param_87 = None
+        view_64: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_63, _shape_param_88);  view_63 = _shape_param_88 = None
+        permute_35: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_64, [0, 2, 1, 3]);  view_64 = None
+        convert_element_type_69: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg60_1, torch.bfloat16);  arg60_1 = None
+        convert_element_type_70: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg61_1, torch.bfloat16);  arg61_1 = None
+        permute_36: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_70, [1, 0]);  convert_element_type_70 = None
+        addmm_20: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_69, view_62, permute_36);  convert_element_type_69 = None
+        view_65: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_20, _shape_param_89);  addmm_20 = _shape_param_89 = None
+        view_66: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_65, _shape_param_90);  view_65 = _shape_param_90 = None
+        permute_37: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_66, [0, 2, 1, 3]);  view_66 = None
+        convert_element_type_71: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg62_1, torch.bfloat16);  arg62_1 = None
+        convert_element_type_72: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg63_1, torch.bfloat16);  arg63_1 = None
+        permute_38: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_72, [1, 0]);  convert_element_type_72 = None
+        addmm_21: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_71, view_62, permute_38);  convert_element_type_71 = None
+        view_67: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_21, _shape_param_91);  addmm_21 = _shape_param_91 = None
+        view_68: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_67, _shape_param_92);  view_67 = _shape_param_92 = None
+        permute_39: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_68, [0, 2, 1, 3]);  view_68 = None
+        mul_49: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_35, 0.3535533905932738);  permute_35 = None
+        permute_40: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_37, [0, 1, 3, 2]);  permute_37 = None
+        mul_50: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_40, 0.3535533905932738);  permute_40 = None
+        expand_14: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_49, _shape_param_93);  mul_49 = _shape_param_93 = None
+        clone_12: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_14, memory_format = torch.contiguous_format);  expand_14 = None
+        view_69: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_12, _shape_param_94);  clone_12 = _shape_param_94 = None
+        expand_15: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_50, _shape_param_95);  mul_50 = _shape_param_95 = None
+        clone_13: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_15, memory_format = torch.contiguous_format);  expand_15 = None
+        view_70: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_13, _shape_param_96);  clone_13 = _shape_param_96 = None
+        bmm_6: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_69, view_70)
+        view_71: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_6, _shape_param_97);  bmm_6 = _shape_param_97 = None
+        convert_element_type_73: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_71, torch.float32)
+        amax_3: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_73, [-1], True)
+        sub_10: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_73, amax_3);  convert_element_type_73 = amax_3 = None
+        exp_3: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_10);  sub_10 = None
+        sum_4: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_3, [-1], True)
+        div_3: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_3, sum_4);  exp_3 = sum_4 = None
+        convert_element_type_74: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_3, torch.bfloat16);  div_3 = None
+        eq_3: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_71, -inf);  view_71 = None
+        logical_not_6: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_3);  eq_3 = None
+        any_4: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_6, -1, True);  logical_not_6 = None
+        logical_not_7: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_4);  any_4 = None
+        where_3: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_7, full, convert_element_type_74);  logical_not_7 = convert_element_type_74 = None
+        inductor_lookup_seed_10: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 10)
+        inductor_random_10: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_98, inductor_lookup_seed_10, 'rand');  _shape_param_98 = inductor_lookup_seed_10 = None
+        convert_element_type_75: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_10, torch.bfloat16);  inductor_random_10 = None
+        gt_10: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_75, 0.1);  convert_element_type_75 = None
+        mul_51: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_10, where_3)
+        mul_52: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_51, 1.1111111111111112);  mul_51 = None
+        expand_16: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_52, _shape_param_99);  mul_52 = _shape_param_99 = None
+        view_72: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_16, _shape_param_100);  expand_16 = _shape_param_100 = None
+        expand_17: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_39, _shape_param_101);  permute_39 = _shape_param_101 = None
+        clone_14: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_17, memory_format = torch.contiguous_format);  expand_17 = None
+        view_73: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_14, _shape_param_102);  clone_14 = _shape_param_102 = None
+        bmm_7: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_72, view_73)
+        view_74: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_7, _shape_param_103);  bmm_7 = _shape_param_103 = None
+        permute_41: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_74, [0, 2, 1, 3]);  view_74 = None
+        clone_15: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_41, memory_format = torch.contiguous_format);  permute_41 = None
+        view_75: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_15, _shape_param_104);  clone_15 = _shape_param_104 = None
+        convert_element_type_76: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg64_1, torch.bfloat16);  arg64_1 = None
+        convert_element_type_77: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg65_1, torch.bfloat16);  arg65_1 = None
+        view_76: "bf16[32768, 256]" = torch.ops.aten.view.default(view_75, _shape_param_105);  view_75 = _shape_param_105 = None
+        permute_42: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_77, [1, 0]);  convert_element_type_77 = None
+        addmm_22: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_76, view_76, permute_42);  convert_element_type_76 = None
+        view_77: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_22, _shape_param_106);  addmm_22 = _shape_param_106 = None
+        inductor_lookup_seed_11: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 11)
+        inductor_random_11: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_107, inductor_lookup_seed_11, 'rand');  _shape_param_107 = inductor_lookup_seed_11 = None
+        convert_element_type_78: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_11, torch.bfloat16);  inductor_random_11 = None
+        gt_11: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_78, 0.1);  convert_element_type_78 = None
+        mul_53: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_11, view_77);  view_77 = None
+        mul_54: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_53, 1.1111111111111112);  mul_53 = None
+        add_25: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_54, add_24);  mul_54 = add_24 = None
+        var_mean_7 = torch.ops.aten.var_mean.correction(add_25, [2], correction = 0, keepdim = True)
+        getitem_14: "f32[64, 512, 1]" = var_mean_7[0]
+        getitem_15: "f32[64, 512, 1]" = var_mean_7[1];  var_mean_7 = None
+        add_26: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_14, 1e-12);  getitem_14 = None
+        rsqrt_7: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_26);  add_26 = None
+        sub_11: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_25, getitem_15);  add_25 = getitem_15 = None
+        mul_55: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_11, rsqrt_7);  sub_11 = None
+        mul_56: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_55, arg66_1);  arg66_1 = None
+        add_27: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_56, arg67_1);  mul_56 = arg67_1 = None
+        convert_element_type_79: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg68_1, torch.bfloat16);  arg68_1 = None
+        convert_element_type_80: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg69_1, torch.bfloat16);  arg69_1 = None
+        convert_element_type_81: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_27, torch.bfloat16)
+        view_78: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_81, _shape_param_108);  convert_element_type_81 = _shape_param_108 = None
+        permute_43: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_80, [1, 0]);  convert_element_type_80 = None
+        addmm_23: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_79, view_78, permute_43);  convert_element_type_79 = None
+        view_79: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_23, _shape_param_109);  _shape_param_109 = None
+        convert_element_type_82: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_79, torch.float32);  view_79 = None
+        mul_57: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_82, 0.5)
+        mul_58: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_82, 0.7071067811865476);  convert_element_type_82 = None
+        erf_3: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_58);  mul_58 = None
+        add_28: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_3, 1);  erf_3 = None
+        mul_59: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_57, add_28);  mul_57 = add_28 = None
+        convert_element_type_83: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_59, torch.bfloat16);  mul_59 = None
+        convert_element_type_84: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg70_1, torch.bfloat16);  arg70_1 = None
+        convert_element_type_85: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg71_1, torch.bfloat16);  arg71_1 = None
+        view_80: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_83, _shape_param_110);  convert_element_type_83 = _shape_param_110 = None
+        permute_44: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_85, [1, 0]);  convert_element_type_85 = None
+        addmm_24: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_84, view_80, permute_44);  convert_element_type_84 = None
+        view_81: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_24, _shape_param_111);  addmm_24 = _shape_param_111 = None
+        inductor_lookup_seed_12: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 12)
+        inductor_random_12: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_112, inductor_lookup_seed_12, 'rand');  _shape_param_112 = inductor_lookup_seed_12 = None
+        convert_element_type_86: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_12, torch.bfloat16);  inductor_random_12 = None
+        gt_12: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_86, 0.1);  convert_element_type_86 = None
+        mul_60: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_12, view_81);  view_81 = None
+        mul_61: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_60, 1.1111111111111112);  mul_60 = None
+        add_29: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_61, add_27);  mul_61 = add_27 = None
+        var_mean_8 = torch.ops.aten.var_mean.correction(add_29, [2], correction = 0, keepdim = True)
+        getitem_16: "f32[64, 512, 1]" = var_mean_8[0]
+        getitem_17: "f32[64, 512, 1]" = var_mean_8[1];  var_mean_8 = None
+        add_30: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_16, 1e-12);  getitem_16 = None
+        rsqrt_8: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_30);  add_30 = None
+        sub_12: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_29, getitem_17);  add_29 = getitem_17 = None
+        mul_62: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_12, rsqrt_8);  sub_12 = None
+        mul_63: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_62, arg72_1);  arg72_1 = None
+        add_31: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_63, arg73_1);  mul_63 = arg73_1 = None
+        convert_element_type_87: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg74_1, torch.bfloat16);  arg74_1 = None
+        convert_element_type_88: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg75_1, torch.bfloat16);  arg75_1 = None
+        convert_element_type_89: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_31, torch.bfloat16)
+        view_82: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_89, _shape_param_113);  convert_element_type_89 = _shape_param_113 = None
+        permute_45: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_88, [1, 0]);  convert_element_type_88 = None
+        addmm_25: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_87, view_82, permute_45);  convert_element_type_87 = None
+        view_83: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_25, _shape_param_114);  addmm_25 = _shape_param_114 = None
+        view_84: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_83, _shape_param_115);  view_83 = _shape_param_115 = None
+        permute_46: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_84, [0, 2, 1, 3]);  view_84 = None
+        convert_element_type_90: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg76_1, torch.bfloat16);  arg76_1 = None
+        convert_element_type_91: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg77_1, torch.bfloat16);  arg77_1 = None
+        permute_47: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_91, [1, 0]);  convert_element_type_91 = None
+        addmm_26: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_90, view_82, permute_47);  convert_element_type_90 = None
+        view_85: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_26, _shape_param_116);  addmm_26 = _shape_param_116 = None
+        view_86: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_85, _shape_param_117);  view_85 = _shape_param_117 = None
+        permute_48: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_86, [0, 2, 1, 3]);  view_86 = None
+        convert_element_type_92: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg78_1, torch.bfloat16);  arg78_1 = None
+        convert_element_type_93: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg79_1, torch.bfloat16);  arg79_1 = None
+        permute_49: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_93, [1, 0]);  convert_element_type_93 = None
+        addmm_27: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_92, view_82, permute_49);  convert_element_type_92 = None
+        view_87: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_27, _shape_param_118);  addmm_27 = _shape_param_118 = None
+        view_88: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_87, _shape_param_119);  view_87 = _shape_param_119 = None
+        permute_50: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_88, [0, 2, 1, 3]);  view_88 = None
+        mul_64: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_46, 0.3535533905932738);  permute_46 = None
+        permute_51: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_48, [0, 1, 3, 2]);  permute_48 = None
+        mul_65: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_51, 0.3535533905932738);  permute_51 = None
+        expand_18: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_64, _shape_param_120);  mul_64 = _shape_param_120 = None
+        clone_16: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_18, memory_format = torch.contiguous_format);  expand_18 = None
+        view_89: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_16, _shape_param_121);  clone_16 = _shape_param_121 = None
+        expand_19: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_65, _shape_param_122);  mul_65 = _shape_param_122 = None
+        clone_17: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_19, memory_format = torch.contiguous_format);  expand_19 = None
+        view_90: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_17, _shape_param_123);  clone_17 = _shape_param_123 = None
+        bmm_8: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_89, view_90)
+        view_91: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_8, _shape_param_124);  bmm_8 = _shape_param_124 = None
+        convert_element_type_94: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_91, torch.float32)
+        amax_4: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_94, [-1], True)
+        sub_13: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_94, amax_4);  convert_element_type_94 = amax_4 = None
+        exp_4: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_13);  sub_13 = None
+        sum_5: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_4, [-1], True)
+        div_4: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_4, sum_5);  exp_4 = sum_5 = None
+        convert_element_type_95: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_4, torch.bfloat16);  div_4 = None
+        eq_4: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_91, -inf);  view_91 = None
+        logical_not_8: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_4);  eq_4 = None
+        any_5: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_8, -1, True);  logical_not_8 = None
+        logical_not_9: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_5);  any_5 = None
+        where_4: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_9, full, convert_element_type_95);  logical_not_9 = convert_element_type_95 = None
+        inductor_lookup_seed_13: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 13)
+        inductor_random_13: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_125, inductor_lookup_seed_13, 'rand');  _shape_param_125 = inductor_lookup_seed_13 = None
+        convert_element_type_96: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_13, torch.bfloat16);  inductor_random_13 = None
+        gt_13: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_96, 0.1);  convert_element_type_96 = None
+        mul_66: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_13, where_4)
+        mul_67: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_66, 1.1111111111111112);  mul_66 = None
+        expand_20: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_67, _shape_param_126);  mul_67 = _shape_param_126 = None
+        view_92: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_20, _shape_param_127);  expand_20 = _shape_param_127 = None
+        expand_21: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_50, _shape_param_128);  permute_50 = _shape_param_128 = None
+        clone_18: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_21, memory_format = torch.contiguous_format);  expand_21 = None
+        view_93: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_18, _shape_param_129);  clone_18 = _shape_param_129 = None
+        bmm_9: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_92, view_93)
+        view_94: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_9, _shape_param_130);  bmm_9 = _shape_param_130 = None
+        permute_52: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_94, [0, 2, 1, 3]);  view_94 = None
+        clone_19: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_52, memory_format = torch.contiguous_format);  permute_52 = None
+        view_95: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_19, _shape_param_131);  clone_19 = _shape_param_131 = None
+        convert_element_type_97: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg80_1, torch.bfloat16);  arg80_1 = None
+        convert_element_type_98: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg81_1, torch.bfloat16);  arg81_1 = None
+        view_96: "bf16[32768, 256]" = torch.ops.aten.view.default(view_95, _shape_param_132);  view_95 = _shape_param_132 = None
+        permute_53: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_98, [1, 0]);  convert_element_type_98 = None
+        addmm_28: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_97, view_96, permute_53);  convert_element_type_97 = None
+        view_97: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_28, _shape_param_133);  addmm_28 = _shape_param_133 = None
+        inductor_lookup_seed_14: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 14)
+        inductor_random_14: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_134, inductor_lookup_seed_14, 'rand');  _shape_param_134 = inductor_lookup_seed_14 = None
+        convert_element_type_99: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_14, torch.bfloat16);  inductor_random_14 = None
+        gt_14: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_99, 0.1);  convert_element_type_99 = None
+        mul_68: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_14, view_97);  view_97 = None
+        mul_69: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_68, 1.1111111111111112);  mul_68 = None
+        add_32: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_69, add_31);  mul_69 = add_31 = None
+        var_mean_9 = torch.ops.aten.var_mean.correction(add_32, [2], correction = 0, keepdim = True)
+        getitem_18: "f32[64, 512, 1]" = var_mean_9[0]
+        getitem_19: "f32[64, 512, 1]" = var_mean_9[1];  var_mean_9 = None
+        add_33: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_18, 1e-12);  getitem_18 = None
+        rsqrt_9: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_33);  add_33 = None
+        sub_14: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_32, getitem_19);  add_32 = getitem_19 = None
+        mul_70: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_14, rsqrt_9);  sub_14 = None
+        mul_71: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_70, arg82_1);  arg82_1 = None
+        add_34: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_71, arg83_1);  mul_71 = arg83_1 = None
+        convert_element_type_100: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg84_1, torch.bfloat16);  arg84_1 = None
+        convert_element_type_101: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg85_1, torch.bfloat16);  arg85_1 = None
+        convert_element_type_102: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_34, torch.bfloat16)
+        view_98: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_102, _shape_param_135);  convert_element_type_102 = _shape_param_135 = None
+        permute_54: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_101, [1, 0]);  convert_element_type_101 = None
+        addmm_29: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_100, view_98, permute_54);  convert_element_type_100 = None
+        view_99: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_29, _shape_param_136);  _shape_param_136 = None
+        convert_element_type_103: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_99, torch.float32);  view_99 = None
+        mul_72: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_103, 0.5)
+        mul_73: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_103, 0.7071067811865476);  convert_element_type_103 = None
+        erf_4: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_73);  mul_73 = None
+        add_35: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_4, 1);  erf_4 = None
+        mul_74: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_72, add_35);  mul_72 = add_35 = None
+        convert_element_type_104: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_74, torch.bfloat16);  mul_74 = None
+        convert_element_type_105: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg86_1, torch.bfloat16);  arg86_1 = None
+        convert_element_type_106: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg87_1, torch.bfloat16);  arg87_1 = None
+        view_100: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_104, _shape_param_137);  convert_element_type_104 = _shape_param_137 = None
+        permute_55: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_106, [1, 0]);  convert_element_type_106 = None
+        addmm_30: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_105, view_100, permute_55);  convert_element_type_105 = None
+        view_101: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_30, _shape_param_138);  addmm_30 = _shape_param_138 = None
+        inductor_lookup_seed_15: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 15)
+        inductor_random_15: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_139, inductor_lookup_seed_15, 'rand');  _shape_param_139 = inductor_lookup_seed_15 = None
+        convert_element_type_107: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_15, torch.bfloat16);  inductor_random_15 = None
+        gt_15: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_107, 0.1);  convert_element_type_107 = None
+        mul_75: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_15, view_101);  view_101 = None
+        mul_76: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_75, 1.1111111111111112);  mul_75 = None
+        add_36: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_76, add_34);  mul_76 = add_34 = None
+        var_mean_10 = torch.ops.aten.var_mean.correction(add_36, [2], correction = 0, keepdim = True)
+        getitem_20: "f32[64, 512, 1]" = var_mean_10[0]
+        getitem_21: "f32[64, 512, 1]" = var_mean_10[1];  var_mean_10 = None
+        add_37: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_20, 1e-12);  getitem_20 = None
+        rsqrt_10: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_37);  add_37 = None
+        sub_15: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_36, getitem_21);  add_36 = getitem_21 = None
+        mul_77: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_15, rsqrt_10);  sub_15 = None
+        mul_78: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_77, arg88_1);  arg88_1 = None
+        add_38: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_78, arg89_1);  mul_78 = arg89_1 = None
+        convert_element_type_108: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg90_1, torch.bfloat16);  arg90_1 = None
+        convert_element_type_109: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg91_1, torch.bfloat16);  arg91_1 = None
+        convert_element_type_110: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_38, torch.bfloat16)
+        view_102: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_110, _shape_param_140);  convert_element_type_110 = _shape_param_140 = None
+        permute_56: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_109, [1, 0]);  convert_element_type_109 = None
+        addmm_31: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_108, view_102, permute_56);  convert_element_type_108 = None
+        view_103: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_31, _shape_param_141);  addmm_31 = _shape_param_141 = None
+        view_104: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_103, _shape_param_142);  view_103 = _shape_param_142 = None
+        permute_57: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_104, [0, 2, 1, 3]);  view_104 = None
+        convert_element_type_111: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg92_1, torch.bfloat16);  arg92_1 = None
+        convert_element_type_112: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg93_1, torch.bfloat16);  arg93_1 = None
+        permute_58: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_112, [1, 0]);  convert_element_type_112 = None
+        addmm_32: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_111, view_102, permute_58);  convert_element_type_111 = None
+        view_105: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_32, _shape_param_143);  addmm_32 = _shape_param_143 = None
+        view_106: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_105, _shape_param_144);  view_105 = _shape_param_144 = None
+        permute_59: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_106, [0, 2, 1, 3]);  view_106 = None
+        convert_element_type_113: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg94_1, torch.bfloat16);  arg94_1 = None
+        convert_element_type_114: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg95_1, torch.bfloat16);  arg95_1 = None
+        permute_60: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_114, [1, 0]);  convert_element_type_114 = None
+        addmm_33: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_113, view_102, permute_60);  convert_element_type_113 = None
+        view_107: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_33, _shape_param_145);  addmm_33 = _shape_param_145 = None
+        view_108: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_107, _shape_param_146);  view_107 = _shape_param_146 = None
+        permute_61: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_108, [0, 2, 1, 3]);  view_108 = None
+        mul_79: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_57, 0.3535533905932738);  permute_57 = None
+        permute_62: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_59, [0, 1, 3, 2]);  permute_59 = None
+        mul_80: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_62, 0.3535533905932738);  permute_62 = None
+        expand_22: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_79, _shape_param_147);  mul_79 = _shape_param_147 = None
+        clone_20: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_22, memory_format = torch.contiguous_format);  expand_22 = None
+        view_109: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_20, _shape_param_148);  clone_20 = _shape_param_148 = None
+        expand_23: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_80, _shape_param_149);  mul_80 = _shape_param_149 = None
+        clone_21: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_23, memory_format = torch.contiguous_format);  expand_23 = None
+        view_110: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_21, _shape_param_150);  clone_21 = _shape_param_150 = None
+        bmm_10: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_109, view_110)
+        view_111: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_10, _shape_param_151);  bmm_10 = _shape_param_151 = None
+        convert_element_type_115: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_111, torch.float32)
+        amax_5: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_115, [-1], True)
+        sub_16: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_115, amax_5);  convert_element_type_115 = amax_5 = None
+        exp_5: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_16);  sub_16 = None
+        sum_6: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_5, [-1], True)
+        div_5: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_5, sum_6);  exp_5 = sum_6 = None
+        convert_element_type_116: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_5, torch.bfloat16);  div_5 = None
+        eq_5: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_111, -inf);  view_111 = None
+        logical_not_10: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_5);  eq_5 = None
+        any_6: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_10, -1, True);  logical_not_10 = None
+        logical_not_11: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_6);  any_6 = None
+        where_5: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_11, full, convert_element_type_116);  logical_not_11 = convert_element_type_116 = None
+        inductor_lookup_seed_16: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 16)
+        inductor_random_16: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_152, inductor_lookup_seed_16, 'rand');  _shape_param_152 = inductor_lookup_seed_16 = None
+        convert_element_type_117: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_16, torch.bfloat16);  inductor_random_16 = None
+        gt_16: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_117, 0.1);  convert_element_type_117 = None
+        mul_81: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_16, where_5)
+        mul_82: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_81, 1.1111111111111112);  mul_81 = None
+        expand_24: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_82, _shape_param_153);  mul_82 = _shape_param_153 = None
+        view_112: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_24, _shape_param_154);  expand_24 = _shape_param_154 = None
+        expand_25: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_61, _shape_param_155);  permute_61 = _shape_param_155 = None
+        clone_22: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_25, memory_format = torch.contiguous_format);  expand_25 = None
+        view_113: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_22, _shape_param_156);  clone_22 = _shape_param_156 = None
+        bmm_11: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_112, view_113)
+        view_114: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_11, _shape_param_157);  bmm_11 = _shape_param_157 = None
+        permute_63: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_114, [0, 2, 1, 3]);  view_114 = None
+        clone_23: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_63, memory_format = torch.contiguous_format);  permute_63 = None
+        view_115: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_23, _shape_param_158);  clone_23 = _shape_param_158 = None
+        convert_element_type_118: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg96_1, torch.bfloat16);  arg96_1 = None
+        convert_element_type_119: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg97_1, torch.bfloat16);  arg97_1 = None
+        view_116: "bf16[32768, 256]" = torch.ops.aten.view.default(view_115, _shape_param_159);  view_115 = _shape_param_159 = None
+        permute_64: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_119, [1, 0]);  convert_element_type_119 = None
+        addmm_34: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_118, view_116, permute_64);  convert_element_type_118 = None
+        view_117: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_34, _shape_param_160);  addmm_34 = _shape_param_160 = None
+        inductor_lookup_seed_17: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 17)
+        inductor_random_17: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_161, inductor_lookup_seed_17, 'rand');  _shape_param_161 = inductor_lookup_seed_17 = None
+        convert_element_type_120: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_17, torch.bfloat16);  inductor_random_17 = None
+        gt_17: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_120, 0.1);  convert_element_type_120 = None
+        mul_83: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_17, view_117);  view_117 = None
+        mul_84: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_83, 1.1111111111111112);  mul_83 = None
+        add_39: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_84, add_38);  mul_84 = add_38 = None
+        var_mean_11 = torch.ops.aten.var_mean.correction(add_39, [2], correction = 0, keepdim = True)
+        getitem_22: "f32[64, 512, 1]" = var_mean_11[0]
+        getitem_23: "f32[64, 512, 1]" = var_mean_11[1];  var_mean_11 = None
+        add_40: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_22, 1e-12);  getitem_22 = None
+        rsqrt_11: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_40);  add_40 = None
+        sub_17: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_39, getitem_23);  add_39 = getitem_23 = None
+        mul_85: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_17, rsqrt_11);  sub_17 = None
+        mul_86: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_85, arg98_1);  arg98_1 = None
+        add_41: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_86, arg99_1);  mul_86 = arg99_1 = None
+        convert_element_type_121: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg100_1, torch.bfloat16);  arg100_1 = None
+        convert_element_type_122: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg101_1, torch.bfloat16);  arg101_1 = None
+        convert_element_type_123: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_41, torch.bfloat16)
+        view_118: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_123, _shape_param_162);  convert_element_type_123 = _shape_param_162 = None
+        permute_65: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_122, [1, 0]);  convert_element_type_122 = None
+        addmm_35: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_121, view_118, permute_65);  convert_element_type_121 = None
+        view_119: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_35, _shape_param_163);  _shape_param_163 = None
+        convert_element_type_124: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_119, torch.float32);  view_119 = None
+        mul_87: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_124, 0.5)
+        mul_88: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_124, 0.7071067811865476);  convert_element_type_124 = None
+        erf_5: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_88);  mul_88 = None
+        add_42: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_5, 1);  erf_5 = None
+        mul_89: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_87, add_42);  mul_87 = add_42 = None
+        convert_element_type_125: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_89, torch.bfloat16);  mul_89 = None
+        convert_element_type_126: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg102_1, torch.bfloat16);  arg102_1 = None
+        convert_element_type_127: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg103_1, torch.bfloat16);  arg103_1 = None
+        view_120: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_125, _shape_param_164);  convert_element_type_125 = _shape_param_164 = None
+        permute_66: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_127, [1, 0]);  convert_element_type_127 = None
+        addmm_36: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_126, view_120, permute_66);  convert_element_type_126 = None
+        view_121: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_36, _shape_param_165);  addmm_36 = _shape_param_165 = None
+        inductor_lookup_seed_18: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 18)
+        inductor_random_18: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_166, inductor_lookup_seed_18, 'rand');  _shape_param_166 = inductor_lookup_seed_18 = None
+        convert_element_type_128: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_18, torch.bfloat16);  inductor_random_18 = None
+        gt_18: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_128, 0.1);  convert_element_type_128 = None
+        mul_90: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_18, view_121);  view_121 = None
+        mul_91: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_90, 1.1111111111111112);  mul_90 = None
+        add_43: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_91, add_41);  mul_91 = add_41 = None
+        var_mean_12 = torch.ops.aten.var_mean.correction(add_43, [2], correction = 0, keepdim = True)
+        getitem_24: "f32[64, 512, 1]" = var_mean_12[0]
+        getitem_25: "f32[64, 512, 1]" = var_mean_12[1];  var_mean_12 = None
+        add_44: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_24, 1e-12);  getitem_24 = None
+        rsqrt_12: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_44);  add_44 = None
+        sub_18: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_43, getitem_25);  add_43 = getitem_25 = None
+        mul_92: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_18, rsqrt_12);  sub_18 = None
+        mul_93: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_92, arg104_1);  arg104_1 = None
+        add_45: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_93, arg105_1);  mul_93 = arg105_1 = None
+        convert_element_type_129: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg106_1, torch.bfloat16);  arg106_1 = None
+        convert_element_type_130: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg107_1, torch.bfloat16);  arg107_1 = None
+        convert_element_type_131: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_45, torch.bfloat16)
+        view_122: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_131, _shape_param_167);  convert_element_type_131 = _shape_param_167 = None
+        permute_67: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_130, [1, 0]);  convert_element_type_130 = None
+        addmm_37: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_129, view_122, permute_67);  convert_element_type_129 = None
+        view_123: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_37, _shape_param_168);  addmm_37 = _shape_param_168 = None
+        view_124: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_123, _shape_param_169);  view_123 = _shape_param_169 = None
+        permute_68: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_124, [0, 2, 1, 3]);  view_124 = None
+        convert_element_type_132: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg108_1, torch.bfloat16);  arg108_1 = None
+        convert_element_type_133: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg109_1, torch.bfloat16);  arg109_1 = None
+        permute_69: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_133, [1, 0]);  convert_element_type_133 = None
+        addmm_38: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_132, view_122, permute_69);  convert_element_type_132 = None
+        view_125: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_38, _shape_param_170);  addmm_38 = _shape_param_170 = None
+        view_126: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_125, _shape_param_171);  view_125 = _shape_param_171 = None
+        permute_70: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_126, [0, 2, 1, 3]);  view_126 = None
+        convert_element_type_134: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg110_1, torch.bfloat16);  arg110_1 = None
+        convert_element_type_135: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg111_1, torch.bfloat16);  arg111_1 = None
+        permute_71: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_135, [1, 0]);  convert_element_type_135 = None
+        addmm_39: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_134, view_122, permute_71);  convert_element_type_134 = None
+        view_127: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_39, _shape_param_172);  addmm_39 = _shape_param_172 = None
+        view_128: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_127, _shape_param_173);  view_127 = _shape_param_173 = None
+        permute_72: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_128, [0, 2, 1, 3]);  view_128 = None
+        mul_94: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_68, 0.3535533905932738);  permute_68 = None
+        permute_73: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_70, [0, 1, 3, 2]);  permute_70 = None
+        mul_95: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_73, 0.3535533905932738);  permute_73 = None
+        expand_26: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_94, _shape_param_174);  mul_94 = _shape_param_174 = None
+        clone_24: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_26, memory_format = torch.contiguous_format);  expand_26 = None
+        view_129: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_24, _shape_param_175);  clone_24 = _shape_param_175 = None
+        expand_27: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_95, _shape_param_176);  mul_95 = _shape_param_176 = None
+        clone_25: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_27, memory_format = torch.contiguous_format);  expand_27 = None
+        view_130: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_25, _shape_param_177);  clone_25 = _shape_param_177 = None
+        bmm_12: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_129, view_130)
+        view_131: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_12, _shape_param_178);  bmm_12 = _shape_param_178 = None
+        convert_element_type_136: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_131, torch.float32)
+        amax_6: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_136, [-1], True)
+        sub_19: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_136, amax_6);  convert_element_type_136 = amax_6 = None
+        exp_6: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_19);  sub_19 = None
+        sum_7: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_6, [-1], True)
+        div_6: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_6, sum_7);  exp_6 = sum_7 = None
+        convert_element_type_137: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_6, torch.bfloat16);  div_6 = None
+        eq_6: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_131, -inf);  view_131 = None
+        logical_not_12: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_6);  eq_6 = None
+        any_7: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_12, -1, True);  logical_not_12 = None
+        logical_not_13: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_7);  any_7 = None
+        where_6: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_13, full, convert_element_type_137);  logical_not_13 = convert_element_type_137 = None
+        inductor_lookup_seed_19: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 19)
+        inductor_random_19: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_179, inductor_lookup_seed_19, 'rand');  _shape_param_179 = inductor_lookup_seed_19 = None
+        convert_element_type_138: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_19, torch.bfloat16);  inductor_random_19 = None
+        gt_19: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_138, 0.1);  convert_element_type_138 = None
+        mul_96: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_19, where_6)
+        mul_97: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_96, 1.1111111111111112);  mul_96 = None
+        expand_28: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_97, _shape_param_180);  mul_97 = _shape_param_180 = None
+        view_132: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_28, _shape_param_181);  expand_28 = _shape_param_181 = None
+        expand_29: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_72, _shape_param_182);  permute_72 = _shape_param_182 = None
+        clone_26: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_29, memory_format = torch.contiguous_format);  expand_29 = None
+        view_133: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_26, _shape_param_183);  clone_26 = _shape_param_183 = None
+        bmm_13: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_132, view_133)
+        view_134: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_13, _shape_param_184);  bmm_13 = _shape_param_184 = None
+        permute_74: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_134, [0, 2, 1, 3]);  view_134 = None
+        clone_27: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_74, memory_format = torch.contiguous_format);  permute_74 = None
+        view_135: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_27, _shape_param_185);  clone_27 = _shape_param_185 = None
+        convert_element_type_139: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg112_1, torch.bfloat16);  arg112_1 = None
+        convert_element_type_140: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg113_1, torch.bfloat16);  arg113_1 = None
+        view_136: "bf16[32768, 256]" = torch.ops.aten.view.default(view_135, _shape_param_186);  view_135 = _shape_param_186 = None
+        permute_75: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_140, [1, 0]);  convert_element_type_140 = None
+        addmm_40: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_139, view_136, permute_75);  convert_element_type_139 = None
+        view_137: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_40, _shape_param_187);  addmm_40 = _shape_param_187 = None
+        inductor_lookup_seed_20: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 20)
+        inductor_random_20: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_188, inductor_lookup_seed_20, 'rand');  _shape_param_188 = inductor_lookup_seed_20 = None
+        convert_element_type_141: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_20, torch.bfloat16);  inductor_random_20 = None
+        gt_20: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_141, 0.1);  convert_element_type_141 = None
+        mul_98: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_20, view_137);  view_137 = None
+        mul_99: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_98, 1.1111111111111112);  mul_98 = None
+        add_46: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_99, add_45);  mul_99 = add_45 = None
+        var_mean_13 = torch.ops.aten.var_mean.correction(add_46, [2], correction = 0, keepdim = True)
+        getitem_26: "f32[64, 512, 1]" = var_mean_13[0]
+        getitem_27: "f32[64, 512, 1]" = var_mean_13[1];  var_mean_13 = None
+        add_47: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_26, 1e-12);  getitem_26 = None
+        rsqrt_13: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_47);  add_47 = None
+        sub_20: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_46, getitem_27);  add_46 = getitem_27 = None
+        mul_100: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_20, rsqrt_13);  sub_20 = None
+        mul_101: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_100, arg114_1);  arg114_1 = None
+        add_48: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_101, arg115_1);  mul_101 = arg115_1 = None
+        convert_element_type_142: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg116_1, torch.bfloat16);  arg116_1 = None
+        convert_element_type_143: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg117_1, torch.bfloat16);  arg117_1 = None
+        convert_element_type_144: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_48, torch.bfloat16)
+        view_138: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_144, _shape_param_189);  convert_element_type_144 = _shape_param_189 = None
+        permute_76: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_143, [1, 0]);  convert_element_type_143 = None
+        addmm_41: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_142, view_138, permute_76);  convert_element_type_142 = None
+        view_139: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_41, _shape_param_190);  _shape_param_190 = None
+        convert_element_type_145: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_139, torch.float32);  view_139 = None
+        mul_102: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_145, 0.5)
+        mul_103: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_145, 0.7071067811865476);  convert_element_type_145 = None
+        erf_6: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_103);  mul_103 = None
+        add_49: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_6, 1);  erf_6 = None
+        mul_104: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_102, add_49);  mul_102 = add_49 = None
+        convert_element_type_146: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_104, torch.bfloat16);  mul_104 = None
+        convert_element_type_147: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg118_1, torch.bfloat16);  arg118_1 = None
+        convert_element_type_148: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg119_1, torch.bfloat16);  arg119_1 = None
+        view_140: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_146, _shape_param_191);  convert_element_type_146 = _shape_param_191 = None
+        permute_77: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_148, [1, 0]);  convert_element_type_148 = None
+        addmm_42: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_147, view_140, permute_77);  convert_element_type_147 = None
+        view_141: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_42, _shape_param_192);  addmm_42 = _shape_param_192 = None
+        inductor_lookup_seed_21: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 21)
+        inductor_random_21: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_193, inductor_lookup_seed_21, 'rand');  _shape_param_193 = inductor_lookup_seed_21 = None
+        convert_element_type_149: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_21, torch.bfloat16);  inductor_random_21 = None
+        gt_21: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_149, 0.1);  convert_element_type_149 = None
+        mul_105: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_21, view_141);  view_141 = None
+        mul_106: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_105, 1.1111111111111112);  mul_105 = None
+        add_50: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_106, add_48);  mul_106 = add_48 = None
+        var_mean_14 = torch.ops.aten.var_mean.correction(add_50, [2], correction = 0, keepdim = True)
+        getitem_28: "f32[64, 512, 1]" = var_mean_14[0]
+        getitem_29: "f32[64, 512, 1]" = var_mean_14[1];  var_mean_14 = None
+        add_51: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_28, 1e-12);  getitem_28 = None
+        rsqrt_14: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_51);  add_51 = None
+        sub_21: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_50, getitem_29);  add_50 = getitem_29 = None
+        mul_107: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_21, rsqrt_14);  sub_21 = None
+        mul_108: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_107, arg120_1);  arg120_1 = None
+        add_52: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_108, arg121_1);  mul_108 = arg121_1 = None
+        convert_element_type_150: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg122_1, torch.bfloat16);  arg122_1 = None
+        convert_element_type_151: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg123_1, torch.bfloat16);  arg123_1 = None
+        convert_element_type_152: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_52, torch.bfloat16)
+        view_142: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_152, _shape_param_194);  convert_element_type_152 = _shape_param_194 = None
+        permute_78: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_151, [1, 0]);  convert_element_type_151 = None
+        addmm_43: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_150, view_142, permute_78);  convert_element_type_150 = None
+        view_143: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_43, _shape_param_195);  addmm_43 = _shape_param_195 = None
+        view_144: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_143, _shape_param_196);  view_143 = _shape_param_196 = None
+        permute_79: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_144, [0, 2, 1, 3]);  view_144 = None
+        convert_element_type_153: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg124_1, torch.bfloat16);  arg124_1 = None
+        convert_element_type_154: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg125_1, torch.bfloat16);  arg125_1 = None
+        permute_80: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_154, [1, 0]);  convert_element_type_154 = None
+        addmm_44: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_153, view_142, permute_80);  convert_element_type_153 = None
+        view_145: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_44, _shape_param_197);  addmm_44 = _shape_param_197 = None
+        view_146: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_145, _shape_param_198);  view_145 = _shape_param_198 = None
+        permute_81: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_146, [0, 2, 1, 3]);  view_146 = None
+        convert_element_type_155: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg126_1, torch.bfloat16);  arg126_1 = None
+        convert_element_type_156: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg127_1, torch.bfloat16);  arg127_1 = None
+        permute_82: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_156, [1, 0]);  convert_element_type_156 = None
+        addmm_45: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_155, view_142, permute_82);  convert_element_type_155 = None
+        view_147: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_45, _shape_param_199);  addmm_45 = _shape_param_199 = None
+        view_148: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_147, _shape_param_200);  view_147 = _shape_param_200 = None
+        permute_83: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_148, [0, 2, 1, 3]);  view_148 = None
+        mul_109: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_79, 0.3535533905932738);  permute_79 = None
+        permute_84: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_81, [0, 1, 3, 2]);  permute_81 = None
+        mul_110: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_84, 0.3535533905932738);  permute_84 = None
+        expand_30: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_109, _shape_param_201);  mul_109 = _shape_param_201 = None
+        clone_28: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_30, memory_format = torch.contiguous_format);  expand_30 = None
+        view_149: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_28, _shape_param_202);  clone_28 = _shape_param_202 = None
+        expand_31: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_110, _shape_param_203);  mul_110 = _shape_param_203 = None
+        clone_29: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_31, memory_format = torch.contiguous_format);  expand_31 = None
+        view_150: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_29, _shape_param_204);  clone_29 = _shape_param_204 = None
+        bmm_14: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_149, view_150)
+        view_151: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_14, _shape_param_205);  bmm_14 = _shape_param_205 = None
+        convert_element_type_157: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_151, torch.float32)
+        amax_7: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_157, [-1], True)
+        sub_22: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_157, amax_7);  convert_element_type_157 = amax_7 = None
+        exp_7: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_22);  sub_22 = None
+        sum_8: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_7, [-1], True)
+        div_7: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_7, sum_8);  exp_7 = sum_8 = None
+        convert_element_type_158: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_7, torch.bfloat16);  div_7 = None
+        eq_7: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_151, -inf);  view_151 = None
+        logical_not_14: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_7);  eq_7 = None
+        any_8: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_14, -1, True);  logical_not_14 = None
+        logical_not_15: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_8);  any_8 = None
+        where_7: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_15, full, convert_element_type_158);  logical_not_15 = convert_element_type_158 = None
+        inductor_lookup_seed_22: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 22)
+        inductor_random_22: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_206, inductor_lookup_seed_22, 'rand');  _shape_param_206 = inductor_lookup_seed_22 = None
+        convert_element_type_159: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_22, torch.bfloat16);  inductor_random_22 = None
+        gt_22: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_159, 0.1);  convert_element_type_159 = None
+        mul_111: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_22, where_7)
+        mul_112: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_111, 1.1111111111111112);  mul_111 = None
+        expand_32: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_112, _shape_param_207);  mul_112 = _shape_param_207 = None
+        view_152: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_32, _shape_param_208);  expand_32 = _shape_param_208 = None
+        expand_33: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_83, _shape_param_209);  permute_83 = _shape_param_209 = None
+        clone_30: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_33, memory_format = torch.contiguous_format);  expand_33 = None
+        view_153: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_30, _shape_param_210);  clone_30 = _shape_param_210 = None
+        bmm_15: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_152, view_153)
+        view_154: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_15, _shape_param_211);  bmm_15 = _shape_param_211 = None
+        permute_85: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_154, [0, 2, 1, 3]);  view_154 = None
+        clone_31: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_85, memory_format = torch.contiguous_format);  permute_85 = None
+        view_155: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_31, _shape_param_212);  clone_31 = _shape_param_212 = None
+        convert_element_type_160: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg128_1, torch.bfloat16);  arg128_1 = None
+        convert_element_type_161: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg129_1, torch.bfloat16);  arg129_1 = None
+        view_156: "bf16[32768, 256]" = torch.ops.aten.view.default(view_155, _shape_param_213);  view_155 = _shape_param_213 = None
+        permute_86: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_161, [1, 0]);  convert_element_type_161 = None
+        addmm_46: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_160, view_156, permute_86);  convert_element_type_160 = None
+        view_157: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_46, _shape_param_214);  addmm_46 = _shape_param_214 = None
+        inductor_lookup_seed_23: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 23)
+        inductor_random_23: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_215, inductor_lookup_seed_23, 'rand');  _shape_param_215 = inductor_lookup_seed_23 = None
+        convert_element_type_162: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_23, torch.bfloat16);  inductor_random_23 = None
+        gt_23: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_162, 0.1);  convert_element_type_162 = None
+        mul_113: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_23, view_157);  view_157 = None
+        mul_114: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_113, 1.1111111111111112);  mul_113 = None
+        add_53: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_114, add_52);  mul_114 = add_52 = None
+        var_mean_15 = torch.ops.aten.var_mean.correction(add_53, [2], correction = 0, keepdim = True)
+        getitem_30: "f32[64, 512, 1]" = var_mean_15[0]
+        getitem_31: "f32[64, 512, 1]" = var_mean_15[1];  var_mean_15 = None
+        add_54: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_30, 1e-12);  getitem_30 = None
+        rsqrt_15: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_54);  add_54 = None
+        sub_23: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_53, getitem_31);  add_53 = getitem_31 = None
+        mul_115: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_23, rsqrt_15);  sub_23 = None
+        mul_116: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_115, arg130_1);  arg130_1 = None
+        add_55: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_116, arg131_1);  mul_116 = arg131_1 = None
+        convert_element_type_163: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg132_1, torch.bfloat16);  arg132_1 = None
+        convert_element_type_164: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg133_1, torch.bfloat16);  arg133_1 = None
+        convert_element_type_165: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_55, torch.bfloat16)
+        view_158: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_165, _shape_param_216);  convert_element_type_165 = _shape_param_216 = None
+        permute_87: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_164, [1, 0]);  convert_element_type_164 = None
+        addmm_47: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_163, view_158, permute_87);  convert_element_type_163 = None
+        view_159: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_47, _shape_param_217);  _shape_param_217 = None
+        convert_element_type_166: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_159, torch.float32);  view_159 = None
+        mul_117: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_166, 0.5)
+        mul_118: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_166, 0.7071067811865476);  convert_element_type_166 = None
+        erf_7: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_118);  mul_118 = None
+        add_56: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_7, 1);  erf_7 = None
+        mul_119: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_117, add_56);  mul_117 = add_56 = None
+        convert_element_type_167: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_119, torch.bfloat16);  mul_119 = None
+        convert_element_type_168: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg134_1, torch.bfloat16);  arg134_1 = None
+        convert_element_type_169: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg135_1, torch.bfloat16);  arg135_1 = None
+        view_160: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_167, _shape_param_218);  convert_element_type_167 = _shape_param_218 = None
+        permute_88: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_169, [1, 0]);  convert_element_type_169 = None
+        addmm_48: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_168, view_160, permute_88);  convert_element_type_168 = None
+        view_161: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_48, _shape_param_219);  addmm_48 = _shape_param_219 = None
+        inductor_lookup_seed_24: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 24)
+        inductor_random_24: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_220, inductor_lookup_seed_24, 'rand');  _shape_param_220 = inductor_lookup_seed_24 = None
+        convert_element_type_170: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_24, torch.bfloat16);  inductor_random_24 = None
+        gt_24: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_170, 0.1);  convert_element_type_170 = None
+        mul_120: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_24, view_161);  view_161 = None
+        mul_121: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_120, 1.1111111111111112);  mul_120 = None
+        add_57: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_121, add_55);  mul_121 = add_55 = None
+        var_mean_16 = torch.ops.aten.var_mean.correction(add_57, [2], correction = 0, keepdim = True)
+        getitem_32: "f32[64, 512, 1]" = var_mean_16[0]
+        getitem_33: "f32[64, 512, 1]" = var_mean_16[1];  var_mean_16 = None
+        add_58: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_32, 1e-12);  getitem_32 = None
+        rsqrt_16: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_58);  add_58 = None
+        sub_24: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_57, getitem_33);  add_57 = getitem_33 = None
+        mul_122: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_24, rsqrt_16);  sub_24 = None
+        mul_123: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_122, arg136_1);  arg136_1 = None
+        add_59: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_123, arg137_1);  mul_123 = arg137_1 = None
+        convert_element_type_171: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg138_1, torch.bfloat16);  arg138_1 = None
+        convert_element_type_172: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg139_1, torch.bfloat16);  arg139_1 = None
+        convert_element_type_173: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_59, torch.bfloat16)
+        view_162: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_173, _shape_param_221);  convert_element_type_173 = _shape_param_221 = None
+        permute_89: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_172, [1, 0]);  convert_element_type_172 = None
+        addmm_49: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_171, view_162, permute_89);  convert_element_type_171 = None
+        view_163: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_49, _shape_param_222);  addmm_49 = _shape_param_222 = None
+        view_164: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_163, _shape_param_223);  view_163 = _shape_param_223 = None
+        permute_90: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_164, [0, 2, 1, 3]);  view_164 = None
+        convert_element_type_174: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg140_1, torch.bfloat16);  arg140_1 = None
+        convert_element_type_175: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg141_1, torch.bfloat16);  arg141_1 = None
+        permute_91: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_175, [1, 0]);  convert_element_type_175 = None
+        addmm_50: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_174, view_162, permute_91);  convert_element_type_174 = None
+        view_165: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_50, _shape_param_224);  addmm_50 = _shape_param_224 = None
+        view_166: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_165, _shape_param_225);  view_165 = _shape_param_225 = None
+        permute_92: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_166, [0, 2, 1, 3]);  view_166 = None
+        convert_element_type_176: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg142_1, torch.bfloat16);  arg142_1 = None
+        convert_element_type_177: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg143_1, torch.bfloat16);  arg143_1 = None
+        permute_93: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_177, [1, 0]);  convert_element_type_177 = None
+        addmm_51: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_176, view_162, permute_93);  convert_element_type_176 = None
+        view_167: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_51, _shape_param_226);  addmm_51 = _shape_param_226 = None
+        view_168: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_167, _shape_param_227);  view_167 = _shape_param_227 = None
+        permute_94: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_168, [0, 2, 1, 3]);  view_168 = None
+        mul_124: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_90, 0.3535533905932738);  permute_90 = None
+        permute_95: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_92, [0, 1, 3, 2]);  permute_92 = None
+        mul_125: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_95, 0.3535533905932738);  permute_95 = None
+        expand_34: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_124, _shape_param_228);  mul_124 = _shape_param_228 = None
+        clone_32: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_34, memory_format = torch.contiguous_format);  expand_34 = None
+        view_169: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_32, _shape_param_229);  clone_32 = _shape_param_229 = None
+        expand_35: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_125, _shape_param_230);  mul_125 = _shape_param_230 = None
+        clone_33: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_35, memory_format = torch.contiguous_format);  expand_35 = None
+        view_170: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_33, _shape_param_231);  clone_33 = _shape_param_231 = None
+        bmm_16: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_169, view_170)
+        view_171: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_16, _shape_param_232);  bmm_16 = _shape_param_232 = None
+        convert_element_type_178: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_171, torch.float32)
+        amax_8: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_178, [-1], True)
+        sub_25: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_178, amax_8);  convert_element_type_178 = amax_8 = None
+        exp_8: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_25);  sub_25 = None
+        sum_9: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_8, [-1], True)
+        div_8: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_8, sum_9);  exp_8 = sum_9 = None
+        convert_element_type_179: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_8, torch.bfloat16);  div_8 = None
+        eq_8: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_171, -inf);  view_171 = None
+        logical_not_16: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_8);  eq_8 = None
+        any_9: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_16, -1, True);  logical_not_16 = None
+        logical_not_17: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_9);  any_9 = None
+        where_8: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_17, full, convert_element_type_179);  logical_not_17 = convert_element_type_179 = None
+        inductor_lookup_seed_25: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 25)
+        inductor_random_25: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_233, inductor_lookup_seed_25, 'rand');  _shape_param_233 = inductor_lookup_seed_25 = None
+        convert_element_type_180: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_25, torch.bfloat16);  inductor_random_25 = None
+        gt_25: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_180, 0.1);  convert_element_type_180 = None
+        mul_126: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_25, where_8)
+        mul_127: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_126, 1.1111111111111112);  mul_126 = None
+        expand_36: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_127, _shape_param_234);  mul_127 = _shape_param_234 = None
+        view_172: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_36, _shape_param_235);  expand_36 = _shape_param_235 = None
+        expand_37: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_94, _shape_param_236);  permute_94 = _shape_param_236 = None
+        clone_34: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_37, memory_format = torch.contiguous_format);  expand_37 = None
+        view_173: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_34, _shape_param_237);  clone_34 = _shape_param_237 = None
+        bmm_17: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_172, view_173)
+        view_174: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_17, _shape_param_238);  bmm_17 = _shape_param_238 = None
+        permute_96: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_174, [0, 2, 1, 3]);  view_174 = None
+        clone_35: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_96, memory_format = torch.contiguous_format);  permute_96 = None
+        view_175: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_35, _shape_param_239);  clone_35 = _shape_param_239 = None
+        convert_element_type_181: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg144_1, torch.bfloat16);  arg144_1 = None
+        convert_element_type_182: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg145_1, torch.bfloat16);  arg145_1 = None
+        view_176: "bf16[32768, 256]" = torch.ops.aten.view.default(view_175, _shape_param_240);  view_175 = _shape_param_240 = None
+        permute_97: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_182, [1, 0]);  convert_element_type_182 = None
+        addmm_52: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_181, view_176, permute_97);  convert_element_type_181 = None
+        view_177: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_52, _shape_param_241);  addmm_52 = _shape_param_241 = None
+        inductor_lookup_seed_26: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 26)
+        inductor_random_26: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_242, inductor_lookup_seed_26, 'rand');  _shape_param_242 = inductor_lookup_seed_26 = None
+        convert_element_type_183: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_26, torch.bfloat16);  inductor_random_26 = None
+        gt_26: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_183, 0.1);  convert_element_type_183 = None
+        mul_128: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_26, view_177);  view_177 = None
+        mul_129: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_128, 1.1111111111111112);  mul_128 = None
+        add_60: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_129, add_59);  mul_129 = add_59 = None
+        var_mean_17 = torch.ops.aten.var_mean.correction(add_60, [2], correction = 0, keepdim = True)
+        getitem_34: "f32[64, 512, 1]" = var_mean_17[0]
+        getitem_35: "f32[64, 512, 1]" = var_mean_17[1];  var_mean_17 = None
+        add_61: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_34, 1e-12);  getitem_34 = None
+        rsqrt_17: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_61);  add_61 = None
+        sub_26: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_60, getitem_35);  add_60 = getitem_35 = None
+        mul_130: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_26, rsqrt_17);  sub_26 = None
+        mul_131: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_130, arg146_1);  arg146_1 = None
+        add_62: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_131, arg147_1);  mul_131 = arg147_1 = None
+        convert_element_type_184: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg148_1, torch.bfloat16);  arg148_1 = None
+        convert_element_type_185: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg149_1, torch.bfloat16);  arg149_1 = None
+        convert_element_type_186: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_62, torch.bfloat16)
+        view_178: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_186, _shape_param_243);  convert_element_type_186 = _shape_param_243 = None
+        permute_98: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_185, [1, 0]);  convert_element_type_185 = None
+        addmm_53: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_184, view_178, permute_98);  convert_element_type_184 = None
+        view_179: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_53, _shape_param_244);  _shape_param_244 = None
+        convert_element_type_187: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_179, torch.float32);  view_179 = None
+        mul_132: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_187, 0.5)
+        mul_133: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_187, 0.7071067811865476);  convert_element_type_187 = None
+        erf_8: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_133);  mul_133 = None
+        add_63: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_8, 1);  erf_8 = None
+        mul_134: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_132, add_63);  mul_132 = add_63 = None
+        convert_element_type_188: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_134, torch.bfloat16);  mul_134 = None
+        convert_element_type_189: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg150_1, torch.bfloat16);  arg150_1 = None
+        convert_element_type_190: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg151_1, torch.bfloat16);  arg151_1 = None
+        view_180: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_188, _shape_param_245);  convert_element_type_188 = _shape_param_245 = None
+        permute_99: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_190, [1, 0]);  convert_element_type_190 = None
+        addmm_54: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_189, view_180, permute_99);  convert_element_type_189 = None
+        view_181: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_54, _shape_param_246);  addmm_54 = _shape_param_246 = None
+        inductor_lookup_seed_27: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 27)
+        inductor_random_27: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_247, inductor_lookup_seed_27, 'rand');  _shape_param_247 = inductor_lookup_seed_27 = None
+        convert_element_type_191: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_27, torch.bfloat16);  inductor_random_27 = None
+        gt_27: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_191, 0.1);  convert_element_type_191 = None
+        mul_135: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_27, view_181);  view_181 = None
+        mul_136: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_135, 1.1111111111111112);  mul_135 = None
+        add_64: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_136, add_62);  mul_136 = add_62 = None
+        var_mean_18 = torch.ops.aten.var_mean.correction(add_64, [2], correction = 0, keepdim = True)
+        getitem_36: "f32[64, 512, 1]" = var_mean_18[0]
+        getitem_37: "f32[64, 512, 1]" = var_mean_18[1];  var_mean_18 = None
+        add_65: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_36, 1e-12);  getitem_36 = None
+        rsqrt_18: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_65);  add_65 = None
+        sub_27: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_64, getitem_37);  add_64 = getitem_37 = None
+        mul_137: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_27, rsqrt_18);  sub_27 = None
+        mul_138: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_137, arg152_1);  arg152_1 = None
+        add_66: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_138, arg153_1);  mul_138 = arg153_1 = None
+        convert_element_type_192: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg154_1, torch.bfloat16);  arg154_1 = None
+        convert_element_type_193: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg155_1, torch.bfloat16);  arg155_1 = None
+        convert_element_type_194: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_66, torch.bfloat16)
+        view_182: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_194, _shape_param_248);  convert_element_type_194 = _shape_param_248 = None
+        permute_100: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_193, [1, 0]);  convert_element_type_193 = None
+        addmm_55: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_192, view_182, permute_100);  convert_element_type_192 = None
+        view_183: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_55, _shape_param_249);  addmm_55 = _shape_param_249 = None
+        view_184: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_183, _shape_param_250);  view_183 = _shape_param_250 = None
+        permute_101: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_184, [0, 2, 1, 3]);  view_184 = None
+        convert_element_type_195: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg156_1, torch.bfloat16);  arg156_1 = None
+        convert_element_type_196: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg157_1, torch.bfloat16);  arg157_1 = None
+        permute_102: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_196, [1, 0]);  convert_element_type_196 = None
+        addmm_56: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_195, view_182, permute_102);  convert_element_type_195 = None
+        view_185: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_56, _shape_param_251);  addmm_56 = _shape_param_251 = None
+        view_186: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_185, _shape_param_252);  view_185 = _shape_param_252 = None
+        permute_103: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_186, [0, 2, 1, 3]);  view_186 = None
+        convert_element_type_197: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg158_1, torch.bfloat16);  arg158_1 = None
+        convert_element_type_198: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg159_1, torch.bfloat16);  arg159_1 = None
+        permute_104: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_198, [1, 0]);  convert_element_type_198 = None
+        addmm_57: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_197, view_182, permute_104);  convert_element_type_197 = None
+        view_187: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_57, _shape_param_253);  addmm_57 = _shape_param_253 = None
+        view_188: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_187, _shape_param_254);  view_187 = _shape_param_254 = None
+        permute_105: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_188, [0, 2, 1, 3]);  view_188 = None
+        mul_139: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_101, 0.3535533905932738);  permute_101 = None
+        permute_106: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_103, [0, 1, 3, 2]);  permute_103 = None
+        mul_140: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_106, 0.3535533905932738);  permute_106 = None
+        expand_38: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_139, _shape_param_255);  mul_139 = _shape_param_255 = None
+        clone_36: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_38, memory_format = torch.contiguous_format);  expand_38 = None
+        view_189: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_36, _shape_param_256);  clone_36 = _shape_param_256 = None
+        expand_39: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_140, _shape_param_257);  mul_140 = _shape_param_257 = None
+        clone_37: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_39, memory_format = torch.contiguous_format);  expand_39 = None
+        view_190: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_37, _shape_param_258);  clone_37 = _shape_param_258 = None
+        bmm_18: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_189, view_190)
+        view_191: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_18, _shape_param_259);  bmm_18 = _shape_param_259 = None
+        convert_element_type_199: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_191, torch.float32)
+        amax_9: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_199, [-1], True)
+        sub_28: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_199, amax_9);  convert_element_type_199 = amax_9 = None
+        exp_9: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_28);  sub_28 = None
+        sum_10: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_9, [-1], True)
+        div_9: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_9, sum_10);  exp_9 = sum_10 = None
+        convert_element_type_200: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_9, torch.bfloat16);  div_9 = None
+        eq_9: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_191, -inf);  view_191 = None
+        logical_not_18: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_9);  eq_9 = None
+        any_10: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_18, -1, True);  logical_not_18 = None
+        logical_not_19: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_10);  any_10 = None
+        where_9: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_19, full, convert_element_type_200);  logical_not_19 = convert_element_type_200 = None
+        inductor_lookup_seed_28: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 28)
+        inductor_random_28: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_260, inductor_lookup_seed_28, 'rand');  _shape_param_260 = inductor_lookup_seed_28 = None
+        convert_element_type_201: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_28, torch.bfloat16);  inductor_random_28 = None
+        gt_28: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_201, 0.1);  convert_element_type_201 = None
+        mul_141: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_28, where_9)
+        mul_142: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_141, 1.1111111111111112);  mul_141 = None
+        expand_40: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_142, _shape_param_261);  mul_142 = _shape_param_261 = None
+        view_192: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_40, _shape_param_262);  expand_40 = _shape_param_262 = None
+        expand_41: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_105, _shape_param_263);  permute_105 = _shape_param_263 = None
+        clone_38: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_41, memory_format = torch.contiguous_format);  expand_41 = None
+        view_193: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_38, _shape_param_264);  clone_38 = _shape_param_264 = None
+        bmm_19: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_192, view_193)
+        view_194: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_19, _shape_param_265);  bmm_19 = _shape_param_265 = None
+        permute_107: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_194, [0, 2, 1, 3]);  view_194 = None
+        clone_39: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_107, memory_format = torch.contiguous_format);  permute_107 = None
+        view_195: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_39, _shape_param_266);  clone_39 = _shape_param_266 = None
+        convert_element_type_202: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg160_1, torch.bfloat16);  arg160_1 = None
+        convert_element_type_203: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg161_1, torch.bfloat16);  arg161_1 = None
+        view_196: "bf16[32768, 256]" = torch.ops.aten.view.default(view_195, _shape_param_267);  view_195 = _shape_param_267 = None
+        permute_108: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_203, [1, 0]);  convert_element_type_203 = None
+        addmm_58: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_202, view_196, permute_108);  convert_element_type_202 = None
+        view_197: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_58, _shape_param_268);  addmm_58 = _shape_param_268 = None
+        inductor_lookup_seed_29: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 29)
+        inductor_random_29: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_269, inductor_lookup_seed_29, 'rand');  _shape_param_269 = inductor_lookup_seed_29 = None
+        convert_element_type_204: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_29, torch.bfloat16);  inductor_random_29 = None
+        gt_29: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_204, 0.1);  convert_element_type_204 = None
+        mul_143: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_29, view_197);  view_197 = None
+        mul_144: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_143, 1.1111111111111112);  mul_143 = None
+        add_67: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_144, add_66);  mul_144 = add_66 = None
+        var_mean_19 = torch.ops.aten.var_mean.correction(add_67, [2], correction = 0, keepdim = True)
+        getitem_38: "f32[64, 512, 1]" = var_mean_19[0]
+        getitem_39: "f32[64, 512, 1]" = var_mean_19[1];  var_mean_19 = None
+        add_68: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_38, 1e-12);  getitem_38 = None
+        rsqrt_19: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_68);  add_68 = None
+        sub_29: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_67, getitem_39);  add_67 = getitem_39 = None
+        mul_145: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_29, rsqrt_19);  sub_29 = None
+        mul_146: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_145, arg162_1);  arg162_1 = None
+        add_69: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_146, arg163_1);  mul_146 = arg163_1 = None
+        convert_element_type_205: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg164_1, torch.bfloat16);  arg164_1 = None
+        convert_element_type_206: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg165_1, torch.bfloat16);  arg165_1 = None
+        convert_element_type_207: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_69, torch.bfloat16)
+        view_198: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_207, _shape_param_270);  convert_element_type_207 = _shape_param_270 = None
+        permute_109: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_206, [1, 0]);  convert_element_type_206 = None
+        addmm_59: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_205, view_198, permute_109);  convert_element_type_205 = None
+        view_199: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_59, _shape_param_271);  _shape_param_271 = None
+        convert_element_type_208: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_199, torch.float32);  view_199 = None
+        mul_147: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_208, 0.5)
+        mul_148: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_208, 0.7071067811865476);  convert_element_type_208 = None
+        erf_9: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_148);  mul_148 = None
+        add_70: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_9, 1);  erf_9 = None
+        mul_149: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_147, add_70);  mul_147 = add_70 = None
+        convert_element_type_209: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_149, torch.bfloat16);  mul_149 = None
+        convert_element_type_210: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg166_1, torch.bfloat16);  arg166_1 = None
+        convert_element_type_211: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg167_1, torch.bfloat16);  arg167_1 = None
+        view_200: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_209, _shape_param_272);  convert_element_type_209 = _shape_param_272 = None
+        permute_110: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_211, [1, 0]);  convert_element_type_211 = None
+        addmm_60: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_210, view_200, permute_110);  convert_element_type_210 = None
+        view_201: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_60, _shape_param_273);  addmm_60 = _shape_param_273 = None
+        inductor_lookup_seed_30: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 30)
+        inductor_random_30: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_274, inductor_lookup_seed_30, 'rand');  _shape_param_274 = inductor_lookup_seed_30 = None
+        convert_element_type_212: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_30, torch.bfloat16);  inductor_random_30 = None
+        gt_30: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_212, 0.1);  convert_element_type_212 = None
+        mul_150: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_30, view_201);  view_201 = None
+        mul_151: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_150, 1.1111111111111112);  mul_150 = None
+        add_71: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_151, add_69);  mul_151 = add_69 = None
+        var_mean_20 = torch.ops.aten.var_mean.correction(add_71, [2], correction = 0, keepdim = True)
+        getitem_40: "f32[64, 512, 1]" = var_mean_20[0]
+        getitem_41: "f32[64, 512, 1]" = var_mean_20[1];  var_mean_20 = None
+        add_72: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_40, 1e-12);  getitem_40 = None
+        rsqrt_20: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_72);  add_72 = None
+        sub_30: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_71, getitem_41);  add_71 = getitem_41 = None
+        mul_152: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_30, rsqrt_20);  sub_30 = None
+        mul_153: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_152, arg168_1);  arg168_1 = None
+        add_73: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_153, arg169_1);  mul_153 = arg169_1 = None
+        convert_element_type_213: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg170_1, torch.bfloat16);  arg170_1 = None
+        convert_element_type_214: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg171_1, torch.bfloat16);  arg171_1 = None
+        convert_element_type_215: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_73, torch.bfloat16)
+        view_202: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_215, _shape_param_275);  convert_element_type_215 = _shape_param_275 = None
+        permute_111: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_214, [1, 0]);  convert_element_type_214 = None
+        addmm_61: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_213, view_202, permute_111);  convert_element_type_213 = None
+        view_203: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_61, _shape_param_276);  addmm_61 = _shape_param_276 = None
+        view_204: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_203, _shape_param_277);  view_203 = _shape_param_277 = None
+        permute_112: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_204, [0, 2, 1, 3]);  view_204 = None
+        convert_element_type_216: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg172_1, torch.bfloat16);  arg172_1 = None
+        convert_element_type_217: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg173_1, torch.bfloat16);  arg173_1 = None
+        permute_113: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_217, [1, 0]);  convert_element_type_217 = None
+        addmm_62: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_216, view_202, permute_113);  convert_element_type_216 = None
+        view_205: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_62, _shape_param_278);  addmm_62 = _shape_param_278 = None
+        view_206: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_205, _shape_param_279);  view_205 = _shape_param_279 = None
+        permute_114: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_206, [0, 2, 1, 3]);  view_206 = None
+        convert_element_type_218: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg174_1, torch.bfloat16);  arg174_1 = None
+        convert_element_type_219: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg175_1, torch.bfloat16);  arg175_1 = None
+        permute_115: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_219, [1, 0]);  convert_element_type_219 = None
+        addmm_63: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_218, view_202, permute_115);  convert_element_type_218 = None
+        view_207: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_63, _shape_param_280);  addmm_63 = _shape_param_280 = None
+        view_208: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_207, _shape_param_281);  view_207 = _shape_param_281 = None
+        permute_116: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_208, [0, 2, 1, 3]);  view_208 = None
+        mul_154: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_112, 0.3535533905932738);  permute_112 = None
+        permute_117: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_114, [0, 1, 3, 2]);  permute_114 = None
+        mul_155: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_117, 0.3535533905932738);  permute_117 = None
+        expand_42: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_154, _shape_param_282);  mul_154 = _shape_param_282 = None
+        clone_40: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_42, memory_format = torch.contiguous_format);  expand_42 = None
+        view_209: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_40, _shape_param_283);  clone_40 = _shape_param_283 = None
+        expand_43: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_155, _shape_param_284);  mul_155 = _shape_param_284 = None
+        clone_41: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_43, memory_format = torch.contiguous_format);  expand_43 = None
+        view_210: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_41, _shape_param_285);  clone_41 = _shape_param_285 = None
+        bmm_20: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_209, view_210)
+        view_211: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_20, _shape_param_286);  bmm_20 = _shape_param_286 = None
+        convert_element_type_220: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_211, torch.float32)
+        amax_10: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_220, [-1], True)
+        sub_31: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_220, amax_10);  convert_element_type_220 = amax_10 = None
+        exp_10: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_31);  sub_31 = None
+        sum_11: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_10, [-1], True)
+        div_10: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_10, sum_11);  exp_10 = sum_11 = None
+        convert_element_type_221: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_10, torch.bfloat16);  div_10 = None
+        eq_10: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_211, -inf);  view_211 = None
+        logical_not_20: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_10);  eq_10 = None
+        any_11: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_20, -1, True);  logical_not_20 = None
+        logical_not_21: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_11);  any_11 = None
+        where_10: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_21, full, convert_element_type_221);  logical_not_21 = convert_element_type_221 = None
+        inductor_lookup_seed_31: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 31)
+        inductor_random_31: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_287, inductor_lookup_seed_31, 'rand');  _shape_param_287 = inductor_lookup_seed_31 = None
+        convert_element_type_222: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_31, torch.bfloat16);  inductor_random_31 = None
+        gt_31: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_222, 0.1);  convert_element_type_222 = None
+        mul_156: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_31, where_10)
+        mul_157: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_156, 1.1111111111111112);  mul_156 = None
+        expand_44: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_157, _shape_param_288);  mul_157 = _shape_param_288 = None
+        view_212: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_44, _shape_param_289);  expand_44 = _shape_param_289 = None
+        expand_45: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_116, _shape_param_290);  permute_116 = _shape_param_290 = None
+        clone_42: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_45, memory_format = torch.contiguous_format);  expand_45 = None
+        view_213: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_42, _shape_param_291);  clone_42 = _shape_param_291 = None
+        bmm_21: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_212, view_213)
+        view_214: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_21, _shape_param_292);  bmm_21 = _shape_param_292 = None
+        permute_118: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_214, [0, 2, 1, 3]);  view_214 = None
+        clone_43: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_118, memory_format = torch.contiguous_format);  permute_118 = None
+        view_215: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_43, _shape_param_293);  clone_43 = _shape_param_293 = None
+        convert_element_type_223: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg176_1, torch.bfloat16);  arg176_1 = None
+        convert_element_type_224: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg177_1, torch.bfloat16);  arg177_1 = None
+        view_216: "bf16[32768, 256]" = torch.ops.aten.view.default(view_215, _shape_param_294);  view_215 = _shape_param_294 = None
+        permute_119: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_224, [1, 0]);  convert_element_type_224 = None
+        addmm_64: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_223, view_216, permute_119);  convert_element_type_223 = None
+        view_217: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_64, _shape_param_295);  addmm_64 = _shape_param_295 = None
+        inductor_lookup_seed_32: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 32)
+        inductor_random_32: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_296, inductor_lookup_seed_32, 'rand');  _shape_param_296 = inductor_lookup_seed_32 = None
+        convert_element_type_225: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_32, torch.bfloat16);  inductor_random_32 = None
+        gt_32: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_225, 0.1);  convert_element_type_225 = None
+        mul_158: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_32, view_217);  view_217 = None
+        mul_159: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_158, 1.1111111111111112);  mul_158 = None
+        add_74: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_159, add_73);  mul_159 = add_73 = None
+        var_mean_21 = torch.ops.aten.var_mean.correction(add_74, [2], correction = 0, keepdim = True)
+        getitem_42: "f32[64, 512, 1]" = var_mean_21[0]
+        getitem_43: "f32[64, 512, 1]" = var_mean_21[1];  var_mean_21 = None
+        add_75: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_42, 1e-12);  getitem_42 = None
+        rsqrt_21: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_75);  add_75 = None
+        sub_32: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_74, getitem_43);  add_74 = getitem_43 = None
+        mul_160: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_32, rsqrt_21);  sub_32 = None
+        mul_161: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_160, arg178_1);  arg178_1 = None
+        add_76: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_161, arg179_1);  mul_161 = arg179_1 = None
+        convert_element_type_226: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg180_1, torch.bfloat16);  arg180_1 = None
+        convert_element_type_227: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg181_1, torch.bfloat16);  arg181_1 = None
+        convert_element_type_228: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_76, torch.bfloat16)
+        view_218: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_228, _shape_param_297);  convert_element_type_228 = _shape_param_297 = None
+        permute_120: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_227, [1, 0]);  convert_element_type_227 = None
+        addmm_65: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_226, view_218, permute_120);  convert_element_type_226 = None
+        view_219: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_65, _shape_param_298);  _shape_param_298 = None
+        convert_element_type_229: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_219, torch.float32);  view_219 = None
+        mul_162: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_229, 0.5)
+        mul_163: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_229, 0.7071067811865476);  convert_element_type_229 = None
+        erf_10: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_163);  mul_163 = None
+        add_77: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_10, 1);  erf_10 = None
+        mul_164: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_162, add_77);  mul_162 = add_77 = None
+        convert_element_type_230: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_164, torch.bfloat16);  mul_164 = None
+        convert_element_type_231: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg182_1, torch.bfloat16);  arg182_1 = None
+        convert_element_type_232: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg183_1, torch.bfloat16);  arg183_1 = None
+        view_220: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_230, _shape_param_299);  convert_element_type_230 = _shape_param_299 = None
+        permute_121: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_232, [1, 0]);  convert_element_type_232 = None
+        addmm_66: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_231, view_220, permute_121);  convert_element_type_231 = None
+        view_221: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_66, _shape_param_300);  addmm_66 = _shape_param_300 = None
+        inductor_lookup_seed_33: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 33)
+        inductor_random_33: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_301, inductor_lookup_seed_33, 'rand');  _shape_param_301 = inductor_lookup_seed_33 = None
+        convert_element_type_233: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_33, torch.bfloat16);  inductor_random_33 = None
+        gt_33: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_233, 0.1);  convert_element_type_233 = None
+        mul_165: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_33, view_221);  view_221 = None
+        mul_166: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_165, 1.1111111111111112);  mul_165 = None
+        add_78: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_166, add_76);  mul_166 = add_76 = None
+        var_mean_22 = torch.ops.aten.var_mean.correction(add_78, [2], correction = 0, keepdim = True)
+        getitem_44: "f32[64, 512, 1]" = var_mean_22[0]
+        getitem_45: "f32[64, 512, 1]" = var_mean_22[1];  var_mean_22 = None
+        add_79: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_44, 1e-12);  getitem_44 = None
+        rsqrt_22: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_79);  add_79 = None
+        sub_33: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_78, getitem_45);  add_78 = getitem_45 = None
+        mul_167: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_33, rsqrt_22);  sub_33 = None
+        mul_168: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_167, arg184_1);  arg184_1 = None
+        add_80: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_168, arg185_1);  mul_168 = arg185_1 = None
+        convert_element_type_234: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg186_1, torch.bfloat16);  arg186_1 = None
+        convert_element_type_235: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg187_1, torch.bfloat16);  arg187_1 = None
+        convert_element_type_236: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_80, torch.bfloat16)
+        view_222: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_236, _shape_param_302);  convert_element_type_236 = _shape_param_302 = None
+        permute_122: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_235, [1, 0]);  convert_element_type_235 = None
+        addmm_67: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_234, view_222, permute_122);  convert_element_type_234 = None
+        view_223: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_67, _shape_param_303);  addmm_67 = _shape_param_303 = None
+        view_224: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_223, _shape_param_304);  view_223 = _shape_param_304 = None
+        permute_123: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_224, [0, 2, 1, 3]);  view_224 = None
+        convert_element_type_237: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg188_1, torch.bfloat16);  arg188_1 = None
+        convert_element_type_238: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg189_1, torch.bfloat16);  arg189_1 = None
+        permute_124: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_238, [1, 0]);  convert_element_type_238 = None
+        addmm_68: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_237, view_222, permute_124);  convert_element_type_237 = None
+        view_225: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_68, _shape_param_305);  addmm_68 = _shape_param_305 = None
+        view_226: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_225, _shape_param_306);  view_225 = _shape_param_306 = None
+        permute_125: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_226, [0, 2, 1, 3]);  view_226 = None
+        convert_element_type_239: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg190_1, torch.bfloat16);  arg190_1 = None
+        convert_element_type_240: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg191_1, torch.bfloat16);  arg191_1 = None
+        permute_126: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_240, [1, 0]);  convert_element_type_240 = None
+        addmm_69: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_239, view_222, permute_126);  convert_element_type_239 = None
+        view_227: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_69, _shape_param_307);  addmm_69 = _shape_param_307 = None
+        view_228: "bf16[64, 512, 4, 64]" = torch.ops.aten.view.default(view_227, _shape_param_308);  view_227 = _shape_param_308 = None
+        permute_127: "bf16[64, 4, 512, 64]" = torch.ops.aten.permute.default(view_228, [0, 2, 1, 3]);  view_228 = None
+        mul_169: "bf16[64, 4, 512, 64]" = torch.ops.aten.mul.Scalar(permute_123, 0.3535533905932738);  permute_123 = None
+        permute_128: "bf16[64, 4, 64, 512]" = torch.ops.aten.permute.default(permute_125, [0, 1, 3, 2]);  permute_125 = None
+        mul_170: "bf16[64, 4, 64, 512]" = torch.ops.aten.mul.Scalar(permute_128, 0.3535533905932738);  permute_128 = None
+        expand_46: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(mul_169, _shape_param_309);  mul_169 = _shape_param_309 = None
+        clone_44: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_46, memory_format = torch.contiguous_format);  expand_46 = None
+        view_229: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_44, _shape_param_310);  clone_44 = _shape_param_310 = None
+        expand_47: "bf16[64, 4, 64, 512]" = torch.ops.aten.expand.default(mul_170, _shape_param_311);  mul_170 = _shape_param_311 = None
+        clone_45: "bf16[64, 4, 64, 512]" = torch.ops.aten.clone.default(expand_47, memory_format = torch.contiguous_format);  expand_47 = None
+        view_230: "bf16[256, 64, 512]" = torch.ops.aten.view.default(clone_45, _shape_param_312);  clone_45 = _shape_param_312 = None
+        bmm_22: "bf16[256, 512, 512]" = torch.ops.aten.bmm.default(view_229, view_230)
+        view_231: "bf16[64, 4, 512, 512]" = torch.ops.aten.view.default(bmm_22, _shape_param_313);  bmm_22 = _shape_param_313 = None
+        convert_element_type_241: "f32[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(view_231, torch.float32)
+        amax_11: "f32[64, 4, 512, 1]" = torch.ops.aten.amax.default(convert_element_type_241, [-1], True)
+        sub_34: "f32[64, 4, 512, 512]" = torch.ops.aten.sub.Tensor(convert_element_type_241, amax_11);  convert_element_type_241 = amax_11 = None
+        exp_11: "f32[64, 4, 512, 512]" = torch.ops.aten.exp.default(sub_34);  sub_34 = None
+        sum_12: "f32[64, 4, 512, 1]" = torch.ops.aten.sum.dim_IntList(exp_11, [-1], True)
+        div_11: "f32[64, 4, 512, 512]" = torch.ops.aten.div.Tensor(exp_11, sum_12);  exp_11 = sum_12 = None
+        convert_element_type_242: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(div_11, torch.bfloat16);  div_11 = None
+        eq_11: "b8[64, 4, 512, 512]" = torch.ops.aten.eq.Scalar(view_231, -inf);  view_231 = None
+        logical_not_22: "b8[64, 4, 512, 512]" = torch.ops.aten.logical_not.default(eq_11);  eq_11 = None
+        any_12: "b8[64, 4, 512, 1]" = torch.ops.aten.any.dim(logical_not_22, -1, True);  logical_not_22 = None
+        logical_not_23: "b8[64, 4, 512, 1]" = torch.ops.aten.logical_not.default(any_12);  any_12 = None
+        where_11: "bf16[64, 4, 512, 512]" = torch.ops.aten.where.self(logical_not_23, full, convert_element_type_242);  logical_not_23 = full = convert_element_type_242 = None
+        inductor_lookup_seed_34: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 34)
+        inductor_random_34: "f32[64, 4, 512, 512]" = torch.ops.prims.inductor_random.default(_shape_param_314, inductor_lookup_seed_34, 'rand');  _shape_param_314 = inductor_lookup_seed_34 = None
+        convert_element_type_243: "bf16[64, 4, 512, 512]" = torch.ops.prims.convert_element_type.default(inductor_random_34, torch.bfloat16);  inductor_random_34 = None
+        gt_34: "b8[64, 4, 512, 512]" = torch.ops.aten.gt.Scalar(convert_element_type_243, 0.1);  convert_element_type_243 = None
+        mul_171: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(gt_34, where_11)
+        mul_172: "bf16[64, 4, 512, 512]" = torch.ops.aten.mul.Tensor(mul_171, 1.1111111111111112);  mul_171 = None
+        expand_48: "bf16[64, 4, 512, 512]" = torch.ops.aten.expand.default(mul_172, _shape_param_315);  mul_172 = _shape_param_315 = None
+        view_232: "bf16[256, 512, 512]" = torch.ops.aten.view.default(expand_48, _shape_param_316);  expand_48 = _shape_param_316 = None
+        expand_49: "bf16[64, 4, 512, 64]" = torch.ops.aten.expand.default(permute_127, _shape_param_317);  permute_127 = _shape_param_317 = None
+        clone_46: "bf16[64, 4, 512, 64]" = torch.ops.aten.clone.default(expand_49, memory_format = torch.contiguous_format);  expand_49 = None
+        view_233: "bf16[256, 512, 64]" = torch.ops.aten.view.default(clone_46, _shape_param_318);  clone_46 = _shape_param_318 = None
+        bmm_23: "bf16[256, 512, 64]" = torch.ops.aten.bmm.default(view_232, view_233)
+        view_234: "bf16[64, 4, 512, 64]" = torch.ops.aten.view.default(bmm_23, _shape_param_319);  bmm_23 = _shape_param_319 = None
+        permute_129: "bf16[64, 512, 4, 64]" = torch.ops.aten.permute.default(view_234, [0, 2, 1, 3]);  view_234 = None
+        clone_47: "bf16[64, 512, 4, 64]" = torch.ops.aten.clone.default(permute_129, memory_format = torch.contiguous_format);  permute_129 = None
+        view_235: "bf16[64, 512, 256]" = torch.ops.aten.view.default(clone_47, _shape_param_320);  clone_47 = _shape_param_320 = None
+        convert_element_type_244: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg192_1, torch.bfloat16);  arg192_1 = None
+        convert_element_type_245: "bf16[256, 256]" = torch.ops.prims.convert_element_type.default(arg193_1, torch.bfloat16);  arg193_1 = None
+        view_236: "bf16[32768, 256]" = torch.ops.aten.view.default(view_235, _shape_param_321);  view_235 = _shape_param_321 = None
+        permute_130: "bf16[256, 256]" = torch.ops.aten.permute.default(convert_element_type_245, [1, 0]);  convert_element_type_245 = None
+        addmm_70: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_244, view_236, permute_130);  convert_element_type_244 = None
+        view_237: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_70, _shape_param_322);  addmm_70 = _shape_param_322 = None
+        inductor_lookup_seed_35: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 35)
+        inductor_random_35: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_323, inductor_lookup_seed_35, 'rand');  _shape_param_323 = inductor_lookup_seed_35 = None
+        convert_element_type_246: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_35, torch.bfloat16);  inductor_random_35 = None
+        gt_35: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_246, 0.1);  convert_element_type_246 = None
+        mul_173: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_35, view_237);  view_237 = None
+        mul_174: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_173, 1.1111111111111112);  mul_173 = None
+        add_81: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_174, add_80);  mul_174 = add_80 = None
+        var_mean_23 = torch.ops.aten.var_mean.correction(add_81, [2], correction = 0, keepdim = True)
+        getitem_46: "f32[64, 512, 1]" = var_mean_23[0]
+        getitem_47: "f32[64, 512, 1]" = var_mean_23[1];  var_mean_23 = None
+        add_82: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_46, 1e-12);  getitem_46 = None
+        rsqrt_23: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_82);  add_82 = None
+        sub_35: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_81, getitem_47);  add_81 = getitem_47 = None
+        mul_175: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_35, rsqrt_23);  sub_35 = None
+        mul_176: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_175, arg194_1);  arg194_1 = None
+        add_83: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_176, arg195_1);  mul_176 = arg195_1 = None
+        convert_element_type_247: "bf16[1024]" = torch.ops.prims.convert_element_type.default(arg196_1, torch.bfloat16);  arg196_1 = None
+        convert_element_type_248: "bf16[1024, 256]" = torch.ops.prims.convert_element_type.default(arg197_1, torch.bfloat16);  arg197_1 = None
+        convert_element_type_249: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_83, torch.bfloat16)
+        view_238: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_249, _shape_param_324);  convert_element_type_249 = _shape_param_324 = None
+        permute_131: "bf16[256, 1024]" = torch.ops.aten.permute.default(convert_element_type_248, [1, 0]);  convert_element_type_248 = None
+        addmm_71: "bf16[32768, 1024]" = torch.ops.aten.addmm.default(convert_element_type_247, view_238, permute_131);  convert_element_type_247 = None
+        view_239: "bf16[64, 512, 1024]" = torch.ops.aten.view.default(addmm_71, _shape_param_325);  _shape_param_325 = None
+        convert_element_type_250: "f32[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(view_239, torch.float32);  view_239 = None
+        mul_177: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_250, 0.5)
+        mul_178: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(convert_element_type_250, 0.7071067811865476);  convert_element_type_250 = None
+        erf_11: "f32[64, 512, 1024]" = torch.ops.aten.erf.default(mul_178);  mul_178 = None
+        add_84: "f32[64, 512, 1024]" = torch.ops.aten.add.Tensor(erf_11, 1);  erf_11 = None
+        mul_179: "f32[64, 512, 1024]" = torch.ops.aten.mul.Tensor(mul_177, add_84);  mul_177 = add_84 = None
+        convert_element_type_251: "bf16[64, 512, 1024]" = torch.ops.prims.convert_element_type.default(mul_179, torch.bfloat16);  mul_179 = None
+        convert_element_type_252: "bf16[256]" = torch.ops.prims.convert_element_type.default(arg198_1, torch.bfloat16);  arg198_1 = None
+        convert_element_type_253: "bf16[256, 1024]" = torch.ops.prims.convert_element_type.default(arg199_1, torch.bfloat16);  arg199_1 = None
+        view_240: "bf16[32768, 1024]" = torch.ops.aten.view.default(convert_element_type_251, _shape_param_326);  convert_element_type_251 = _shape_param_326 = None
+        permute_132: "bf16[1024, 256]" = torch.ops.aten.permute.default(convert_element_type_253, [1, 0]);  convert_element_type_253 = None
+        addmm_72: "bf16[32768, 256]" = torch.ops.aten.addmm.default(convert_element_type_252, view_240, permute_132);  convert_element_type_252 = None
+        view_241: "bf16[64, 512, 256]" = torch.ops.aten.view.default(addmm_72, _shape_param_327);  addmm_72 = _shape_param_327 = None
+        inductor_lookup_seed_36: "i64[]" = torch.ops.prims.inductor_lookup_seed.default(inductor_seeds, 36);  inductor_seeds = None
+        inductor_random_36: "f32[64, 512, 256]" = torch.ops.prims.inductor_random.default(_shape_param_328, inductor_lookup_seed_36, 'rand');  _shape_param_328 = inductor_lookup_seed_36 = None
+        convert_element_type_254: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(inductor_random_36, torch.bfloat16);  inductor_random_36 = None
+        gt_36: "b8[64, 512, 256]" = torch.ops.aten.gt.Scalar(convert_element_type_254, 0.1);  convert_element_type_254 = None
+        mul_180: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(gt_36, view_241);  view_241 = None
+        mul_181: "bf16[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_180, 1.1111111111111112);  mul_180 = None
+        add_85: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_181, add_83);  mul_181 = add_83 = None
+        var_mean_24 = torch.ops.aten.var_mean.correction(add_85, [2], correction = 0, keepdim = True)
+        getitem_48: "f32[64, 512, 1]" = var_mean_24[0]
+        getitem_49: "f32[64, 512, 1]" = var_mean_24[1];  var_mean_24 = None
+        add_86: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_48, 1e-12);  getitem_48 = None
+        rsqrt_24: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_86);  add_86 = None
+        sub_36: "f32[64, 512, 256]" = torch.ops.aten.sub.Tensor(add_85, getitem_49);  add_85 = getitem_49 = None
+        mul_182: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(sub_36, rsqrt_24);  sub_36 = None
+        mul_183: "f32[64, 512, 256]" = torch.ops.aten.mul.Tensor(mul_182, arg200_1);  arg200_1 = None
+        add_87: "f32[64, 512, 256]" = torch.ops.aten.add.Tensor(mul_183, arg201_1);  mul_183 = arg201_1 = None
+        convert_element_type_255: "bf16[128]" = torch.ops.prims.convert_element_type.default(arg202_1, torch.bfloat16);  arg202_1 = None
+        convert_element_type_256: "bf16[128, 256]" = torch.ops.prims.convert_element_type.default(arg203_1, torch.bfloat16);  arg203_1 = None
+        convert_element_type_257: "bf16[64, 512, 256]" = torch.ops.prims.convert_element_type.default(add_87, torch.bfloat16);  add_87 = None
+        view_242: "bf16[32768, 256]" = torch.ops.aten.view.default(convert_element_type_257, _shape_param_329);  convert_element_type_257 = _shape_param_329 = None
+        permute_133: "bf16[256, 128]" = torch.ops.aten.permute.default(convert_element_type_256, [1, 0]);  convert_element_type_256 = None
+        addmm_73: "bf16[32768, 128]" = torch.ops.aten.addmm.default(convert_element_type_255, view_242, permute_133);  convert_element_type_255 = None
+        view_243: "bf16[64, 512, 128]" = torch.ops.aten.view.default(addmm_73, _shape_param_330);  _shape_param_330 = None
+        convert_element_type_258: "f32[64, 512, 128]" = torch.ops.prims.convert_element_type.default(view_243, torch.float32);  view_243 = None
+        mul_184: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(convert_element_type_258, 0.5)
+        mul_185: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(convert_element_type_258, 0.7071067811865476);  convert_element_type_258 = None
+        erf_12: "f32[64, 512, 128]" = torch.ops.aten.erf.default(mul_185);  mul_185 = None
+        add_88: "f32[64, 512, 128]" = torch.ops.aten.add.Tensor(erf_12, 1);  erf_12 = None
+        mul_186: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(mul_184, add_88);  mul_184 = add_88 = None
+        convert_element_type_259: "bf16[64, 512, 128]" = torch.ops.prims.convert_element_type.default(mul_186, torch.bfloat16);  mul_186 = None
+        convert_element_type_260: "f32[64, 512, 128]" = torch.ops.prims.convert_element_type.default(convert_element_type_259, torch.float32);  convert_element_type_259 = None
+        var_mean_25 = torch.ops.aten.var_mean.correction(convert_element_type_260, [2], correction = 0, keepdim = True)
+        getitem_50: "f32[64, 512, 1]" = var_mean_25[0]
+        getitem_51: "f32[64, 512, 1]" = var_mean_25[1];  var_mean_25 = None
+        add_89: "f32[64, 512, 1]" = torch.ops.aten.add.Tensor(getitem_50, 1e-12);  getitem_50 = None
+        rsqrt_25: "f32[64, 512, 1]" = torch.ops.aten.rsqrt.default(add_89);  add_89 = None
+        sub_37: "f32[64, 512, 128]" = torch.ops.aten.sub.Tensor(convert_element_type_260, getitem_51);  convert_element_type_260 = None
+        mul_187: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(sub_37, rsqrt_25);  sub_37 = None
+        mul_188: "f32[64, 512, 128]" = torch.ops.aten.mul.Tensor(mul_187, arg204_1);  mul_187 = arg204_1 = None
+        add_90: "f32[64, 512, 128]" = torch.ops.aten.add.Tensor(mul_188, arg205_1);  mul_188 = arg205_1 = None
+        convert_element_type_261: "bf16[30522]" = torch.ops.prims.convert_element_type.default(arg206_1, torch.bfloat16);  arg206_1 = None
+        convert_element_type_262: "bf16[30522, 128]" = torch.ops.prims.convert_element_type.default(arg2_1, torch.bfloat16);  arg2_1 = None
+        convert_element_type_263: "bf16[64, 512, 128]" = torch.ops.prims.convert_element_type.default(add_90, torch.bfloat16);  add_90 = None
+        view_244: "bf16[32768, 128]" = torch.ops.aten.view.default(convert_element_type_263, _shape_param_331);  convert_element_type_263 = _shape_param_331 = None
+        permute_134: "bf16[128, 30522]" = torch.ops.aten.permute.default(convert_element_type_262, [1, 0]);  convert_element_type_262 = None
+        constant_pad_nd: "bf16[128, 30528]" = torch.ops.aten.constant_pad_nd.default(permute_134, _shape_param_332);  _shape_param_332 = None
+        full_1: "bf16[6]" = torch.ops.aten.full.default(_shape_param_333, 0, dtype = torch.bfloat16, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False);  _shape_param_333 = None
+        cat: "bf16[30528]" = torch.ops.aten.cat.default([convert_element_type_261, full_1]);  convert_element_type_261 = full_1 = None
+        addmm_74: "bf16[32768, 30528]" = torch.ops.aten.addmm.default(cat, view_244, constant_pad_nd);  cat = constant_pad_nd = None
+        slice_1: "bf16[32768, 30522]" = torch.ops.aten.slice.Tensor(addmm_74, 1, 0, -6);  addmm_74 = None
+        view_245: "bf16[64, 512, 30522]" = torch.ops.aten.view.default(slice_1, _shape_param_334);  slice_1 = _shape_param_334 = None
+        convert_element_type_264: "f32[64, 512, 30522]" = torch.ops.prims.convert_element_type.default(view_245, torch.float32)
+        constant_pad_nd_1: "i64[64, 513]" = torch.ops.aten.constant_pad_nd.default(arg207_1, [0, 1], -100.0);  arg207_1 = None
+        slice_2: "i64[64, 512]" = torch.ops.aten.slice.Tensor(constant_pad_nd_1, 1, 1, 9223372036854775807)
+        clone_48: "i64[64, 512]" = torch.ops.aten.clone.default(slice_2, memory_format = torch.contiguous_format);  slice_2 = None
+        view_246: "f32[32768, 30522]" = torch.ops.aten.view.default(convert_element_type_264, _shape_param_335);  convert_element_type_264 = _shape_param_335 = None
+        view_247: "i64[32768]" = torch.ops.aten.view.default(clone_48, [-1]);  clone_48 = None
+        amax_12: "f32[32768, 1]" = torch.ops.aten.amax.default(view_246, [1], True)
+        sub_38: "f32[32768, 30522]" = torch.ops.aten.sub.Tensor(view_246, amax_12);  view_246 = None
+        exp_12: "f32[32768, 30522]" = torch.ops.aten.exp.default(sub_38)
+        sum_13: "f32[32768, 1]" = torch.ops.aten.sum.dim_IntList(exp_12, [1], True);  exp_12 = None
+        log: "f32[32768, 1]" = torch.ops.aten.log.default(sum_13);  sum_13 = None
+        sub_39: "f32[32768, 30522]" = torch.ops.aten.sub.Tensor(sub_38, log);  sub_38 = None
+        ne: "b8[32768]" = torch.ops.aten.ne.Scalar(view_247, -100)
+        full_2: "i64[]" = torch.ops.aten.full.default([], 0, dtype = torch.int64, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+        where_12: "i64[32768]" = torch.ops.aten.where.self(ne, view_247, full_2);  view_247 = full_2 = None
+        unsqueeze: "i64[32768, 1]" = torch.ops.aten.unsqueeze.default(where_12, 1);  where_12 = None
+        gather_1: "f32[32768, 1]" = torch.ops.aten.gather.default(sub_39, 1, unsqueeze);  sub_39 = unsqueeze = None
+        squeeze: "f32[32768]" = torch.ops.aten.squeeze.dim(gather_1, 1);  gather_1 = None
+        neg: "f32[32768]" = torch.ops.aten.neg.default(squeeze);  squeeze = None
+        full_3: "f32[]" = torch.ops.aten.full.default([], 0.0, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+        where_13: "f32[32768]" = torch.ops.aten.where.self(ne, neg, full_3);  neg = full_3 = None
+        sum_14: "i64[]" = torch.ops.aten.sum.default(ne);  ne = None
+        convert_element_type_265: "f32[]" = torch.ops.prims.convert_element_type.default(sum_14, torch.float32);  sum_14 = None
+        sum_15: "f32[]" = torch.ops.aten.sum.default(where_13);  where_13 = None
+        div_12: "f32[]" = torch.ops.aten.div.Tensor(sum_15, convert_element_type_265);  sum_15 = None
+        permute_135: "bf16[30522, 128]" = torch.ops.aten.permute.default(permute_134, [1, 0]);  permute_134 = None
+        permute_136: "bf16[128, 256]" = torch.ops.aten.permute.default(permute_133, [1, 0]);  permute_133 = None
+        div_13: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_24, 256);  rsqrt_24 = None
+        permute_137: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_132, [1, 0]);  permute_132 = None
+        permute_138: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_131, [1, 0]);  permute_131 = None
+        div_14: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_23, 256);  rsqrt_23 = None
+        permute_139: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_130, [1, 0]);  permute_130 = None
+        permute_140: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_232, [0, 2, 1]);  view_232 = None
+        permute_141: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_233, [0, 2, 1]);  view_233 = None
+        permute_142: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_229, [0, 2, 1]);  view_229 = None
+        permute_143: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_230, [0, 2, 1]);  view_230 = None
+        permute_144: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_126, [1, 0]);  permute_126 = None
+        permute_145: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_124, [1, 0]);  permute_124 = None
+        permute_146: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_122, [1, 0]);  permute_122 = None
+        div_15: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_22, 256);  rsqrt_22 = None
+        permute_147: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_121, [1, 0]);  permute_121 = None
+        permute_148: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_120, [1, 0]);  permute_120 = None
+        div_16: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_21, 256);  rsqrt_21 = None
+        permute_149: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_119, [1, 0]);  permute_119 = None
+        permute_150: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_212, [0, 2, 1]);  view_212 = None
+        permute_151: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_213, [0, 2, 1]);  view_213 = None
+        permute_152: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_209, [0, 2, 1]);  view_209 = None
+        permute_153: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_210, [0, 2, 1]);  view_210 = None
+        permute_154: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_115, [1, 0]);  permute_115 = None
+        permute_155: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_113, [1, 0]);  permute_113 = None
+        permute_156: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_111, [1, 0]);  permute_111 = None
+        div_17: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_20, 256);  rsqrt_20 = None
+        permute_157: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_110, [1, 0]);  permute_110 = None
+        permute_158: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_109, [1, 0]);  permute_109 = None
+        div_18: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_19, 256);  rsqrt_19 = None
+        permute_159: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_108, [1, 0]);  permute_108 = None
+        permute_160: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_192, [0, 2, 1]);  view_192 = None
+        permute_161: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_193, [0, 2, 1]);  view_193 = None
+        permute_162: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_189, [0, 2, 1]);  view_189 = None
+        permute_163: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_190, [0, 2, 1]);  view_190 = None
+        permute_164: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_104, [1, 0]);  permute_104 = None
+        permute_165: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_102, [1, 0]);  permute_102 = None
+        permute_166: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_100, [1, 0]);  permute_100 = None
+        div_19: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_18, 256);  rsqrt_18 = None
+        permute_167: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_99, [1, 0]);  permute_99 = None
+        permute_168: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_98, [1, 0]);  permute_98 = None
+        div_20: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_17, 256);  rsqrt_17 = None
+        permute_169: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_97, [1, 0]);  permute_97 = None
+        permute_170: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_172, [0, 2, 1]);  view_172 = None
+        permute_171: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_173, [0, 2, 1]);  view_173 = None
+        permute_172: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_169, [0, 2, 1]);  view_169 = None
+        permute_173: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_170, [0, 2, 1]);  view_170 = None
+        permute_174: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_93, [1, 0]);  permute_93 = None
+        permute_175: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_91, [1, 0]);  permute_91 = None
+        permute_176: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_89, [1, 0]);  permute_89 = None
+        div_21: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_16, 256);  rsqrt_16 = None
+        permute_177: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_88, [1, 0]);  permute_88 = None
+        permute_178: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_87, [1, 0]);  permute_87 = None
+        div_22: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_15, 256);  rsqrt_15 = None
+        permute_179: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_86, [1, 0]);  permute_86 = None
+        permute_180: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_152, [0, 2, 1]);  view_152 = None
+        permute_181: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_153, [0, 2, 1]);  view_153 = None
+        permute_182: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_149, [0, 2, 1]);  view_149 = None
+        permute_183: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_150, [0, 2, 1]);  view_150 = None
+        permute_184: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_82, [1, 0]);  permute_82 = None
+        permute_185: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_80, [1, 0]);  permute_80 = None
+        permute_186: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_78, [1, 0]);  permute_78 = None
+        div_23: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_14, 256);  rsqrt_14 = None
+        permute_187: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_77, [1, 0]);  permute_77 = None
+        permute_188: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_76, [1, 0]);  permute_76 = None
+        div_24: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_13, 256);  rsqrt_13 = None
+        permute_189: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_75, [1, 0]);  permute_75 = None
+        permute_190: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_132, [0, 2, 1]);  view_132 = None
+        permute_191: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_133, [0, 2, 1]);  view_133 = None
+        permute_192: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_129, [0, 2, 1]);  view_129 = None
+        permute_193: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_130, [0, 2, 1]);  view_130 = None
+        permute_194: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_71, [1, 0]);  permute_71 = None
+        permute_195: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_69, [1, 0]);  permute_69 = None
+        permute_196: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_67, [1, 0]);  permute_67 = None
+        div_25: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_12, 256);  rsqrt_12 = None
+        permute_197: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_66, [1, 0]);  permute_66 = None
+        permute_198: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_65, [1, 0]);  permute_65 = None
+        div_26: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_11, 256);  rsqrt_11 = None
+        permute_199: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_64, [1, 0]);  permute_64 = None
+        permute_200: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_112, [0, 2, 1]);  view_112 = None
+        permute_201: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_113, [0, 2, 1]);  view_113 = None
+        permute_202: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_109, [0, 2, 1]);  view_109 = None
+        permute_203: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_110, [0, 2, 1]);  view_110 = None
+        permute_204: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_60, [1, 0]);  permute_60 = None
+        permute_205: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_58, [1, 0]);  permute_58 = None
+        permute_206: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_56, [1, 0]);  permute_56 = None
+        div_27: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_10, 256);  rsqrt_10 = None
+        permute_207: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_55, [1, 0]);  permute_55 = None
+        permute_208: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_54, [1, 0]);  permute_54 = None
+        div_28: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_9, 256);  rsqrt_9 = None
+        permute_209: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_53, [1, 0]);  permute_53 = None
+        permute_210: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_92, [0, 2, 1]);  view_92 = None
+        permute_211: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_93, [0, 2, 1]);  view_93 = None
+        permute_212: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_89, [0, 2, 1]);  view_89 = None
+        permute_213: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_90, [0, 2, 1]);  view_90 = None
+        permute_214: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_49, [1, 0]);  permute_49 = None
+        permute_215: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_47, [1, 0]);  permute_47 = None
+        permute_216: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_45, [1, 0]);  permute_45 = None
+        div_29: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_8, 256);  rsqrt_8 = None
+        permute_217: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_44, [1, 0]);  permute_44 = None
+        permute_218: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_43, [1, 0]);  permute_43 = None
+        div_30: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_7, 256);  rsqrt_7 = None
+        permute_219: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_42, [1, 0]);  permute_42 = None
+        permute_220: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_72, [0, 2, 1]);  view_72 = None
+        permute_221: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_73, [0, 2, 1]);  view_73 = None
+        permute_222: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_69, [0, 2, 1]);  view_69 = None
+        permute_223: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_70, [0, 2, 1]);  view_70 = None
+        permute_224: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_38, [1, 0]);  permute_38 = None
+        permute_225: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_36, [1, 0]);  permute_36 = None
+        permute_226: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_34, [1, 0]);  permute_34 = None
+        div_31: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_6, 256);  rsqrt_6 = None
+        permute_227: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_33, [1, 0]);  permute_33 = None
+        permute_228: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_32, [1, 0]);  permute_32 = None
+        div_32: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_5, 256);  rsqrt_5 = None
+        permute_229: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_31, [1, 0]);  permute_31 = None
+        permute_230: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_52, [0, 2, 1]);  view_52 = None
+        permute_231: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_53, [0, 2, 1]);  view_53 = None
+        permute_232: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_49, [0, 2, 1]);  view_49 = None
+        permute_233: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_50, [0, 2, 1]);  view_50 = None
+        permute_234: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_27, [1, 0]);  permute_27 = None
+        permute_235: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_25, [1, 0]);  permute_25 = None
+        permute_236: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_23, [1, 0]);  permute_23 = None
+        div_33: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_4, 256);  rsqrt_4 = None
+        permute_237: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_22, [1, 0]);  permute_22 = None
+        permute_238: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_21, [1, 0]);  permute_21 = None
+        div_34: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_3, 256);  rsqrt_3 = None
+        permute_239: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_20, [1, 0]);  permute_20 = None
+        permute_240: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_32, [0, 2, 1]);  view_32 = None
+        permute_241: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_33, [0, 2, 1]);  view_33 = None
+        permute_242: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_29, [0, 2, 1]);  view_29 = None
+        permute_243: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_30, [0, 2, 1]);  view_30 = None
+        permute_244: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_16, [1, 0]);  permute_16 = None
+        permute_245: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_14, [1, 0]);  permute_14 = None
+        permute_246: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_12, [1, 0]);  permute_12 = None
+        div_35: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt_2, 256);  rsqrt_2 = None
+        permute_247: "bf16[256, 1024]" = torch.ops.aten.permute.default(permute_11, [1, 0]);  permute_11 = None
+        permute_248: "bf16[1024, 256]" = torch.ops.aten.permute.default(permute_10, [1, 0]);  permute_10 = None
+        permute_249: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_9, [1, 0]);  permute_9 = None
+        permute_250: "bf16[256, 512, 512]" = torch.ops.aten.permute.default(view_12, [0, 2, 1]);  view_12 = None
+        permute_251: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_13, [0, 2, 1]);  view_13 = None
+        permute_252: "bf16[256, 64, 512]" = torch.ops.aten.permute.default(view_9, [0, 2, 1]);  view_9 = None
+        permute_253: "bf16[256, 512, 64]" = torch.ops.aten.permute.default(view_10, [0, 2, 1]);  view_10 = None
+        permute_254: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_5, [1, 0]);  permute_5 = None
+        permute_255: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_3, [1, 0]);  permute_3 = None
+        permute_256: "bf16[256, 256]" = torch.ops.aten.permute.default(permute_1, [1, 0]);  permute_1 = None
+        permute_257: "bf16[256, 128]" = torch.ops.aten.permute.default(permute, [1, 0]);  permute = None
+        div_36: "f32[64, 512, 1]" = torch.ops.aten.div.Tensor(rsqrt, 128);  rsqrt = None
+        return (gather, mul, gt, view, view_2, bmm, amax, sum_1, logical_not_1, gt_1, view_16, gt_2, add_4, getitem_3, rsqrt_1, view_18, addmm_5, view_20, gt_3, mul_17, view_22, where_1, gt_4, view_36, gt_5, mul_25, view_38, addmm_11, view_40, gt_6, mul_32, view_42, where_2, gt_7, view_56, gt_8, mul_40, view_58, addmm_17, view_60, gt_9, mul_47, view_62, where_3, gt_10, view_76, gt_11, mul_55, view_78, addmm_23, view_80, gt_12, mul_62, view_82, where_4, gt_13, view_96, gt_14, mul_70, view_98, addmm_29, view_100, gt_15, mul_77, view_102, where_5, gt_16, view_116, gt_17, mul_85, view_118, addmm_35, view_120, gt_18, mul_92, view_122, where_6, gt_19, view_136, gt_20, mul_100, view_138, addmm_41, view_140, gt_21, mul_107, view_142, where_7, gt_22, view_156, gt_23, mul_115, view_158, addmm_47, view_160, gt_24, mul_122, view_162, where_8, gt_25, view_176, gt_26, mul_130, view_178, addmm_53, view_180, gt_27, mul_137, view_182, where_9, gt_28, view_196, gt_29, mul_145, view_198, addmm_59, view_200, gt_30, mul_152, view_202, where_10, gt_31, view_216, gt_32, mul_160, view_218, addmm_65, view_220, gt_33, mul_167, view_222, where_11, gt_34, view_236, gt_35, mul_175, view_238, addmm_71, view_240, gt_36, mul_182, view_242, addmm_73, getitem_51, rsqrt_25, view_244, view_245, constant_pad_nd_1, amax_12, log, convert_element_type_265, div_12, permute_135, permute_136, div_13, permute_137, permute_138, div_14, permute_139, permute_140, permute_141, permute_142, permute_143, permute_144, permute_145, permute_146, div_15, permute_147, permute_148, div_16, permute_149, permute_150, permute_151, permute_152, permute_153, permute_154, permute_155, permute_156, div_17, permute_157, permute_158, div_18, permute_159, permute_160, permute_161, permute_162, permute_163, permute_164, permute_165, permute_166, div_19, permute_167, permute_168, div_20, permute_169, permute_170, permute_171, permute_172, permute_173, permute_174, permute_175, permute_176, div_21, permute_177, permute_178, div_22, permute_179, permute_180, permute_181, permute_182, permute_183, permute_184, permute_185, permute_186, div_23, permute_187, permute_188, div_24, permute_189, permute_190, permute_191, permute_192, permute_193, permute_194, permute_195, permute_196, div_25, permute_197, permute_198, div_26, permute_199, permute_200, permute_201, permute_202, permute_203, permute_204, permute_205, permute_206, div_27, permute_207, permute_208, div_28, permute_209, permute_210, permute_211, permute_212, permute_213, permute_214, permute_215, permute_216, div_29, permute_217, permute_218, div_30, permute_219, permute_220, permute_221, permute_222, permute_223, permute_224, permute_225, permute_226, div_31, permute_227, permute_228, div_32, permute_229, permute_230, permute_231, permute_232, permute_233, permute_234, permute_235, permute_236, div_33, permute_237, permute_238, div_34, permute_239, permute_240, permute_241, permute_242, permute_243, permute_244, permute_245, permute_246, div_35, permute_247, permute_248, permute_249, permute_250, permute_251, permute_252, permute_253, permute_254, permute_255, permute_256, permute_257, div_36)
+
+
+
+def _default_make_inputs():
+    configs = load_shape_configs(__file__)
+    if not configs:
+        raise RuntimeError(
+            "no shapes.json next to this repro — pass an explicit config "
+            "via make_inputs(shape_config=...)")
+    return make_inputs_from_config(next(iter(configs.values())))
+
+
+def make_inputs(shape_config=None):
+    """Generate inputs for a specific shape config, or default."""
+    if shape_config is not None:
+        return make_inputs_from_config(shape_config)
+    return _default_make_inputs()
+
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

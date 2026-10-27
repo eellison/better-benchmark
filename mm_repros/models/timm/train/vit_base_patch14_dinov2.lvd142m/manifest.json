@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "vit_base_patch14_dinov2.lvd142m",
+  "patterns": [
+    "3c7cfcea01e1",
+    "49e399f69cab",
+    "4c0197592e1a",
+    "5a77e9b067b5",
+    "8ec41e32a71b",
+    "f9bd63a48460"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

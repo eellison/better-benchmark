@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "visformer_small",
+  "patterns": [
+    "1a6bfc5cbf0e",
+    "24ce41abcd6c",
+    "3f9fb4841e6e",
+    "603d750ec7eb",
+    "8621641103ae",
+    "930f85ada6be",
+    "ca56f9495fe2"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

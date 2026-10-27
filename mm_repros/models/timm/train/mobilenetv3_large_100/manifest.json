@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilenetv3_large_100",
+  "patterns": [
+    "24ce41abcd6c",
+    "38d9f31c2b12",
+    "6d9bdb40a61e"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

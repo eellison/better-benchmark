@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "PLBartForCausalLM",
+  "patterns": [
+    "2ae5e3df19a5",
+    "7c5ca737e63d",
+    "8092635c55c2",
+    "949ab3bb777b",
+    "f1674c6ea81c",
+    "ffd162f3446e"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py",
+    "full_graph_004.py",
+    "full_graph_005.py",
+    "full_graph_006.py",
+    "full_graph_007.py",
+    "full_graph_008.py",
+    "full_graph_009.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json",
+    "full_graph_004.py": "full_graph_004.meta.json",
+    "full_graph_005.py": "full_graph_005.meta.json",
+    "full_graph_006.py": "full_graph_006.meta.json",
+    "full_graph_007.py": "full_graph_007.meta.json",
+    "full_graph_008.py": "full_graph_008.meta.json",
+    "full_graph_009.py": "full_graph_009.meta.json"
+  },
+  "mode": "train"
+}

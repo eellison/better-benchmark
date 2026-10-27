@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "ElectraForCausalLM",
+  "patterns": [
+    "1cb28346584b",
+    "5a88ebedb573"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "PegasusForCausalLM",
+  "patterns": [
+    "5bc091a09350",
+    "753664e0f235",
+    "944070b99e63",
+    "9e778e3453cc",
+    "dac97df7f24f",
+    "f6432c0161c8"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py",
+    "full_graph_004.py",
+    "full_graph_005.py",
+    "full_graph_006.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json",
+    "full_graph_004.py": "full_graph_004.meta.json",
+    "full_graph_005.py": "full_graph_005.meta.json",
+    "full_graph_006.py": "full_graph_006.meta.json"
+  },
+  "mode": "train"
+}

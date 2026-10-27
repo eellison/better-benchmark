@@ -1,0 +1,23 @@
+{
+  "pattern_hash": "1b2a23af38a0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.expand.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

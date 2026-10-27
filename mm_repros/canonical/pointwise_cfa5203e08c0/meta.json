@@ -1,0 +1,16 @@
+{
+  "pattern_hash": "cfa5203e08c0",
+  "kind": "pointwise",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/infer/ghostnet_100"
+  ]
+}

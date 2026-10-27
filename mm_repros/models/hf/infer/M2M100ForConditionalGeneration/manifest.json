@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "M2M100ForConditionalGeneration",
+  "patterns": [
+    "31f2d8d3c464",
+    "358924f3d7a4",
+    "49bd873f7f56",
+    "632b766bca24"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

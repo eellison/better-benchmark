@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "AllenaiLongformerBase",
+  "patterns": [
+    "356c99074d3d",
+    "877eaa8e0104",
+    "921a8f387aeb",
+    "a35a7cbea9d9",
+    "bb9a4b50ddd5",
+    "ec12bca7bc5f",
+    "fc94eecab4c0"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py",
+    "full_graph_004.py",
+    "full_graph_005.py",
+    "full_graph_006.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json",
+    "full_graph_004.py": "full_graph_004.meta.json",
+    "full_graph_005.py": "full_graph_005.meta.json",
+    "full_graph_006.py": "full_graph_006.meta.json"
+  },
+  "mode": "train"
+}

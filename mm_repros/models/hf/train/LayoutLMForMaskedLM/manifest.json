@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "LayoutLMForMaskedLM",
+  "patterns": [
+    "0fed37f413f6",
+    "52b8a2be77c3"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

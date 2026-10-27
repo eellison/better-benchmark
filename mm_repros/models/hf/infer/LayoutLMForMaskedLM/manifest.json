@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "LayoutLMForMaskedLM",
+  "patterns": [
+    "46667ecf6942",
+    "b4ce8dacbbf9",
+    "d14e897e7d3b"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

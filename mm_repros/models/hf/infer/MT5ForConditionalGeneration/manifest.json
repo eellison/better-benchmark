@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MT5ForConditionalGeneration",
+  "patterns": [
+    "90d1cc7a4518"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

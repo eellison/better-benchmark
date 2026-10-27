@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MegatronBertForCausalLM",
+  "patterns": [
+    "cdbc5fb75ea7",
+    "de51625c5752",
+    "ff63e4e0629e"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

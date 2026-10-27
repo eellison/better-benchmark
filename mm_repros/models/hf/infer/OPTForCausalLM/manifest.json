@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "OPTForCausalLM",
+  "patterns": [
+    "1d2769f9fe6f",
+    "32eb0d33c77c",
+    "91e32148c6a7"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

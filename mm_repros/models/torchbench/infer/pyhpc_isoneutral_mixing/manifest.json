@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "pyhpc_isoneutral_mixing",
+  "patterns": [],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

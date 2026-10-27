@@ -1,0 +1,17 @@
+{
+  "points": [
+    {
+      "shape_hash": "41eeb4d4",
+      "models": {
+        "torchbench/infer/opacus_cifar10": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [[10,512],"bf16"],
+        [[10],"bf16"],
+        [[64,512],"bf16"]
+      ]
+    }
+  ]
+}

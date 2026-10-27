@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_base_distilled_patch16_224",
+  "patterns": [
+    "6cbefe4a8ca9",
+    "ce9459b41851",
+    "e3426e3aaa74"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

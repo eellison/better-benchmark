@@ -86,23 +86,36 @@ ALLOCATION_ONLY_OPS = {
     torch.ops.aten.empty.memory_format,
 }
 
+GEMM_OP_NAMES = {
+    "aten::mm", "aten::bmm", "aten::addmm", "aten::baddbmm",
+    "aten::mv", "aten::addmv", "aten::matmul", "aten::_grouped_mm",
+    "aten::_scaled_mm", "aten::_scaled_grouped_mm", "aten::_scaled_grouped_mm_v2",
+}
 
-def partition_node_is_supported(node: fx.Node) -> bool:
+
+def partition_node_is_supported(node: fx.Node, *, include_gemm: bool = False) -> bool:
     """Capture-pipeline fusibility test for a single node.
 
     A node belongs in a fusible partition if it is a transparent view op or
     Inductor's is_fusible_node says it has a fusible lowering (no BLAS/cuDNN
     flop-counter ops, no fallbacks, no collectives).
+
+    include_gemm admits the named GEMM family, including extern/fallback
+    implementations. Region eligibility does not imply scheduler fusion.
     """
     from torch._inductor.fx_passes.fusion_regions import is_fusible_node
 
     if node.op == "call_function" and node.target in TRANSPARENT_OPS:
         return True
+    if (include_gemm and node.op == "call_function"
+            and isinstance(node.target, torch._ops.OpOverload)
+            and node.target._schema.name in GEMM_OP_NAMES):
+        return True
     return is_fusible_node(node)
 
 
 def graph_node_accounting(gm: fx.GraphModule, components=None,
-                          constant_folded=None) -> dict:
+                          constant_folded=None, *, include_gemm: bool = False) -> dict:
     """Exhaustive fusibility classification of every call_function node.
 
     Serialized into each full_graph_*.meta.json so the capture-time
@@ -130,7 +143,7 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
     fusible set, and vice versa.
     """
     if components is None:
-        components = get_fusion_partitions(gm)
+        components = get_fusion_partitions(gm, include_gemm=include_gemm)
     partitioned = set()
     for comp in components:
         partitioned.update(comp)
@@ -157,7 +170,7 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
             buckets["constant_folded"][name] += 1
         elif node in partitioned:
             buckets["fusible_in_partition"][name] += 1
-        elif partition_node_is_supported(node):
+        elif partition_node_is_supported(node, include_gemm=include_gemm):
             buckets["fusible_unpartitioned"][name] += 1
         else:
             buckets["non_fusible"][name] += 1
@@ -246,7 +259,7 @@ def _split_connected_components(nodes):
     return result_components
 
 
-def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
+def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *, include_gemm: bool = False) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
 
@@ -262,6 +275,9 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
     partition, as if they were not fusible.
 
+    ``include_gemm`` additionally allows GEMM nodes inside regions. These
+    regions may contain multiple GEMM kernels after compilation.
+
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
     import inspect
@@ -275,7 +291,11 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     excluded = excluded or ()
 
     def _is_supported(_submodules, node):
-        return node not in excluded and partition_node_is_supported(node)
+        if node in excluded:
+            return False
+        if include_gemm:
+            return partition_node_is_supported(node, include_gemm=True)
+        return partition_node_is_supported(node)
 
     support = create_op_support(_is_supported)
     _part_kwargs = dict(allows_single_node_partition=True)
@@ -1291,12 +1311,13 @@ def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
                  validate: bool = True, capture_only: bool = False,
-                 constant_folding: bool = False):
+                 constant_folding: bool = False, include_gemm: bool = False):
         self.output_dir = output_dir
         # The compiled model folds constants at load time (AOTInductor's
         # use_runtime_constant_folding): constant-only work is not per-call
         # work, so it is kept out of the captured regions.
         self.constant_folding = constant_folding
+        self.include_gemm = include_gemm
         self.constant_folded_nodes = 0
         self.constant_folding_graphs = 0
         self.constant_folding_skipped = {"training": 0, "subgraph": 0, "no_metadata": 0}
@@ -1799,7 +1820,7 @@ if __name__ == "__main__":
 
         # Partition ONCE; both the metadata sidecar (node_accounting) and the
         # capture loop below consume the same components.
-        components = get_fusion_partitions(gm, excluded=folded)
+        components = get_fusion_partitions(gm, excluded=folded, include_gemm=self.include_gemm)
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
@@ -1828,7 +1849,9 @@ if __name__ == "__main__":
                         extra={
                             "source": infer_full_graph_source(full_graph_path),
                             "node_accounting": graph_node_accounting(
-                                gm, components, constant_folded=folded),
+                                gm, components, constant_folded=folded, include_gemm=self.include_gemm),
+                            **({"partition_policy": {"include_gemm": True}}
+                               if self.include_gemm else {}),
                             "replay_dependencies": replay_dependencies(gm),
                             **({"constant_inputs": constant_inputs}
                                if constant_inputs is not None else {}),
@@ -2011,7 +2034,7 @@ _active_state: _CaptureState | None = None
 
 def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
                          validate: bool = True, capture_only: bool = False,
-                         constant_folding: bool = False):
+                         constant_folding: bool = False, include_gemm: bool = False):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -2023,6 +2046,8 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         capture_only: If True, raise _CaptureComplete after capture to skip
             expensive inductor compilation. Caller should catch the error.
         validate: If True, run eager validation on captured repros (can trigger CUDA errors).
+        include_gemm: Include the GEMM family in extracted regions, including
+            extern/fallback implementations. Conv and attention remain boundaries.
         constant_folding: Set when the model is deployed with AOTInductor's
             runtime constant folding (aot_inductor.use_runtime_constant_folding):
             in inference graphs, work derived only from module parameters,
@@ -2035,7 +2060,8 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
     """
     global _active_state
     _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate,
-                                  capture_only=capture_only, constant_folding=constant_folding)
+                                  capture_only=capture_only, constant_folding=constant_folding,
+                                  include_gemm=include_gemm)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 

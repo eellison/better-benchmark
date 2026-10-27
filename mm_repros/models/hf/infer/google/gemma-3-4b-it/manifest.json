@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "google/gemma-3-4b-it",
+  "patterns": [
+    "2b1c7c7f4a05",
+    "78e038568b0c",
+    "b6efb3e3213e",
+    "ed1494f110f5",
+    "f2b3494c35f0"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

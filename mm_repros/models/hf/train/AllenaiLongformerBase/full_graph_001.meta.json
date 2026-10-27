@@ -1,0 +1,111 @@
+{
+  "schema_version": 2,
+  "inputs": [
+    [
+      [
+        8,
+        1024
+      ],
+      "f32",
+      {
+        "n": "arg0_1"
+      }
+    ]
+  ],
+  "outputs": [
+    [
+      [],
+      "b8",
+      {
+        "n": "output_0",
+        "gen": [
+          "randint",
+          0,
+          2
+        ]
+      }
+    ],
+    [
+      [
+        8,
+        1024
+      ],
+      "b8",
+      {
+        "n": "output_1",
+        "gen": [
+          "randint",
+          0,
+          2
+        ]
+      }
+    ],
+    [
+      [
+        8,
+        1024
+      ],
+      "b8",
+      {
+        "n": "output_2",
+        "gen": [
+          "randint",
+          0,
+          2
+        ]
+      }
+    ]
+  ],
+  "tensor_attrs": {},
+  "graph": "full_graph_001.py",
+  "source": {
+    "kind": "model",
+    "suite": "hf",
+    "mode": "train",
+    "model": "AllenaiLongformerBase",
+    "graph": "full_graph_001.py"
+  },
+  "source_capture": {
+    "path": "/home/jaeyeonw/better-benchmark/repros/models/hf/train/AllenaiLongformerBase/full_graph_001.py",
+    "node_accounting": {
+      "total_call_functions": 4,
+      "counts": {
+        "fusible_in_partition": 4,
+        "fusible_unpartitioned": 0,
+        "non_fusible": 0
+      },
+      "ops": {
+        "fusible_in_partition": {
+          "aten.any.default": 1,
+          "aten.gt.Scalar": 1,
+          "aten.lt.Scalar": 1,
+          "aten.reshape.default": 1
+        },
+        "fusible_unpartitioned": {},
+        "non_fusible": {}
+      }
+    },
+    "roundtrip": "ok"
+  },
+  "partition_policy": {
+    "include_gemm": true
+  },
+  "node_accounting": {
+    "total_call_functions": 4,
+    "counts": {
+      "fusible_in_partition": 4,
+      "fusible_unpartitioned": 0,
+      "non_fusible": 0
+    },
+    "ops": {
+      "fusible_in_partition": {
+        "aten.any.default": 1,
+        "aten.gt.Scalar": 1,
+        "aten.lt.Scalar": 1,
+        "aten.view.default": 1
+      },
+      "fusible_unpartitioned": {},
+      "non_fusible": {}
+    }
+  }
+}

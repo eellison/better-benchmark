@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "vit_base_patch16_siglip_256",
+  "patterns": [
+    "1639565033e9",
+    "1b2a23af38a0",
+    "376a43886603",
+    "4c0eac02a210",
+    "6991cd9c6dd8",
+    "861663e048e9",
+    "d620e30d8597",
+    "d8c23b797cb9",
+    "e6b2c5bbec68",
+    "f3c2b10a25e5"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

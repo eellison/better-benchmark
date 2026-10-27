@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "T5ForConditionalGeneration",
+  "patterns": [
+    "17abcf417d41",
+    "ac5b34b9a191"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "c55eea77ab28",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 26,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.as_strided_scatter.default",
+    "aten.div.Scalar",
+    "aten.erf.default",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/dm_nfnet_f0"
+  ]
+}

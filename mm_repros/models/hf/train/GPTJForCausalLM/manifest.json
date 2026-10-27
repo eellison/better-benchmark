@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTJForCausalLM",
+  "patterns": [
+    "06520c3adb35",
+    "a1bd3164320d"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

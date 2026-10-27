@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "openai/gpt-oss-20b",
+  "patterns": [
+    "3ac61cd6e287",
+    "3df2639bc2c6",
+    "441d6e79ae66",
+    "6105beff3474",
+    "7f59592ddfa9"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

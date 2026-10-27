@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "beit_base_patch16_224",
+  "patterns": [
+    "01d97e74ac64",
+    "03d56b568063",
+    "5c59bd5c9131"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "genai",
+  "model": "static/CrossEntropyForward",
+  "patterns": [],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  }
+}

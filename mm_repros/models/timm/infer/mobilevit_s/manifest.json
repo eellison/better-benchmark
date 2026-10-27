@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilevit_s",
+  "patterns": [
+    "0aed125b0699",
+    "1ee305179799",
+    "7d203adb1d3f",
+    "a41249db010e",
+    "ab6ea1bbe71b",
+    "c83a6ea39f3c",
+    "d25e6448a780",
+    "e632f6bcf1d8",
+    "fedbfaf213e9"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "XLNetLMHeadModel",
+  "patterns": [
+    "3c53183461ca",
+    "4bd7a9f32438",
+    "4ceff1032b87",
+    "a41c29446935",
+    "e782fae57294"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

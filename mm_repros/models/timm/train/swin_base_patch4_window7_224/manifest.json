@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "swin_base_patch4_window7_224",
+  "patterns": [
+    "1cec36001d43",
+    "24ce41abcd6c",
+    "a4c5c8022c8b"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

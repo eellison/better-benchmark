@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "TrOCRForCausalLM",
+  "patterns": [
+    "d69531416f1f"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

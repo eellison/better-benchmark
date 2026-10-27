@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_tiny_patch16_224.fb_in1k",
+  "patterns": [
+    "24ce41abcd6c",
+    "4c0197592e1a",
+    "6991cd9c6dd8",
+    "811d62470089",
+    "842eec146fcb",
+    "9315970cec10",
+    "d8c23b797cb9"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

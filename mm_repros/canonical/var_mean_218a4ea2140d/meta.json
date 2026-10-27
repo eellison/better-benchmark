@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "218a4ea2140d",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 38,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.cat.default",
+    "aten.embedding.default",
+    "aten.embedding.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.rsqrt.default",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.slice.Tensor",
+    "aten.split.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/DistillGPT2"
+  ]
+}

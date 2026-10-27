@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "nfnet_l0",
+  "patterns": [
+    "0a9816d536c8",
+    "24ce41abcd6c",
+    "7ddd1b9c8495"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

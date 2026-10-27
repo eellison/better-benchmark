@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "maml",
+  "patterns": [
+    "fba82396802b"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "infer"
+}

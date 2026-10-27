@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "shufflenet_v2_x1_0",
+  "patterns": [
+    "24ce41abcd6c",
+    "31cffca06d8d",
+    "c0a1a42e45a9"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

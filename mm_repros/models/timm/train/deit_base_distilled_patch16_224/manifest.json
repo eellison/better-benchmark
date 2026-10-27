@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_base_distilled_patch16_224",
+  "patterns": [
+    "12e136aec764",
+    "5ecb46f1c6eb",
+    "6991cd9c6dd8",
+    "8e1d01e75115",
+    "d8b9836799ad",
+    "d8c23b797cb9"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

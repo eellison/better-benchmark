@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "DistillGPT2",
+  "patterns": [
+    "121d74951cf2",
+    "218a4ea2140d",
+    "a7af166b846a"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "infer"
+}

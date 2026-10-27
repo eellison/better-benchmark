@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPT2ForSequenceClassification",
+  "patterns": [
+    "2f6127f9b83c",
+    "4243cc40e0bf",
+    "627107c794e0",
+    "64ce6c265955",
+    "654300d83de1",
+    "760c52e066ba",
+    "77127711d917",
+    "8ea8ad786602",
+    "9249411eaac9",
+    "a79568f427a4",
+    "b0020fd53162",
+    "b207817dee40",
+    "cfe351abe68c",
+    "dcb93e2386e9",
+    "dde4cf169b5d",
+    "ef825fd4d383"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

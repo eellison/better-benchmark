@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "f3c2b10a25e5",
+  "kind": "reduction",
+  "reduction_types": [
+    "var_mean"
+  ],
+  "n_ops": 26,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.rsqrt.default",
+    "aten.sub.Tensor",
+    "aten.unbind.int",
+    "aten.var_mean.correction",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

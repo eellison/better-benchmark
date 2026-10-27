@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "openai/whisper-tiny",
+  "patterns": [
+    "20f0bbedb06d",
+    "2267d2930b14",
+    "34cfb22b8dd9",
+    "3f65b70d4174",
+    "aa015c99a9ff",
+    "bad1a55273a5",
+    "c087bfcc23c0"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

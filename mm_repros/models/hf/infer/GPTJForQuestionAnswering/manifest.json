@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTJForQuestionAnswering",
+  "patterns": [
+    "2668ac6a8b4b"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

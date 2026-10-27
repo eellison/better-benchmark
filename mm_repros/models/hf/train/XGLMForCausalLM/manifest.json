@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "XGLMForCausalLM",
+  "patterns": [
+    "aaf53737494e",
+    "bf2a64d25a91",
+    "ec4e490db0f0",
+    "f20508972ac8"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py",
+    "full_graph_004.py",
+    "full_graph_005.py",
+    "full_graph_006.py",
+    "full_graph_007.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json",
+    "full_graph_004.py": "full_graph_004.meta.json",
+    "full_graph_005.py": "full_graph_005.meta.json",
+    "full_graph_006.py": "full_graph_006.meta.json",
+    "full_graph_007.py": "full_graph_007.meta.json"
+  },
+  "mode": "train"
+}

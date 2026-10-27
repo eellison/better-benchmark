@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "phlippe_densenet",
+  "patterns": [
+    "1202ee4b62e2",
+    "24ce41abcd6c",
+    "b56c1c462bdd"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

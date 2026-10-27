@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "inception_v3",
+  "patterns": [
+    "24ce41abcd6c",
+    "5eb57259b924",
+    "a4960c9f1a99"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

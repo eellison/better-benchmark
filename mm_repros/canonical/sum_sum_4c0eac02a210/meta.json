@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "4c0eac02a210",
+  "kind": "reduction",
+  "reduction_types": [
+    "sum",
+    "sum"
+  ],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/vit_base_patch16_siglip_256"
+  ]
+}

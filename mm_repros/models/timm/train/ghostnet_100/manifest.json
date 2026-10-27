@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "ghostnet_100",
+  "patterns": [
+    "24ce41abcd6c",
+    "40d26a72335f",
+    "901b5ca32363"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

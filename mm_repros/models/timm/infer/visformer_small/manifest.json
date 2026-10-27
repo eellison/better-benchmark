@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "visformer_small",
+  "patterns": [
+    "2a9b58fff8f7"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

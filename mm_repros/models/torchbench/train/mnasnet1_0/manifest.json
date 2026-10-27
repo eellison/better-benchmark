@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "mnasnet1_0",
+  "patterns": [
+    "24ce41abcd6c",
+    "2f57de38e24a",
+    "981120fb30ac"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

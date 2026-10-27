@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "RobertaForCausalLM",
+  "patterns": [
+    "c6ac56109227"
+  ],
+  "graphs": [
+    "full_graph_000.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json"
+  },
+  "mode": "infer"
+}

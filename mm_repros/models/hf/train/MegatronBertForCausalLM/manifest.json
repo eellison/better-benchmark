@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MegatronBertForCausalLM",
+  "patterns": [
+    "07b976972ee7",
+    "1506eceb2e34",
+    "17af5dc7c24f",
+    "1f3c42d34d35",
+    "30d938adf6a3",
+    "3d373b7d2c28",
+    "41c19108de42",
+    "4982caa7eecf",
+    "6c4f843ec889",
+    "6ddb269c03fb",
+    "813b0db3d5d8",
+    "988fc39f3459",
+    "9e9975cfd835",
+    "b05feafd23c1",
+    "b356fe3d5557",
+    "b8ad8075df69",
+    "b9f802cca45b",
+    "c43bbe19d108",
+    "c758e61b0466",
+    "cd666b4a5eda",
+    "d6b3f80aed55",
+    "d9b4bc2cf814",
+    "e4b4947c6e90",
+    "e61496bb99b2",
+    "e90ce791261c",
+    "f22ece990ab5",
+    "fcdff677a8a9",
+    "ff3bde663410"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json"
+  },
+  "mode": "train"
+}

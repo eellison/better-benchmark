@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "DistillGPT2",
+  "patterns": [
+    "4243cc40e0bf",
+    "4ccffe1b03bd",
+    "53b9dd8d3ebb",
+    "760c52e066ba",
+    "77127711d917",
+    "7cbf0c21266b",
+    "a79568f427a4",
+    "b0020fd53162",
+    "b5e73ba7b22f",
+    "dde4cf169b5d"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json"
+  },
+  "mode": "train"
+}

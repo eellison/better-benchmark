@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "M2M100ForConditionalGeneration",
+  "patterns": [
+    "1efc9f473156",
+    "809ffe97dcf1",
+    "944070b99e63",
+    "9c5f69ba7f3a",
+    "a59cc0566ada",
+    "e92b7d6ba1a6",
+    "f6432c0161c8",
+    "fee866eebfd0"
+  ],
+  "graphs": [
+    "full_graph_000.py",
+    "full_graph_001.py",
+    "full_graph_002.py",
+    "full_graph_003.py",
+    "full_graph_004.py",
+    "full_graph_005.py",
+    "full_graph_006.py",
+    "full_graph_007.py",
+    "full_graph_008.py",
+    "full_graph_009.py",
+    "full_graph_010.py",
+    "full_graph_011.py"
+  ],
+  "graph_metadata": {
+    "full_graph_000.py": "full_graph_000.meta.json",
+    "full_graph_001.py": "full_graph_001.meta.json",
+    "full_graph_002.py": "full_graph_002.meta.json",
+    "full_graph_003.py": "full_graph_003.meta.json",
+    "full_graph_004.py": "full_graph_004.meta.json",
+    "full_graph_005.py": "full_graph_005.meta.json",
+    "full_graph_006.py": "full_graph_006.meta.json",
+    "full_graph_007.py": "full_graph_007.meta.json",
+    "full_graph_008.py": "full_graph_008.meta.json",
+    "full_graph_009.py": "full_graph_009.meta.json",
+    "full_graph_010.py": "full_graph_010.meta.json",
+    "full_graph_011.py": "full_graph_011.meta.json"
+  },
+  "mode": "train"
+}
