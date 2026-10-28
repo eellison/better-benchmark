@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_tiny_patch16_224.fb_in1k",
+  "patterns": [
+    "0586bd6b1be6"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "2fe2aeba588e",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.expm1.default",
+    "aten.gt.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench/train/nvidia_deeprecommender"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_2fe2aeba588e/repro.py",
+  "n_aten_ops": 8,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

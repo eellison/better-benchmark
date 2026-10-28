@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "0fc65bb383f0",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/XLNetLMHeadModel"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_0fc65bb383f0/repro.py",
+  "n_aten_ops": 10,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

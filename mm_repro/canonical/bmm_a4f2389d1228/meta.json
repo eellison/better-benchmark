@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "a4f2389d1228",
+  "kind": "matmul",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 19,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.bmm.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.index.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/swin_base_patch4_window7_224"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_a4f2389d1228/repro.py",
+  "n_aten_ops": 18,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "block_or_reshaped_reduction",
+    "epilogue",
+    "gather",
+    "mm_reduction",
+    "row_reduction"
+  ]
+}

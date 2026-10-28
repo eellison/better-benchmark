@@ -1,0 +1,123 @@
+{
+  "points": [
+    {
+      "shape_hash": "327f2e6b",
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 26
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 26
+        }
+      },
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            4096
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 10,
+        "compute": 3,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 1,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_11",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            4096
+          ],
+          "rhs": [
+            4096,
+            4096
+          ],
+          "out": [
+            128,
+            4096
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_5",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            16384
+          ],
+          "rhs": [
+            16384,
+            4096
+          ],
+          "out": [
+            128,
+            4096
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 7,
+      "n_mm_ops": 2,
+      "traits": [
+        "epilogue",
+        "horizontal",
+        "horizontal_then_combine"
+      ]
+    }
+  ]
+}

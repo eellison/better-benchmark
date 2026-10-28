@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "ghostnet_100",
+  "patterns": [
+    "41f7abf5db7a",
+    "be26ea9f945f"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

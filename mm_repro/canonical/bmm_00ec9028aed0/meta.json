@@ -1,0 +1,56 @@
+{
+  "pattern_hash": "00ec9028aed0",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 32,
+  "origin_ops": [
+    "aten.abs.default",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.bmm.default",
+    "aten.div.Tensor",
+    "aten.div.Tensor",
+    "aten.embedding.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.gt.Scalar",
+    "aten.log.default",
+    "aten.lt.Scalar",
+    "aten.minimum.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/train/T5ForConditionalGeneration",
+    "hf/train/T5Small"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_00ec9028aed0/repro.py",
+  "n_aten_ops": 26,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "gather"
+  ]
+}

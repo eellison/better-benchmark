@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "vit_base_patch16_siglip_256",
+  "patterns": [
+    "0bc457cd5b37",
+    "33ee8772715d",
+    "3f354b01b482",
+    "6e5cd3f31dc1",
+    "8021ae440991",
+    "ab1dbd579113",
+    "c1b191533b49",
+    "ffc423127a11"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

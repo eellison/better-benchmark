@@ -1,0 +1,145 @@
+{
+  "points": [
+    {
+      "shape_hash": "04b9d04d",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [
+          [
+            384,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            384
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            384,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            384
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            -1,
+            6,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            -1,
+            6,
+            64
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        768
+      ],
+      "partition_metrics": {
+        "nodes": 10,
+        "compute": 2,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 2,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_4",
+          "op": "aten::mm",
+          "lhs": [
+            1,
+            384
+          ],
+          "rhs": [
+            384,
+            384
+          ],
+          "out": [
+            1,
+            384
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_21",
+          "op": "aten::addmm",
+          "lhs": [
+            1,
+            384
+          ],
+          "rhs": [
+            384,
+            384
+          ],
+          "out": [
+            1,
+            384
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 10,
+      "n_mm_ops": 2,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

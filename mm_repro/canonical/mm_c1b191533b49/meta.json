@@ -1,0 +1,45 @@
+{
+  "pattern_hash": "c1b191533b49",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 22,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.erf.default",
+    "aten.exp.default",
+    "aten.full.default",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.select_scatter.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/vit_base_patch16_siglip_256"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_c1b191533b49/repro.py",
+  "n_aten_ops": 19,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "prologue"
+  ]
+}

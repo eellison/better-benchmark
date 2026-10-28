@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "maml",
+  "patterns": [
+    "81eca7394f75"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "5012b76274fe",
+  "kind": "matmul",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.div.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/train/GPTJForCausalLM",
+    "hf/train/GPTJForQuestionAnswering"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_5012b76274fe/repro.py",
+  "n_aten_ops": 7,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "block_or_reshaped_reduction",
+    "epilogue",
+    "mm_reduction",
+    "row_reduction"
+  ]
+}

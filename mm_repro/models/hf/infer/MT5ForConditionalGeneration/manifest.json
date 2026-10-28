@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "MT5ForConditionalGeneration",
+  "patterns": [
+    "69fcf37d813b",
+    "6b903f01990d",
+    "ad2be59c7785",
+    "cda9b058208c",
+    "cfc2bed77092",
+    "dc1600797af6",
+    "fbc3143bbace"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

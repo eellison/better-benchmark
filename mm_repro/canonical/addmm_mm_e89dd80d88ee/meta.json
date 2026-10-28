@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "e89dd80d88ee",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/GPTJForCausalLM",
+    "hf/infer/GPTJForQuestionAnswering"
+  ],
+  "mm_types": [
+    "addmm",
+    "mm"
+  ],
+  "repro": "canonical/addmm_mm_e89dd80d88ee/repro.py",
+  "n_aten_ops": 7,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "horizontal",
+    "horizontal_then_combine"
+  ]
+}

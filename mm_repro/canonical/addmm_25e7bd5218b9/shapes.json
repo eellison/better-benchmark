@@ -1,0 +1,96 @@
+{
+  "points": [
+    {
+      "shape_hash": "bc2c0740",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            1536,
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            24,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            512,
+            64
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 2,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_1",
+          "op": "aten::addmm",
+          "lhs": [
+            4096,
+            1536
+          ],
+          "rhs": [
+            1536,
+            1536
+          ],
+          "out": [
+            4096,
+            1536
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 11,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

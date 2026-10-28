@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "repvgg_a2",
+  "patterns": [
+    "815b26e59a70"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

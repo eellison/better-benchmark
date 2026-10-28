@@ -1,0 +1,88 @@
+{
+  "points": [
+    {
+      "shape_hash": "66ac73c8",
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            4,
+            2048,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "b8"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8192,
+            768
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 10,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 2,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            768
+          ],
+          "rhs": [
+            768,
+            3072
+          ],
+          "out": [
+            8192,
+            3072
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue",
+        "prologue"
+      ]
+    }
+  ]
+}

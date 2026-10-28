@@ -1,0 +1,185 @@
+{
+  "points": [
+    {
+      "shape_hash": "59d349b4",
+      "models": {
+        "torchbench/infer/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 21,
+        "compute": 10,
+        "mm": 4,
+        "mm_depth": 4,
+        "reduction_depth": 0,
+        "contraction_depth": 4,
+        "reduction_extent": 1,
+        "handoff": 16,
+        "non_mm_compute": 6,
+        "outputs": 1,
+        "inputs": 11
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            16
+          ],
+          "rhs": [
+            16,
+            16
+          ],
+          "out": [
+            128,
+            16
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_1",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            16
+          ],
+          "rhs": [
+            16,
+            16
+          ],
+          "out": [
+            128,
+            16
+          ],
+          "parents": [
+            "addmm"
+          ]
+        },
+        {
+          "node": "addmm_2",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            16
+          ],
+          "rhs": [
+            16,
+            16
+          ],
+          "out": [
+            128,
+            16
+          ],
+          "parents": [
+            "addmm",
+            "addmm_1"
+          ]
+        },
+        {
+          "node": "addmm_3",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            16
+          ],
+          "rhs": [
+            16,
+            1
+          ],
+          "out": [
+            128,
+            1
+          ],
+          "parents": [
+            "addmm",
+            "addmm_1",
+            "addmm_2"
+          ]
+        }
+      ],
+      "n_aten_ops": 17,
+      "n_mm_ops": 4,
+      "traits": [
+        "epilogue",
+        "prologue",
+        "vertical"
+      ]
+    }
+  ]
+}

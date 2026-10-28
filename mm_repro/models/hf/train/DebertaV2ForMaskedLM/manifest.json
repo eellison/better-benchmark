@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "DebertaV2ForMaskedLM",
+  "patterns": [
+    "0bc457cd5b37",
+    "187072f1a97b",
+    "25e7bd5218b9",
+    "2c6f0ce3294a",
+    "33ee8772715d",
+    "715e9839297e",
+    "7cd62c3d34f8",
+    "9d6235e22b5f",
+    "ab1dbd579113",
+    "b8ae4aa96c5d",
+    "ce8cf3fa1557"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

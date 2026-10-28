@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "swin_base_patch4_window7_224",
+  "patterns": [
+    "05908f41caa4",
+    "09a17397312d",
+    "0bc457cd5b37",
+    "0d0094aafaa7",
+    "22f44887e68d",
+    "33ee8772715d",
+    "370d6447b18e",
+    "3a3508f03d7a",
+    "3e9e1e749afc",
+    "3f4e9259510b",
+    "46eea55f48f7",
+    "57abd7df76fe",
+    "5cd3c18b3f94",
+    "669ffbb43a61",
+    "90e2b0767b8e",
+    "97f45af0349d",
+    "a4f2389d1228",
+    "ab1dbd579113",
+    "b4da8b22c3d0",
+    "d9d24d04c282",
+    "eada1fbc534c",
+    "f1e05fa4ec9c",
+    "faacfc36d757"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

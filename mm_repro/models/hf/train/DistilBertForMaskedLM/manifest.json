@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "DistilBertForMaskedLM",
+  "patterns": [
+    "0bc457cd5b37",
+    "27b944863ebf",
+    "2ded9abc3cf8",
+    "33ee8772715d",
+    "7f7cd4a52177",
+    "a6917b1968db",
+    "ab1dbd579113",
+    "ce8cf3fa1557",
+    "dd81d6262e26",
+    "de43a0c4f030"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

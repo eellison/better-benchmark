@@ -464,6 +464,15 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         kind = entry.get("kind", "region")
         reduction_types = entry.get("reduction_types", [])
         kind_label = "_".join(reduction_types[:3]) if reduction_types else kind
+        if kind == "matmul":
+            mm_types = entry.get("mm_types")
+            if not mm_types:
+                # Older MM captures recorded concrete ATen names in origin_ops.
+                from matmul_partitioner import MM_NAMES
+
+                mm_types = sorted({op.split(".")[1] for op in entry.get("origin_ops", [])
+                                   if op.startswith("aten.") and "aten::" + op.split(".")[1] in MM_NAMES})
+            kind_label = "_".join(mm_types) or kind
         dir_name = f"{kind_label}_{pattern_hash}"
         repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
         if repro_dir is None:
@@ -523,6 +532,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 "n_models": 1,
                 "models": [qual_key],
             }
+            if kind == "matmul":
+                meta["mm_types"] = mm_types
             _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
         # Write canonical repro.py if it doesn't exist or is older-format

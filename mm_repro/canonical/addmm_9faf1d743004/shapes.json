@@ -1,0 +1,106 @@
+{
+  "points": [
+    {
+      "shape_hash": "ff53bd60",
+      "models": {
+        "timm/train/dm_nfnet_f0": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            3072,
+            6,
+            6
+          ],
+          "bf16",
+          {
+            "st": [
+              110592,
+              1,
+              18432,
+              3072
+            ]
+          }
+        ],
+        [
+          [
+            1000
+          ],
+          "f32"
+        ],
+        [
+          [
+            1000,
+            3072
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            3072,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            3072,
+            1,
+            3072,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            3072
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 15,
+        "compute": 8,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 1,
+        "contraction_depth": 2,
+        "reduction_extent": 36,
+        "handoff": 0,
+        "non_mm_compute": 7,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            3072
+          ],
+          "rhs": [
+            3072,
+            1000
+          ],
+          "out": [
+            128,
+            1000
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 11,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

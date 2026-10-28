@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "vit_base_patch14_dinov2.lvd142m",
+  "patterns": [
+    "0586bd6b1be6",
+    "27a4f8d1bfae",
+    "30b40397852a"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

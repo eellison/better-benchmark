@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "mistralai/Mistral-7B-Instruct-v0.3",
+  "patterns": [
+    "9c5fb9a4085f",
+    "bdd1d6cf4c6a"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

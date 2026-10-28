@@ -1,0 +1,101 @@
+{
+  "points": [
+    {
+      "shape_hash": "ad71e823",
+      "models": {
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            384,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            384
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 8,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 1,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            16384,
+            768
+          ],
+          "rhs": [
+            768,
+            384
+          ],
+          "out": [
+            16384,
+            384
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

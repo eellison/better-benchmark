@@ -1,0 +1,147 @@
+{
+  "points": [
+    {
+      "shape_hash": "adf4b59c",
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16
+          ]
+        ],
+        [
+          "S",
+          [
+            16
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 26,
+        "compute": 11,
+        "mm": 3,
+        "mm_depth": 3,
+        "reduction_depth": 1,
+        "contraction_depth": 3,
+        "reduction_extent": 128,
+        "handoff": 128,
+        "non_mm_compute": 8,
+        "outputs": 4,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_3",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            16
+          ],
+          "rhs": [
+            16,
+            16
+          ],
+          "out": [
+            128,
+            16
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_5",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            16
+          ],
+          "rhs": [
+            16,
+            16
+          ],
+          "out": [
+            128,
+            16
+          ],
+          "parents": [
+            "mm_3"
+          ]
+        },
+        {
+          "node": "mm_7",
+          "op": "aten::mm",
+          "lhs": [
+            16,
+            128
+          ],
+          "rhs": [
+            128,
+            1
+          ],
+          "out": [
+            16,
+            1
+          ],
+          "parents": [
+            "mm_3",
+            "mm_5"
+          ]
+        }
+      ],
+      "n_aten_ops": 15,
+      "n_mm_ops": 3,
+      "traits": [
+        "epilogue",
+        "mm_reduction",
+        "prologue",
+        "vertical"
+      ]
+    }
+  ]
+}

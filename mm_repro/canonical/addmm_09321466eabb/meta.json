@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "09321466eabb",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/MobileBertForMaskedLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_09321466eabb/repro.py",
+  "n_aten_ops": 4,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

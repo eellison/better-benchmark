@@ -1,0 +1,86 @@
+{
+  "points": [
+    {
+      "shape_hash": "bb72be8b",
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            256,
+            197951
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            197951
+          ],
+          "bf16",
+          {
+            "st": [
+              197952,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            197951,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 26,
+        "compute": 15,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 14,
+        "outputs": 2,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            256,
+            197952
+          ],
+          "rhs": [
+            197952,
+            512
+          ],
+          "out": [
+            256,
+            512
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 20,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue",
+        "prologue"
+      ]
+    }
+  ]
+}

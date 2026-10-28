@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "mnasnet1_0",
+  "patterns": [
+    "08deccedc20e"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

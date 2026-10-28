@@ -1,0 +1,27 @@
+{
+  "pattern_hash": "1f238fcf71b3",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/AlbertForMaskedLM"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_1f238fcf71b3/repro.py",
+  "n_aten_ops": 3,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

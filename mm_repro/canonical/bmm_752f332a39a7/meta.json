@@ -1,0 +1,52 @@
+{
+  "pattern_hash": "752f332a39a7",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 27,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.bmm.default",
+    "aten.bmm.default",
+    "aten.clone.default",
+    "aten.full.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.slice_scatter.default",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/XLNetLMHeadModel"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_752f332a39a7/repro.py",
+  "n_aten_ops": 23,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "horizontal",
+    "horizontal_then_combine",
+    "prologue"
+  ]
+}

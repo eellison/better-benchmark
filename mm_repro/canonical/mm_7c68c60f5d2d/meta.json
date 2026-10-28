@@ -1,0 +1,56 @@
+{
+  "pattern_hash": "7c68c60f5d2d",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 30,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.mul.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.pow.Tensor_Scalar",
+    "aten.sub.Tensor",
+    "aten.tanh.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 5,
+  "models": [
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/GPTJForCausalLM",
+    "hf/train/GPTJForQuestionAnswering",
+    "hf/train/GPTNeoForCausalLM",
+    "hf/train/GPTNeoForSequenceClassification"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_7c68c60f5d2d/repro.py",
+  "n_aten_ops": 25,
+  "n_mm_ops": 1,
+  "shape_points": 3,
+  "traits": [
+    "epilogue"
+  ]
+}

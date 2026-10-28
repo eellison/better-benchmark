@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "330ef1fb21d2",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.eq.Scalar",
+    "aten.logical_not.default",
+    "aten.view.default"
+  ],
+  "n_models": 8,
+  "models": [
+    "hf/infer/AlbertForMaskedLM",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/ElectraForCausalLM",
+    "hf/train/RobertaForCausalLM"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_330ef1fb21d2/repro.py",
+  "n_aten_ops": 4,
+  "n_mm_ops": 1,
+  "shape_points": 3,
+  "traits": [
+    "epilogue"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "6262cbab9847",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/DebertaV2ForMaskedLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_6262cbab9847/repro.py",
+  "n_aten_ops": 10,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

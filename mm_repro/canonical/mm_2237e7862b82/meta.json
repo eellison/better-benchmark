@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "2237e7862b82",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/train/MT5ForConditionalGeneration",
+    "hf/train/T5ForConditionalGeneration",
+    "hf/train/T5Small"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_2237e7862b82/repro.py",
+  "n_aten_ops": 7,
+  "n_mm_ops": 1,
+  "shape_points": 3,
+  "traits": [
+    "epilogue"
+  ]
+}

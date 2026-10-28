@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "mobilenet_v2",
+  "patterns": [
+    "89e0ab13d216"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

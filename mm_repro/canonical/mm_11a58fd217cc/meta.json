@@ -1,0 +1,44 @@
+{
+  "pattern_hash": "11a58fd217cc",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 19,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.tanh.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/google/gemma-2-2b",
+    "hf/infer/google/gemma-3-4b-it"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_11a58fd217cc/repro.py",
+  "n_aten_ops": 17,
+  "n_mm_ops": 2,
+  "shape_points": 2,
+  "traits": [
+    "epilogue",
+    "horizontal",
+    "horizontal_then_combine"
+  ]
+}

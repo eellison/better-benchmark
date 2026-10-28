@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "RobertaForCausalLM",
+  "patterns": [
+    "016b3fa4dad0",
+    "051679c102c3",
+    "0bc457cd5b37",
+    "330ef1fb21d2",
+    "33ee8772715d",
+    "4ff241b2eaa6",
+    "a6917b1968db",
+    "ab1dbd579113",
+    "ce8cf3fa1557",
+    "dd81d6262e26",
+    "e8c8522dc857"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

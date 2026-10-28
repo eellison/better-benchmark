@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "google/gemma-3-4b-it",
+  "patterns": [
+    "11a58fd217cc",
+    "4934217ec01b",
+    "c926c18e5e99",
+    "ef78a9d2d30d"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

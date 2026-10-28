@@ -1,0 +1,1105 @@
+{
+  "se_exact_math": {
+    "repros": 0,
+    "shape_points": 0,
+    "occurrences": 0,
+    "patterns": [],
+    "example": null
+  },
+  "swiglu_gate_math": {
+    "repros": 1,
+    "shape_points": 2,
+    "occurrences": 60,
+    "patterns": [
+      "bdd1d6cf4c6a"
+    ],
+    "example": {
+      "source": "repros/models/hf/infer/Qwen/Qwen3-0.6B/full_graph_000.py",
+      "repro": "canonical/mm_bdd1d6cf4c6a/repro.py",
+      "mm_shapes": [
+        {
+          "node": "mm_4",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            1024
+          ],
+          "rhs": [
+            1024,
+            3072
+          ],
+          "out": [
+            1000,
+            3072
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_5",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            1024
+          ],
+          "rhs": [
+            1024,
+            3072
+          ],
+          "out": [
+            1000,
+            3072
+          ],
+          "parents": []
+        }
+      ]
+    }
+  },
+  "mm_normalization": {
+    "repros": 2,
+    "shape_points": 2,
+    "occurrences": 2,
+    "patterns": [
+      "1f15df84c407",
+      "4fb63f9ccc45"
+    ],
+    "example": {
+      "source": "repros/models/hf/infer/ElectraForCausalLM/full_graph_000.py",
+      "repro": "canonical/addmm_4fb63f9ccc45/repro.py",
+      "mm_shapes": [
+        {
+          "node": "addmm_73",
+          "op": "aten::addmm",
+          "lhs": [
+            32768,
+            256
+          ],
+          "rhs": [
+            256,
+            128
+          ],
+          "out": [
+            32768,
+            128
+          ],
+          "parents": []
+        }
+      ]
+    }
+  },
+  "small_vertical": {
+    "repros": 26,
+    "shape_points": 31,
+    "occurrences": 167,
+    "patterns": [
+      "0ae14c379f90",
+      "22f44887e68d",
+      "2ded9abc3cf8",
+      "370d6447b18e",
+      "431e8c9490dd",
+      "687e08371fcc",
+      "6e0071d79577",
+      "782d307093a9",
+      "7f7cd4a52177",
+      "8ed26adc744a",
+      "8edcbdf086f0",
+      "90e2b0767b8e",
+      "95193cad6efa",
+      "9f396db49822",
+      "a11bba58c35b",
+      "ac95c7db7c58",
+      "b281e23a78eb",
+      "bcd7d76d653b",
+      "bd86c1ac4d5b",
+      "bdd66b8c1580",
+      "d0b08749d87e",
+      "d9d24d04c282",
+      "dc4f88f29f7c",
+      "f1e05fa4ec9c",
+      "faacfc36d757",
+      "fe4891df3e8d"
+    ],
+    "example": {
+      "source": "repros/models/hf/infer/MobileBertForMaskedLM/full_graph_000.py",
+      "repro": "canonical/addmm_bmm_fe4891df3e8d/repro.py",
+      "mm_shapes": [
+        {
+          "node": "addmm_2",
+          "op": "aten::addmm",
+          "lhs": [
+            32768,
+            128
+          ],
+          "rhs": [
+            128,
+            128
+          ],
+          "out": [
+            32768,
+            128
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_3",
+          "op": "aten::addmm",
+          "lhs": [
+            32768,
+            128
+          ],
+          "rhs": [
+            128,
+            128
+          ],
+          "out": [
+            32768,
+            128
+          ],
+          "parents": []
+        },
+        {
+          "node": "bmm",
+          "op": "aten::bmm",
+          "lhs": [
+            1024,
+            128,
+            32
+          ],
+          "rhs": [
+            1024,
+            32,
+            128
+          ],
+          "out": [
+            1024,
+            128,
+            128
+          ],
+          "parents": [
+            "addmm_2",
+            "addmm_3"
+          ]
+        }
+      ]
+    }
+  },
+  "four_mm": [
+    {
+      "pattern_hash": "77709072e15a",
+      "repro": "canonical/addmm_77709072e15a/repro.py",
+      "example": {
+        "source": "repros/models/hf/infer/M2M100ForConditionalGeneration/full_graph_000.py",
+        "metrics": {
+          "nodes": 18,
+          "compute": 4,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 0,
+          "outputs": 4,
+          "inputs": 12
+        },
+        "mm_shapes": [
+          {
+            "node": "addmm_71",
+            "op": "aten::addmm",
+            "lhs": [
+              8192,
+              4096
+            ],
+            "rhs": [
+              4096,
+              1024
+            ],
+            "out": [
+              8192,
+              1024
+            ],
+            "parents": []
+          },
+          {
+            "node": "addmm_72",
+            "op": "aten::addmm",
+            "lhs": [
+              8192,
+              1024
+            ],
+            "rhs": [
+              1024,
+              1024
+            ],
+            "out": [
+              8192,
+              1024
+            ],
+            "parents": []
+          },
+          {
+            "node": "addmm_73",
+            "op": "aten::addmm",
+            "lhs": [
+              8192,
+              1024
+            ],
+            "rhs": [
+              1024,
+              1024
+            ],
+            "out": [
+              8192,
+              1024
+            ],
+            "parents": []
+          },
+          {
+            "node": "addmm_74",
+            "op": "aten::addmm",
+            "lhs": [
+              8192,
+              1024
+            ],
+            "rhs": [
+              1024,
+              1024
+            ],
+            "out": [
+              8192,
+              1024
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "8ed26adc744a",
+      "repro": "canonical/addmm_8ed26adc744a/repro.py",
+      "example": {
+        "source": "repros/models/torchbench/infer/lennard_jones/full_graph_000.py",
+        "metrics": {
+          "nodes": 21,
+          "compute": 10,
+          "mm": 4,
+          "mm_depth": 4,
+          "reduction_depth": 0,
+          "contraction_depth": 4,
+          "reduction_extent": 1,
+          "handoff": 16,
+          "non_mm_compute": 6,
+          "outputs": 1,
+          "inputs": 11
+        },
+        "mm_shapes": [
+          {
+            "node": "addmm",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              16
+            ],
+            "out": [
+              128,
+              16
+            ],
+            "parents": []
+          },
+          {
+            "node": "addmm_1",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              16
+            ],
+            "out": [
+              128,
+              16
+            ],
+            "parents": [
+              "addmm"
+            ]
+          },
+          {
+            "node": "addmm_2",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              16
+            ],
+            "out": [
+              128,
+              16
+            ],
+            "parents": [
+              "addmm",
+              "addmm_1"
+            ]
+          },
+          {
+            "node": "addmm_3",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              1
+            ],
+            "out": [
+              128,
+              1
+            ],
+            "parents": [
+              "addmm",
+              "addmm_1",
+              "addmm_2"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "b281e23a78eb",
+      "repro": "canonical/addmm_b281e23a78eb/repro.py",
+      "example": {
+        "source": "repros/models/torchbench/train/lennard_jones/full_graph_000.py",
+        "metrics": {
+          "nodes": 32,
+          "compute": 10,
+          "mm": 4,
+          "mm_depth": 4,
+          "reduction_depth": 0,
+          "contraction_depth": 4,
+          "reduction_extent": 1,
+          "handoff": 16,
+          "non_mm_compute": 6,
+          "outputs": 4,
+          "inputs": 11
+        },
+        "mm_shapes": [
+          {
+            "node": "addmm",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              16
+            ],
+            "out": [
+              128,
+              16
+            ],
+            "parents": []
+          },
+          {
+            "node": "addmm_1",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              16
+            ],
+            "out": [
+              128,
+              16
+            ],
+            "parents": [
+              "addmm"
+            ]
+          },
+          {
+            "node": "addmm_2",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              16
+            ],
+            "out": [
+              128,
+              16
+            ],
+            "parents": [
+              "addmm",
+              "addmm_1"
+            ]
+          },
+          {
+            "node": "addmm_3",
+            "op": "aten::addmm",
+            "lhs": [
+              128,
+              16
+            ],
+            "rhs": [
+              16,
+              1
+            ],
+            "out": [
+              128,
+              1
+            ],
+            "parents": [
+              "addmm",
+              "addmm_1",
+              "addmm_2"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "342e4efdfc5d",
+      "repro": "canonical/mm_342e4efdfc5d/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/AlbertForMaskedLM/full_graph_001.py",
+        "metrics": {
+          "nodes": 8,
+          "compute": 4,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 0,
+          "outputs": 4,
+          "inputs": 7
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_142",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_143",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_144",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_145",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "363738149ada",
+      "repro": "canonical/mm_363738149ada/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/MobileBertForMaskedLM/full_graph_001.py",
+        "metrics": {
+          "nodes": 8,
+          "compute": 4,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 0,
+          "outputs": 4,
+          "inputs": 6
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_27",
+            "op": "aten::mm",
+            "lhs": [
+              128,
+              32768
+            ],
+            "rhs": [
+              32768,
+              128
+            ],
+            "out": [
+              128,
+              128
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_29",
+            "op": "aten::mm",
+            "lhs": [
+              128,
+              32768
+            ],
+            "rhs": [
+              32768,
+              128
+            ],
+            "out": [
+              128,
+              128
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_31",
+            "op": "aten::mm",
+            "lhs": [
+              128,
+              32768
+            ],
+            "rhs": [
+              32768,
+              512
+            ],
+            "out": [
+              128,
+              512
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_33",
+            "op": "aten::mm",
+            "lhs": [
+              128,
+              32768
+            ],
+            "rhs": [
+              32768,
+              512
+            ],
+            "out": [
+              128,
+              512
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "5e7f964ce981",
+      "repro": "canonical/mm_5e7f964ce981/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/AlbertForMaskedLM/full_graph_001.py",
+        "metrics": {
+          "nodes": 11,
+          "compute": 7,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 3,
+          "outputs": 1,
+          "inputs": 8
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_5",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              16384
+            ],
+            "out": [
+              4096,
+              16384
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_17",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              16384
+            ],
+            "out": [
+              4096,
+              16384
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_29",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              16384
+            ],
+            "out": [
+              4096,
+              16384
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_41",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              16384
+            ],
+            "out": [
+              4096,
+              16384
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "8e49d8639fb2",
+      "repro": "canonical/mm_8e49d8639fb2/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/MegatronBertForCausalLM/full_graph_001.py",
+        "metrics": {
+          "nodes": 23,
+          "compute": 4,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 0,
+          "outputs": 4,
+          "inputs": 6
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_9",
+            "op": "aten::mm",
+            "lhs": [
+              1024,
+              8192
+            ],
+            "rhs": [
+              8192,
+              1024
+            ],
+            "out": [
+              1024,
+              1024
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_11",
+            "op": "aten::mm",
+            "lhs": [
+              1024,
+              8192
+            ],
+            "rhs": [
+              8192,
+              1024
+            ],
+            "out": [
+              1024,
+              1024
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_13",
+            "op": "aten::mm",
+            "lhs": [
+              1024,
+              8192
+            ],
+            "rhs": [
+              8192,
+              1024
+            ],
+            "out": [
+              1024,
+              1024
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_15",
+            "op": "aten::mm",
+            "lhs": [
+              1024,
+              8192
+            ],
+            "rhs": [
+              8192,
+              1024
+            ],
+            "out": [
+              1024,
+              1024
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "a6ea45b6431b",
+      "repro": "canonical/mm_a6ea45b6431b/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/MT5ForConditionalGeneration/full_graph_001.py",
+        "metrics": {
+          "nodes": 16,
+          "compute": 8,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 4,
+          "outputs": 1,
+          "inputs": 9
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_11",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              384
+            ],
+            "rhs": [
+              384,
+              512
+            ],
+            "out": [
+              4096,
+              512
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_13",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              384
+            ],
+            "rhs": [
+              384,
+              512
+            ],
+            "out": [
+              4096,
+              512
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_33",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              384
+            ],
+            "rhs": [
+              384,
+              512
+            ],
+            "out": [
+              4096,
+              512
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_35",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              384
+            ],
+            "rhs": [
+              384,
+              512
+            ],
+            "out": [
+              4096,
+              512
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "ba343ea3c5b6",
+      "repro": "canonical/mm_ba343ea3c5b6/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/AlbertForMaskedLM/full_graph_001.py",
+        "metrics": {
+          "nodes": 10,
+          "compute": 4,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 0,
+          "outputs": 4,
+          "inputs": 7
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_58",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_59",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_60",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_61",
+            "op": "aten::mm",
+            "lhs": [
+              4096,
+              4096
+            ],
+            "rhs": [
+              4096,
+              4096
+            ],
+            "out": [
+              4096,
+              4096
+            ],
+            "parents": []
+          }
+        ]
+      }
+    },
+    {
+      "pattern_hash": "d5f7be69a724",
+      "repro": "canonical/mm_d5f7be69a724/repro.py",
+      "example": {
+        "source": "repros/models/hf/train/BlenderbotForCausalLM/full_graph_007.py",
+        "metrics": {
+          "nodes": 23,
+          "compute": 4,
+          "mm": 4,
+          "mm_depth": 1,
+          "reduction_depth": 0,
+          "contraction_depth": 1,
+          "reduction_extent": 1,
+          "handoff": 0,
+          "non_mm_compute": 0,
+          "outputs": 4,
+          "inputs": 6
+        },
+        "mm_shapes": [
+          {
+            "node": "mm_5",
+            "op": "aten::mm",
+            "lhs": [
+              2560,
+              4096
+            ],
+            "rhs": [
+              4096,
+              2560
+            ],
+            "out": [
+              2560,
+              2560
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_7",
+            "op": "aten::mm",
+            "lhs": [
+              2560,
+              4096
+            ],
+            "rhs": [
+              4096,
+              2560
+            ],
+            "out": [
+              2560,
+              2560
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_9",
+            "op": "aten::mm",
+            "lhs": [
+              2560,
+              4096
+            ],
+            "rhs": [
+              4096,
+              2560
+            ],
+            "out": [
+              2560,
+              2560
+            ],
+            "parents": []
+          },
+          {
+            "node": "mm_11",
+            "op": "aten::mm",
+            "lhs": [
+              2560,
+              4096
+            ],
+            "rhs": [
+              4096,
+              2560
+            ],
+            "out": [
+              2560,
+              2560
+            ],
+            "parents": []
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "vgg16",
+  "patterns": [
+    "924994404cac",
+    "efa907db85c9"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

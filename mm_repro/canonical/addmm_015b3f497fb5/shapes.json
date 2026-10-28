@@ -1,0 +1,101 @@
+{
+  "points": [
+    {
+      "shape_hash": "81349049",
+      "models": {
+        "timm/infer/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2304,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            2304
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            3,
+            12,
+            -1
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 10,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 3,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            25216,
+            768
+          ],
+          "rhs": [
+            768,
+            2304
+          ],
+          "out": [
+            25216,
+            2304
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 7,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

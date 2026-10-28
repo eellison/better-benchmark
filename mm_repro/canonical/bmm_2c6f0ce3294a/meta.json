@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "2c6f0ce3294a",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.bmm.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/DebertaV2ForMaskedLM"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_2c6f0ce3294a/repro.py",
+  "n_aten_ops": 14,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

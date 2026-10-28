@@ -1,0 +1,73 @@
+{
+  "points": [
+    {
+      "shape_hash": "dcc0e1e2",
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            256000,
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            256000
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 4,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 3,
+        "outputs": 1,
+        "inputs": 2
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_182",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            2304
+          ],
+          "rhs": [
+            2304,
+            256000
+          ],
+          "out": [
+            1000,
+            256000
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 6,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

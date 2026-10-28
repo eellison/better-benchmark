@@ -1,0 +1,980 @@
+{
+  "points": [
+    {
+      "shape_hash": "57679356",
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            4096,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            10240,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            2560
+          ],
+          "b8"
+        ],
+        [
+          [
+            32,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2560
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_2",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            10240
+          ],
+          "rhs": [
+            10240,
+            2560
+          ],
+          "out": [
+            4096,
+            2560
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "fd922ce9",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            2048,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2048,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "b8"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_10",
+          "op": "aten::mm",
+          "lhs": [
+            2048,
+            2560
+          ],
+          "rhs": [
+            2560,
+            2560
+          ],
+          "out": [
+            2048,
+            2560
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "547e619d",
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            2048,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            10240,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2048,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "b8"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_2",
+          "op": "aten::mm",
+          "lhs": [
+            2048,
+            10240
+          ],
+          "rhs": [
+            10240,
+            2560
+          ],
+          "out": [
+            2048,
+            2560
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "5bf176f9",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_10",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            1024
+          ],
+          "rhs": [
+            1024,
+            1024
+          ],
+          "out": [
+            8192,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "1f5a38ae",
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            8192,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_2",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            4096
+          ],
+          "rhs": [
+            4096,
+            1024
+          ],
+          "out": [
+            8192,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "71fae698",
+      "models": {
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            8192,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            1024
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_2",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            4096
+          ],
+          "rhs": [
+            4096,
+            1024
+          ],
+          "out": [
+            8192,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "6de6491b",
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            16384,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            128,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            128,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_2",
+          "op": "aten::mm",
+          "lhs": [
+            16384,
+            4096
+          ],
+          "rhs": [
+            4096,
+            1024
+          ],
+          "out": [
+            16384,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "2723ac5c",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_2",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            4096
+          ],
+          "rhs": [
+            4096,
+            1024
+          ],
+          "out": [
+            4096,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

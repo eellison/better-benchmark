@@ -1,0 +1,128 @@
+{
+  "points": [
+    {
+      "shape_hash": "d1284ac9",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "inputs": [
+        [
+          [
+            1024,
+            16384
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            16384,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1024,
+            16,
+            64,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            1024,
+            16,
+            64,
+            1,
+            1
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 12,
+        "compute": 2,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 2,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_8",
+          "op": "aten::mm",
+          "lhs": [
+            1024,
+            16384
+          ],
+          "rhs": [
+            16384,
+            1024
+          ],
+          "out": [
+            1024,
+            1024
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_9",
+          "op": "aten::mm",
+          "lhs": [
+            1024,
+            8192
+          ],
+          "rhs": [
+            8192,
+            1024
+          ],
+          "out": [
+            1024,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 10,
+      "n_mm_ops": 2,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

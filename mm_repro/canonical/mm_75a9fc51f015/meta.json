@@ -1,0 +1,42 @@
+{
+  "pattern_hash": "75a9fc51f015",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 20,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/AllenaiLongformerBase"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_75a9fc51f015/repro.py",
+  "n_aten_ops": 17,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

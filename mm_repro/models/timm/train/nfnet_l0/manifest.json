@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "nfnet_l0",
+  "patterns": [
+    "354007f6bb5c",
+    "360136d76530"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

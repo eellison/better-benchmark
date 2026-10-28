@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "27b944863ebf",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/DistilBertForMaskedLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_27b944863ebf/repro.py",
+  "n_aten_ops": 4,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

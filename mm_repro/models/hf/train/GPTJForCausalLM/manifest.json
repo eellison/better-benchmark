@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTJForCausalLM",
+  "patterns": [
+    "1905944880d0",
+    "33ee8772715d",
+    "5012b76274fe",
+    "695773afcca2",
+    "79f052906a18",
+    "7c68c60f5d2d",
+    "af04f75df852",
+    "b295495ff6a1",
+    "ddb22e0e140a"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

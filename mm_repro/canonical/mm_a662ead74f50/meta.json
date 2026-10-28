@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "a662ead74f50",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.slice.Tensor",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/DistillGPT2"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_a662ead74f50/repro.py",
+  "n_aten_ops": 5,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

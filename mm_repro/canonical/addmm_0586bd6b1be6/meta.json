@@ -1,0 +1,58 @@
+{
+  "pattern_hash": "0586bd6b1be6",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.erf.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 26,
+  "models": [
+    "hf/infer/AllenaiLongformerBase",
+    "hf/infer/BartForCausalLM",
+    "hf/infer/BertForMaskedLM",
+    "hf/infer/BlenderbotForCausalLM",
+    "hf/infer/BlenderbotForConditionalGeneration",
+    "hf/infer/DebertaV2ForMaskedLM",
+    "hf/infer/DistilBertForMaskedLM",
+    "hf/infer/ElectraForCausalLM",
+    "hf/infer/LayoutLMForMaskedLM",
+    "hf/infer/MBartForCausalLM",
+    "hf/infer/MegatronBertForCausalLM",
+    "hf/infer/PLBartForCausalLM",
+    "hf/infer/PegasusForCausalLM",
+    "hf/infer/RobertaForCausalLM",
+    "hf/infer/TrOCRForCausalLM",
+    "hf/infer/XGLMForCausalLM",
+    "hf/infer/XLNetLMHeadModel",
+    "hf/infer/YituTechConvBert",
+    "hf/infer/openai/whisper-tiny",
+    "timm/infer/beit_base_patch16_224",
+    "timm/infer/deit_base_distilled_patch16_224",
+    "timm/infer/deit_tiny_patch16_224.fb_in1k",
+    "timm/infer/swin_base_patch4_window7_224",
+    "timm/infer/vit_base_patch14_dinov2.lvd142m",
+    "timm/infer/vit_base_patch16_siglip_256",
+    "torchbench/infer/BERT_pytorch"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_0586bd6b1be6/repro.py",
+  "n_aten_ops": 9,
+  "n_mm_ops": 1,
+  "shape_points": 22,
+  "traits": [
+    "epilogue"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "pattern_hash": "8bddbf694a3f",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 21,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/train/MT5ForConditionalGeneration",
+    "hf/train/T5ForConditionalGeneration",
+    "hf/train/T5Small"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_8bddbf694a3f/repro.py",
+  "n_aten_ops": 19,
+  "n_mm_ops": 2,
+  "shape_points": 2,
+  "traits": [
+    "horizontal"
+  ]
+}

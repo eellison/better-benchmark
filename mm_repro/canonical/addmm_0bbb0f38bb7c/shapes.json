@@ -1,0 +1,208 @@
+{
+  "points": [
+    {
+      "shape_hash": "619cff39",
+      "models": {
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            -1,
+            64
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        25165824
+      ],
+      "partition_metrics": {
+        "nodes": 18,
+        "compute": 3,
+        "mm": 3,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 3,
+        "inputs": 9
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            16384,
+            768
+          ],
+          "rhs": [
+            768,
+            768
+          ],
+          "out": [
+            16384,
+            768
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_1",
+          "op": "aten::addmm",
+          "lhs": [
+            16384,
+            768
+          ],
+          "rhs": [
+            768,
+            768
+          ],
+          "out": [
+            16384,
+            768
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_2",
+          "op": "aten::addmm",
+          "lhs": [
+            16384,
+            768
+          ],
+          "rhs": [
+            768,
+            768
+          ],
+          "out": [
+            16384,
+            768
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 18,
+      "n_mm_ops": 3,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

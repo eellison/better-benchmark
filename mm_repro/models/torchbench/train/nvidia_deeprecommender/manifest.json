@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "nvidia_deeprecommender",
+  "patterns": [
+    "17b2ce9fc2ac",
+    "27a78530077d",
+    "2fe2aeba588e",
+    "4fba9760b15b",
+    "513a934594f8",
+    "7c8b47d795af",
+    "b7cbbaced1a4",
+    "d6add6559712"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

@@ -1,0 +1,29 @@
+{
+  "pattern_hash": "e4bb3658e67d",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.clone.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/openai/whisper-tiny"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_e4bb3658e67d/repro.py",
+  "n_aten_ops": 7,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

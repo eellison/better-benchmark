@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "PegasusForCausalLM",
+  "patterns": [
+    "0586bd6b1be6",
+    "94e8674165b0",
+    "ac98ab030fe4"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

@@ -1,0 +1,250 @@
+{
+  "points": [
+    {
+      "shape_hash": "f565291d",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [
+          [
+            288
+          ],
+          "f32"
+        ],
+        [
+          [
+            288,
+            144
+          ],
+          "f32"
+        ],
+        [
+          [
+            131072,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            256,
+            288
+          ]
+        ],
+        [
+          "S",
+          [
+            131072,
+            288
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 12,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_2",
+          "op": "aten::addmm",
+          "lhs": [
+            131072,
+            144
+          ],
+          "rhs": [
+            144,
+            288
+          ],
+          "out": [
+            131072,
+            288
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "db6da153",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "inputs": [
+        [
+          [
+            384
+          ],
+          "f32"
+        ],
+        [
+          [
+            384,
+            192
+          ],
+          "f32"
+        ],
+        [
+          [
+            32768,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            384
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 12,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_10",
+          "op": "aten::addmm",
+          "lhs": [
+            32768,
+            192
+          ],
+          "rhs": [
+            192,
+            384
+          ],
+          "out": [
+            32768,
+            384
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "fcb43dfd",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [
+          [
+            480
+          ],
+          "f32"
+        ],
+        [
+          [
+            480,
+            240
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            480
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            480
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 12,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_26",
+          "op": "aten::addmm",
+          "lhs": [
+            8192,
+            240
+          ],
+          "rhs": [
+            240,
+            480
+          ],
+          "out": [
+            8192,
+            480
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

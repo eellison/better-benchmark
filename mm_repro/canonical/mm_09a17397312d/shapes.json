@@ -1,0 +1,280 @@
+{
+  "points": [
+    {
+      "shape_hash": "b746645e",
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            25088,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            25088,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            14,
+            14,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            14,
+            14,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            512,
+            49,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            7,
+            7,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            2,
+            2,
+            7,
+            7,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            14,
+            14,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            14,
+            14,
+            512
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 16,
+        "compute": 7,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 6,
+        "outputs": 4,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_162",
+          "op": "aten::mm",
+          "lhs": [
+            25088,
+            1536
+          ],
+          "rhs": [
+            1536,
+            512
+          ],
+          "out": [
+            25088,
+            512
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 14,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "54d10506",
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            100352,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256
+          ],
+          "f32"
+        ],
+        [
+          [
+            100352,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            28,
+            28,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            28,
+            28,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            2048,
+            49,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            2048,
+            7,
+            7,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            4,
+            4,
+            7,
+            7,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            28,
+            28,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            28,
+            28,
+            256
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 16,
+        "compute": 7,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 6,
+        "outputs": 4,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_180",
+          "op": "aten::mm",
+          "lhs": [
+            100352,
+            768
+          ],
+          "rhs": [
+            768,
+            256
+          ],
+          "out": [
+            100352,
+            256
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 14,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "cf9ca38b2ac5",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.tanh.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/GoogleFnet",
+    "hf/train/GoogleFnet"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_cf9ca38b2ac5/repro.py",
+  "n_aten_ops": 11,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

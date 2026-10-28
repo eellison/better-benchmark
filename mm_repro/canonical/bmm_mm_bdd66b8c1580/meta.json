@@ -1,0 +1,55 @@
+{
+  "pattern_hash": "bdd66b8c1580",
+  "kind": "matmul",
+  "reduction_types": [
+    "sum"
+  ],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.bmm.default",
+    "aten.clone.default",
+    "aten.mm.default",
+    "aten.mul.Scalar",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.fma.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/MobileBertForMaskedLM"
+  ],
+  "mm_types": [
+    "bmm",
+    "mm"
+  ],
+  "repro": "canonical/bmm_mm_bdd66b8c1580/repro.py",
+  "n_aten_ops": 19,
+  "n_mm_ops": 3,
+  "shape_points": 1,
+  "traits": [
+    "block_or_reshaped_reduction",
+    "epilogue",
+    "mm_reduction",
+    "prologue",
+    "row_reduction",
+    "vertical"
+  ]
+}

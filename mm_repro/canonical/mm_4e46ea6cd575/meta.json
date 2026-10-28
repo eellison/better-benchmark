@@ -1,0 +1,35 @@
+{
+  "pattern_hash": "4e46ea6cd575",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Tensor",
+    "aten.full.default",
+    "aten.le.Scalar",
+    "aten.lt.Scalar",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.view.default",
+    "aten.where.self",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/mobilenetv3_large_100"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_4e46ea6cd575/repro.py",
+  "n_aten_ops": 10,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

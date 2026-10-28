@@ -1,0 +1,103 @@
+{
+  "points": [
+    {
+      "shape_hash": "844472c4",
+      "models": {
+        "hf/infer/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            1024,
+            256,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            64,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              16384,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            64,
+            16,
+            256,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            -1,
+            256,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            1024,
+            256,
+            256
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 20,
+        "compute": 6,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 5,
+        "outputs": 1,
+        "inputs": 2
+      },
+      "mm_shapes": [
+        {
+          "node": "bmm",
+          "op": "aten::bmm",
+          "lhs": [
+            1024,
+            256,
+            64
+          ],
+          "rhs": [
+            1024,
+            64,
+            256
+          ],
+          "out": [
+            1024,
+            256,
+            256
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 17,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

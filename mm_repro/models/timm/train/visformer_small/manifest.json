@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "visformer_small",
+  "patterns": [
+    "0ae14c379f90",
+    "b8446ea4cb37",
+    "c8e6fc2c14b9",
+    "cc8c49d58b44"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

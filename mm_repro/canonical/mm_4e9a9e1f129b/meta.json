@@ -1,0 +1,50 @@
+{
+  "pattern_hash": "4e9a9e1f129b",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 27,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/GPTNeoForCausalLM",
+    "hf/infer/GPTNeoForSequenceClassification"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_4e9a9e1f129b/repro.py",
+  "n_aten_ops": 25,
+  "n_mm_ops": 3,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

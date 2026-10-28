@@ -1,0 +1,258 @@
+{
+  "points": [
+    {
+      "shape_hash": "8da39bde",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "inputs": [
+        [
+          [
+            512,
+            4,
+            16,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            4,
+            16,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            4,
+            16,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            0,
+            -4
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            -4
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            -4
+          ]
+        ],
+        [
+          "S",
+          [
+            3,
+            512,
+            4,
+            16,
+            60
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            720
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            720
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 12,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_9",
+          "op": "aten::mm",
+          "lhs": [
+            720,
+            8192
+          ],
+          "rhs": [
+            8192,
+            240
+          ],
+          "out": [
+            720,
+            240
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 11,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    },
+    {
+      "shape_hash": "16cad84b",
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [
+          [
+            512,
+            4,
+            256,
+            40
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            4,
+            256,
+            40
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            4,
+            256,
+            40
+          ],
+          "bf16"
+        ],
+        [
+          [
+            131072,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            0,
+            -4
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            -4
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            -4
+          ]
+        ],
+        [
+          "S",
+          [
+            3,
+            512,
+            4,
+            256,
+            36
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            256,
+            432
+          ]
+        ],
+        [
+          "S",
+          [
+            131072,
+            432
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 12,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_65",
+          "op": "aten::mm",
+          "lhs": [
+            432,
+            131072
+          ],
+          "rhs": [
+            131072,
+            144
+          ],
+          "out": [
+            432,
+            144
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 11,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

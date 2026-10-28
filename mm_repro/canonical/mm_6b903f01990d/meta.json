@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "6b903f01990d",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.pow.Tensor_Scalar",
+    "aten.tanh.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/MT5ForConditionalGeneration"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_6b903f01990d/repro.py",
+  "n_aten_ops": 16,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "horizontal",
+    "horizontal_then_combine"
+  ]
+}

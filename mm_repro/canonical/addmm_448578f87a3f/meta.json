@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "448578f87a3f",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/train/OPTForCausalLM",
+    "torchbench/train/alexnet"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_448578f87a3f/repro.py",
+  "n_aten_ops": 3,
+  "n_mm_ops": 1,
+  "shape_points": 2,
+  "traits": [
+    "epilogue"
+  ]
+}

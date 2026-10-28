@@ -1,0 +1,83 @@
+{
+  "points": [
+    {
+      "shape_hash": "aad97ac9",
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            2048,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            2048
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 5,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 1,
+        "inputs": 2
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_9",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            512
+          ],
+          "rhs": [
+            512,
+            2048
+          ],
+          "out": [
+            8192,
+            2048
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 5,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

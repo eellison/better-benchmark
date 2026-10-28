@@ -1,0 +1,110 @@
+{
+  "points": [
+    {
+      "shape_hash": "bf394e40",
+      "models": {
+        "hf/train/GoogleFnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            32000,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            32000
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            512,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            512,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 19,
+        "compute": 15,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 14,
+        "outputs": 4,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            16384,
+            32000
+          ],
+          "rhs": [
+            32000,
+            768
+          ],
+          "out": [
+            16384,
+            768
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 19,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

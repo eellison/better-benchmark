@@ -1,0 +1,134 @@
+{
+  "points": [
+    {
+      "shape_hash": "32090bb2",
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [
+          [
+            3072
+          ],
+          "f32"
+        ],
+        [
+          [
+            3072,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            6272,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            49,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            49,
+            3,
+            32,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            49,
+            32
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            49,
+            32
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            49,
+            32
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            49,
+            32
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            0,
+            0,
+            7,
+            0,
+            0
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 19,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 3,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_88",
+          "op": "aten::addmm",
+          "lhs": [
+            6272,
+            1024
+          ],
+          "rhs": [
+            1024,
+            3072
+          ],
+          "out": [
+            6272,
+            3072
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 15,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

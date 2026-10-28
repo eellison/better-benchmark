@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GoogleFnet",
+  "patterns": [
+    "319c33819ea6",
+    "44940d51a61a",
+    "8908ead50c07",
+    "cf9ca38b2ac5",
+    "fdd47407ba52"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

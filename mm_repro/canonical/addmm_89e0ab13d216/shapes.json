@@ -1,0 +1,104 @@
+{
+  "points": [
+    {
+      "shape_hash": "bc26879a",
+      "models": {
+        "torchbench/infer/mobilenet_v2": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            1280
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            1280,
+            7,
+            7
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1280
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1280
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1280
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            1280
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16,
+            1280
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 27,
+        "compute": 11,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 1,
+        "contraction_depth": 2,
+        "reduction_extent": 49,
+        "handoff": 0,
+        "non_mm_compute": 10,
+        "outputs": 1,
+        "inputs": 7
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            16,
+            1280
+          ],
+          "rhs": [
+            1280,
+            1000
+          ],
+          "out": [
+            16,
+            1000
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 22,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

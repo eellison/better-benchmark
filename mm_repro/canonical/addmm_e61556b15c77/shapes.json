@@ -1,0 +1,172 @@
+{
+  "points": [
+    {
+      "shape_hash": "147175af",
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            4,
+            2048,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            4,
+            -1,
+            12,
+            64
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            8192,
+            768
+          ],
+          "rhs": [
+            768,
+            768
+          ],
+          "out": [
+            8192,
+            768
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 6,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "81305da6",
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [
+          [
+            384,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            -1,
+            64
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_20",
+          "op": "aten::addmm",
+          "lhs": [
+            1,
+            384
+          ],
+          "rhs": [
+            384,
+            384
+          ],
+          "out": [
+            1,
+            384
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 6,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

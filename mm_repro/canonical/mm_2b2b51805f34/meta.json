@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "2b2b51805f34",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.sub.Tensor",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/train/BlenderbotForCausalLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/MBartForCausalLM",
+    "hf/train/PegasusForCausalLM",
+    "hf/train/XGLMForCausalLM"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_2b2b51805f34/repro.py",
+  "n_aten_ops": 12,
+  "n_mm_ops": 1,
+  "shape_points": 8,
+  "traits": [
+    "epilogue"
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "points": [
+    {
+      "shape_hash": "75a603dc",
+      "models": {
+        "timm/train/convnextv2_nano.fcmae_ft_in22k_in1k": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            640
+          ],
+          "bf16"
+        ],
+        [
+          [
+            640
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            1,
+            1,
+            640
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1,
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            1,
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            640,
+            1,
+            1
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 11,
+        "compute": 7,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 6,
+        "outputs": 4,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            1000
+          ],
+          "rhs": [
+            1000,
+            640
+          ],
+          "out": [
+            128,
+            640
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 9,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

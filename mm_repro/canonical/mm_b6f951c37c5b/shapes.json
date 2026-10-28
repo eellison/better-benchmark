@@ -1,0 +1,170 @@
+{
+  "points": [
+    {
+      "shape_hash": "e10ec79b",
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [],
+          "f32"
+        ],
+        [
+          [
+            1
+          ],
+          "b8"
+        ],
+        [
+          [
+            1
+          ],
+          "i64"
+        ],
+        [
+          [
+            1,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1
+          ],
+          "b8"
+        ],
+        [
+          [
+            1
+          ],
+          "i64"
+        ],
+        [
+          [
+            1,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            2
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 66,
+        "compute": 40,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 2,
+        "contraction_depth": 3,
+        "reduction_extent": 128,
+        "handoff": 0,
+        "non_mm_compute": 39,
+        "outputs": 1,
+        "inputs": 14
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_1",
+          "op": "aten::mm",
+          "lhs": [
+            2,
+            128
+          ],
+          "rhs": [
+            128,
+            4096
+          ],
+          "out": [
+            2,
+            4096
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 50,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

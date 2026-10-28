@@ -1,0 +1,101 @@
+{
+  "points": [
+    {
+      "shape_hash": "487e6fdd",
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128100
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128100,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            4
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            4,
+            0,
+            0
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            128100
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            128100
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 9,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 2,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_145",
+          "op": "aten::addmm",
+          "lhs": [
+            4096,
+            1536
+          ],
+          "rhs": [
+            1536,
+            128104
+          ],
+          "out": [
+            4096,
+            128104
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

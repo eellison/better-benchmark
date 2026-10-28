@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "d432634a8465",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Scalar",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.le.Scalar",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.squeeze.dims",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "torchbench/train/densenet121",
+    "torchbench/train/phlippe_densenet"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_d432634a8465/repro.py",
+  "n_aten_ops": 22,
+  "n_mm_ops": 1,
+  "shape_points": 2,
+  "traits": [
+    "epilogue"
+  ]
+}

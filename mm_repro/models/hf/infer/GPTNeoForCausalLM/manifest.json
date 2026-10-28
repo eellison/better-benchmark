@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTNeoForCausalLM",
+  "patterns": [
+    "319c33819ea6",
+    "4e9a9e1f129b",
+    "72b9078c35fc",
+    "ad5853a57e38",
+    "d48a4fe0051a"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

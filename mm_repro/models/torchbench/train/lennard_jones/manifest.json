@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "lennard_jones",
+  "patterns": [
+    "056d7aa2ceae",
+    "0a545912805c",
+    "9f396db49822",
+    "b281e23a78eb"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

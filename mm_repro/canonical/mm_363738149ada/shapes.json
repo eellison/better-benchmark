@@ -1,0 +1,168 @@
+{
+  "points": [
+    {
+      "shape_hash": "619d76d5",
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            32768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            32768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            32768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            32768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 8,
+        "compute": 4,
+        "mm": 4,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 4,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_27",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            32768
+          ],
+          "rhs": [
+            32768,
+            128
+          ],
+          "out": [
+            128,
+            128
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_29",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            32768
+          ],
+          "rhs": [
+            32768,
+            128
+          ],
+          "out": [
+            128,
+            128
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_31",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            32768
+          ],
+          "rhs": [
+            32768,
+            512
+          ],
+          "out": [
+            128,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_33",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            32768
+          ],
+          "rhs": [
+            32768,
+            512
+          ],
+          "out": [
+            128,
+            512
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 4,
+      "n_mm_ops": 4,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

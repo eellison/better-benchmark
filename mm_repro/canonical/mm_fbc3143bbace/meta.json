@@ -1,0 +1,49 @@
+{
+  "pattern_hash": "fbc3143bbace",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 3,
+  "models": [
+    "hf/infer/MT5ForConditionalGeneration",
+    "hf/infer/T5ForConditionalGeneration",
+    "hf/infer/T5Small"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_fbc3143bbace/repro.py",
+  "n_aten_ops": 25,
+  "n_mm_ops": 3,
+  "shape_points": 2,
+  "traits": [
+    "horizontal"
+  ]
+}

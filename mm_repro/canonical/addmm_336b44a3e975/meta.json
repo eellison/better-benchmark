@@ -1,0 +1,45 @@
+{
+  "pattern_hash": "336b44a3e975",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 23,
+  "origin_ops": [
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "<built-in function getitem>",
+    "aten.addmm.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.unbind.int",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/infer/swin_base_patch4_window7_224"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_336b44a3e975/repro.py",
+  "n_aten_ops": 20,
+  "n_mm_ops": 1,
+  "shape_points": 4,
+  "traits": [
+    "epilogue"
+  ]
+}

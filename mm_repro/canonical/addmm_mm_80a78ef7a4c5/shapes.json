@@ -1,0 +1,186 @@
+{
+  "points": [
+    {
+      "shape_hash": "b7281db3",
+      "models": {
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            54,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            54
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            0,
+            4,
+            4
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            3456,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            384,
+            9
+          ]
+        ],
+        [
+          "S",
+          [
+            98304,
+            64,
+            9
+          ]
+        ],
+        [
+          "S",
+          [
+            98304,
+            64,
+            9
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            54
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            9,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            98304,
+            9,
+            1
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 36,
+        "compute": 13,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 2,
+        "contraction_depth": 3,
+        "reduction_extent": 9,
+        "handoff": 0,
+        "non_mm_compute": 11,
+        "outputs": 2,
+        "inputs": 6
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_3",
+          "op": "aten::addmm",
+          "lhs": [
+            16384,
+            768
+          ],
+          "rhs": [
+            768,
+            384
+          ],
+          "out": [
+            16384,
+            384
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            16384,
+            384
+          ],
+          "rhs": [
+            384,
+            54
+          ],
+          "out": [
+            16384,
+            54
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 32,
+      "n_mm_ops": 2,
+      "traits": [
+        "block_or_reshaped_reduction",
+        "epilogue",
+        "gather",
+        "horizontal",
+        "mm_reduction"
+      ]
+    }
+  ]
+}

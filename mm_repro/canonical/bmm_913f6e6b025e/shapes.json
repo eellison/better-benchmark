@@ -1,0 +1,148 @@
+{
+  "points": [
+    {
+      "shape_hash": "bff459b6",
+      "models": {
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            384,
+            512,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            64,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              32768,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            512
+          ],
+          "b8"
+        ],
+        [
+          [
+            384,
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            1
+          ],
+          "b8"
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            12,
+            512,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            12,
+            512,
+            512
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 18,
+        "compute": 11,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 10,
+        "outputs": 1,
+        "inputs": 8
+      },
+      "mm_shapes": [
+        {
+          "node": "bmm_1",
+          "op": "aten::bmm",
+          "lhs": [
+            384,
+            512,
+            64
+          ],
+          "rhs": [
+            384,
+            64,
+            512
+          ],
+          "out": [
+            384,
+            512,
+            512
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 14,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

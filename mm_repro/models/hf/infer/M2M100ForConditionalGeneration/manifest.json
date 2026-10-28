@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "M2M100ForConditionalGeneration",
+  "patterns": [
+    "0b10a33f8d30",
+    "1cd8a5d9f4f9",
+    "77709072e15a",
+    "ac98ab030fe4",
+    "e0698f102b3e"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilevit_s",
+  "patterns": [
+    "0323a61942aa",
+    "3e9e1e749afc",
+    "4862dd402aa2",
+    "5bb350955287",
+    "6b58536d60df",
+    "7d8d50307577",
+    "8021ae440991",
+    "b6a6941d040b",
+    "e3646f0be013"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

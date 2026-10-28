@@ -130,7 +130,7 @@ def trace_full_graph_fake(definition):
             return make_fx(instance, tracing_mode="fake")(*inputs)
 
 
-def derive_partitions(gm) -> list[dict[str, Any]]:
+def derive_partitions(gm, *, partition_options=None) -> list[dict[str, Any]]:
     """Partition a GraphModule with the capture pipeline's own partitioner.
 
     Returns a list of {"hash": pattern_hash, "ops": [str(target), ...]} —
@@ -138,8 +138,13 @@ def derive_partitions(gm) -> list[dict[str, Any]]:
     """
     from capture_hook import compute_partition_pattern, get_fusion_partitions
 
+    options = dict(partition_options or {})
+    if isinstance(options.get("matmul_limits"), dict):
+        from matmul_partitioner import MatmulLimits
+
+        options["matmul_limits"] = MatmulLimits(**options["matmul_limits"])
     out = []
-    for comp in get_fusion_partitions(gm):
+    for comp in get_fusion_partitions(gm, **options):
         pattern = compute_partition_pattern(comp, gm)
         if pattern is None:
             continue
@@ -328,6 +333,7 @@ def validate_written_full_graph(
     graph_path: str | Path,
     *,
     original_gm=None,
+    partition_options=None,
 ) -> dict[str, Any]:
     """Run invariants A + C against a just-written full_graph_*.py artifact.
 
@@ -359,6 +365,8 @@ def validate_written_full_graph(
         from full_graph_harness import load_full_graph_definition
 
         definition = load_full_graph_definition(graph_path)
+        if partition_options is None:
+            partition_options = definition.metadata.get("partitioning")
     except Exception as exc:
         _fail(f"A: load_full_graph_definition: {type(exc).__name__}: {exc}")
         return result
@@ -376,9 +384,9 @@ def validate_written_full_graph(
     if original_gm is None:
         return result
     try:
-        original_parts = derive_partitions(original_gm)
+        original_parts = derive_partitions(original_gm, partition_options=partition_options)
         gm = trace_full_graph_fake(definition)
-        derived_parts = derive_partitions(gm)
+        derived_parts = derive_partitions(gm, partition_options=partition_options)
     except Exception as exc:
         _fail(f"C: re-trace failed: {type(exc).__name__}: {exc}")
         return result
@@ -441,7 +449,7 @@ def stamp_roundtrip(graph_path: str | Path, verdict: dict[str, Any]) -> None:
         )
 
 
-def run_write_gate(graph_path: str | Path, original_gm=None) -> dict[str, Any]:
+def run_write_gate(graph_path: str | Path, original_gm=None, *, partition_options=None) -> dict[str, Any]:
     """Validate-before-write gate for capture paths that emit full_graph_*.py.
 
     Call right after the artifact (+ sidecar) is written. Reloads the
@@ -473,7 +481,8 @@ def run_write_gate(graph_path: str | Path, original_gm=None) -> dict[str, Any]:
         # clears the TracingContext for the validation scope.
         with tracing(None), unset_fake_temporarily():
             verdict = validate_written_full_graph(
-                graph_path, original_gm=original_gm
+                graph_path, original_gm=original_gm,
+                partition_options=partition_options,
             )
     except Exception as exc:
         verdict = {

@@ -1,0 +1,37 @@
+{
+  "pattern_hash": "360136d76530",
+  "kind": "matmul",
+  "reduction_types": [
+    "mean"
+  ],
+  "n_ops": 13,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.as_strided.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.mean.dim",
+    "aten.neg.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/nfnet_l0"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_360136d76530/repro.py",
+  "n_aten_ops": 9,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

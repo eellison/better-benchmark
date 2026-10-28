@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "BlenderbotForConditionalGeneration",
+  "patterns": [
+    "0bc457cd5b37",
+    "2b2b51805f34",
+    "33ee8772715d",
+    "431e8c9490dd",
+    "543f1b9c5615",
+    "62bdfb31cb14",
+    "63881e0f4fd6",
+    "8c7e648813b7",
+    "a2e9f2646c70",
+    "a58a61f988cc",
+    "a6917b1968db",
+    "b295495ff6a1",
+    "d5f7be69a724",
+    "dd81d6262e26",
+    "e4e4db90ec29",
+    "fe45c0d8a0fb"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

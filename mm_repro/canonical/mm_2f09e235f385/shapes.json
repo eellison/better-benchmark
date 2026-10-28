@@ -1,0 +1,155 @@
+{
+  "points": [
+    {
+      "shape_hash": "c46d5210",
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            16,
+            512
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              32000
+            ]
+          }
+        ],
+        [
+          [
+            32000,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            16,
+            64
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            64
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            64
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1024,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            1,
+            16,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            16,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            256,
+            512,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            256,
+            512,
+            64
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 38,
+        "compute": 10,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 4,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            1024
+          ],
+          "rhs": [
+            1024,
+            1024
+          ],
+          "out": [
+            8192,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 31,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue",
+        "gather",
+        "prologue"
+      ]
+    }
+  ]
+}

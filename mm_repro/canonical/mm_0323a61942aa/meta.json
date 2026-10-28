@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "0323a61942aa",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 12,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.constant_pad_nd.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/mobilevit_s"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_0323a61942aa/repro.py",
+  "n_aten_ops": 11,
+  "n_mm_ops": 1,
+  "shape_points": 2,
+  "traits": [
+    "prologue"
+  ]
+}

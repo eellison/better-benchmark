@@ -1,0 +1,56 @@
+{
+  "pattern_hash": "38be5f463d3c",
+  "kind": "matmul",
+  "reduction_types": [
+    "amax",
+    "sum"
+  ],
+  "n_ops": 28,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.amax.default",
+    "aten.bmm.default",
+    "aten.div.Tensor",
+    "aten.exp.default",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.le.Tensor",
+    "aten.maximum.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/XGLMForCausalLM"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_38be5f463d3c/repro.py",
+  "n_aten_ops": 24,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "block_or_reshaped_reduction",
+    "epilogue",
+    "mm_reduction",
+    "row_reduction"
+  ]
+}

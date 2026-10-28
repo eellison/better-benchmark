@@ -1,0 +1,176 @@
+{
+  "points": [
+    {
+      "shape_hash": "25148e6c",
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            2048,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            2048,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            16,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            16,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            128,
+            128
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        16777216
+      ],
+      "partition_metrics": {
+        "nodes": 19,
+        "compute": 2,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 2,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            2048
+          ],
+          "rhs": [
+            2048,
+            2048
+          ],
+          "out": [
+            4096,
+            2048
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_1",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            2048
+          ],
+          "rhs": [
+            2048,
+            2048
+          ],
+          "out": [
+            4096,
+            2048
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 17,
+      "n_mm_ops": 2,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

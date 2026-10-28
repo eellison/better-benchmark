@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "PLBartForCausalLM",
+  "patterns": [
+    "0bc457cd5b37",
+    "18c63eb1f04f",
+    "77f7b81f0e6c",
+    "ab1dbd579113",
+    "ab5403ebe6f4",
+    "be84ab28ee4d"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilenetv2_100",
+  "patterns": [
+    "daa3efbdcf8a"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

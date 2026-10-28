@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "ffc423127a11",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.full.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.select_scatter.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/vit_base_patch16_siglip_256"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_ffc423127a11/repro.py",
+  "n_aten_ops": 5,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

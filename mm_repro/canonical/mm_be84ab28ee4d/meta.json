@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "be84ab28ee4d",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.constant_pad_nd.default",
+    "aten.mm.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/train/BartForCausalLM",
+    "hf/train/MBartForCausalLM",
+    "hf/train/PLBartForCausalLM",
+    "hf/train/PegasusForCausalLM",
+    "hf/train/TrOCRForCausalLM",
+    "torchbench/train/BERT_pytorch"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_be84ab28ee4d/repro.py",
+  "n_aten_ops": 3,
+  "n_mm_ops": 1,
+  "shape_points": 4,
+  "traits": [
+    "prologue"
+  ]
+}

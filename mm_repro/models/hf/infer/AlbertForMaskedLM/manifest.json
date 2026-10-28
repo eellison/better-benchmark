@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "AlbertForMaskedLM",
+  "patterns": [
+    "0b10a33f8d30",
+    "0e791cbfd6cc",
+    "319c33819ea6",
+    "330ef1fb21d2"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

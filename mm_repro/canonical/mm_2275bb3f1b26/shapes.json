@@ -1,0 +1,87 @@
+{
+  "points": [
+    {
+      "shape_hash": "25b10093",
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            768
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_3",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            768
+          ],
+          "rhs": [
+            768,
+            768
+          ],
+          "out": [
+            8192,
+            768
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 5,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "points": [
+    {
+      "shape_hash": "06144af8",
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "inputs": [
+        [
+          [
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            1536,
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            1536,
+            1536
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            24,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            512,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            24,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            512,
+            64
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 20,
+        "compute": 2,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 4,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_6",
+          "op": "aten::addmm",
+          "lhs": [
+            4096,
+            1536
+          ],
+          "rhs": [
+            1536,
+            1536
+          ],
+          "out": [
+            4096,
+            1536
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_8",
+          "op": "aten::addmm",
+          "lhs": [
+            4096,
+            1536
+          ],
+          "rhs": [
+            1536,
+            1536
+          ],
+          "out": [
+            4096,
+            1536
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 16,
+      "n_mm_ops": 2,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

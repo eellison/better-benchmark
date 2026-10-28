@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "TrOCRForCausalLM",
+  "patterns": [
+    "0586bd6b1be6",
+    "3d28acb0f5fb",
+    "85866214fbc9",
+    "94e8674165b0",
+    "d596244dd3f4",
+    "db3e172b4c29"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

@@ -1,0 +1,39 @@
+{
+  "pattern_hash": "584ca96b2e27",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 17,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/OPTForCausalLM"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_584ca96b2e27/repro.py",
+  "n_aten_ops": 14,
+  "n_mm_ops": 3,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

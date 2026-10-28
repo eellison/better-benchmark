@@ -1,0 +1,98 @@
+{
+  "points": [
+    {
+      "shape_hash": "467140ad",
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [
+          [
+            401408,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            3136,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            3136,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            3136,
+            128
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 11,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 1,
+        "contraction_depth": 2,
+        "reduction_extent": 128,
+        "handoff": 0,
+        "non_mm_compute": 10,
+        "outputs": 2,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_186",
+          "op": "aten::mm",
+          "lhs": [
+            401408,
+            512
+          ],
+          "rhs": [
+            512,
+            128
+          ],
+          "out": [
+            401408,
+            128
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "block_or_reshaped_reduction",
+        "epilogue",
+        "mm_reduction",
+        "row_reduction"
+      ]
+    }
+  ]
+}

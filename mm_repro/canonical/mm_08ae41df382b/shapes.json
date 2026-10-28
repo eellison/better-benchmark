@@ -1,0 +1,72 @@
+{
+  "points": [
+    {
+      "shape_hash": "d1a4a415",
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 5,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 2,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            128,
+            1000
+          ],
+          "rhs": [
+            1000,
+            4096
+          ],
+          "out": [
+            128,
+            4096
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 5,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

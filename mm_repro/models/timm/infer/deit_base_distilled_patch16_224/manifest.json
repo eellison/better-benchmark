@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "deit_base_distilled_patch16_224",
+  "patterns": [
+    "0586bd6b1be6",
+    "5b743ffb9637"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

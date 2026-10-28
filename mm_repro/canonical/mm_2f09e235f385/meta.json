@@ -1,0 +1,62 @@
+{
+  "pattern_hash": "2f09e235f385",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 38,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.clone.default",
+    "aten.embedding.default",
+    "aten.gt.Scalar",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default",
+    "prims.inductor_seeds.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/XLNetLMHeadModel"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_2f09e235f385/repro.py",
+  "n_aten_ops": 31,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "gather",
+    "prologue"
+  ]
+}

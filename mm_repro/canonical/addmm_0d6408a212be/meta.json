@@ -1,0 +1,34 @@
+{
+  "pattern_hash": "0d6408a212be",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.pow.Tensor_Scalar",
+    "aten.tanh.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/DistillGPT2",
+    "hf/infer/GPT2ForSequenceClassification"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_0d6408a212be/repro.py",
+  "n_aten_ops": 11,
+  "n_mm_ops": 1,
+  "shape_points": 2,
+  "traits": [
+    "epilogue"
+  ]
+}

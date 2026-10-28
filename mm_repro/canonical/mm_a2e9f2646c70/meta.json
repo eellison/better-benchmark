@@ -1,0 +1,32 @@
+{
+  "pattern_hash": "a2e9f2646c70",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.mm.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_a2e9f2646c70/repro.py",
+  "n_aten_ops": 5,
+  "n_mm_ops": 2,
+  "shape_points": 2,
+  "traits": [
+    "epilogue",
+    "horizontal",
+    "horizontal_then_combine"
+  ]
+}

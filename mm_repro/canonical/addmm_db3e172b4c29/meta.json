@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "db3e172b4c29",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 15,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/TrOCRForCausalLM",
+    "hf/infer/XGLMForCausalLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_db3e172b4c29/repro.py",
+  "n_aten_ops": 15,
+  "n_mm_ops": 2,
+  "shape_points": 2,
+  "traits": [
+    "horizontal"
+  ]
+}

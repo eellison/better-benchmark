@@ -1,0 +1,174 @@
+{
+  "policy": {
+    "max_mm": 4,
+    "max_nodes": 96,
+    "max_compute": 48,
+    "max_outputs": 4,
+    "max_inputs": 24,
+    "max_contraction_depth": 4,
+    "max_internal_dim": 128,
+    "max_reduction_extent": 512
+  },
+  "sources": 364,
+  "sources_traced": 239,
+  "sources_without_visible_mm": 125,
+  "failures": [],
+  "unique_repros": 373,
+  "shape_points": 624,
+  "region_occurrences": 5092,
+  "original_mm": 17527,
+  "selected_mm_union": 7311,
+  "shapes_per_repro": {
+    "count": 373,
+    "min": 1,
+    "p25": 1.0,
+    "p50": 1.0,
+    "p75": 2.0,
+    "p95": 4.0,
+    "p100": 22,
+    "mean": 1.6729
+  },
+  "aten_ops_per_repro": {
+    "count": 373,
+    "min": 2,
+    "p25": 7.0,
+    "p50": 11.0,
+    "p75": 20.0,
+    "p95": 34.0,
+    "p100": 86,
+    "mean": 14.7399
+  },
+  "aten_ops_per_shape_point": {
+    "count": 624,
+    "min": 2,
+    "p25": 7.0,
+    "p50": 10.0,
+    "p75": 19.0,
+    "p95": 29.85,
+    "p100": 86,
+    "mean": 13.359
+  },
+  "mm_ops_per_repro": {
+    "count": 373,
+    "min": 1,
+    "p25": 1.0,
+    "p50": 1.0,
+    "p75": 2.0,
+    "p95": 3.0,
+    "p100": 4,
+    "mean": 1.4129
+  },
+  "mm_ops_per_shape_point": {
+    "count": 624,
+    "min": 1,
+    "p25": 1.0,
+    "p50": 1.0,
+    "p75": 2.0,
+    "p95": 3.0,
+    "p100": 4,
+    "mean": 1.3942
+  },
+  "mm_ops_histogram_repro": {
+    "1": 265,
+    "2": 72,
+    "3": 26,
+    "4": 10
+  },
+  "mm_ops_histogram_occurrence": {
+    "2": 1087,
+    "1": 3415,
+    "3": 540,
+    "4": 50
+  },
+  "traits_occurrences": {
+    "epilogue": 3948,
+    "horizontal": 1536,
+    "prologue": 469,
+    "block_or_reshaped_reduction": 360,
+    "mm_reduction": 362,
+    "row_reduction": 325,
+    "normalization_math": 4,
+    "gather": 147,
+    "horizontal_then_combine": 395,
+    "vertical": 167,
+    "scatter": 5,
+    "gather_mm_scatter": 2
+  },
+  "traits_repros": {
+    "prologue": 107,
+    "epilogue": 264,
+    "normalization_math": 4,
+    "horizontal": 84,
+    "block_or_reshaped_reduction": 46,
+    "mm_reduction": 48,
+    "row_reduction": 44,
+    "horizontal_then_combine": 19,
+    "gather": 35,
+    "vertical": 26,
+    "gather_mm_scatter": 2,
+    "scatter": 4
+  },
+  "unexpected_bare_output_regions": 0,
+  "pure_horizontal_occurrences": 880,
+  "timing": {
+    "wall_seconds": 81.677,
+    "trace_seconds": 205.011,
+    "partition_seconds": 39.939,
+    "capture_seconds": 62.142
+  },
+  "policy_id": "5b9588334f8ebb95",
+  "fake_tensor_validation": {
+    "repros": 373,
+    "shape_points": 624,
+    "failures": [],
+    "seconds": 4.143
+  },
+  "coverage": {
+    "se_exact_math": {
+      "repros": 0,
+      "shape_points": 0,
+      "occurrences": 0
+    },
+    "swiglu_gate_math": {
+      "repros": 1,
+      "shape_points": 2,
+      "occurrences": 60
+    },
+    "mm_normalization": {
+      "repros": 2,
+      "shape_points": 2,
+      "occurrences": 2
+    },
+    "small_vertical": {
+      "repros": 26,
+      "shape_points": 31,
+      "occurrences": 167
+    }
+  },
+  "fusion_profiles_repros": {
+    "prologue_only": 63,
+    "epilogue_only": 220,
+    "horizontal_mm": 46,
+    "prologue_and_epilogue": 44
+  },
+  "fusion_profiles_occurrences": {
+    "epilogue_only": 3743,
+    "prologue_only": 264,
+    "horizontal_mm": 880,
+    "prologue_and_epilogue": 205
+  },
+  "mm_operator_kinds_repro": {
+    "aten.addmm.default": 166,
+    "aten.bmm.default": 108,
+    "aten.mm.default": 253
+  },
+  "previous_snapshot": {
+    "unique_repros": 466,
+    "fusion_profiles_repros": {
+      "prologue_only": 152,
+      "prologue_and_epilogue": 106,
+      "epilogue_only": 165,
+      "horizontal_mm": 43
+    }
+  }
+}

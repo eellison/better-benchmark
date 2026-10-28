@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "9b17bfa28d61",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 7,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/train/DistillGPT2",
+    "hf/train/GPT2ForSequenceClassification"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_9b17bfa28d61/repro.py",
+  "n_aten_ops": 6,
+  "n_mm_ops": 1,
+  "shape_points": 2,
+  "traits": [
+    "epilogue"
+  ]
+}

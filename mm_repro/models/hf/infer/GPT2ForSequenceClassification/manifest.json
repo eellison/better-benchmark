@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPT2ForSequenceClassification",
+  "patterns": [
+    "0d6408a212be",
+    "4e8973b9a872"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

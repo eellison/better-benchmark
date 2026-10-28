@@ -1,0 +1,54 @@
+{
+  "pattern_hash": "a6917b1968db",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 25,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.expand.default",
+    "aten.expand.default",
+    "aten.mul.Scalar",
+    "aten.mul.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 7,
+  "models": [
+    "hf/train/AlbertForMaskedLM",
+    "hf/train/BertForMaskedLM",
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/DistilBertForMaskedLM",
+    "hf/train/ElectraForCausalLM",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/RobertaForCausalLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_a6917b1968db/repro.py",
+  "n_aten_ops": 21,
+  "n_mm_ops": 2,
+  "shape_points": 6,
+  "traits": [
+    "epilogue",
+    "horizontal"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "36c917926cb7",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 11,
+  "origin_ops": [
+    "aten.as_strided.default",
+    "aten.clone.default",
+    "aten.constant_pad_nd.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/AllenaiLongformerBase"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_36c917926cb7/repro.py",
+  "n_aten_ops": 10,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

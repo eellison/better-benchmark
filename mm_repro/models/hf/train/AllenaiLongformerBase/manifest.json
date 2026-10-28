@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "AllenaiLongformerBase",
+  "patterns": [
+    "0bc457cd5b37",
+    "11b695095c62",
+    "2b6ab92a19ee",
+    "32e532f427ac",
+    "36c917926cb7",
+    "42be4dbe49aa",
+    "750c67fa68f5",
+    "75a9fc51f015",
+    "a9df1525a201",
+    "ab1dbd579113",
+    "dc9c93ee7cd7",
+    "fe0ba35016eb"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

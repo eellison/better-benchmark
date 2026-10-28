@@ -1,0 +1,87 @@
+{
+  "points": [
+    {
+      "shape_hash": "217b5f62",
+      "models": {
+        "hf/infer/GPT2ForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            2,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            2
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 2,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            8192,
+            768
+          ],
+          "rhs": [
+            768,
+            2
+          ],
+          "out": [
+            8192,
+            2
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 4,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue",
+        "gather"
+      ]
+    }
+  ]
+}

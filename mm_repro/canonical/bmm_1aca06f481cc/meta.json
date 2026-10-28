@@ -1,0 +1,26 @@
+{
+  "pattern_hash": "1aca06f481cc",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.bmm.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/TrOCRForCausalLM"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_1aca06f481cc/repro.py",
+  "n_aten_ops": 4,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

@@ -1,0 +1,256 @@
+{
+  "points": [
+    {
+      "shape_hash": "49fa2802",
+      "models": {
+        "hf/infer/Qwen/Qwen3-0.6B": {
+          "occurrences": 28
+        }
+      },
+      "inputs": [
+        [
+          [
+            3072,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            1024
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            3072,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            1024
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            3072
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        2048000
+      ],
+      "partition_metrics": {
+        "nodes": 14,
+        "compute": 7,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 5,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_4",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            1024
+          ],
+          "rhs": [
+            1024,
+            3072
+          ],
+          "out": [
+            1000,
+            3072
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_5",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            1024
+          ],
+          "rhs": [
+            1024,
+            3072
+          ],
+          "out": [
+            1000,
+            3072
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 2,
+      "traits": [
+        "epilogue",
+        "horizontal",
+        "horizontal_then_combine"
+      ]
+    },
+    {
+      "shape_hash": "8e31a439",
+      "models": {
+        "hf/infer/mistralai/Mistral-7B-Instruct-v0.3": {
+          "occurrences": 32
+        }
+      },
+      "inputs": [
+        [
+          [
+            14336,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            4096
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            14336,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            4096
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            14336
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            14336
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            14336
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        8192000
+      ],
+      "partition_metrics": {
+        "nodes": 14,
+        "compute": 7,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 5,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_4",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            4096
+          ],
+          "rhs": [
+            4096,
+            14336
+          ],
+          "out": [
+            1000,
+            14336
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_5",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            4096
+          ],
+          "rhs": [
+            4096,
+            14336
+          ],
+          "out": [
+            1000,
+            14336
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 2,
+      "traits": [
+        "epilogue",
+        "horizontal",
+        "horizontal_then_combine"
+      ]
+    }
+  ]
+}

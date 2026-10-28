@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "beit_base_patch16_224",
+  "patterns": [
+    "015b3f497fb5",
+    "0586bd6b1be6",
+    "066f7165f9bc",
+    "312042bc1330"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

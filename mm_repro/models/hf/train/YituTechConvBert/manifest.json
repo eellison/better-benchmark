@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "YituTechConvBert",
+  "patterns": [
+    "00615c749628",
+    "0bc457cd5b37",
+    "33ee8772715d",
+    "5e226d216884",
+    "9db769498436",
+    "ab1dbd579113",
+    "bc03eb6e8892",
+    "ce8cf3fa1557",
+    "de43a0c4f030",
+    "e3c2551887f0",
+    "ea48f342f420",
+    "ee3544c2052c"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

@@ -1,0 +1,49 @@
+{
+  "pattern_hash": "c2ef212cc627",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 24,
+  "origin_ops": [
+    "aten.abs.default",
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.bmm.default",
+    "aten.bmm.default",
+    "aten.eq.Tensor",
+    "aten.index.Tensor",
+    "aten.logical_not.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.ne.Scalar",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.slice.Tensor",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/XLNetLMHeadModel"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_c2ef212cc627/repro.py",
+  "n_aten_ops": 21,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "epilogue",
+    "gather",
+    "horizontal",
+    "horizontal_then_combine"
+  ]
+}

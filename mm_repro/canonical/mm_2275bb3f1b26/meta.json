@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "2275bb3f1b26",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/AllenaiLongformerBase"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_2275bb3f1b26/repro.py",
+  "n_aten_ops": 5,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

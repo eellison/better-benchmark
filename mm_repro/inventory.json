@@ -1,0 +1,4042 @@
+[
+  {
+    "pattern_hash": "015b3f497fb5",
+    "repro": "canonical/addmm_015b3f497fb5/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "035bfade128f",
+    "repro": "canonical/addmm_035bfade128f/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "03a8d4631165",
+    "repro": "canonical/addmm_03a8d4631165/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "normalization_math",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "051679c102c3",
+    "repro": "canonical/addmm_051679c102c3/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "0586bd6b1be6",
+    "repro": "canonical/addmm_0586bd6b1be6/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 22,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "066f7165f9bc",
+    "repro": "canonical/addmm_066f7165f9bc/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "09321466eabb",
+    "repro": "canonical/addmm_09321466eabb/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0939135a5591",
+    "repro": "canonical/addmm_0939135a5591/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "0945a518f8bd",
+    "repro": "canonical/addmm_0945a518f8bd/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "0b10a33f8d30",
+    "repro": "canonical/addmm_0b10a33f8d30/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 2,
+    "shape_points": 6,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "0bbb0f38bb7c",
+    "repro": "canonical/addmm_0bbb0f38bb7c/repro.py",
+    "n_aten_ops": 18,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "0bc457cd5b37",
+    "repro": "canonical/addmm_0bc457cd5b37/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 19,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0d6408a212be",
+    "repro": "canonical/addmm_0d6408a212be/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0e791cbfd6cc",
+    "repro": "canonical/addmm_0e791cbfd6cc/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0f6bfa1c248f",
+    "repro": "canonical/addmm_0f6bfa1c248f/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "187072f1a97b",
+    "repro": "canonical/addmm_187072f1a97b/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "18c63eb1f04f",
+    "repro": "canonical/addmm_18c63eb1f04f/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 3,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "1905944880d0",
+    "repro": "canonical/addmm_1905944880d0/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "1cf67b7fba47",
+    "repro": "canonical/addmm_1cf67b7fba47/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "1f15df84c407",
+    "repro": "canonical/addmm_1f15df84c407/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "normalization_math",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "24f1e7660a5f",
+    "repro": "canonical/addmm_24f1e7660a5f/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "25e7bd5218b9",
+    "repro": "canonical/addmm_25e7bd5218b9/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "27a4f8d1bfae",
+    "repro": "canonical/addmm_27a4f8d1bfae/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "27b944863ebf",
+    "repro": "canonical/addmm_27b944863ebf/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "27bcaf768972",
+    "repro": "canonical/addmm_27bcaf768972/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "2b6ab92a19ee",
+    "repro": "canonical/addmm_2b6ab92a19ee/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "2d5c34903316",
+    "repro": "canonical/addmm_2d5c34903316/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "2fe2aeba588e",
+    "repro": "canonical/addmm_2fe2aeba588e/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "30b40397852a",
+    "repro": "canonical/addmm_30b40397852a/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "30b8bbef1012",
+    "repro": "canonical/addmm_30b8bbef1012/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "312042bc1330",
+    "repro": "canonical/addmm_312042bc1330/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "319c33819ea6",
+    "repro": "canonical/addmm_319c33819ea6/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 4,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "336b44a3e975",
+    "repro": "canonical/addmm_336b44a3e975/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 4,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "360136d76530",
+    "repro": "canonical/addmm_360136d76530/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "3c1cbf8a6eb5",
+    "repro": "canonical/addmm_3c1cbf8a6eb5/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "3d0f7005854b",
+    "repro": "canonical/addmm_3d0f7005854b/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "3d28acb0f5fb",
+    "repro": "canonical/addmm_3d28acb0f5fb/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "3fd9284cc6d8",
+    "repro": "canonical/addmm_3fd9284cc6d8/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "41ab61684a68",
+    "repro": "canonical/addmm_41ab61684a68/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "41ee45dc58c6",
+    "repro": "canonical/addmm_41ee45dc58c6/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "43408ee9363a",
+    "repro": "canonical/addmm_43408ee9363a/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "448578f87a3f",
+    "repro": "canonical/addmm_448578f87a3f/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "4862dd402aa2",
+    "repro": "canonical/addmm_4862dd402aa2/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "4fb63f9ccc45",
+    "repro": "canonical/addmm_4fb63f9ccc45/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "normalization_math",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "513a934594f8",
+    "repro": "canonical/addmm_513a934594f8/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "543f1b9c5615",
+    "repro": "canonical/addmm_543f1b9c5615/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 3,
+    "shape_points": 4,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "564ae4a21730",
+    "repro": "canonical/addmm_564ae4a21730/repro.py",
+    "n_aten_ops": 30,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "585257e60d0b",
+    "repro": "canonical/addmm_585257e60d0b/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "5b743ffb9637",
+    "repro": "canonical/addmm_5b743ffb9637/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "5be88bdf1e98",
+    "repro": "canonical/addmm_5be88bdf1e98/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "6262cbab9847",
+    "repro": "canonical/addmm_6262cbab9847/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "62bdfb31cb14",
+    "repro": "canonical/addmm_62bdfb31cb14/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "63c18193d87a",
+    "repro": "canonical/addmm_63c18193d87a/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "64b287c03e0e",
+    "repro": "canonical/addmm_64b287c03e0e/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "6a25c9a1a38f",
+    "repro": "canonical/addmm_6a25c9a1a38f/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "6aaed8c01349",
+    "repro": "canonical/addmm_6aaed8c01349/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "73d472a0753f",
+    "repro": "canonical/addmm_73d472a0753f/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "76831b3bcebf",
+    "repro": "canonical/addmm_76831b3bcebf/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 5,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "77709072e15a",
+    "repro": "canonical/addmm_77709072e15a/repro.py",
+    "n_aten_ops": 18,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "7af86989016c",
+    "repro": "canonical/addmm_7af86989016c/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "808371765c5c",
+    "repro": "canonical/addmm_808371765c5c/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "813c189afca5",
+    "repro": "canonical/addmm_813c189afca5/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "81eca7394f75",
+    "repro": "canonical/addmm_81eca7394f75/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "8369ee678e00",
+    "repro": "canonical/addmm_8369ee678e00/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "85866214fbc9",
+    "repro": "canonical/addmm_85866214fbc9/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "85d85f98e33f",
+    "repro": "canonical/addmm_85d85f98e33f/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "86817f645924",
+    "repro": "canonical/addmm_86817f645924/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "89e0ab13d216",
+    "repro": "canonical/addmm_89e0ab13d216/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "8ed26adc744a",
+    "repro": "canonical/addmm_8ed26adc744a/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "97f45af0349d",
+    "repro": "canonical/addmm_97f45af0349d/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "9d6235e22b5f",
+    "repro": "canonical/addmm_9d6235e22b5f/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "9db769498436",
+    "repro": "canonical/addmm_9db769498436/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "9faf1d743004",
+    "repro": "canonical/addmm_9faf1d743004/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "a53e224af83f",
+    "repro": "canonical/addmm_a53e224af83f/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "a5fb3c5a0e39",
+    "repro": "canonical/addmm_a5fb3c5a0e39/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "a6917b1968db",
+    "repro": "canonical/addmm_a6917b1968db/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 2,
+    "shape_points": 6,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "ab5403ebe6f4",
+    "repro": "canonical/addmm_ab5403ebe6f4/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "ab6ea1bbe71b",
+    "repro": "canonical/addmm_ab6ea1bbe71b/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "ab82b7b84a59",
+    "repro": "canonical/addmm_ab82b7b84a59/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "ac98ab030fe4",
+    "repro": "canonical/addmm_ac98ab030fe4/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 3,
+    "shape_points": 5,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "b05dbfb37345",
+    "repro": "canonical/addmm_b05dbfb37345/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "b281e23a78eb",
+    "repro": "canonical/addmm_b281e23a78eb/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "b3e3373eed7a",
+    "repro": "canonical/addmm_b3e3373eed7a/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "b4da8b22c3d0",
+    "repro": "canonical/addmm_b4da8b22c3d0/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "b59786dc2212",
+    "repro": "canonical/addmm_b59786dc2212/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "b6a6941d040b",
+    "repro": "canonical/addmm_b6a6941d040b/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "b7cbbaced1a4",
+    "repro": "canonical/addmm_b7cbbaced1a4/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "bab225dd3451",
+    "repro": "canonical/addmm_bab225dd3451/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "bb9ce3abc3e9",
+    "repro": "canonical/addmm_bb9ce3abc3e9/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "bc86fea5ac12",
+    "repro": "canonical/addmm_bc86fea5ac12/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "bd201657f151",
+    "repro": "canonical/addmm_bd201657f151/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "be26ea9f945f",
+    "repro": "canonical/addmm_be26ea9f945f/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "6e0071d79577",
+    "repro": "canonical/addmm_bmm_6e0071d79577/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "fe4891df3e8d",
+    "repro": "canonical/addmm_bmm_fe4891df3e8d/repro.py",
+    "n_aten_ops": 34,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "c01afdf8c0d1",
+    "repro": "canonical/addmm_c01afdf8c0d1/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "c2147238011a",
+    "repro": "canonical/addmm_c2147238011a/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "c4ffb252a8ea",
+    "repro": "canonical/addmm_c4ffb252a8ea/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "c9202f055c06",
+    "repro": "canonical/addmm_c9202f055c06/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "ccc174bc2dac",
+    "repro": "canonical/addmm_ccc174bc2dac/repro.py",
+    "n_aten_ops": 52,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "cd48c1124885",
+    "repro": "canonical/addmm_cd48c1124885/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "ce8cf3fa1557",
+    "repro": "canonical/addmm_ce8cf3fa1557/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 4,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "cf824e0ac138",
+    "repro": "canonical/addmm_cf824e0ac138/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "cf9ca38b2ac5",
+    "repro": "canonical/addmm_cf9ca38b2ac5/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "cfa5203e08c0",
+    "repro": "canonical/addmm_cfa5203e08c0/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "cfc084055e28",
+    "repro": "canonical/addmm_cfc084055e28/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "d7bcf7d7a685",
+    "repro": "canonical/addmm_d7bcf7d7a685/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "db3e172b4c29",
+    "repro": "canonical/addmm_db3e172b4c29/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "dc9c93ee7cd7",
+    "repro": "canonical/addmm_dc9c93ee7cd7/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "de43a0c4f030",
+    "repro": "canonical/addmm_de43a0c4f030/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "e0698f102b3e",
+    "repro": "canonical/addmm_e0698f102b3e/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e06b1d1c4362",
+    "repro": "canonical/addmm_e06b1d1c4362/repro.py",
+    "n_aten_ops": 13,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "e3c2551887f0",
+    "repro": "canonical/addmm_e3c2551887f0/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e3ddda0b9f48",
+    "repro": "canonical/addmm_e3ddda0b9f48/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "e4bb3658e67d",
+    "repro": "canonical/addmm_e4bb3658e67d/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e61556b15c77",
+    "repro": "canonical/addmm_e61556b15c77/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e717429de41b",
+    "repro": "canonical/addmm_e717429de41b/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "ea48f342f420",
+    "repro": "canonical/addmm_ea48f342f420/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "ec533ca16df9",
+    "repro": "canonical/addmm_ec533ca16df9/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 4,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "ecf5f8f874e9",
+    "repro": "canonical/addmm_ecf5f8f874e9/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "efa907db85c9",
+    "repro": "canonical/addmm_efa907db85c9/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "f39c9ad8f3a0",
+    "repro": "canonical/addmm_f39c9ad8f3a0/repro.py",
+    "n_aten_ops": 39,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "f409aff43d8f",
+    "repro": "canonical/addmm_f409aff43d8f/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "f4b81d33e751",
+    "repro": "canonical/addmm_f4b81d33e751/repro.py",
+    "n_aten_ops": 41,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "normalization_math",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "f589cec826ab",
+    "repro": "canonical/addmm_f589cec826ab/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "f66533a290f5",
+    "repro": "canonical/addmm_f66533a290f5/repro.py",
+    "n_aten_ops": 18,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "574486ab57bf",
+    "repro": "canonical/addmm_mm_574486ab57bf/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "80a78ef7a4c5",
+    "repro": "canonical/addmm_mm_80a78ef7a4c5/repro.py",
+    "n_aten_ops": 32,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "horizontal",
+      "mm_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "ddb22e0e140a",
+    "repro": "canonical/addmm_mm_ddb22e0e140a/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "e5a6f1206250",
+    "repro": "canonical/addmm_mm_e5a6f1206250/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "e89dd80d88ee",
+    "repro": "canonical/addmm_mm_e89dd80d88ee/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "00615c749628",
+    "repro": "canonical/bmm_00615c749628/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "00658dc2be97",
+    "repro": "canonical/bmm_00658dc2be97/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "00ec9028aed0",
+    "repro": "canonical/bmm_00ec9028aed0/repro.py",
+    "n_aten_ops": 26,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "016b3fa4dad0",
+    "repro": "canonical/bmm_016b3fa4dad0/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "079dfeb381b2",
+    "repro": "canonical/bmm_079dfeb381b2/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0ae14c379f90",
+    "repro": "canonical/bmm_0ae14c379f90/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "0e5086bacf72",
+    "repro": "canonical/bmm_0e5086bacf72/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "11911ec6f17b",
+    "repro": "canonical/bmm_11911ec6f17b/repro.py",
+    "n_aten_ops": 24,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "15340c6c95d5",
+    "repro": "canonical/bmm_15340c6c95d5/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "1aca06f481cc",
+    "repro": "canonical/bmm_1aca06f481cc/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "1c2c06e56a5b",
+    "repro": "canonical/bmm_1c2c06e56a5b/repro.py",
+    "n_aten_ops": 86,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "1cd8a5d9f4f9",
+    "repro": "canonical/bmm_1cd8a5d9f4f9/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "22f44887e68d",
+    "repro": "canonical/bmm_22f44887e68d/repro.py",
+    "n_aten_ops": 27,
+    "n_mm_ops": 2,
+    "shape_points": 3,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "288b5fa0a449",
+    "repro": "canonical/bmm_288b5fa0a449/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "2c6f0ce3294a",
+    "repro": "canonical/bmm_2c6f0ce3294a/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "2ded9abc3cf8",
+    "repro": "canonical/bmm_2ded9abc3cf8/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "330ef1fb21d2",
+    "repro": "canonical/bmm_330ef1fb21d2/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "389eb9f65ed6",
+    "repro": "canonical/bmm_389eb9f65ed6/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "38be5f463d3c",
+    "repro": "canonical/bmm_38be5f463d3c/repro.py",
+    "n_aten_ops": 24,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "431e8c9490dd",
+    "repro": "canonical/bmm_431e8c9490dd/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "46eea55f48f7",
+    "repro": "canonical/bmm_46eea55f48f7/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "4789ce7d671b",
+    "repro": "canonical/bmm_4789ce7d671b/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "499a003de4cb",
+    "repro": "canonical/bmm_499a003de4cb/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "4b318e1fef0f",
+    "repro": "canonical/bmm_4b318e1fef0f/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "4ff241b2eaa6",
+    "repro": "canonical/bmm_4ff241b2eaa6/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "5012b76274fe",
+    "repro": "canonical/bmm_5012b76274fe/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "609dcafbad8e",
+    "repro": "canonical/bmm_609dcafbad8e/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "669ffbb43a61",
+    "repro": "canonical/bmm_669ffbb43a61/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "695773afcca2",
+    "repro": "canonical/bmm_695773afcca2/repro.py",
+    "n_aten_ops": 29,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "709f4f6a299d",
+    "repro": "canonical/bmm_709f4f6a299d/repro.py",
+    "n_aten_ops": 34,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "715e9839297e",
+    "repro": "canonical/bmm_715e9839297e/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "752f332a39a7",
+    "repro": "canonical/bmm_752f332a39a7/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "782d307093a9",
+    "repro": "canonical/bmm_782d307093a9/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "7cd62c3d34f8",
+    "repro": "canonical/bmm_7cd62c3d34f8/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "7f7059a9ad72",
+    "repro": "canonical/bmm_7f7059a9ad72/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 4,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "7f7cd4a52177",
+    "repro": "canonical/bmm_7f7cd4a52177/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "82b2006d166e",
+    "repro": "canonical/bmm_82b2006d166e/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "85afe3a52176",
+    "repro": "canonical/bmm_85afe3a52176/repro.py",
+    "n_aten_ops": 26,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "8738ba63c1e0",
+    "repro": "canonical/bmm_8738ba63c1e0/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "8ac43cbc8a33",
+    "repro": "canonical/bmm_8ac43cbc8a33/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "8edcbdf086f0",
+    "repro": "canonical/bmm_8edcbdf086f0/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "913f6e6b025e",
+    "repro": "canonical/bmm_913f6e6b025e/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "9ac8a35a2bef",
+    "repro": "canonical/bmm_9ac8a35a2bef/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "a271281035e9",
+    "repro": "canonical/bmm_a271281035e9/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "a4f2389d1228",
+    "repro": "canonical/bmm_a4f2389d1228/repro.py",
+    "n_aten_ops": 18,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "a58a61f988cc",
+    "repro": "canonical/bmm_a58a61f988cc/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "aaad50da7ef4",
+    "repro": "canonical/bmm_aaad50da7ef4/repro.py",
+    "n_aten_ops": 37,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "ac95c7db7c58",
+    "repro": "canonical/bmm_ac95c7db7c58/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "ad2be59c7785",
+    "repro": "canonical/bmm_ad2be59c7785/repro.py",
+    "n_aten_ops": 33,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "af04f75df852",
+    "repro": "canonical/bmm_af04f75df852/repro.py",
+    "n_aten_ops": 30,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "b8446ea4cb37",
+    "repro": "canonical/bmm_b8446ea4cb37/repro.py",
+    "n_aten_ops": 18,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "b8ae4aa96c5d",
+    "repro": "canonical/bmm_b8ae4aa96c5d/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "bc318d3540cd",
+    "repro": "canonical/bmm_bc318d3540cd/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "bcd7d76d653b",
+    "repro": "canonical/bmm_bcd7d76d653b/repro.py",
+    "n_aten_ops": 30,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "c2ef212cc627",
+    "repro": "canonical/bmm_c2ef212cc627/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "c8e6fc2c14b9",
+    "repro": "canonical/bmm_c8e6fc2c14b9/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "cfc2bed77092",
+    "repro": "canonical/bmm_cfc2bed77092/repro.py",
+    "n_aten_ops": 44,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "d0b08749d87e",
+    "repro": "canonical/bmm_d0b08749d87e/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "horizontal",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "d48a4fe0051a",
+    "repro": "canonical/bmm_d48a4fe0051a/repro.py",
+    "n_aten_ops": 36,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "d4a8bd8d80de",
+    "repro": "canonical/bmm_d4a8bd8d80de/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "d596244dd3f4",
+    "repro": "canonical/bmm_d596244dd3f4/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "d9d24d04c282",
+    "repro": "canonical/bmm_d9d24d04c282/repro.py",
+    "n_aten_ops": 26,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "gather_mm_scatter",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "scatter",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "dc1600797af6",
+    "repro": "canonical/bmm_dc1600797af6/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "dc4f88f29f7c",
+    "repro": "canonical/bmm_dc4f88f29f7c/repro.py",
+    "n_aten_ops": 27,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "dd81d6262e26",
+    "repro": "canonical/bmm_dd81d6262e26/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 6,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e8c8522dc857",
+    "repro": "canonical/bmm_e8c8522dc857/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "eab0d897a905",
+    "repro": "canonical/bmm_eab0d897a905/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "eada1fbc534c",
+    "repro": "canonical/bmm_eada1fbc534c/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "ee3544c2052c",
+    "repro": "canonical/bmm_ee3544c2052c/repro.py",
+    "n_aten_ops": 13,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "f1e05fa4ec9c",
+    "repro": "canonical/bmm_f1e05fa4ec9c/repro.py",
+    "n_aten_ops": 26,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "gather_mm_scatter",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "scatter",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "f4b94c8b19cd",
+    "repro": "canonical/bmm_f4b94c8b19cd/repro.py",
+    "n_aten_ops": 33,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "faacfc36d757",
+    "repro": "canonical/bmm_faacfc36d757/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 2,
+    "shape_points": 3,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "fe0ba35016eb",
+    "repro": "canonical/bmm_fe0ba35016eb/repro.py",
+    "n_aten_ops": 24,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "370d6447b18e",
+    "repro": "canonical/bmm_mm_370d6447b18e/repro.py",
+    "n_aten_ops": 33,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "687e08371fcc",
+    "repro": "canonical/bmm_mm_687e08371fcc/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "90e2b0767b8e",
+    "repro": "canonical/bmm_mm_90e2b0767b8e/repro.py",
+    "n_aten_ops": 28,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "95193cad6efa",
+    "repro": "canonical/bmm_mm_95193cad6efa/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "a11bba58c35b",
+    "repro": "canonical/bmm_mm_a11bba58c35b/repro.py",
+    "n_aten_ops": 28,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "bd86c1ac4d5b",
+    "repro": "canonical/bmm_mm_bd86c1ac4d5b/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "bdd66b8c1580",
+    "repro": "canonical/bmm_mm_bdd66b8c1580/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "row_reduction",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "00552fd3f644",
+    "repro": "canonical/mm_00552fd3f644/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "01d6ca2ddf18",
+    "repro": "canonical/mm_01d6ca2ddf18/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0323a61942aa",
+    "repro": "canonical/mm_0323a61942aa/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "035c741abe20",
+    "repro": "canonical/mm_035c741abe20/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "04299a9e7d23",
+    "repro": "canonical/mm_04299a9e7d23/repro.py",
+    "n_aten_ops": 24,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0451ad9b17d1",
+    "repro": "canonical/mm_0451ad9b17d1/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "04cb12dbb993",
+    "repro": "canonical/mm_04cb12dbb993/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "056d7aa2ceae",
+    "repro": "canonical/mm_056d7aa2ceae/repro.py",
+    "n_aten_ops": 2,
+    "n_mm_ops": 2,
+    "shape_points": 4,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "05908f41caa4",
+    "repro": "canonical/mm_05908f41caa4/repro.py",
+    "n_aten_ops": 13,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "089926541349",
+    "repro": "canonical/mm_089926541349/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "08ae41df382b",
+    "repro": "canonical/mm_08ae41df382b/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "08deccedc20e",
+    "repro": "canonical/mm_08deccedc20e/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "09a17397312d",
+    "repro": "canonical/mm_09a17397312d/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0a545912805c",
+    "repro": "canonical/mm_0a545912805c/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "0d0094aafaa7",
+    "repro": "canonical/mm_0d0094aafaa7/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "0e4400cec4a0",
+    "repro": "canonical/mm_0e4400cec4a0/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "0fc65bb383f0",
+    "repro": "canonical/mm_0fc65bb383f0/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "11a58fd217cc",
+    "repro": "canonical/mm_11a58fd217cc/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "11b695095c62",
+    "repro": "canonical/mm_11b695095c62/repro.py",
+    "n_aten_ops": 32,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "129d99fd2d45",
+    "repro": "canonical/mm_129d99fd2d45/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "165e5da6acd5",
+    "repro": "canonical/mm_165e5da6acd5/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "17b2ce9fc2ac",
+    "repro": "canonical/mm_17b2ce9fc2ac/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "1aab21d778e6",
+    "repro": "canonical/mm_1aab21d778e6/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "1c9ff12ea893",
+    "repro": "canonical/mm_1c9ff12ea893/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "1f238fcf71b3",
+    "repro": "canonical/mm_1f238fcf71b3/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "221ebce29187",
+    "repro": "canonical/mm_221ebce29187/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "2237e7862b82",
+    "repro": "canonical/mm_2237e7862b82/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "2275bb3f1b26",
+    "repro": "canonical/mm_2275bb3f1b26/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "25e9e8b3aae0",
+    "repro": "canonical/mm_25e9e8b3aae0/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "27a78530077d",
+    "repro": "canonical/mm_27a78530077d/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "27eae3e6b7d0",
+    "repro": "canonical/mm_27eae3e6b7d0/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "2b2b51805f34",
+    "repro": "canonical/mm_2b2b51805f34/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 8,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "2f09e235f385",
+    "repro": "canonical/mm_2f09e235f385/repro.py",
+    "n_aten_ops": 31,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "2f78df5edf48",
+    "repro": "canonical/mm_2f78df5edf48/repro.py",
+    "n_aten_ops": 68,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "2fce44d91a8a",
+    "repro": "canonical/mm_2fce44d91a8a/repro.py",
+    "n_aten_ops": 32,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "30cb4076112a",
+    "repro": "canonical/mm_30cb4076112a/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "315893c0b720",
+    "repro": "canonical/mm_315893c0b720/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "32e532f427ac",
+    "repro": "canonical/mm_32e532f427ac/repro.py",
+    "n_aten_ops": 34,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "33ee8772715d",
+    "repro": "canonical/mm_33ee8772715d/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 18,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "342e4efdfc5d",
+    "repro": "canonical/mm_342e4efdfc5d/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "346313be4b48",
+    "repro": "canonical/mm_346313be4b48/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "354007f6bb5c",
+    "repro": "canonical/mm_354007f6bb5c/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "363738149ada",
+    "repro": "canonical/mm_363738149ada/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "36c917926cb7",
+    "repro": "canonical/mm_36c917926cb7/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "3a3508f03d7a",
+    "repro": "canonical/mm_3a3508f03d7a/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "gather",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "3e11055fe425",
+    "repro": "canonical/mm_3e11055fe425/repro.py",
+    "n_aten_ops": 49,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "3e9e1e749afc",
+    "repro": "canonical/mm_3e9e1e749afc/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 8,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "3f354b01b482",
+    "repro": "canonical/mm_3f354b01b482/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "3f4e9259510b",
+    "repro": "canonical/mm_3f4e9259510b/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction",
+      "row_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "4131baeacec6",
+    "repro": "canonical/mm_4131baeacec6/repro.py",
+    "n_aten_ops": 29,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "4153ae0c0c59",
+    "repro": "canonical/mm_4153ae0c0c59/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "41f7abf5db7a",
+    "repro": "canonical/mm_41f7abf5db7a/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "42be4dbe49aa",
+    "repro": "canonical/mm_42be4dbe49aa/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "44940d51a61a",
+    "repro": "canonical/mm_44940d51a61a/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "45d61156404c",
+    "repro": "canonical/mm_45d61156404c/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "461c6833aa96",
+    "repro": "canonical/mm_461c6833aa96/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "48994be71178",
+    "repro": "canonical/mm_48994be71178/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "49172a53466b",
+    "repro": "canonical/mm_49172a53466b/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "4934217ec01b",
+    "repro": "canonical/mm_4934217ec01b/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "49f2bac44c4a",
+    "repro": "canonical/mm_49f2bac44c4a/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "4e46ea6cd575",
+    "repro": "canonical/mm_4e46ea6cd575/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "4e8973b9a872",
+    "repro": "canonical/mm_4e8973b9a872/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "4e9a9e1f129b",
+    "repro": "canonical/mm_4e9a9e1f129b/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "4f2b9a28e32c",
+    "repro": "canonical/mm_4f2b9a28e32c/repro.py",
+    "n_aten_ops": 43,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "horizontal",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "4fba9760b15b",
+    "repro": "canonical/mm_4fba9760b15b/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "571caf2dd958",
+    "repro": "canonical/mm_571caf2dd958/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "57abd7df76fe",
+    "repro": "canonical/mm_57abd7df76fe/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "584ca96b2e27",
+    "repro": "canonical/mm_584ca96b2e27/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "5b49791add98",
+    "repro": "canonical/mm_5b49791add98/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "5bb350955287",
+    "repro": "canonical/mm_5bb350955287/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "5cd3c18b3f94",
+    "repro": "canonical/mm_5cd3c18b3f94/repro.py",
+    "n_aten_ops": 13,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "5e226d216884",
+    "repro": "canonical/mm_5e226d216884/repro.py",
+    "n_aten_ops": 29,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "scatter"
+    ]
+  },
+  {
+    "pattern_hash": "5e7f964ce981",
+    "repro": "canonical/mm_5e7f964ce981/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 4,
+    "shape_points": 3,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "63881e0f4fd6",
+    "repro": "canonical/mm_63881e0f4fd6/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "658428ef3758",
+    "repro": "canonical/mm_658428ef3758/repro.py",
+    "n_aten_ops": 28,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "665712f6fcd9",
+    "repro": "canonical/mm_665712f6fcd9/repro.py",
+    "n_aten_ops": 21,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "68a03beec1ee",
+    "repro": "canonical/mm_68a03beec1ee/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "69fcf37d813b",
+    "repro": "canonical/mm_69fcf37d813b/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "6b58536d60df",
+    "repro": "canonical/mm_6b58536d60df/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "6b903f01990d",
+    "repro": "canonical/mm_6b903f01990d/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "6ded8ee233af",
+    "repro": "canonical/mm_6ded8ee233af/repro.py",
+    "n_aten_ops": 38,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "gather",
+      "horizontal",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "6e5cd3f31dc1",
+    "repro": "canonical/mm_6e5cd3f31dc1/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "72b9078c35fc",
+    "repro": "canonical/mm_72b9078c35fc/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "750c67fa68f5",
+    "repro": "canonical/mm_750c67fa68f5/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "75a9fc51f015",
+    "repro": "canonical/mm_75a9fc51f015/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "77d7f41767e0",
+    "repro": "canonical/mm_77d7f41767e0/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather"
+    ]
+  },
+  {
+    "pattern_hash": "77f7b81f0e6c",
+    "repro": "canonical/mm_77f7b81f0e6c/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "788a171d4bad",
+    "repro": "canonical/mm_788a171d4bad/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "78f216f9554f",
+    "repro": "canonical/mm_78f216f9554f/repro.py",
+    "n_aten_ops": 13,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "7988223ff5cb",
+    "repro": "canonical/mm_7988223ff5cb/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "79f052906a18",
+    "repro": "canonical/mm_79f052906a18/repro.py",
+    "n_aten_ops": 60,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "gather",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "7c68c60f5d2d",
+    "repro": "canonical/mm_7c68c60f5d2d/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 3,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "7c8b47d795af",
+    "repro": "canonical/mm_7c8b47d795af/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "7d8d50307577",
+    "repro": "canonical/mm_7d8d50307577/repro.py",
+    "n_aten_ops": 29,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "8021ae440991",
+    "repro": "canonical/mm_8021ae440991/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 6,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "815b26e59a70",
+    "repro": "canonical/mm_815b26e59a70/repro.py",
+    "n_aten_ops": 42,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "8383750d8de6",
+    "repro": "canonical/mm_8383750d8de6/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "8908ead50c07",
+    "repro": "canonical/mm_8908ead50c07/repro.py",
+    "n_aten_ops": 27,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "8bda00239841",
+    "repro": "canonical/mm_8bda00239841/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 3,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "8bddbf694a3f",
+    "repro": "canonical/mm_8bddbf694a3f/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "8c7e648813b7",
+    "repro": "canonical/mm_8c7e648813b7/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 5,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "8e49d8639fb2",
+    "repro": "canonical/mm_8e49d8639fb2/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "8f1c0c0de0c9",
+    "repro": "canonical/mm_8f1c0c0de0c9/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "924994404cac",
+    "repro": "canonical/mm_924994404cac/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "94e8674165b0",
+    "repro": "canonical/mm_94e8674165b0/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "9700d0b237d8",
+    "repro": "canonical/mm_9700d0b237d8/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "97715b15aa18",
+    "repro": "canonical/mm_97715b15aa18/repro.py",
+    "n_aten_ops": 13,
+    "n_mm_ops": 3,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "97c8e69728c9",
+    "repro": "canonical/mm_97c8e69728c9/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "99f07abee04d",
+    "repro": "canonical/mm_99f07abee04d/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "9b17bfa28d61",
+    "repro": "canonical/mm_9b17bfa28d61/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "9c5fb9a4085f",
+    "repro": "canonical/mm_9c5fb9a4085f/repro.py",
+    "n_aten_ops": 48,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "9d0eff6c3bfe",
+    "repro": "canonical/mm_9d0eff6c3bfe/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "9dfa03ddac4a",
+    "repro": "canonical/mm_9dfa03ddac4a/repro.py",
+    "n_aten_ops": 14,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "9f396db49822",
+    "repro": "canonical/mm_9f396db49822/repro.py",
+    "n_aten_ops": 15,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "mm_reduction",
+      "prologue",
+      "vertical"
+    ]
+  },
+  {
+    "pattern_hash": "9f9342ba0a1a",
+    "repro": "canonical/mm_9f9342ba0a1a/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "a2e9f2646c70",
+    "repro": "canonical/mm_a2e9f2646c70/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "a5b393e69e27",
+    "repro": "canonical/mm_a5b393e69e27/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "a63aa6fb3e22",
+    "repro": "canonical/mm_a63aa6fb3e22/repro.py",
+    "n_aten_ops": 34,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "a662ead74f50",
+    "repro": "canonical/mm_a662ead74f50/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "a6ea45b6431b",
+    "repro": "canonical/mm_a6ea45b6431b/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 4,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "a900e5dd6d32",
+    "repro": "canonical/mm_a900e5dd6d32/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "a9df1525a201",
+    "repro": "canonical/mm_a9df1525a201/repro.py",
+    "n_aten_ops": 31,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "aa947857d07d",
+    "repro": "canonical/mm_aa947857d07d/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "ab1dbd579113",
+    "repro": "canonical/mm_ab1dbd579113/repro.py",
+    "n_aten_ops": 16,
+    "n_mm_ops": 1,
+    "shape_points": 15,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "ac1f64f9d65f",
+    "repro": "canonical/mm_ac1f64f9d65f/repro.py",
+    "n_aten_ops": 23,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue",
+      "scatter"
+    ]
+  },
+  {
+    "pattern_hash": "ad5853a57e38",
+    "repro": "canonical/mm_ad5853a57e38/repro.py",
+    "n_aten_ops": 17,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "b1a0786358d4",
+    "repro": "canonical/mm_b1a0786358d4/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "b295495ff6a1",
+    "repro": "canonical/mm_b295495ff6a1/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 3,
+    "shape_points": 6,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "b43575d29b7d",
+    "repro": "canonical/mm_b43575d29b7d/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "b6f951c37c5b",
+    "repro": "canonical/mm_b6f951c37c5b/repro.py",
+    "n_aten_ops": 50,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "b73a9669de67",
+    "repro": "canonical/mm_b73a9669de67/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "ba343ea3c5b6",
+    "repro": "canonical/mm_ba343ea3c5b6/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 4,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "bc03eb6e8892",
+    "repro": "canonical/mm_bc03eb6e8892/repro.py",
+    "n_aten_ops": 11,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "block_or_reshaped_reduction",
+      "epilogue",
+      "mm_reduction"
+    ]
+  },
+  {
+    "pattern_hash": "bc1681dbe7a5",
+    "repro": "canonical/mm_bc1681dbe7a5/repro.py",
+    "n_aten_ops": 33,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "bdd1d6cf4c6a",
+    "repro": "canonical/mm_bdd1d6cf4c6a/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 2,
+    "shape_points": 2,
+    "traits": [
+      "epilogue",
+      "horizontal",
+      "horizontal_then_combine"
+    ]
+  },
+  {
+    "pattern_hash": "be84ab28ee4d",
+    "repro": "canonical/mm_be84ab28ee4d/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 1,
+    "shape_points": 4,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "c0573952db13",
+    "repro": "canonical/mm_c0573952db13/repro.py",
+    "n_aten_ops": 9,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "c1b191533b49",
+    "repro": "canonical/mm_c1b191533b49/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "c2315cfb3edc",
+    "repro": "canonical/mm_c2315cfb3edc/repro.py",
+    "n_aten_ops": 7,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "c926c18e5e99",
+    "repro": "canonical/mm_c926c18e5e99/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "epilogue",
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "cc8c49d58b44",
+    "repro": "canonical/mm_cc8c49d58b44/repro.py",
+    "n_aten_ops": 10,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "cda9b058208c",
+    "repro": "canonical/mm_cda9b058208c/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 3,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "d10094917566",
+    "repro": "canonical/mm_d10094917566/repro.py",
+    "n_aten_ops": 8,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "d432634a8465",
+    "repro": "canonical/mm_d432634a8465/repro.py",
+    "n_aten_ops": 22,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "d5f7be69a724",
+    "repro": "canonical/mm_d5f7be69a724/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 4,
+    "shape_points": 5,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "d6add6559712",
+    "repro": "canonical/mm_d6add6559712/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "d6b923b478ef",
+    "repro": "canonical/mm_d6b923b478ef/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "d980607b9663",
+    "repro": "canonical/mm_d980607b9663/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 2,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "d9c22485d165",
+    "repro": "canonical/mm_d9c22485d165/repro.py",
+    "n_aten_ops": 20,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "gather",
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "daa3efbdcf8a",
+    "repro": "canonical/mm_daa3efbdcf8a/repro.py",
+    "n_aten_ops": 28,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "dabb1520c363",
+    "repro": "canonical/mm_dabb1520c363/repro.py",
+    "n_aten_ops": 35,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "dccff7643bd4",
+    "repro": "canonical/mm_dccff7643bd4/repro.py",
+    "n_aten_ops": 3,
+    "n_mm_ops": 3,
+    "shape_points": 3,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "e22e65a5b93e",
+    "repro": "canonical/mm_e22e65a5b93e/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e3646f0be013",
+    "repro": "canonical/mm_e3646f0be013/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "e4e4db90ec29",
+    "repro": "canonical/mm_e4e4db90ec29/repro.py",
+    "n_aten_ops": 2,
+    "n_mm_ops": 2,
+    "shape_points": 5,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "ef78a9d2d30d",
+    "repro": "canonical/mm_ef78a9d2d30d/repro.py",
+    "n_aten_ops": 4,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "f1b0a67e687c",
+    "repro": "canonical/mm_f1b0a67e687c/repro.py",
+    "n_aten_ops": 12,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "fa0494794f34",
+    "repro": "canonical/mm_fa0494794f34/repro.py",
+    "n_aten_ops": 6,
+    "n_mm_ops": 3,
+    "shape_points": 1,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "fb63810df645",
+    "repro": "canonical/mm_fb63810df645/repro.py",
+    "n_aten_ops": 18,
+    "n_mm_ops": 1,
+    "shape_points": 2,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "fbc3143bbace",
+    "repro": "canonical/mm_fbc3143bbace/repro.py",
+    "n_aten_ops": 25,
+    "n_mm_ops": 3,
+    "shape_points": 2,
+    "traits": [
+      "horizontal"
+    ]
+  },
+  {
+    "pattern_hash": "fdd47407ba52",
+    "repro": "canonical/mm_fdd47407ba52/repro.py",
+    "n_aten_ops": 19,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "epilogue"
+    ]
+  },
+  {
+    "pattern_hash": "fe45c0d8a0fb",
+    "repro": "canonical/mm_fe45c0d8a0fb/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 6,
+    "traits": [
+      "prologue"
+    ]
+  },
+  {
+    "pattern_hash": "ffc423127a11",
+    "repro": "canonical/mm_ffc423127a11/repro.py",
+    "n_aten_ops": 5,
+    "n_mm_ops": 1,
+    "shape_points": 1,
+    "traits": [
+      "prologue"
+    ]
+  }
+]

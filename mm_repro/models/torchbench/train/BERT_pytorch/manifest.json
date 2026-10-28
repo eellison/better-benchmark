@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "BERT_pytorch",
+  "patterns": [
+    "24f1e7660a5f",
+    "8383750d8de6",
+    "8edcbdf086f0",
+    "b295495ff6a1",
+    "be84ab28ee4d",
+    "c01afdf8c0d1",
+    "d6b923b478ef",
+    "f1b0a67e687c",
+    "fb63810df645"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

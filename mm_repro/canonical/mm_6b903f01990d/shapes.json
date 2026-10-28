@@ -1,0 +1,130 @@
+{
+  "points": [
+    {
+      "shape_hash": "220444dc",
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 16
+        }
+      },
+      "inputs": [
+        [
+          [
+            1024,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            1024,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1024
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        4194304
+      ],
+      "partition_metrics": {
+        "nodes": 16,
+        "compute": 11,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 9,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_9",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            512
+          ],
+          "rhs": [
+            512,
+            1024
+          ],
+          "out": [
+            4096,
+            1024
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_10",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            512
+          ],
+          "rhs": [
+            512,
+            1024
+          ],
+          "out": [
+            4096,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 16,
+      "n_mm_ops": 2,
+      "traits": [
+        "epilogue",
+        "horizontal",
+        "horizontal_then_combine"
+      ]
+    }
+  ]
+}

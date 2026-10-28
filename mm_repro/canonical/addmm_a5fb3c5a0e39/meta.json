@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "a5fb3c5a0e39",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/OPTForCausalLM",
+    "hf/infer/YituTechConvBert"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_a5fb3c5a0e39/repro.py",
+  "n_aten_ops": 10,
+  "n_mm_ops": 2,
+  "shape_points": 2,
+  "traits": [
+    "horizontal"
+  ]
+}

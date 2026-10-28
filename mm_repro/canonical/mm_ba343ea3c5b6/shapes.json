@@ -1,0 +1,191 @@
+{
+  "points": [
+    {
+      "shape_hash": "6463a5ea",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 7
+        }
+      },
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ],
+            "alias": 0
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "alias": 1
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ],
+            "alias": 1
+          }
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            4096
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        33554432,
+        33554432
+      ],
+      "partition_metrics": {
+        "nodes": 10,
+        "compute": 4,
+        "mm": 4,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 4,
+        "inputs": 7
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_58",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            4096
+          ],
+          "rhs": [
+            4096,
+            4096
+          ],
+          "out": [
+            4096,
+            4096
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_59",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            4096
+          ],
+          "rhs": [
+            4096,
+            4096
+          ],
+          "out": [
+            4096,
+            4096
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_60",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            4096
+          ],
+          "rhs": [
+            4096,
+            4096
+          ],
+          "out": [
+            4096,
+            4096
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_61",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            4096
+          ],
+          "rhs": [
+            4096,
+            4096
+          ],
+          "out": [
+            4096,
+            4096
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 6,
+      "n_mm_ops": 4,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "points": [
+    {
+      "shape_hash": "c0f1aec2",
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            8,
+            16,
+            1024,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              1048576,
+              64,
+              1024,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            1024
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 8,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_3",
+          "op": "aten::addmm",
+          "lhs": [
+            8192,
+            1024
+          ],
+          "rhs": [
+            1024,
+            1024
+          ],
+          "out": [
+            8192,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 7,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    },
+    {
+      "shape_hash": "a746af31",
+      "models": {
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            16,
+            12,
+            1024,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              786432,
+              64,
+              768,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            1024,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16,
+            1024,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            1024,
+            768
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 8,
+        "compute": 2,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 1,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_3",
+          "op": "aten::addmm",
+          "lhs": [
+            16384,
+            768
+          ],
+          "rhs": [
+            768,
+            768
+          ],
+          "out": [
+            16384,
+            768
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 7,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

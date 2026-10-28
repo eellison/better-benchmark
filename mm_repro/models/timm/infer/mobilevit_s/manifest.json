@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "timm",
+  "model": "mobilevit_s",
+  "patterns": [
+    "808371765c5c",
+    "ab6ea1bbe71b",
+    "cd48c1124885"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

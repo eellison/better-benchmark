@@ -1,0 +1,38 @@
+{
+  "pattern_hash": "0a545912805c",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 16,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench/train/lennard_jones"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_0a545912805c/repro.py",
+  "n_aten_ops": 8,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

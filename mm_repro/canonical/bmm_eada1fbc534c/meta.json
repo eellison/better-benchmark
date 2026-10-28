@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "eada1fbc534c",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 3,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.mul.Tensor",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/swin_base_patch4_window7_224"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_eada1fbc534c/repro.py",
+  "n_aten_ops": 3,
+  "n_mm_ops": 1,
+  "shape_points": 3,
+  "traits": [
+    "epilogue"
+  ]
+}

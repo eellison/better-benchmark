@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "15340c6c95d5",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 6,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.full.default",
+    "aten.full.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/DebertaV2ForMaskedLM"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_15340c6c95d5/repro.py",
+  "n_aten_ops": 5,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

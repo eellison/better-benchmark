@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "OPTForCausalLM",
+  "patterns": [
+    "3c1cbf8a6eb5",
+    "a5fb3c5a0e39",
+    "e61556b15c77"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

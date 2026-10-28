@@ -1,0 +1,95 @@
+{
+  "points": [
+    {
+      "shape_hash": "3b842c3a",
+      "models": {
+        "torchbench/infer/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            128,
+            256,
+            13,
+            13
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            9216
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            3,
+            3
+          ]
+        ],
+        [
+          "S",
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            9216
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 8,
+        "compute": 5,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 4,
+        "outputs": 1,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            128,
+            9216
+          ],
+          "rhs": [
+            9216,
+            4096
+          ],
+          "out": [
+            128,
+            4096
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 6,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue",
+        "prologue"
+      ]
+    }
+  ]
+}

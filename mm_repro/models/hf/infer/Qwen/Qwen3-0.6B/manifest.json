@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "Qwen/Qwen3-0.6B",
+  "patterns": [
+    "49172a53466b",
+    "bdd1d6cf4c6a"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

@@ -1,0 +1,151 @@
+{
+  "points": [
+    {
+      "shape_hash": "6c998692",
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            128,
+            64
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 21,
+        "compute": 2,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 4,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_1",
+          "op": "aten::addmm",
+          "lhs": [
+            4096,
+            1024
+          ],
+          "rhs": [
+            1024,
+            1024
+          ],
+          "out": [
+            4096,
+            1024
+          ],
+          "parents": []
+        },
+        {
+          "node": "addmm_2",
+          "op": "aten::addmm",
+          "lhs": [
+            4096,
+            1024
+          ],
+          "rhs": [
+            1024,
+            1024
+          ],
+          "out": [
+            4096,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 17,
+      "n_mm_ops": 2,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

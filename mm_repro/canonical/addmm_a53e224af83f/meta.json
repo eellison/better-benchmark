@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "a53e224af83f",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.cat.default",
+    "aten.constant_pad_nd.default",
+    "aten.full.default",
+    "aten.permute.default",
+    "aten.slice.Tensor",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "torchbench/infer/BERT_pytorch"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_a53e224af83f/repro.py",
+  "n_aten_ops": 7,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

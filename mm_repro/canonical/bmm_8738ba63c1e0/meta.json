@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "8738ba63c1e0",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/YituTechConvBert"
+  ],
+  "mm_types": [
+    "bmm"
+  ],
+  "repro": "canonical/bmm_8738ba63c1e0/repro.py",
+  "n_aten_ops": 8,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

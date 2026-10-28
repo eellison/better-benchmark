@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "bb9ce3abc3e9",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 8,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/BartForCausalLM",
+    "hf/infer/PLBartForCausalLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_bb9ce3abc3e9/repro.py",
+  "n_aten_ops": 7,
+  "n_mm_ops": 1,
+  "shape_points": 2,
+  "traits": [
+    "epilogue"
+  ]
+}

@@ -1,0 +1,412 @@
+{
+  "points": [
+    {
+      "shape_hash": "b97c79fe",
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            384,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            384,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 3,
+        "mm": 3,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 3,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_32",
+          "op": "aten::mm",
+          "lhs": [
+            384,
+            4096
+          ],
+          "rhs": [
+            4096,
+            512
+          ],
+          "out": [
+            384,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_34",
+          "op": "aten::mm",
+          "lhs": [
+            384,
+            4096
+          ],
+          "rhs": [
+            4096,
+            512
+          ],
+          "out": [
+            384,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_36",
+          "op": "aten::mm",
+          "lhs": [
+            384,
+            4096
+          ],
+          "rhs": [
+            4096,
+            512
+          ],
+          "out": [
+            384,
+            512
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 3,
+      "n_mm_ops": 3,
+      "traits": [
+        "horizontal"
+      ]
+    },
+    {
+      "shape_hash": "1de7dd10",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 11
+        },
+        "hf/train/T5Small": {
+          "occurrences": 11
+        }
+      },
+      "inputs": [
+        [
+          [
+            512,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            2048
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 3,
+        "mm": 3,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 3,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_18",
+          "op": "aten::mm",
+          "lhs": [
+            512,
+            8192
+          ],
+          "rhs": [
+            8192,
+            512
+          ],
+          "out": [
+            512,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_20",
+          "op": "aten::mm",
+          "lhs": [
+            512,
+            8192
+          ],
+          "rhs": [
+            8192,
+            512
+          ],
+          "out": [
+            512,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_22",
+          "op": "aten::mm",
+          "lhs": [
+            512,
+            8192
+          ],
+          "rhs": [
+            8192,
+            2048
+          ],
+          "out": [
+            512,
+            2048
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 3,
+      "n_mm_ops": 3,
+      "traits": [
+        "horizontal"
+      ]
+    },
+    {
+      "shape_hash": "968f6b30",
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/train/T5Small": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            512,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            8192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 6,
+        "compute": 3,
+        "mm": 3,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 3,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_28",
+          "op": "aten::mm",
+          "lhs": [
+            512,
+            8192
+          ],
+          "rhs": [
+            8192,
+            512
+          ],
+          "out": [
+            512,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_30",
+          "op": "aten::mm",
+          "lhs": [
+            512,
+            8192
+          ],
+          "rhs": [
+            8192,
+            512
+          ],
+          "out": [
+            512,
+            512
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_32",
+          "op": "aten::mm",
+          "lhs": [
+            512,
+            8192
+          ],
+          "rhs": [
+            8192,
+            512
+          ],
+          "out": [
+            512,
+            512
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 3,
+      "n_mm_ops": 3,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "LearningToPaint",
+  "patterns": [
+    "30b8bbef1012",
+    "346313be4b48"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

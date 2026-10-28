@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "openai/gpt-oss-20b",
+  "patterns": [
+    "00658dc2be97",
+    "609dcafbad8e",
+    "ccc174bc2dac"
+  ],
+  "graphs": [],
+  "mode": "infer"
+}

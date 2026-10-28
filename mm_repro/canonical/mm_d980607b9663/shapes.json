@@ -1,0 +1,110 @@
+{
+  "points": [
+    {
+      "shape_hash": "feb203d3",
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 8
+        }
+      },
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            4096
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 5,
+        "compute": 2,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 0,
+        "outputs": 2,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_53",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            4096
+          ],
+          "rhs": [
+            4096,
+            16384
+          ],
+          "out": [
+            4096,
+            16384
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_54",
+          "op": "aten::mm",
+          "lhs": [
+            4096,
+            16384
+          ],
+          "rhs": [
+            16384,
+            4096
+          ],
+          "out": [
+            4096,
+            4096
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 3,
+      "n_mm_ops": 2,
+      "traits": [
+        "horizontal"
+      ]
+    }
+  ]
+}

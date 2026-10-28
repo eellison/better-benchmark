@@ -1,0 +1,101 @@
+{
+  "points": [
+    {
+      "shape_hash": "7fef1fa6",
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            30522
+          ],
+          "bf16"
+        ],
+        [
+          [
+            30522,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            6
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            6,
+            0,
+            0
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            30522
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            30522
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 9,
+        "compute": 3,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 2,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm_74",
+          "op": "aten::addmm",
+          "lhs": [
+            32768,
+            128
+          ],
+          "rhs": [
+            128,
+            30528
+          ],
+          "out": [
+            32768,
+            30528
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 8,
+      "n_mm_ops": 1,
+      "traits": [
+        "prologue"
+      ]
+    }
+  ]
+}

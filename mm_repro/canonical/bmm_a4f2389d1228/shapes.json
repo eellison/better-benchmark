@@ -1,0 +1,140 @@
+{
+  "points": [
+    {
+      "shape_hash": "a77eab9b",
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "inputs": [
+        [
+          [
+            4096,
+            49,
+            32
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            32,
+            49
+          ],
+          "bf16"
+        ],
+        [
+          [
+            49,
+            49
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              169
+            ]
+          }
+        ],
+        [
+          [
+            169,
+            32
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            49,
+            49,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            7,
+            0,
+            7,
+            0,
+            0
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 19,
+        "compute": 9,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 2,
+        "contraction_depth": 3,
+        "reduction_extent": 49,
+        "handoff": 0,
+        "non_mm_compute": 8,
+        "outputs": 4,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "bmm_44",
+          "op": "aten::bmm",
+          "lhs": [
+            4096,
+            49,
+            32
+          ],
+          "rhs": [
+            4096,
+            32,
+            49
+          ],
+          "out": [
+            4096,
+            49,
+            49
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 18,
+      "n_mm_ops": 1,
+      "traits": [
+        "block_or_reshaped_reduction",
+        "epilogue",
+        "gather",
+        "mm_reduction",
+        "row_reduction"
+      ]
+    }
+  ]
+}

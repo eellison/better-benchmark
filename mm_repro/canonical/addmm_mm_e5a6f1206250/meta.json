@@ -1,0 +1,33 @@
+{
+  "pattern_hash": "e5a6f1206250",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 10,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/openai/whisper-tiny"
+  ],
+  "mm_types": [
+    "addmm",
+    "mm"
+  ],
+  "repro": "canonical/addmm_mm_e5a6f1206250/repro.py",
+  "n_aten_ops": 10,
+  "n_mm_ops": 2,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

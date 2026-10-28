@@ -1,0 +1,31 @@
+{
+  "pattern_hash": "e4e4db90ec29",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 4,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.mm.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 6,
+  "models": [
+    "hf/train/BlenderbotForConditionalGeneration",
+    "hf/train/M2M100ForConditionalGeneration",
+    "hf/train/MT5ForConditionalGeneration",
+    "hf/train/MobileBertForMaskedLM",
+    "hf/train/T5ForConditionalGeneration",
+    "hf/train/T5Small"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_e4e4db90ec29/repro.py",
+  "n_aten_ops": 2,
+  "n_mm_ops": 2,
+  "shape_points": 5,
+  "traits": [
+    "horizontal"
+  ]
+}

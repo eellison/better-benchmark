@@ -1,0 +1,59 @@
+{
+  "pattern_hash": "2fce44d91a8a",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 37,
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.cos.default",
+    "aten.div.Tensor",
+    "aten.expand.default",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.pow.Scalar",
+    "aten.reciprocal.default",
+    "aten.sin.default",
+    "aten.squeeze.dim",
+    "aten.squeeze.dim",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.unsqueeze.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/XLNetLMHeadModel"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_2fce44d91a8a/repro.py",
+  "n_aten_ops": 32,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "prologue"
+  ]
+}

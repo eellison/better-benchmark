@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "GPTNeoForSequenceClassification",
+  "patterns": [
+    "1905944880d0",
+    "33ee8772715d",
+    "389eb9f65ed6",
+    "7c68c60f5d2d",
+    "99f07abee04d",
+    "ac1f64f9d65f",
+    "b295495ff6a1",
+    "d0b08749d87e"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

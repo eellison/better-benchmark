@@ -1,0 +1,95 @@
+{
+  "points": [
+    {
+      "shape_hash": "b850c895",
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            2048,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            768
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 13,
+        "compute": 11,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 10,
+        "outputs": 4,
+        "inputs": 5
+      },
+      "mm_shapes": [
+        {
+          "node": "mm_6",
+          "op": "aten::mm",
+          "lhs": [
+            2048,
+            3072
+          ],
+          "rhs": [
+            3072,
+            768
+          ],
+          "out": [
+            2048,
+            768
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue"
+      ]
+    }
+  ]
+}

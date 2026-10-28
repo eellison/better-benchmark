@@ -1,0 +1,87 @@
+{
+  "points": [
+    {
+      "shape_hash": "26e047eb",
+      "models": {
+        "torchbench/infer/maml": {
+          "occurrences": 1
+        }
+      },
+      "inputs": [
+        [
+          [
+            5
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              5
+            ]
+          }
+        ],
+        [
+          [
+            5,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            5
+          ],
+          "bf16"
+        ],
+        [
+          [
+            5,
+            64
+          ],
+          "bf16"
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 25,
+        "compute": 17,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 3,
+        "contraction_depth": 4,
+        "reduction_extent": 5,
+        "handoff": 0,
+        "non_mm_compute": 16,
+        "outputs": 1,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "addmm",
+          "op": "aten::addmm",
+          "lhs": [
+            5,
+            64
+          ],
+          "rhs": [
+            64,
+            5
+          ],
+          "out": [
+            5,
+            5
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 22,
+      "n_mm_ops": 1,
+      "traits": [
+        "epilogue",
+        "gather",
+        "mm_reduction",
+        "row_reduction"
+      ]
+    }
+  ]
+}

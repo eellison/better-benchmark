@@ -1,0 +1,97 @@
+{
+  "points": [
+    {
+      "shape_hash": "fe02163a",
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "inputs": [
+        [
+          [
+            54
+          ],
+          "f32"
+        ],
+        [
+          [
+            54,
+            384
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            54
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            9,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            98304,
+            9,
+            1
+          ]
+        ]
+      ],
+      "partition_metrics": {
+        "nodes": 15,
+        "compute": 7,
+        "mm": 1,
+        "mm_depth": 1,
+        "reduction_depth": 2,
+        "contraction_depth": 3,
+        "reduction_extent": 9,
+        "handoff": 0,
+        "non_mm_compute": 6,
+        "outputs": 3,
+        "inputs": 3
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            16384,
+            384
+          ],
+          "rhs": [
+            384,
+            54
+          ],
+          "out": [
+            16384,
+            54
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 11,
+      "n_mm_ops": 1,
+      "traits": [
+        "block_or_reshaped_reduction",
+        "epilogue",
+        "mm_reduction"
+      ]
+    }
+  ]
+}

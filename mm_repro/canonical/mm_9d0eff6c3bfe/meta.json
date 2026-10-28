@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "9d0eff6c3bfe",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 5,
+  "origin_ops": [
+    "aten.mm.default",
+    "aten.permute.default",
+    "aten.relu.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 2,
+  "models": [
+    "hf/infer/T5ForConditionalGeneration",
+    "hf/infer/T5Small"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_9d0eff6c3bfe/repro.py",
+  "n_aten_ops": 5,
+  "n_mm_ops": 1,
+  "shape_points": 1,
+  "traits": [
+    "epilogue"
+  ]
+}

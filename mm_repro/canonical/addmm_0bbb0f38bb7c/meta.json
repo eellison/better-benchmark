@@ -1,0 +1,40 @@
+{
+  "pattern_hash": "0bbb0f38bb7c",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 18,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.clone.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/infer/LayoutLMForMaskedLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_0bbb0f38bb7c/repro.py",
+  "n_aten_ops": 18,
+  "n_mm_ops": 3,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

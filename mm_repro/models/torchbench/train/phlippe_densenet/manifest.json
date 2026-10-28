@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "source": "torchbench",
+  "model": "phlippe_densenet",
+  "patterns": [
+    "d432634a8465"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

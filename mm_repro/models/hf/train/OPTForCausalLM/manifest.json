@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "source": "hf",
+  "model": "OPTForCausalLM",
+  "patterns": [
+    "00552fd3f644",
+    "448578f87a3f",
+    "584ca96b2e27",
+    "9700d0b237d8",
+    "aa947857d07d",
+    "b43575d29b7d",
+    "bd201657f151",
+    "ea48f342f420"
+  ],
+  "graphs": [],
+  "mode": "train"
+}

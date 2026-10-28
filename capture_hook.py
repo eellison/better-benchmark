@@ -246,7 +246,9 @@ def _split_connected_components(nodes):
     return result_components
 
 
-def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
+def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
+                          only_include_mm: bool = False,
+                          matmul_limits=None, diagnostics=None) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
 
@@ -262,8 +264,21 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
     partition, as if they were not fusible.
 
+    ``only_include_mm=True`` selects independent small MM benchmarks, with
+    meaningful computation and explicit outputs (see matmul_partitioner).
+    These regions may overlap; they do not replace the original model graph.
+
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
+    if only_include_mm:
+        from matmul_partitioner import get_matmul_regions
+
+        regions = get_matmul_regions(
+            gm, partition_node_is_supported, limits=matmul_limits,
+            excluded=excluded or (), diagnostics=diagnostics,
+        )
+        return regions
+
     import inspect
 
     from torch.fx.passes.operator_support import create_op_support
@@ -436,6 +451,10 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
 
     Returns (sub_gm, placeholder_info, shape_params) or None.
     """
+    from matmul_partitioner import MatmulRegion
+
+    requested_outputs = (set(origin_nodes.outputs)
+                         if isinstance(origin_nodes, MatmulRegion) else None)
     seen = set()
     unique_origins = []
     for n in origin_nodes:
@@ -468,10 +487,11 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         name = getattr(target, "__name__", "") or str(target)
         return name.rstrip(".default").endswith("_")
 
-    output_nodes = [
-        n for n in origin_nodes
-        if any(user not in needed_nodes for user in n.users) or _is_mutating(n)
-    ]
+    output_nodes = ([n for n in origin_nodes if n in requested_outputs]
+                    if requested_outputs is not None else [
+                        n for n in origin_nodes
+                        if any(user not in needed_nodes for user in n.users) or _is_mutating(n)
+                    ])
     if not output_nodes:
         output_nodes = origin_nodes
 
@@ -1291,8 +1311,20 @@ def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
                  validate: bool = True, capture_only: bool = False,
-                 constant_folding: bool = False):
+                 constant_folding: bool = False, only_include_mm: bool = False,
+                 matmul_limits=None):
         self.output_dir = output_dir
+        self.only_include_mm = only_include_mm
+        self.matmul_limits = matmul_limits
+        self.partition_options = {}
+        if self.only_include_mm:
+            from dataclasses import asdict
+            from matmul_partitioner import MatmulLimits
+
+            self.partition_options = {
+                "only_include_mm": only_include_mm,
+                "matmul_limits": asdict(matmul_limits or MatmulLimits()),
+            }
         # The compiled model folds constants at load time (AOTInductor's
         # use_runtime_constant_folding): constant-only work is not per-call
         # work, so it is kept out of the captured regions.
@@ -1775,7 +1807,8 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
-    def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
+    def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None,
+                      *, components=None):
         """Called by the hook for each post-grad graph. Partitions and captures.
 
         ``is_inference`` is what Inductor passes inference-aware custom passes
@@ -1799,7 +1832,11 @@ if __name__ == "__main__":
 
         # Partition ONCE; both the metadata sidecar (node_accounting) and the
         # capture loop below consume the same components.
-        components = get_fusion_partitions(gm, excluded=folded)
+        if components is None:
+            components = get_fusion_partitions(
+                gm, excluded=folded,
+                only_include_mm=self.only_include_mm, matmul_limits=self.matmul_limits,
+            )
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
@@ -1830,6 +1867,8 @@ if __name__ == "__main__":
                             "node_accounting": graph_node_accounting(
                                 gm, components, constant_folded=folded),
                             "replay_dependencies": replay_dependencies(gm),
+                            **({"partitioning": self.partition_options}
+                               if self.only_include_mm else {}),
                             **({"constant_inputs": constant_inputs}
                                if constant_inputs is not None else {}),
                         },
@@ -1850,7 +1889,8 @@ if __name__ == "__main__":
                 try:
                     from roundtrip_validation import run_write_gate
 
-                    run_write_gate(full_graph_path, original_gm=gm)
+                    run_write_gate(full_graph_path, original_gm=gm,
+                                   partition_options=self.partition_options)
                 except Exception as exc:
                     print(
                         f"[capture_hook] WARNING: round-trip gate unavailable "
@@ -1866,6 +1906,7 @@ if __name__ == "__main__":
         # Shared partitioning + hashing (see module-level helpers above):
         # this is the single source of truth for how graphs are cut into
         # canonical repros and how each partition is content-addressed.
+        observations = []
         for comp in components:
             is_reduction = partition_has_reduction(comp)
 
@@ -1892,6 +1933,11 @@ if __name__ == "__main__":
             shape_key = pattern["shape_hash"]
 
             full_key = f"{pattern_key}_{shape_key}"
+            observations.append({
+                "pattern_hash": pattern_key, "shape_hash": shape_key,
+                "source_nodes": [n.name for n in comp],
+                "canonical_ops": [str(n.target) for n in sub_gm.graph.nodes if n.op == "call_function"],
+            })
             # Count EVERY occurrence (pre-dedup): the repro file is written
             # once per point, but the count is what the accounting joins on.
             self.occurrence_counts[full_key] = (
@@ -1914,7 +1960,10 @@ if __name__ == "__main__":
                             "dtype": dtype,
                         })
 
-            kind = "reduction" if is_reduction else "pointwise"
+            from matmul_partitioner import MatmulRegion
+
+            is_mm_region = isinstance(comp, MatmulRegion)
+            kind = "matmul" if is_mm_region else ("reduction" if is_reduction else "pointwise")
             meta = {
                 "kind": kind,
                 "pattern_hash": pattern_key,
@@ -1924,8 +1973,14 @@ if __name__ == "__main__":
                 "origin_ops": origin_ops,
                 "reduction_types": [r["reduction_type"] for r in reduction_infos],
             }
+            if is_mm_region:
+                meta["matmul"] = comp.metrics
+                meta["mm_types"] = list(comp.mm_types)
 
-            if is_reduction:
+            if is_mm_region:
+                mm_label = "_".join(comp.mm_types)
+                filename = f"region_{self.counter:03d}_{mm_label}_{pattern_key}_{shape_key}.py"
+            elif is_reduction:
                 red_types = "_".join(sorted(set(r["reduction_type"] for r in reduction_infos)))
                 filename = f"region_{self.counter:03d}_{red_types}_{pattern_key}_{shape_key}.py"
             else:
@@ -1950,6 +2005,9 @@ if __name__ == "__main__":
                 }
                 if alias_group_nbytes:
                     entry["alias_group_nbytes"] = alias_group_nbytes
+                if is_mm_region:
+                    entry["matmul"] = comp.metrics
+                    entry["mm_types"] = list(comp.mm_types)
                 self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report
@@ -1967,6 +2025,8 @@ if __name__ == "__main__":
                     f"{shape_key}): {type(e).__name__}: {str(e)[:160]}",
                     file=sys.stderr,
                 )
+
+        return observations
 
     def finalize(self):
         """Write index.json for the captured session.
@@ -1987,6 +2047,8 @@ if __name__ == "__main__":
             "n_captured": len(self.captured),
             "n_dropped": len(self.dropped),
         }
+        if self.only_include_mm:
+            payload["partitioning"] = self.partition_options
         if self.constant_folding:
             payload["constant_folding"] = {
                 "folded_nodes": self.constant_folded_nodes,
@@ -1999,8 +2061,10 @@ if __name__ == "__main__":
         os.replace(tmp_path, index_path)
         n_red = sum(1 for c in self.captured if c.get("kind") == "reduction")
         n_pw = sum(1 for c in self.captured if c.get("kind") == "pointwise")
+        n_mm = sum(1 for c in self.captured if c.get("kind") == "matmul")
         msg = (f"[capture_hook] Captured {len(self.captured)} regions "
-               f"({n_red} reduction, {n_pw} pointwise) -> {self.output_dir}")
+               f"({n_red} reduction, {n_pw} pointwise"
+               + (f", {n_mm} matmul" if n_mm else "") + f") -> {self.output_dir}")
         if self.dropped:
             msg += f" | DROPPED {len(self.dropped)} regions (see index.json)"
         print(msg)
@@ -2011,7 +2075,8 @@ _active_state: _CaptureState | None = None
 
 def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
                          validate: bool = True, capture_only: bool = False,
-                         constant_folding: bool = False):
+                         constant_folding: bool = False, only_include_mm: bool = False,
+                         matmul_limits=None):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -2023,6 +2088,10 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         capture_only: If True, raise _CaptureComplete after capture to skip
             expensive inductor compilation. Caller should catch the error.
         validate: If True, run eager validation on captured repros (can trigger CUDA errors).
+        only_include_mm: Capture only small MM regions containing real non-MM
+            computation or independent horizontal MMs. Standalone MM plus
+            views/casts alone and bare MM outputs are dropped.
+        matmul_limits: Optional matmul_partitioner.MatmulLimits policy.
         constant_folding: Set when the model is deployed with AOTInductor's
             runtime constant folding (aot_inductor.use_runtime_constant_folding):
             in inference graphs, work derived only from module parameters,
@@ -2035,7 +2104,9 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
     """
     global _active_state
     _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate,
-                                  capture_only=capture_only, constant_folding=constant_folding)
+                                  capture_only=capture_only, constant_folding=constant_folding,
+                                  only_include_mm=only_include_mm,
+                                  matmul_limits=matmul_limits)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 
@@ -2153,4 +2224,7 @@ def uninstall_capture_hook():
 _auto_dir = os.environ.get("REPRO_CAPTURE_DIR")
 if _auto_dir:
     _auto_label = os.environ.get("REPRO_CAPTURE_LABEL", "auto")
-    install_capture_hook(_auto_dir, _auto_label)
+    install_capture_hook(
+        _auto_dir, _auto_label,
+        only_include_mm=os.environ.get("REPRO_CAPTURE_ONLY_INCLUDE_MM") == "1",
+    )

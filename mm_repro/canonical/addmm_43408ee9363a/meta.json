@@ -1,0 +1,43 @@
+{
+  "pattern_hash": "43408ee9363a",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 21,
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "hf/train/MegatronBertForCausalLM"
+  ],
+  "mm_types": [
+    "addmm"
+  ],
+  "repro": "canonical/addmm_43408ee9363a/repro.py",
+  "n_aten_ops": 15,
+  "n_mm_ops": 3,
+  "shape_points": 1,
+  "traits": [
+    "horizontal"
+  ]
+}

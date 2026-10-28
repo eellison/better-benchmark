@@ -1,0 +1,140 @@
+{
+  "points": [
+    {
+      "shape_hash": "0e79adbe",
+      "models": {
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 34
+        }
+      },
+      "inputs": [
+        [
+          [
+            2048,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            2560
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            1024,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            2560
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            -1,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            -1,
+            256
+          ]
+        ]
+      ],
+      "alias_group_nbytes": [
+        5120000
+      ],
+      "partition_metrics": {
+        "nodes": 14,
+        "compute": 4,
+        "mm": 2,
+        "mm_depth": 1,
+        "reduction_depth": 0,
+        "contraction_depth": 1,
+        "reduction_extent": 1,
+        "handoff": 0,
+        "non_mm_compute": 2,
+        "outputs": 2,
+        "inputs": 4
+      },
+      "mm_shapes": [
+        {
+          "node": "mm",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            2560
+          ],
+          "rhs": [
+            2560,
+            2048
+          ],
+          "out": [
+            1000,
+            2048
+          ],
+          "parents": []
+        },
+        {
+          "node": "mm_1",
+          "op": "aten::mm",
+          "lhs": [
+            1000,
+            2560
+          ],
+          "rhs": [
+            2560,
+            1024
+          ],
+          "out": [
+            1000,
+            1024
+          ],
+          "parents": []
+        }
+      ],
+      "n_aten_ops": 12,
+      "n_mm_ops": 2,
+      "traits": [
+        "epilogue",
+        "horizontal"
+      ]
+    }
+  ]
+}

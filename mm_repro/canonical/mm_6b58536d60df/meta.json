@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "6b58536d60df",
+  "kind": "matmul",
+  "reduction_types": [],
+  "n_ops": 14,
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.sigmoid.default",
+    "aten.sub.Tensor",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "n_models": 1,
+  "models": [
+    "timm/train/mobilevit_s"
+  ],
+  "mm_types": [
+    "mm"
+  ],
+  "repro": "canonical/mm_6b58536d60df/repro.py",
+  "n_aten_ops": 11,
+  "n_mm_ops": 1,
+  "shape_points": 3,
+  "traits": [
+    "epilogue"
+  ]
+}
