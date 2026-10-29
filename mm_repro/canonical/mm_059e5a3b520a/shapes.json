@@ -1,0 +1,167 @@
+{
+  "points": [
+    {
+      "shape_hash": "4239d79a",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            512,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            512,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            16384
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 17,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "9a7b135d",
+      "inputs": [
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            8192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            8192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            8192
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            8192
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            8192
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            8192
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            8192
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 17,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

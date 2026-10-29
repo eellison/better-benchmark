@@ -1,14 +1,8 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "MobileBertForMaskedLM",
   "patterns": [
-    "035bfade128f",
-    "b73a9669de67",
-    "bc86fea5ac12",
-    "e0698f102b3e",
-    "fe4891df3e8d"
+    "43902b62e550",
+    "8ccc875f3962",
+    "9622b16c0748"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

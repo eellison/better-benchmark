@@ -1,0 +1,96 @@
+{
+  "points": [
+    {
+      "shape_hash": "7bd269be",
+      "inputs": [
+        [
+          [
+            768,
+            1000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              152064,
+              1
+            ],
+            "alias": 0
+          }
+        ],
+        [
+          [
+            768,
+            1000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              152064,
+              1
+            ],
+            "off": 768,
+            "alias": 0
+          }
+        ]
+      ],
+      "models": {
+        "timm/infer/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 4,
+        "nodes": 4,
+        "inputs": 6,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "horizontal",
+        "horizontal_pw_join"
+      ],
+      "alias_group_nbytes": [
+        38928384
+      ]
+    }
+  ]
+}

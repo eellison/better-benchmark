@@ -656,6 +656,13 @@ def _generation_spec(spec: dict) -> dict | None:
     return None
 
 
+def _positive_minimum(gen: dict) -> float:
+    minimum = float(gen.get("minimum", 0.1))
+    if not 0.0 < minimum < float("inf"):
+        raise ValueError("positive input minimum must be finite and greater than zero")
+    return minimum
+
+
 def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
     """Create a tensor containing random permutations of [0, size).
 
@@ -697,6 +704,7 @@ def make_inputs_from_config(config: dict) -> list:
     """
     group_nbytes = config.get("alias_group_nbytes") or []
     group_storage: dict[int, torch.Tensor] = {}
+    positive_alias_views: list[tuple[float, torch.Tensor]] = []
 
     def _group_buffer(g: int, device, dtype=None) -> torch.Tensor:
         if g not in group_storage:
@@ -747,7 +755,18 @@ def make_inputs_from_config(config: dict) -> list:
             offset = int(spec.get("storage_offset", 0))
             buf = _group_buffer(spec["alias_group"], device, dtype)
             typed = buf.view(dtype) if dtype != torch.uint8 else buf
-            result.append(typed.as_strided(shape, stride, offset))
+            tensor = typed.as_strided(shape, stride, offset)
+            gen = _generation_spec(spec)
+            if gen and gen.get("kind") == "positive":
+                if not dtype.is_floating_point:
+                    raise ValueError("positive input generation requires a floating dtype")
+                # Collapse broadcast axes before writing; repeated elements
+                # share the same storage and cannot be copied independently.
+                unique_shape = [1 if st == 0 else dim
+                                for dim, st in zip(shape, stride)]
+                unique = typed.as_strided(unique_shape, stride, offset)
+                positive_alias_views.append((_positive_minimum(gen), unique))
+            result.append(tensor)
             continue
 
         shape = spec["shape"]
@@ -756,6 +775,17 @@ def make_inputs_from_config(config: dict) -> list:
         stride = spec.get("stride")
         device = spec.get("device", "cuda")
         gen = _generation_spec(spec)
+
+        if gen and gen.get("kind") == "positive":
+            if not dtype.is_floating_point:
+                raise ValueError("positive input generation requires a floating dtype")
+            minimum = _positive_minimum(gen)
+            stride = stride or _contiguous_stride_local(shape)
+            offset = int(spec.get("storage_offset", 0))
+            numel = _storage_size_for_strided(shape, stride) + offset
+            storage = torch.randn(numel, dtype=dtype, device=device).abs().add_(minimum)
+            result.append(storage.as_strided(shape, stride, offset))
+            continue
 
         if gen and gen.get("kind") == "runs":
             # Any integer dtype (incl. unsigned): ids are drawn in int64 and
@@ -828,12 +858,21 @@ def make_inputs_from_config(config: dict) -> list:
                     result.append(storage.to(dtype).as_strided(shape, stride))
                 else:
                     result.append(torch.randint(low, hi, shape, dtype=torch.int64, device=device).to(dtype))
-            elif stride:
-                numel = _storage_size_for_strided(shape, stride)
+            elif stride or spec.get("storage_offset"):
+                stride = stride or _contiguous_stride_local(shape)
+                offset = int(spec.get("storage_offset", 0))
+                numel = _storage_size_for_strided(shape, stride) + offset
                 storage = torch.randn(numel, dtype=dtype, device=device)
-                result.append(storage.as_strided(shape, stride))
+                result.append(storage.as_strided(shape, stride, offset))
             else:
                 result.append(torch.randn(shape, dtype=dtype, device=device))
+    # Read every constrained alias view before changing any shared storage.
+    # This preserves unconstrained disjoint members and avoids adding the
+    # floor repeatedly to overlapping views. Larger minimums win overlaps.
+    positive_values = [(minimum, view, view.abs().add(minimum))
+                       for minimum, view in positive_alias_views]
+    for minimum, view, values in sorted(positive_values, key=lambda item: item[0]):
+        view.copy_(values)
     return result
 
 

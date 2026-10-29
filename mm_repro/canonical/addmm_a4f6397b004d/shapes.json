@@ -1,0 +1,86 @@
+{
+  "points": [
+    {
+      "shape_hash": "3b7abc81",
+      "inputs": [
+        [
+          [
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            128,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            1000
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            1000
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 10,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "pattern_hash": "8ccc875f3962",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "4462af82aab7"
+  ],
+  "legacy_pattern_hashes": [
+    "e0698f102b3e"
+  ],
+  "normalizations": {
+    "input_permutation": 2
+  },
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.relu.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "shape_points": 2,
+  "coverage": []
+}

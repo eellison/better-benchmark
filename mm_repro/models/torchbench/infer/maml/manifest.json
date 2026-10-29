@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "maml",
   "patterns": [
-    "81eca7394f75"
+    "ebba12fa4dcc"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

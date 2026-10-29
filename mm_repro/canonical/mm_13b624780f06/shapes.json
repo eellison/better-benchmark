@@ -1,0 +1,51 @@
+{
+  "points": [
+    {
+      "shape_hash": "4a6cc0a7",
+      "inputs": [
+        [
+          [
+            2304,
+            256000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2304
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            256000
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 5,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "points": [
+    {
+      "shape_hash": "055dd2cc",
+      "inputs": [
+        [
+          [
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            16384
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 11
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 13,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

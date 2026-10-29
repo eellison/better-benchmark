@@ -1,15 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "DistillGPT2",
   "patterns": [
-    "04299a9e7d23",
-    "4153ae0c0c59",
-    "9b17bfa28d61",
-    "a662ead74f50",
-    "c0573952db13",
-    "c2147238011a"
+    "18244167ad75",
+    "4a9e1a392d86",
+    "550c20ccea61",
+    "681d39843a3e",
+    "7364932d493b",
+    "cc48fc88a01f"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

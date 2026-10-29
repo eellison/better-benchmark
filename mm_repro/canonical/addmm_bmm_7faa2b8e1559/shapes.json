@@ -1,0 +1,115 @@
+{
+  "points": [
+    {
+      "shape_hash": "742f9bea",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            12,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            12,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            384,
+            512,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            384,
+            64,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            12,
+            512,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 3,
+        "compute": 4,
+        "nodes": 17,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 2
+      },
+      "coverage": [
+        "horizontal",
+        "horizontal_then_mm",
+        "vertical_mm"
+      ]
+    }
+  ]
+}

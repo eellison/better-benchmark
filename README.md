@@ -347,3 +347,14 @@ benchmarks/              # frozen benchmark set definitions
 ```
 
 </details>
+
+
+## Core matmul fusion corpus
+
+```bash
+python scripts/extract_matmul_corpus.py
+```
+
+Generates only `mm_repro/` from saved model FX graphs. The committed snapshot
+contains **276 repros / 501 shapes**; alignment/copy-only regions are excluded,
+and no count quota is used. [Policy, reproduction and validation](docs/matmul_partitioning.md).

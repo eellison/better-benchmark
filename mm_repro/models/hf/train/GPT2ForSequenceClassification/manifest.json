@@ -1,14 +1,12 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "GPT2ForSequenceClassification",
   "patterns": [
-    "04299a9e7d23",
-    "9b17bfa28d61",
-    "ac1f64f9d65f",
-    "c0573952db13",
-    "c2147238011a"
+    "18244167ad75",
+    "29232f77dc9a",
+    "4a9e1a392d86",
+    "550c20ccea61",
+    "681d39843a3e",
+    "7364932d493b",
+    "cc48fc88a01f"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

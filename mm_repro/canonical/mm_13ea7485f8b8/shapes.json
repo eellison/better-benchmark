@@ -1,0 +1,82 @@
+{
+  "points": [
+    {
+      "shape_hash": "9f5b51c4",
+      "inputs": [
+        [
+          [
+            1,
+            1,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            -1,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 7,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

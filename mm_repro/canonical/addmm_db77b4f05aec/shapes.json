@@ -1,0 +1,49 @@
+{
+  "points": [
+    {
+      "shape_hash": "9edc996d",
+      "inputs": [
+        [
+          [
+            512,
+            65
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            65
+          ],
+          "bf16"
+        ],
+        [
+          [
+            96,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/infer/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 2,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

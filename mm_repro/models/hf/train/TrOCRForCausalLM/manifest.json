@@ -1,19 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "TrOCRForCausalLM",
   "patterns": [
-    "0bc457cd5b37",
-    "0e5086bacf72",
-    "1aca06f481cc",
-    "1cf67b7fba47",
-    "788a171d4bad",
-    "ab1dbd579113",
-    "be84ab28ee4d",
-    "cfc084055e28",
-    "eab0d897a905",
-    "f66533a290f5"
+    "681d39843a3e",
+    "a302e8b2ce42",
+    "a54f20ec9ffa",
+    "aada276501c2",
+    "ca95d733844e",
+    "de42aa1b5558"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

@@ -1,17 +1,13 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "LayoutLMForMaskedLM",
   "patterns": [
-    "079dfeb381b2",
-    "0bc457cd5b37",
-    "24f1e7660a5f",
-    "33ee8772715d",
-    "913f6e6b025e",
-    "ab1dbd579113",
-    "ce8cf3fa1557",
-    "de43a0c4f030"
+    "681d39843a3e",
+    "7faa2b8e1559",
+    "9519247d9dd3",
+    "a54f20ec9ffa",
+    "a7a60531791b",
+    "aada276501c2",
+    "ad517323c028",
+    "ca95d733844e"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

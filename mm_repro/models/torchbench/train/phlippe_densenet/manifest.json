@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "phlippe_densenet",
   "patterns": [
-    "d432634a8465"
+    "c2f285ea01b3"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

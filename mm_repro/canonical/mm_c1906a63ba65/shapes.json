@@ -1,0 +1,230 @@
+{
+  "points": [
+    {
+      "shape_hash": "16336713",
+      "inputs": [
+        [
+          [
+            1024,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            512
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 16
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "2432bf45",
+      "inputs": [
+        [
+          [
+            384,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            512
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 22
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "3601c5fc",
+      "inputs": [
+        [
+          [
+            2048,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              2048
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "3e5b24f3",
+      "inputs": [
+        [
+          [
+            512,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 16
+        },
+        "hf/train/T5Small": {
+          "occurrences": 16
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "pattern_hash": "11187f9103c4",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "6249afece086"
+  ],
+  "legacy_pattern_hashes": [
+    "be26ea9f945f"
+  ],
+  "normalizations": {
+    "input_permutation_through_float_cast": 1
+  },
+  "origin_ops": [
+    "aten.addmm.default",
+    "aten.relu.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "shape_points": 1,
+  "coverage": [
+    "pw_prologue"
+  ]
+}

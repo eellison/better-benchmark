@@ -1,13 +1,10 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "GPTJForQuestionAnswering",
   "patterns": [
-    "2f78df5edf48",
-    "319c33819ea6",
-    "e89dd80d88ee",
-    "f4b94c8b19cd"
+    "2179fd3bf388",
+    "2259201a598c",
+    "4b6251ed77f0",
+    "be03d21a2e8f",
+    "f3e95b99dfb2"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

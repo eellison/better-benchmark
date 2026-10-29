@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "shufflenet_v2_x1_0",
   "patterns": [
-    "7af86989016c"
+    "9e76e72a2f10"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

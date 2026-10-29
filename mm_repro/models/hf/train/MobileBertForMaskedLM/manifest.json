@@ -1,23 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "MobileBertForMaskedLM",
   "patterns": [
-    "089926541349",
-    "09321466eabb",
-    "0f6bfa1c248f",
-    "363738149ada",
-    "461c6833aa96",
-    "687e08371fcc",
-    "95193cad6efa",
-    "a11bba58c35b",
-    "a5b393e69e27",
-    "a900e5dd6d32",
-    "bd86c1ac4d5b",
-    "bdd66b8c1580",
-    "e4e4db90ec29",
-    "f589cec826ab"
+    "39e6a3393286",
+    "4d340faccb7d",
+    "67325627fae5",
+    "67faf09236bf",
+    "bd97b7ab55aa",
+    "f8db7a170d53"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

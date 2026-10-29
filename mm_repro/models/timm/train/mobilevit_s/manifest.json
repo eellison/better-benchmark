@@ -1,18 +1,18 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "mobilevit_s",
   "patterns": [
-    "0323a61942aa",
-    "3e9e1e749afc",
-    "4862dd402aa2",
-    "5bb350955287",
-    "6b58536d60df",
-    "7d8d50307577",
-    "8021ae440991",
-    "b6a6941d040b",
-    "e3646f0be013"
+    "061d547191f7",
+    "0ba916779117",
+    "0f2214b618c4",
+    "17dc5178a675",
+    "1a27d78180b5",
+    "45cd6290c893",
+    "5f440708d458",
+    "84a554caa213",
+    "9bafa1c546f6",
+    "c8245c1dded8",
+    "c9b31648ef9e",
+    "f16d1c13af42",
+    "f299da9c498c"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

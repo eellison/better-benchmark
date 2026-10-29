@@ -1,0 +1,64 @@
+{
+  "points": [
+    {
+      "shape_hash": "cf836108",
+      "inputs": [
+        [
+          [
+            32768,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128,
+            512
+          ],
+          "b8"
+        ],
+        [
+          [],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 96
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

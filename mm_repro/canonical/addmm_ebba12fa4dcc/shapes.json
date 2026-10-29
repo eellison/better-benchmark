@@ -1,0 +1,116 @@
+{
+  "points": [
+    {
+      "shape_hash": "07c5fece",
+      "inputs": [
+        [
+          [
+            5,
+            64,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          [
+            5
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              5
+            ]
+          }
+        ],
+        [
+          [
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            5
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            5
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            5,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            5,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            5
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/infer/maml": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 23,
+        "nodes": 37,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 5
+      },
+      "coverage": [
+        "mm_pw_sum",
+        "pw_prologue",
+        "reduction_mm_reduction"
+      ]
+    }
+  ]
+}

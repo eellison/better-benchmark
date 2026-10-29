@@ -1,0 +1,496 @@
+{
+  "points": [
+    {
+      "shape_hash": "550925d5",
+      "inputs": [
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          [
+            2048,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "b8"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "16c27c4c",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "7de85a70",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            16384,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            256,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            256,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            256,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "03dc0c77",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "b8"
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "29907e28",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            2048,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            128,
+            768
+          ],
+          "b8"
+        ],
+        [
+          [
+            16,
+            128,
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "d640e6b7",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "b8"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "0a63b8c0",
+      "inputs": [
+        [
+          [
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            1536,
+            1536
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1536
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            1536
+          ],
+          "b8"
+        ],
+        [
+          [
+            8,
+            512,
+            1536
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

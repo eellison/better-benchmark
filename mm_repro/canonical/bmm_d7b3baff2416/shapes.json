@@ -1,0 +1,84 @@
+{
+  "points": [
+    {
+      "shape_hash": "a2e29b20",
+      "inputs": [
+        [
+          [
+            256,
+            512,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              64,
+              16384,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            256,
+            64,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              64,
+              1,
+              16384
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16,
+            16,
+            512,
+            1,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            16,
+            1024,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            16,
+            512,
+            1023
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/XLNetLMHeadModel": {
+          "occurrences": 24
+        },
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 8,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

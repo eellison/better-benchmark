@@ -1,0 +1,74 @@
+{
+  "points": [
+    {
+      "shape_hash": "21fc8ef2",
+      "inputs": [
+        [
+          [
+            512,
+            64,
+            4,
+            48
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192
+          ],
+          "f32"
+        ],
+        [
+          [
+            192,
+            192
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              192
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            64,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32768,
+            192
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            192
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

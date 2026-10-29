@@ -1,0 +1,73 @@
+{
+  "points": [
+    {
+      "shape_hash": "2abbf927",
+      "inputs": [
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "b8"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

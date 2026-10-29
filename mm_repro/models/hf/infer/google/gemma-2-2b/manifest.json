@@ -1,14 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "google/gemma-2-2b",
   "patterns": [
-    "11a58fd217cc",
-    "3e11055fe425",
-    "4934217ec01b",
-    "9f9342ba0a1a",
-    "ef78a9d2d30d"
+    "0de71c0815df",
+    "13b624780f06",
+    "797af171c1ea",
+    "a0420b78edb4",
+    "c165d35db746",
+    "f58734dff7af"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

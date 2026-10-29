@@ -1,11 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "GoogleFnet",
   "patterns": [
-    "319c33819ea6",
-    "cf9ca38b2ac5"
+    "4b6251ed77f0",
+    "57d020e2bb30"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

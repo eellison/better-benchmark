@@ -1,17 +1,9 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "GPTNeoForCausalLM",
   "patterns": [
-    "1905944880d0",
-    "33ee8772715d",
-    "389eb9f65ed6",
-    "48994be71178",
-    "7c68c60f5d2d",
-    "99f07abee04d",
-    "b295495ff6a1",
-    "d0b08749d87e"
+    "059e5a3b520a",
+    "39e6a3393286",
+    "409661308c92",
+    "69530ad54ff8"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

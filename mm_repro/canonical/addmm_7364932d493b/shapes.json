@@ -1,0 +1,132 @@
+{
+  "points": [
+    {
+      "shape_hash": "e4214da4",
+      "inputs": [
+        [
+          [
+            32,
+            512,
+            12,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 5
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "0958739b",
+      "inputs": [
+        [
+          [
+            8,
+            1024,
+            12,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            8192,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 11
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

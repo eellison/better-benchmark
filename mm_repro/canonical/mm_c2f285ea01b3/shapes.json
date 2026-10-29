@@ -1,0 +1,77 @@
+{
+  "points": [
+    {
+      "shape_hash": "aa0933c5",
+      "inputs": [
+        [
+          [
+            128,
+            10
+          ],
+          "bf16"
+        ],
+        [
+          [
+            10,
+            184
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            184,
+            4,
+            4
+          ],
+          "b8"
+        ],
+        [
+          [],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            184,
+            4,
+            4
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            184,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            184,
+            4,
+            4
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/phlippe_densenet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

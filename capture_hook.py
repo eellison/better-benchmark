@@ -751,15 +751,21 @@ def canonicalize_for_hash(gm):
     return nodes, resolve, op_name
 
 
-def compute_dag_signature(gm) -> list:
+_SCALAR_PATTERN_HASH_MODE = "scalar_literals_v1"
+
+
+def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
     """Compute a DAG-structure signature for the graph.
 
     Encodes: for each node in topological order, its op name, which
     predecessor nodes feed each argument (by index), and structural
     literal args (list/tuple values like reduction dims, permute orders).
 
-    Does NOT encode scalar int/float constants (e.g., mul by 3.0,
-    eps=1e-6) — those don't affect kernel structure.
+    The legacy default omits scalar int/float constants. Matmul captures
+    opt into ``scalar_sensitive`` because their canonical repros retain
+    these literals: changing a scale or normalization epsilon changes the
+    function even when the tensor shapes and operator DAG stay the same.
+    This mode also preserves tuple getitem indices and numeric kwargs.
 
     Op spellings are canonicalized via canonicalize_for_hash so that
     trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
@@ -773,6 +779,13 @@ def compute_dag_signature(gm) -> list:
     original order — input position is semantics, not spelling.
     """
     nodes, _resolve, _op_name = canonicalize_for_hash(gm)
+    if scalar_sensitive:
+        # Fake retracing creates projections for every result of tuple ops,
+        # even when the caller only uses one. Such dead projections are not
+        # part of the MM's value computation; ignore that tracing noise.
+        nodes = [n for n in nodes if not (
+            n.op == "call_function" and n.target is _operator.getitem and not n.users
+        )]
 
     # --- canonical node order: deterministic Kahn topological sort -------
     node_set = set(nodes)
@@ -858,6 +871,10 @@ def compute_dag_signature(gm) -> list:
         if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
             return ("node", node_to_idx[arg], arg_idx)
         elif isinstance(arg, (list, tuple)):
+            if scalar_sensitive:
+                return ("list", [
+                    _encode_arg(value, i) for i, value in enumerate(arg)
+                ], arg_idx)
             # Structural args: reduction dims, permute orders, reshape targets
             # Encode the structure (length + which are ints) but not concrete values
             # EXCEPT for small int lists (dims) where the values matter
@@ -884,10 +901,16 @@ def compute_dag_signature(gm) -> list:
             # Bare 'int'-typed schema slot: a dim (cat/gather/cumsum) —
             # structural. 'Scalar'-typed int constants fall through below.
             return ("int", arg, arg_idx)
-        # Scalar int/float constants — don't encode (same kernel regardless)
+        elif scalar_sensitive and isinstance(arg, int):
+            # Scalar-typed integer constants and schema-less getitem indices.
+            return ("scalar_int", arg, arg_idx)
+        elif scalar_sensitive and isinstance(arg, float):
+            # Hex spelling preserves exact values, signed zero and inf/nan.
+            return ("scalar_float", arg.hex(), arg_idx)
+        # Keep legacy non-MM signatures byte-compatible by default.
         return None
 
-    signature = []
+    signature = [("hash_mode", _SCALAR_PATTERN_HASH_MODE)] if scalar_sensitive else []
     for node in nodes:
         if node.op == "placeholder":
             signature.append(("input", node_to_idx[node]))
@@ -899,7 +922,9 @@ def compute_dag_signature(gm) -> list:
                 if enc is not None:
                     encoded_args.append(enc)
             # Also encode relevant kwargs (like correction, keepdim)
-            for kw, val in (node.kwargs or {}).items():
+            kwargs = node.kwargs or {}
+            keyword_items = sorted(kwargs.items()) if scalar_sensitive else kwargs.items()
+            for kw, val in keyword_items:
                 if isinstance(val, bool):
                     encoded_args.append(("kw_bool", kw, val))
                 elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
@@ -915,6 +940,10 @@ def compute_dag_signature(gm) -> list:
                     # dim passed as kwarg (argmax(x, dim=1)) — same
                     # structural slot as the positional form.
                     encoded_args.append(("kw_int", kw, val))
+                elif scalar_sensitive and isinstance(val, int):
+                    encoded_args.append(("kw_scalar_int", kw, val))
+                elif scalar_sensitive and isinstance(val, float):
+                    encoded_args.append(("kw_scalar_float", kw, val.hex()))
             signature.append((_op_name(node), encoded_args))
         elif node.op == "output":
             def _collect_output_indices(x):
@@ -934,19 +963,24 @@ def compute_dag_signature(gm) -> list:
             if isinstance(out_indices, list):
                 out_indices = sorted(
                     out_indices,
-                    key=lambda x: (x is None, x if isinstance(x, int) else repr(x)),
+                    key=lambda x: (
+                        x is None, not isinstance(x, int),
+                        x if isinstance(x, int) else repr(x),
+                    ),
                 )
             signature.append(("output", out_indices))
 
     return signature
 
 
-def pattern_hash_for_subgraph(sub_gm) -> str:
-    """Content-addressed pattern hash: ops + wiring, ignoring shapes.
+def pattern_hash_for_subgraph(sub_gm, *, scalar_sensitive: bool = False) -> str:
+    """Content-addressed pattern hash: ops + wiring, ignoring tensor shapes.
 
+    ``scalar_sensitive=True`` preserves the numeric literals baked into MM
+    repros. The default keeps the legacy non-MM pattern identities.
     This is the 12-hex hash in repros/canonical/<family>_<hash> dir names.
     """
-    dag_signature = compute_dag_signature(sub_gm)
+    dag_signature = compute_dag_signature(sub_gm, scalar_sensitive=scalar_sensitive)
     return hashlib.md5(json.dumps(dag_signature).encode()).hexdigest()[:12]
 
 
@@ -1253,7 +1287,9 @@ def compute_partition_pattern(
     and carries the info dicts along by position.
 
     Returns dict with pattern_hash, shape_hash, sub_gm (canonical),
-    placeholder_info, shape_params — or None if extraction fails.
+    placeholder_info, shape_params — or None if extraction fails. MM regions
+    additionally carry pattern_hash_mode and the legacy_pattern_hash for
+    joining old corpus IDs to their scalar-sensitive replacements.
     """
     result = extract_partition_subgraph(comp, gm)
     if result is None:
@@ -1266,13 +1302,28 @@ def compute_partition_pattern(
             info["observed"] = observed_stats[name]
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
-    return {
-        "pattern_hash": pattern_hash_for_subgraph(sub_gm),
+    from matmul_partitioner import MatmulRegion
+
+    is_mm_region = isinstance(comp, MatmulRegion)
+    if is_mm_region:
+        from mm_input_constraints import annotate_external_sqrt_inputs
+
+        annotate_external_sqrt_inputs(sub_gm, placeholder_info)
+    legacy_pattern_hash = pattern_hash_for_subgraph(sub_gm)
+    pattern = {
+        "pattern_hash": (
+            pattern_hash_for_subgraph(sub_gm, scalar_sensitive=True)
+            if is_mm_region else legacy_pattern_hash
+        ),
         "shape_hash": shape_hash_for_placeholders(placeholder_info),
         "sub_gm": sub_gm,
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
     }
+    if is_mm_region:
+        pattern["pattern_hash_mode"] = _SCALAR_PATTERN_HASH_MODE
+        pattern["legacy_pattern_hash"] = legacy_pattern_hash
+    return pattern
 
 
 def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
@@ -1933,7 +1984,13 @@ if __name__ == "__main__":
             shape_key = pattern["shape_hash"]
 
             full_key = f"{pattern_key}_{shape_key}"
+            hash_metadata = {
+                key: pattern[key]
+                for key in ("pattern_hash_mode", "legacy_pattern_hash")
+                if key in pattern
+            }
             observations.append({
+                **hash_metadata,
                 "pattern_hash": pattern_key, "shape_hash": shape_key,
                 "source_nodes": [n.name for n in comp],
                 "canonical_ops": [str(n.target) for n in sub_gm.graph.nodes if n.op == "call_function"],
@@ -1965,6 +2022,7 @@ if __name__ == "__main__":
             is_mm_region = isinstance(comp, MatmulRegion)
             kind = "matmul" if is_mm_region else ("reduction" if is_reduction else "pointwise")
             meta = {
+                **hash_metadata,
                 "kind": kind,
                 "pattern_hash": pattern_key,
                 "shape_hash": shape_key,
@@ -1992,6 +2050,7 @@ if __name__ == "__main__":
                  alias_group_nbytes) = self._generate_repro_file(
                     sub_gm, placeholder_info, meta, filename, shape_params)
                 entry = {
+                    **hash_metadata,
                     "file": filepath,
                     "kind": kind,
                     "pattern_hash": pattern_key,
@@ -2015,6 +2074,7 @@ if __name__ == "__main__":
                 # (silent drops are how the dynamic-regions hole and the
                 # resnet18 mean-head hole happened).
                 self.dropped.append({
+                    **hash_metadata,
                     "filename": filename,
                     "pattern_hash": pattern_key,
                     "shape_hash": shape_key,

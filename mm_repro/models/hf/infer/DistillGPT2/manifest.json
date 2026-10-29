@@ -1,11 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "DistillGPT2",
   "patterns": [
-    "0d6408a212be",
-    "45d61156404c"
+    "23d75749ef7e",
+    "4b6251ed77f0"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

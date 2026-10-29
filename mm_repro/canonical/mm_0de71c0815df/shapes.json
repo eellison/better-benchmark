@@ -1,0 +1,98 @@
+{
+  "points": [
+    {
+      "shape_hash": "41b7d520",
+      "inputs": [
+        [
+          [
+            9216,
+            2304
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              9216
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            9216
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            2304
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 26
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "4a10ea5f",
+      "inputs": [
+        [
+          [
+            10240,
+            2560
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              10240
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            2560
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 34
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

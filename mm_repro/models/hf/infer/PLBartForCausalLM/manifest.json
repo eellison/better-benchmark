@@ -1,13 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "PLBartForCausalLM",
   "patterns": [
-    "0586bd6b1be6",
-    "27eae3e6b7d0",
-    "ac98ab030fe4",
-    "bb9ce3abc3e9"
+    "3e469996152a",
+    "9be8fc0ef35a"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

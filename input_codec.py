@@ -101,6 +101,8 @@ def _gen_to_compact(gen: dict) -> list | None:
     kind = gen.get("kind")
     if kind in (None, "randn"):
         return None  # default for floats — omitted
+    if kind == "positive":
+        return ["positive", float(gen.get("minimum", 0.1))]
     if kind == "index":
         return ["index", int(gen.get("low", 0)), int(gen.get("high", 100))]
     if kind == "randint":
@@ -122,6 +124,8 @@ def _gen_to_compact(gen: dict) -> list | None:
 
 def _gen_from_compact(c: list) -> dict:
     kind = c[0]
+    if kind == "positive":
+        return {"kind": "positive", "minimum": c[1] if len(c) > 1 else 0.1}
     if kind == "index":
         return {"kind": "index", "low": c[1], "high": c[2]}
     if kind == "randint":
@@ -250,7 +254,9 @@ def render_T(entry_or_spec) -> str:
         kwargs.append(f"stride={tuple(opts['st'])}")
     if "gen" in opts:
         g = opts["gen"]
-        if g[0] == "index":
+        if g[0] == "positive":
+            kwargs.append(f"gen=Positive({g[1] if len(g) > 1 else 0.1})")
+        elif g[0] == "index":
             kwargs.append(f"gen=Index({g[2]})")
         elif g[0] == "perm":
             kwargs.append(f"gen=Perm({g[1] if len(g) > 1 else ''})")

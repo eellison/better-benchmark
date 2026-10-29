@@ -1,17 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "OPTForCausalLM",
   "patterns": [
-    "00552fd3f644",
-    "448578f87a3f",
-    "584ca96b2e27",
-    "9700d0b237d8",
-    "aa947857d07d",
-    "b43575d29b7d",
-    "bd201657f151",
-    "ea48f342f420"
+    "2b2243dd86f9",
+    "46b97ee63143",
+    "5950fa4ea097",
+    "8de046b51d73",
+    "9d5e86ffc97d",
+    "c8d1397dcaca"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

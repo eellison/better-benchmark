@@ -1,11 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "mobilenetv3_large_100",
   "patterns": [
-    "0939135a5591",
-    "4e46ea6cd575"
+    "214dc296f9ad",
+    "928492c458b4"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

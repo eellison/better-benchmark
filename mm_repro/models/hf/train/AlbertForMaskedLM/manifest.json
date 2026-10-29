@@ -1,27 +1,13 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "AlbertForMaskedLM",
   "patterns": [
-    "0451ad9b17d1",
-    "165e5da6acd5",
-    "1905944880d0",
-    "1f238fcf71b3",
-    "288b5fa0a449",
-    "330ef1fb21d2",
-    "33ee8772715d",
-    "342e4efdfc5d",
-    "5e7f964ce981",
-    "63c18193d87a",
-    "7c68c60f5d2d",
-    "a6917b1968db",
-    "ba343ea3c5b6",
-    "c2315cfb3edc",
-    "d980607b9663",
-    "dd81d6262e26",
-    "e8c8522dc857",
-    "fa0494794f34"
+    "059e5a3b520a",
+    "124b99380dd4",
+    "2552849e027b",
+    "45690c18c497",
+    "69530ad54ff8",
+    "b177a67b8df4",
+    "f15b150b5b1d",
+    "f17b6a903489"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

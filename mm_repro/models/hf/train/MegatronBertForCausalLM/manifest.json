@@ -1,16 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "MegatronBertForCausalLM",
   "patterns": [
-    "0bc457cd5b37",
-    "33ee8772715d",
-    "43408ee9363a",
-    "8e49d8639fb2",
-    "9dfa03ddac4a",
-    "ab1dbd579113",
-    "ce8cf3fa1557"
+    "4dfb2acebf88",
+    "681d39843a3e",
+    "a7a60531791b",
+    "aada276501c2",
+    "ca95d733844e",
+    "e11d0400397a"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

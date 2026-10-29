@@ -1,11 +1,8 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "vit_base_patch16_siglip_256",
   "patterns": [
-    "0586bd6b1be6",
-    "d10094917566"
+    "13ea7485f8b8",
+    "23d75749ef7e",
+    "3e469996152a"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

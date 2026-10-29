@@ -1,0 +1,184 @@
+{
+  "points": [
+    {
+      "shape_hash": "532b85ce",
+      "inputs": [
+        [
+          [
+            288
+          ],
+          "f32"
+        ],
+        [
+          [
+            144,
+            288
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              144
+            ]
+          }
+        ],
+        [
+          [
+            131072,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            256,
+            288
+          ]
+        ],
+        [
+          "S",
+          [
+            131072,
+            288
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 11,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "37301fd1",
+      "inputs": [
+        [
+          [
+            384
+          ],
+          "f32"
+        ],
+        [
+          [
+            192,
+            384
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              192
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            384
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 11,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "d39e6488",
+      "inputs": [
+        [
+          [
+            480
+          ],
+          "f32"
+        ],
+        [
+          [
+            240,
+            480
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              240
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            480
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            480
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 11,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

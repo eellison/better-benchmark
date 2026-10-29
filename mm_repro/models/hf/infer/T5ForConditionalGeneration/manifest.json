@@ -1,15 +1,8 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "T5ForConditionalGeneration",
   "patterns": [
-    "69fcf37d813b",
-    "85afe3a52176",
-    "9d0eff6c3bfe",
-    "aaad50da7ef4",
-    "cda9b058208c",
-    "fbc3143bbace"
+    "0947c2ed6afd",
+    "6835a3f066ae",
+    "cea2d12e9dbd"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

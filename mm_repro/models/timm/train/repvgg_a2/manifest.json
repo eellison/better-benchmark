@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "repvgg_a2",
   "patterns": [
-    "815b26e59a70"
+    "ea8b1bab6a0e"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

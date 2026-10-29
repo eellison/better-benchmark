@@ -1,0 +1,366 @@
+{
+  "points": [
+    {
+      "shape_hash": "a80700a3",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              3072
+            ]
+          }
+        ],
+        [
+          [
+            25216,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "f6ae9cae",
+      "inputs": [
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            401408,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            3136,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "8057cab7",
+      "inputs": [
+        [
+          [
+            256
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            256
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            100352,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            784,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "e1a9b4b1",
+      "inputs": [
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            2048,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              2048
+            ]
+          }
+        ],
+        [
+          [
+            25088,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            196,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "377a38ab",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            6272,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            49,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "29a913c6",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              3072
+            ]
+          }
+        ],
+        [
+          [
+            175360,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            1370,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

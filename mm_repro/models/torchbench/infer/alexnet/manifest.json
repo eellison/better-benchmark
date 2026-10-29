@@ -1,11 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "alexnet",
   "patterns": [
-    "3c1cbf8a6eb5",
-    "73d472a0753f"
+    "301f1b482dc5",
+    "b1e5624ae6c9"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

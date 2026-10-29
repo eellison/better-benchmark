@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 from collections import Counter, defaultdict
@@ -23,6 +24,9 @@ sys.path.insert(0, str(ROOT))
 POLICY_ID = hashlib.sha256(
     (ROOT / "matmul_partitioner.py").read_bytes()
     + (ROOT / "capture_hook.py").read_bytes()
+    + (ROOT / "mm_input_constraints.py").read_bytes()
+    + (ROOT / "input_codec.py").read_bytes()
+    + (ROOT / "repro_harness.py").read_bytes()
 ).hexdigest()[:16]
 
 VISIBLE_MM = re.compile(
@@ -427,18 +431,13 @@ def merge_and_report(rows, output, wall_seconds):
     return report
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "mm_repro")
-    parser.add_argument("--workers", type=int, default=4)
-    parser.add_argument("--source", action="append", type=Path)
-    parser.add_argument("--resume", action="store_true")
-    parser.add_argument(
-        "--keep-cache",
-        action="store_true",
-        help="Keep intermediate captures for debugging/resume",
+def extract_raw_corpus(output: Path, sources, workers: int = 2):
+    """Internal source capture used by the final core-only generator."""
+    from types import SimpleNamespace
+
+    args = SimpleNamespace(
+        output=output, source=sources, workers=workers, resume=False, keep_cache=False
     )
-    args = parser.parse_args()
     sources = args.source or [
         ROOT / p
         for p in subprocess.check_output(
@@ -498,10 +497,55 @@ def main():
     report = merge_and_report(rows, args.output, time.perf_counter() - start)
     report["policy_id"] = POLICY_ID
     write_json(args.output / "report.json", report)
-    print(json.dumps(report, indent=2), flush=True)
     if not args.keep_cache:
         shutil.rmtree(work)
         (args.output / "progress.json").unlink(missing_ok=True)
+    return report
+
+
+def generate_corpus(output: Path, sources=None, workers: int = 2):
+    """Regenerate core MM repros and atomically replace the generated tree."""
+    from scripts.curate_mm_corpus import curate_corpus
+
+    output = output.resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists() and not (output / "report.json").is_file():
+        raise ValueError(f"Refusing to replace a non-corpus directory: {output}")
+    with tempfile.TemporaryDirectory(
+        prefix=".mm_repro_build_", dir=output.parent
+    ) as tmp:
+        staging = Path(tmp)
+        extract_raw_corpus(staging / "raw", sources, workers)
+        report = curate_corpus(staging / "raw", staging / "core")
+        backup = staging / "previous"
+        if output.exists():
+            output.rename(backup)
+        try:
+            (staging / "core").rename(output)
+        except BaseException:
+            if backup.exists():
+                backup.rename(output)
+            raise
+        return report
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=ROOT / "mm_repro")
+    parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--source", action="append", type=Path)
+    args = parser.parse_args()
+    report = generate_corpus(args.output, args.source, args.workers)
+    print(
+        json.dumps(
+            {
+                "output": str(args.output.resolve()),
+                "unique_repros": report["unique_repros"],
+                "shape_points": report["shape_points"],
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

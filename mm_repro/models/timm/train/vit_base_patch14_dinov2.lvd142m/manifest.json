@@ -1,15 +1,11 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "vit_base_patch14_dinov2.lvd142m",
   "patterns": [
-    "0bc457cd5b37",
-    "33ee8772715d",
-    "6aaed8c01349",
-    "8021ae440991",
-    "8369ee678e00",
-    "ab1dbd579113"
+    "18c671b50dc9",
+    "1ddc4c64dca6",
+    "aada276501c2",
+    "ca95d733844e",
+    "cc086f904506",
+    "f299da9c498c"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

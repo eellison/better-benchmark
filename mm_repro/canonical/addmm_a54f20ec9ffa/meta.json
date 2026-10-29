@@ -1,0 +1,30 @@
+{
+  "pattern_hash": "a54f20ec9ffa",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "4c4ab36a56b7",
+    "a9c4cc91d7ff"
+  ],
+  "legacy_pattern_hashes": [
+    "6679218b08d4",
+    "c78ce5a1fe84"
+  ],
+  "normalizations": {
+    "input_permutation_through_float_cast": 7
+  },
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "shape_points": 7,
+  "coverage": []
+}

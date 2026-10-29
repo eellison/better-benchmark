@@ -534,6 +534,9 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             }
             if kind == "matmul":
                 meta["mm_types"] = mm_types
+                for key in ("pattern_hash_mode", "legacy_pattern_hash"):
+                    if key in entry:
+                        meta[key] = entry[key]
             _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
         # Write canonical repro.py if it doesn't exist or is older-format

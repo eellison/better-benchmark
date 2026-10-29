@@ -1,19 +1,13 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "GPTJForQuestionAnswering",
   "patterns": [
-    "1905944880d0",
-    "5012b76274fe",
-    "585257e60d0b",
-    "695773afcca2",
-    "79f052906a18",
-    "7c68c60f5d2d",
-    "af04f75df852",
-    "b295495ff6a1",
-    "b6f951c37c5b",
-    "ddb22e0e140a"
+    "18b227377dac",
+    "192bc25369d9",
+    "50de66a3b601",
+    "6410eceeae0a",
+    "69530ad54ff8",
+    "7b27746a2f36",
+    "8c3b08032c8b",
+    "f0b107d074d2"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

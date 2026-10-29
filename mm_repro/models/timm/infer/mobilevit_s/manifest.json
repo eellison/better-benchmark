@@ -1,12 +1,10 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "mobilevit_s",
   "patterns": [
-    "808371765c5c",
-    "ab6ea1bbe71b",
-    "cd48c1124885"
+    "1e110aa466b0",
+    "23d75749ef7e",
+    "2d123867f576",
+    "62e993d89b56",
+    "77579177e1d5"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

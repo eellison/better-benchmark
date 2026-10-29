@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "nfnet_l0",
   "patterns": [
-    "c4ffb252a8ea"
+    "e595ea9128c4"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

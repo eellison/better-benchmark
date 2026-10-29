@@ -1,0 +1,70 @@
+{
+  "points": [
+    {
+      "shape_hash": "6db6c173",
+      "inputs": [
+        [
+          [
+            2304,
+            2048
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2304
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1,
+            1000,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1,
+            1000,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            8,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 26
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 10,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

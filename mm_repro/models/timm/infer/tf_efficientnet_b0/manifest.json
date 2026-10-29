@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "tf_efficientnet_b0",
   "patterns": [
-    "ab6ea1bbe71b"
+    "19daa4bf566e"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

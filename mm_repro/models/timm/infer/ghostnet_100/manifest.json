@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "ghostnet_100",
   "patterns": [
-    "cfa5203e08c0"
+    "0300b79a747f"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

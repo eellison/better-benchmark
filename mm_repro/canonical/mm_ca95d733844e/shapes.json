@@ -1,0 +1,967 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7d2fdfd",
+      "inputs": [
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AllenaiLongformerBase": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "da9676db",
+      "inputs": [
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/MegatronBertForCausalLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "b1778f4c",
+      "inputs": [
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "929702b1",
+      "inputs": [
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536,
+            6144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            6144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            6144
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            6144
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            6144
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "5eb10dec",
+      "inputs": [
+        [
+          [
+            32768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 6
+        },
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "6a67c6fc",
+      "inputs": [
+        [
+          [
+            32768,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "2ab7496f",
+      "inputs": [
+        [
+          [
+            16384,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            256,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            256,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "a0c2316b",
+      "inputs": [
+        [
+          [
+            25216,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            25216,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "eecb07e6",
+      "inputs": [
+        [
+          [
+            25344,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25344,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            25344,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "ea1c96fb",
+      "inputs": [
+        [
+          [
+            25216,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            25216,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "b2600d4c",
+      "inputs": [
+        [
+          [
+            6272,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            6272,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            49,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            49,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            6272,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "835f6158",
+      "inputs": [
+        [
+          [
+            25088,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25088,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            196,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            196,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            25088,
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "f617f332",
+      "inputs": [
+        [
+          [
+            100352,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            100352,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            784,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            784,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            100352,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "e5b38b50",
+      "inputs": [
+        [
+          [
+            401408,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            401408,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            3136,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            3136,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            401408,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "4832acea",
+      "inputs": [
+        [
+          [
+            175360,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            175360,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            1370,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1370,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            175360,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 19,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

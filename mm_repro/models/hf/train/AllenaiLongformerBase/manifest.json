@@ -1,21 +1,20 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "AllenaiLongformerBase",
   "patterns": [
-    "0bc457cd5b37",
-    "11b695095c62",
-    "2b6ab92a19ee",
-    "32e532f427ac",
-    "36c917926cb7",
-    "42be4dbe49aa",
-    "750c67fa68f5",
-    "75a9fc51f015",
-    "a9df1525a201",
-    "ab1dbd579113",
-    "dc9c93ee7cd7",
-    "fe0ba35016eb"
+    "0951f5d00b4c",
+    "164a1e9e1dfb",
+    "247ce6fcf37c",
+    "2b3b30b02892",
+    "3a8899624f1b",
+    "681d39843a3e",
+    "7118a59919a7",
+    "7461d56e9e68",
+    "aada276501c2",
+    "b55676d50922",
+    "c75e195a1e10",
+    "ca95d733844e",
+    "e9d99f4d41e4",
+    "f7087915edf4",
+    "ff3b84bf1749"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

@@ -1,0 +1,36 @@
+{
+  "pattern_hash": "5e4321e64b2a",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "6ef82b40401a"
+  ],
+  "legacy_pattern_hashes": [
+    "499a003de4cb"
+  ],
+  "normalizations": {
+    "reshape_chain": 2
+  },
+  "origin_ops": [
+    "aten.bmm.default",
+    "aten.clone.default",
+    "aten.full.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.slice_scatter.default",
+    "aten.squeeze.dim",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default"
+  ],
+  "shape_points": 1,
+  "coverage": []
+}

@@ -1,10 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "mnasnet1_0",
   "patterns": [
-    "08deccedc20e"
+    "55f0fd19f289",
+    "647361fbbee2"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

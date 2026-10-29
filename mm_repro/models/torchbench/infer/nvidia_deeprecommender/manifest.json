@@ -1,10 +1,6 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "nvidia_deeprecommender",
   "patterns": [
-    "76831b3bcebf"
+    "3b33c7487bd9"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

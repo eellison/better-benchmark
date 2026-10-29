@@ -1,14 +1,8 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "LayoutLMForMaskedLM",
   "patterns": [
-    "0586bd6b1be6",
-    "0945a518f8bd",
-    "0bbb0f38bb7c",
-    "3fd9284cc6d8",
-    "ec533ca16df9"
+    "2db9111c406d",
+    "39ecdf0d6b39",
+    "3e469996152a"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

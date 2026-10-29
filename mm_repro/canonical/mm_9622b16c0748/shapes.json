@@ -1,0 +1,80 @@
+{
+  "points": [
+    {
+      "shape_hash": "1cd2d528",
+      "inputs": [
+        [
+          [
+            128,
+            30522
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            384,
+            30522
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            30522
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            0,
+            6,
+            0,
+            0
+          ]
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            30522
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            30522
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 8,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

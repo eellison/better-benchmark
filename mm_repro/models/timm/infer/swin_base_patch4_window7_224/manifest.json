@@ -1,16 +1,10 @@
 {
-  "schema_version": 1,
-  "source": "timm",
-  "model": "swin_base_patch4_window7_224",
   "patterns": [
-    "0586bd6b1be6",
-    "11911ec6f17b",
-    "336b44a3e975",
-    "6e0071d79577",
-    "7f7059a9ad72",
-    "bab225dd3451",
-    "f4b81d33e751"
+    "18341539d8ad",
+    "3e469996152a",
+    "55b2d520453a",
+    "dde312150717",
+    "f0073b23858b"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

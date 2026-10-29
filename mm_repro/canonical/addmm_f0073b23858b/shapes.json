@@ -1,0 +1,186 @@
+{
+  "points": [
+    {
+      "shape_hash": "27ca4230",
+      "inputs": [
+        [
+          [
+            256,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              256
+            ]
+          }
+        ],
+        [
+          [
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            100352,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            28
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              28
+            ]
+          }
+        ],
+        [
+          [
+            28
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              28
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            4,
+            4,
+            7,
+            7,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            28,
+            28,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "2867ddc2",
+      "inputs": [
+        [
+          [
+            512,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25088,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            14
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              14
+            ]
+          }
+        ],
+        [
+          [
+            14
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              14
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            2,
+            2,
+            7,
+            7,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            14,
+            14,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

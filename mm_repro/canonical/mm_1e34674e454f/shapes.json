@@ -1,0 +1,70 @@
+{
+  "points": [
+    {
+      "shape_hash": "a12a1628",
+      "inputs": [
+        [
+          [
+            401408,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            3136,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            3136,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            3136,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 11,
+        "nodes": 13,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 2
+      },
+      "coverage": [
+        "mm_block_amax_sum",
+        "mm_pw_sum"
+      ]
+    }
+  ]
+}

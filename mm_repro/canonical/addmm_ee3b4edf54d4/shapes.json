@@ -1,0 +1,122 @@
+{
+  "points": [
+    {
+      "shape_hash": "ad35097e",
+      "inputs": [
+        [
+          [
+            1,
+            960,
+            1,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            32,
+            960,
+            7,
+            7
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            960,
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            960
+          ],
+          "f32"
+        ],
+        [
+          [
+            960
+          ],
+          "f32"
+        ],
+        [
+          [
+            1280
+          ],
+          "f32"
+        ],
+        [
+          [
+            960,
+            1280
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              960
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            960,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            960,
+            1,
+            1
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            960
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            1280
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 24,
+        "nodes": 35,
+        "inputs": 7,
+        "outputs": 2,
+        "contraction_depth": 2
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

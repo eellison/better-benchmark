@@ -1,0 +1,88 @@
+{
+  "points": [
+    {
+      "shape_hash": "1b321465",
+      "inputs": [
+        [
+          [
+            128,
+            256,
+            13,
+            13
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            9216,
+            4096
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              9216
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            3,
+            3
+          ]
+        ],
+        [
+          "S",
+          [
+            2,
+            2
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            9216
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            9216
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 16,
+        "nodes": 22,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

@@ -1,20 +1,18 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "XLNetLMHeadModel",
   "patterns": [
-    "0fc65bb383f0",
-    "221ebce29187",
-    "2f09e235f385",
-    "499a003de4cb",
-    "658428ef3758",
-    "6ded8ee233af",
-    "752f332a39a7",
-    "9ac8a35a2bef",
-    "bc318d3540cd",
-    "dabb1520c363",
-    "fb63810df645"
+    "0ebedcb77817",
+    "1aa84bd5d047",
+    "5407ed0f235e",
+    "5e4321e64b2a",
+    "681d39843a3e",
+    "720b1d9ffa51",
+    "7e53c699b376",
+    "900a39a7e414",
+    "a94c92c04f7c",
+    "ba9c01d0cc0a",
+    "bae1ebb5573c",
+    "d7b3baff2416",
+    "ecbb148d3a32"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

@@ -1,11 +1,8 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "LearningToPaint",
   "patterns": [
-    "30b8bbef1012",
-    "346313be4b48"
+    "711876c04b3d",
+    "b8924faed4fe",
+    "d48a8a9a09f2"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

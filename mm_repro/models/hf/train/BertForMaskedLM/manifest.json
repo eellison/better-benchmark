@@ -1,20 +1,13 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "BertForMaskedLM",
   "patterns": [
-    "016b3fa4dad0",
-    "0bc457cd5b37",
-    "330ef1fb21d2",
-    "33ee8772715d",
-    "4ff241b2eaa6",
-    "a6917b1968db",
-    "ab1dbd579113",
-    "ce8cf3fa1557",
-    "dd81d6262e26",
-    "de43a0c4f030",
-    "e8c8522dc857"
+    "124b99380dd4",
+    "681d39843a3e",
+    "9519247d9dd3",
+    "a54f20ec9ffa",
+    "a7a60531791b",
+    "aada276501c2",
+    "b177a67b8df4",
+    "ca95d733844e"
   ],
-  "graphs": [],
-  "mode": "train"
+  "category": "core"
 }

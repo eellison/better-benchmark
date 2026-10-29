@@ -1,14 +1,10 @@
 {
-  "schema_version": 1,
-  "source": "torchbench",
-  "model": "BERT_pytorch",
   "patterns": [
-    "0586bd6b1be6",
-    "41ab61684a68",
-    "4b318e1fef0f",
-    "64b287c03e0e",
-    "a53e224af83f"
+    "15a0b4391934",
+    "3e469996152a",
+    "46ea1d2c1759",
+    "898fa2c93a82",
+    "b21424debb52"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }

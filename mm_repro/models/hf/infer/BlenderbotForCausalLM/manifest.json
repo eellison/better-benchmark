@@ -1,11 +1,7 @@
 {
-  "schema_version": 1,
-  "source": "hf",
-  "model": "BlenderbotForCausalLM",
   "patterns": [
-    "0586bd6b1be6",
-    "ac98ab030fe4"
+    "23d75749ef7e",
+    "3e469996152a"
   ],
-  "graphs": [],
-  "mode": "infer"
+  "category": "core"
 }
