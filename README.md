@@ -349,12 +349,14 @@ benchmarks/              # frozen benchmark set definitions
 </details>
 
 
-## Core matmul fusion corpus
+## Matmul fusion corpus
 
 ```bash
-python scripts/extract_matmul_corpus.py
+python scripts/extract_matmul_corpus.py      # regenerates mm_repro/
+python scripts/validate_matmul_repros.py     # FakeTensor-runs every shape point
 ```
 
-Generates only `mm_repro/` from saved model FX graphs. The committed snapshot
-contains **276 repros / 501 shapes**; alignment/copy-only regions are excluded,
-and no count quota is used. [Policy, reproduction and validation](docs/matmul_partitioning.md).
+`mm_repro/` holds small MM-plus-surrounding-work repros cut out of the saved
+model graphs (**276 repros / 501 shapes**). Regeneration runs on CPU with
+FakeTensors and is deterministic. See [docs/matmul_partitioning.md](docs/matmul_partitioning.md)
+for the selection rules, layout and validation.

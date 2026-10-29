@@ -390,12 +390,24 @@ def semantic_graph(gm):
 
 
 def match_graphs(reference, candidate):
+    """An isomorphism reference -> candidate (node -> node), or None.
+
+    Nodes are relabeled to integers in insertion order first. networkx walks
+    node *sets*, and fx.Node hashes are memory addresses, so for a symmetric
+    graph (two identical branches) the first isomorphism found, and thus the
+    recorded input mapping, would otherwise change from run to run.
+    """
+    ref = nx.convert_node_labels_to_integers(reference, label_attribute="node")
+    cand = nx.convert_node_labels_to_integers(candidate, label_attribute="node")
     matcher = nx.algorithms.isomorphism.DiGraphMatcher(
-        reference,
-        candidate,
+        ref,
+        cand,
         node_match=nx.algorithms.isomorphism.categorical_node_match("label", ""),
     )
-    return next(matcher.isomorphisms_iter(), None)
+    mapping = next(matcher.isomorphisms_iter(), None)
+    if mapping is None:
+        return None
+    return {ref.nodes[a]["node"]: cand.nodes[b]["node"] for a, b in mapping.items()}
 
 
 def has_rng(gm):

@@ -1,8 +1,21 @@
-"""Separate simple MM alignment/input-packing controls from richer fusion DAGs.
+"""Spot single-MM regions whose extra work is only bookkeeping (rule 5).
 
-This labels benchmark purpose, not mathematical equivalence or removability.
-In particular, a BMM equality-to-infinity mask can be true for nonfinite inputs
-or finite values that overflow. Controls remain runnable benchmark cases.
+A region is labeled "control" when it has exactly one MM and every other
+real op is one of these:
+
+  zero_padding         pad/cat with zeros along K, or along M/N followed by a
+                       slice that crops the padded lanes away again
+  bias_packing         cat or zero padding that only builds the addmm bias
+  identity_input_copy  select/slice/as_strided_scatter that overwrites a whole
+                       buffer with an input before the MM
+  bmm_infinity_mask    the only extra op is "bmm(...) == -inf", which is all
+                       False unless inputs are non-finite or overflow
+
+The partitioner drops control regions. Everything else is "core": real
+arithmetic, a reduction, a gather or a second MM always makes a region core.
+
+Only graph structure and tensor metadata are read, never tensor values. Nodes
+outside the region are opaque inputs, even if the model fills them with zeros.
 """
 
 from __future__ import annotations
@@ -21,6 +34,7 @@ from matmul_partitioner import (
     value_inputs,
 )
 
+# Ops that keep the values of their first argument (views, copies, casts).
 _VALUE_WRAPPERS = {
     "aten::view",
     "aten::reshape",
@@ -37,6 +51,7 @@ _VALUE_WRAPPERS = {
     "aten::_to_copy",
     "prims::convert_element_type",
 }
+# Ops allowed between the MM and the slice that crops padded lanes away.
 _CROP_WRAPPERS = {
     "aten::clone",
     "aten::contiguous",
@@ -46,6 +61,7 @@ _CROP_WRAPPERS = {
     "aten::slice",
 }
 _ZERO_ALLOCATIONS = {"aten::zeros", "aten::zeros_like", "aten::new_zeros"}
+# Ops between a padded tensor and the MM that keep every axis unchanged.
 _AXIS_PRESERVERS = {
     "aten::clone",
     "aten::contiguous",
@@ -62,7 +78,7 @@ def _literal_metadata(value) -> bool:
 
 
 def _concrete_value(value):
-    """Resolve lifted argument metadata, never tensor contents or estimates."""
+    """Resolve scalar/shape arguments lifted into placeholders (never tensors)."""
     if isinstance(value, Node):
         if "val" in value.meta and _literal_metadata(value.meta["val"]):
             return value.meta["val"]
@@ -77,6 +93,7 @@ def _zero_scalar(value) -> bool:
 
 
 def _binding(node: Node, name: str, default=None):
+    """The concrete value of schema argument ``name``, positional or keyword."""
     if name in node.kwargs:
         return _concrete_value(node.kwargs[name])
     schema = getattr(node.target, "_schema", None)
@@ -102,7 +119,7 @@ def _contiguous(sizes, strides):
 
 
 def _known_zero(node: Node, memo: dict[Node, bool], included: set[Node]) -> bool:
-    # An external producer is an opaque input, even if it happens to be full(0).
+    """True if the region itself builds this tensor out of zeros."""
     if node not in included:
         return False
     if node in memo:
@@ -120,7 +137,11 @@ def _known_zero(node: Node, memo: dict[Node, bool], included: set[Node]) -> bool
 
 
 def _padding(node: Node, zero_memo: dict[Node, bool], included: set[Node]):
-    """Return positive, zero-filled extensions, without reading tensor data."""
+    """Zero padding added by ``node`` as [(dim, before, after, old_size)].
+
+    Handles constant_pad_nd with value 0 and cat of one real tensor with
+    known-zero tensors. Returns None for anything else.
+    """
     shape = tensor_shape(node)
     if shape is None:
         return None
@@ -174,6 +195,7 @@ def _slice_range(node: Node, size: int):
 
 
 def _full_overwrite(node: Node) -> bool:
+    """True for a *_scatter whose source replaces every element of its base."""
     name = op_name(node)
     if name not in {
         "aten::select_scatter",
@@ -226,7 +248,7 @@ def _full_overwrite(node: Node) -> bool:
 def _same_axis_crop(
     mm: Node, node: Node, dim: int, before: int, old_size: int, included: set[Node]
 ):
-    """Prove that a downstream slice discards exactly the padded M/N lanes."""
+    """True if ``node`` slices exactly the padded lanes of MM output ``dim`` away."""
     if op_name(node) != "aten::slice":
         return False
     current = node.args[0]
@@ -250,6 +272,7 @@ def _same_axis_crop(
 
 
 def _unwrapped_operand(node: Node, included: set[Node]) -> Node:
+    """Skip shape-preserving copies/casts between an MM operand and its source."""
     while (
         node in included
         and op_name(node) in _AXIS_PRESERVERS
@@ -265,14 +288,10 @@ def _unwrapped_operand(node: Node, included: set[Node]) -> Node:
 
 
 def _classify_nodes(nodes: list[Node]) -> dict:
+    """Label topologically ordered nodes; see the module docstring."""
     included = set(nodes)
     mms = [n for n in nodes if is_matmul(n)]
-    core = {
-        "category": "core",
-        "control_types": [],
-        "reasons": [],
-        "finite_input_only": False,
-    }
+    core = {"category": "core", "control_types": []}
     if len(mms) != 1:
         return core
     mm = mms[0]
@@ -294,14 +313,7 @@ def _classify_nodes(nodes: list[Node]) -> dict:
             resolved = [_concrete_value(a) for a in eq.args]
             literal = [a for a in resolved if type(a) in (float, int)]
             if literal == [-math.inf]:
-                return {
-                    "category": "control",
-                    "control_types": ["bmm_infinity_mask"],
-                    "reasons": [
-                        "The only extra computation is BMM == -inf; useful as a mask control, usually false for bounded finite sampled inputs. Nonfinite inputs or finite overflow can make it true."
-                    ],
-                    "finite_input_only": True,
-                }
+                return {"category": "control", "control_types": ["bmm_infinity_mask"]}
 
     start = 1 if op_name(mm) in {"aten::addmm", "aten::baddbmm", "aten::addmv"} else 0
     operands = mm.args[start : start + 2]
@@ -309,17 +321,16 @@ def _classify_nodes(nodes: list[Node]) -> dict:
         return core
     bias = mm.args[0] if start else None
     zero_memo = {}
-    types, reasons = set(), []
-    finite = False
+    types = set()
+    # Every real op must be bookkeeping in front of the MM; anything else,
+    # including any work after the MM, makes the region core.
     for n in substantive:
         if n not in ancestors[mm]:
             return core
         if _full_overwrite(n):
             types.add("identity_input_copy")
-            reasons.append(
-                f"{n.name} copies a source over the entire destination before MM; base values never survive."
-            )
             continue
+        # A cat that feeds only the bias, never the multiplied operands.
         if (
             op_name(n) == "aten::cat"
             and bias is not None
@@ -327,9 +338,6 @@ def _classify_nodes(nodes: list[Node]) -> dict:
             and not any(n is p or n in ancestors.get(p, set()) for p in operands)
         ):
             types.add("bias_packing")
-            reasons.append(
-                f"{n.name} only packs the intrinsic additive MM bias; it does not combine MM input/weight streams."
-            )
             continue
         extensions = _padding(n, zero_memo, included)
         if extensions is None:
@@ -338,10 +346,8 @@ def _classify_nodes(nodes: list[Node]) -> dict:
             i for i, p in enumerate(operands) if n is _unwrapped_operand(p, included)
         ]
         if not matching:
-            # Bias padding/zero concatenation is checked through the bias role.
             if bias is not None and (n is bias or n in ancestors.get(bias, set())):
                 types.add("bias_packing")
-                reasons.append(f"{n.name} zero-pads the intrinsic additive MM bias.")
                 continue
             return core
         for i in matching:
@@ -349,41 +355,26 @@ def _classify_nodes(nodes: list[Node]) -> dict:
             kdim = len(shape) - (1 if i == 0 else 2)
             output_dim = len(shape) - (2 if i == 0 else 1)
             for dim, before, after, old_size in extensions:
+                # Zero K lanes only add zero products (for finite inputs).
                 if dim == kdim:
-                    finite = True
-                elif dim == output_dim:
-                    if not any(
-                        _same_axis_crop(mm, q, dim, before, old_size, included)
-                        for q in nodes
-                    ):
-                        return core
-                else:
+                    continue
+                # Padded M/N lanes must be cropped away again after the MM.
+                if dim != output_dim or not any(
+                    _same_axis_crop(mm, q, dim, before, old_size, included)
+                    for q in nodes
+                ):
                     return core
         types.add("zero_padding")
-        reasons.append(
-            f"{n.name} adds only known zero lanes; M/N padding is cropped back to the original domain, or padding is confined to K."
-        )
     if not types:
         return core
-    if finite:
-        reasons.append(
-            "K padding is an alignment control, not a universal identity: zero multiplied by nonfinite values and a changed floating-point reduction schedule can affect results."
-        )
-    return {
-        "category": "control",
-        "control_types": sorted(types),
-        "reasons": reasons,
-        "finite_input_only": finite,
-    }
+    return {"category": "control", "control_types": sorted(types)}
 
 
 def classify_region_quality(region: Iterable[Node]) -> dict:
-    """Classify an FX node subset in place, treating external nodes as inputs.
+    """Label a node subset of a larger graph as "core" or "control".
 
-    No subgraph construction, tracing, canonicalization or capture_hook import
-    is needed. Producer operations outside the region are opaque boundaries;
-    their tensor metadata can establish shapes but never zero tensor values.
-    Concrete non-tensor shape/scalar parameter metadata remains usable.
+    Returns {"category": ..., "control_types": [...]}. Producers outside the
+    region are opaque inputs: their metadata gives shapes, never zero values.
     """
     included = set(region)
     ordered, visited = [], set()
@@ -403,8 +394,5 @@ def classify_region_quality(region: Iterable[Node]) -> dict:
 
 
 def classify_graph_quality(gm: GraphModule) -> dict:
-    """Return the same shape-specific core/control label for a whole graph.
-
-    There are no model/hash allowlists, rankings or corpus count limits.
-    """
+    """Same label for a standalone graph, e.g. a normalized corpus repro."""
     return _classify_nodes(list(gm.graph.nodes))

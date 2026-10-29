@@ -8,9 +8,6 @@
   "source_patterns": [
     "711876c04b3d"
   ],
-  "legacy_pattern_hashes": [
-    "5940aefc6b20"
-  ],
   "normalizations": {},
   "origin_ops": [
     "aten.avg_pool2d_backward.default",

@@ -8,9 +8,6 @@
   "source_patterns": [
     "059e5a3b520a"
   ],
-  "legacy_pattern_hashes": [
-    "89f17c0b0746"
-  ],
   "normalizations": {},
   "origin_ops": [
     "aten.add.Tensor",

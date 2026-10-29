@@ -8,9 +8,6 @@
   "source_patterns": [
     "960b3db8cbfe"
   ],
-  "legacy_pattern_hashes": [
-    "27e60125862d"
-  ],
   "normalizations": {
     "canonical_reduction_axes": 1,
     "input_permutation_through_float_cast": 1,

@@ -1,4 +1,10 @@
-"""Reload every generated repro/shape point and run FakeTensor execution."""
+"""FakeTensor-run every repro of a generated corpus at every shape point.
+
+    python scripts/validate_matmul_repros.py [mm_repro]
+
+Writes validation.json and adds the same summary to report.json. Exits 1 if
+anything fails or the counts disagree with report.json.
+"""
 
 from __future__ import annotations
 
@@ -54,19 +60,15 @@ def main():
                 f"Reloaded {files} repros / {points} shape points; failures={len(failures)}",
                 flush=True,
             )
-    result = {
-        "repros": files,
-        "shape_points": points,
-        "failures": failures,
-        "seconds": round(time.perf_counter() - start, 3),
-    }
-    write_json(output / "validation.json", result)
     if files != report["unique_repros"] or points != report["shape_points"]:
         failures.append({"error": "reloaded file/shape counts differ from report.json"})
-        write_json(output / "validation.json", result)
+    # No timings in the files, so regenerating the corpus is byte-for-byte.
+    result = {"repros": files, "shape_points": points, "failures": failures}
+    write_json(output / "validation.json", result)
     report["fake_tensor_validation"] = result
     write_json(report_path, report)
-    print(json.dumps(result, indent=2), flush=True)
+    seconds = round(time.perf_counter() - start, 1)
+    print(json.dumps({**result, "seconds": seconds}, indent=2), flush=True)
     if failures:
         raise SystemExit(1)
 

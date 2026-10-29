@@ -1,8 +1,17 @@
-"""Small MM benchmark regions, grown locally from real FX contractions.
+"""Pick small, self-contained matmul (MM) benchmark regions from an FX graph.
 
-Regions may overlap.  Each has an explicit benchmark output set; the original
-model graph is never rewritten.  No model names or operator-sequence registry
-participate in selection.
+Input is the post-grad FX graph of a whole model. Output is a list of
+MatmulRegion: small pieces of that graph that contain at least one MM plus the
+surrounding work a fusing compiler could put into the same kernel, e.g.
+
+    (x - mean) * rstd -> mm(., W) -> + bias -> gelu     prologue + epilogue
+    mm(x, Wg), mm(x, Wu) -> silu(.) * .                 horizontal MMs + join
+    mm(x, W1) -> relu -> mm(., W2)                      vertical MM chain
+
+Regions are benchmark *windows*, not a partition of the model: two regions may
+share nodes, and the model graph is never modified. Selection only looks at op
+schemas, value dependencies and tensor metadata. There are no per-model rules,
+no pattern templates and no target number of regions.
 """
 
 from __future__ import annotations
@@ -11,81 +20,70 @@ import itertools
 import math
 import operator
 from collections import Counter, deque
-from dataclasses import InitVar, dataclass
+from dataclasses import dataclass
 
 import torch
 from torch.fx import Node
 from torch.utils._pytree import tree_leaves
 
 # ---------------------------------------------------------------------------
-# What this partitioner produces
+# Rules (the numbers are MatmulLimits defaults)
 # ---------------------------------------------------------------------------
-# We select standalone microbenchmark windows from an existing post-grad FX
-# graph. We do not rewrite the model or assign every model node to one kernel.
-# Windows can overlap: two useful local fusion tasks may share a matmul or an
-# input. Each MatmulRegion carries the exact nodes, escaping tensor outputs,
-# and measured size/dependency limits needed to replay that task.
+# "Reduction" means an MM-family op (it reduces over K) or an op tagged
+# torch.Tag.reduction (sum, mean, amax, var_mean, ...).
 #
-# The selection policy is based on schemas, value dependencies, and tensor
-# metadata. There are no model-name checks, hand-written pattern templates,
-# rankings, sampling quotas, or a target number of corpus entries.
+# 1. Reduction chain. A single dependency path inside a region may contain at
+#    most 5 reductions (max_reductions_chain). Parallel branches are counted
+#    separately. Five fits "norm -> MM -> norm" even when each norm is
+#    written as two chained reductions (mean, then variance), provided the
+#    norms are small enough for rule 2.
 #
-# A "reduction" is an MM-family contraction or a schema-tagged reduction
-# (sum, mean, amax, var_mean, etc.). Count reductions along each dependency
-# path, not across the whole DAG: two parallel branches do not consume each
-# other's vertical budget. The shared default budget is five, so a pre-norm
-# (two reductions), MM, and post-norm (two reductions) fit together. Ordinary
-# reductions may appear before MM; only the final region must contain an MM.
+# 2. Reduction size. An ordinary reduction may reduce at most 128 elements
+#    per output (max_internal_dim; the product of its reduced axes). An
+#    ordinary reduction that is larger, or whose size is unknown, is never
+#    inside a region: its result becomes a region input. MMs obey the same
+#    limit on K, except the first MM of a chain: a large projection can still
+#    anchor a region, but an MM fed by another MM of the region needs K <= 128.
 #
-# Every ordinary reduction must consume at most 128 elements per result,
-# computed from the product of its actual reduced input axes. The first MM's
-# K is unrestricted; an MM with an internal upstream MM must have K <= 128.
-# Thus a large model projection is allowed, but an expensive second matmul or
-# oversized sum becomes a boundary. Views/pointwise operations between the
-# accepted reductions remain in the preceding window.
+# 3. Horizontal MMs. Two MMs where neither depends on the other must produce
+#    exactly the same output shape (batch dims, M and N; K may differ). MMs
+#    that feed each other may change shape freely.
 #
-# Independent MM pairs must have identical FULL output shapes, including
-# batch axes, M, and N. Their K values may differ. Vertically dependent MMs
-# may change output shape. This applies at joins and in the horizontal pass.
-# Unbind is an explicit boundary; projections from its tuple become tensor
-# inputs of downstream windows rather than pulling the unbind into a region.
+# 4. Useful outputs only. Every region output must depend on an MM *and* on
+#    real computation (arithmetic, reductions, indexing). Views, casts, copies
+#    and allocations do not count, so "mm -> view -> float()" is not a
+#    benchmark. Exception: independent MMs side by side are useful on their
+#    own (a horizontal group of bare MMs).
 #
-# How the search works
-# --------------------
-# 1. Build the supported-node set and precompute shapes, reduction extents,
-#    upstream-MM reachability, prologue depth, and alias read/write sets.
-# 2. Seed every supported MM. Explore bounded backward prefix budgets so a
-#    long suffix cannot hide a useful pre-norm/MM/post-norm subwindow.
-# 3. Grow forward through supported users. At a join, collect the missing
-#    sibling MM paths. Accept each addition only while all limits hold.
-# 4. Keep snapshots of the growth. If a maximal window has too many escaping
-#    outputs/inputs, or unsafe graph reentry/aliases, retain its latest valid
-#    shorter snapshot. Export only nodes needed by meaningful outputs.
-# 5. Remove redundant subsets with the same outputs. Merge neighboring
-#    independent candidates horizontally only when shape, depth, and output
-#    constraints remain valid. Shared inputs and an explicit join are optional.
-# 6. Reject finished single-MM windows whose only extra work is alignment
-#    padding/cropping, additive-bias packing, a full input copy, or the sole
-#    BMM == -inf mask. Real PW/reductions/gather and horizontal MM stay valid.
-#    Rejection happens after growth/merging, so it cannot change the search's
-#    neighbor order or turn a rejected suffix into a newly invented task.
+# 5. No low-value regions. A single-MM region whose only extra work is
+#    alignment padding/cropping, packing the addmm bias, copying a whole
+#    input, or a lone "bmm == -inf" mask is dropped (mm_region_quality.py).
 #
-# Output and safety rules
-# -----------------------
-# Cast/view/allocation scaffolding does not make an otherwise bare MM useful.
-# Outputs must depend on an internal MM and real arithmetic/indexing, except
-# pure independent horizontal MM outputs, which are useful in their own right.
-# We reject cross-device copies, paths that leave and reenter a window, writes
-# through aliases that invalidate its independent execution, and unsupported
-# tuple inputs. Unknown reduction metadata is a boundary, not a guessed size.
+# 6. Standalone replay. Unbind, softmax, attention and grouped-MM ops are
+#    never inside a region, nor are copies to another device. No value may
+#    leave a region and flow back into it, and no op outside a region may
+#    write memory the region uses while it runs.
 #
-# Corpus serialization is a separate phase. extract_matmul_corpus.py applies
-# the final 3-MM / 42-node / 32-compute / 8-input / 2-output envelope, normalizes
-# only proven metadata-equivalent interfaces, preserves scalar literals and
-# input domains, and merges equivalent DAGs while retaining every shape/stride
-# configuration and source mapping. Its default output is mm_repro/; it emits
-# core fusion cases only. Selection here does not certify one GPU kernel or
-# promise a speedup: those require backend compilation and measurement.
+# Search
+# ------
+# For every MM (the "seed"):
+#   a. Pull in input-side work in front of the seed (the prologue). Several
+#      prologue sizes, counted in reductions, are tried separately, so that a
+#      long chain after the MM cannot crowd out a "norm -> MM -> norm" window.
+#   b. Walk forward through the seed's users. Each step adds one consumer
+#      plus whatever other MM results that consumer needs (e.g. the second
+#      MM at a join). A step is kept only if every limit still holds.
+#   c. Keep the largest snapshot of this growth that has useful outputs,
+#      stays within the output/input limits and replays safely. Nodes that
+#      only feed dropped values are removed.
+# Then drop regions that are strict subsets of another region, merge
+# neighboring independent regions into horizontal groups when the rules still
+# hold, and apply rules 4 and 5 to the result.
+#
+# The mm_repro/ corpus is built from these regions later, with tighter size
+# limits, normalization and deduplication (scripts/extract_matmul_corpus.py).
+# Being selected here does not mean one GPU kernel can run the region or that
+# fusing it is faster; that needs a real compiler and measurement.
 # ---------------------------------------------------------------------------
 
 MM_NAMES = frozenset(
@@ -140,6 +138,8 @@ VIEW_NAMES = frozenset(
         "aten::detach",
     }
 )
+# Ops that only reinterpret, cast, copy or allocate data, or query sizes.
+# They can be inside a region but never count as real computation (rule 4).
 SCAFFOLD_NAMES = VIEW_NAMES | frozenset(
     {
         "aten::_to_copy",
@@ -166,6 +166,7 @@ SCAFFOLD_NAMES = VIEW_NAMES | frozenset(
         "aten::sym_numel",
     }
 )
+# Ops that read only the shape/dtype of their first argument, not its values.
 SHAPE_ONLY_NAMES = frozenset(
     {
         "aten::empty_like",
@@ -186,31 +187,28 @@ SHAPE_ONLY_NAMES = frozenset(
 
 @dataclass(frozen=True)
 class MatmulLimits:
-    """Size caps and one reduction-chain budget shared by both sides of MM.
+    """Size limits for one region while searching (see the rules above).
 
-    MM and ordinary reductions count together on each value dependency path.
-    Ordinary reductions are bounded everywhere, including before the first MM.
-    The first MM's K is unrestricted; subsequent MM K is bounded.
-    max_contraction_depth is an initialization alias for older saved policies.
+    The exported corpus applies tighter limits afterwards
+    (scripts/curate_mm_corpus.py).
     """
 
-    max_mm: int = 4
-    max_nodes: int = 96
-    max_compute: int = 48
-    max_outputs: int = 4
-    max_inputs: int = 24
-    max_reductions_chain: int = 5
-    max_internal_dim: int = 128
-    max_reduction_extent: int | None = None
-    max_contraction_depth: InitVar[int | None] = None
-
-    def __post_init__(self, max_contraction_depth):
-        if max_contraction_depth is not None:
-            object.__setattr__(self, "max_reductions_chain", max_contraction_depth)
+    max_mm: int = 4  # MM nodes in the region
+    max_nodes: int = 96  # all FX nodes, including views and casts
+    max_compute: int = 48  # MMs plus real computation (no views/casts)
+    max_outputs: int = 4  # tensors the benchmark returns
+    max_inputs: int = 24  # distinct values fed in from outside the region
+    max_reductions_chain: int = 5  # reductions on one dependency path (rule 1)
+    max_internal_dim: int = 128  # elements per reduction, K of chained MMs (rule 2)
 
 
 class MatmulRegion(list):
-    """FX nodes plus the meaningful outputs of this independent benchmark."""
+    """The FX nodes of one region, in graph order.
+
+    outputs: nodes whose values the benchmark returns (rule 4 decides which).
+    metrics: sizes measured by _Collector.measure() and finish().
+    mm_types: sorted MM op names such as ("addmm", "bmm"), used for naming.
+    """
 
     def __init__(self, nodes, outputs, metrics):
         super().__init__(nodes)
@@ -222,6 +220,7 @@ class MatmulRegion(list):
 
 
 def op_name(node):
+    """Schema name such as "aten::mm", or "" for targets without a schema."""
     return getattr(getattr(node.target, "_schema", None), "name", "")
 
 
@@ -230,7 +229,7 @@ def is_matmul(node):
 
 
 def is_reduction(node):
-    """Matrix contractions and ordinary schema-tagged reductions."""
+    """MM-family ops and ops tagged torch.Tag.reduction."""
     return is_matmul(node) or (
         node.op == "call_function"
         and torch.Tag.reduction in getattr(node.target, "tags", ())
@@ -238,6 +237,7 @@ def is_reduction(node):
 
 
 def tensor_shape(node):
+    """Concrete shape of the node's tensor (first tensor of a tuple), or None."""
     value = node.meta.get("val")
     if isinstance(value, (tuple, list)):
         value = next((x for x in value if isinstance(x, torch.Tensor)), None)
@@ -260,6 +260,11 @@ def tensor_shape(node):
 
 
 def value_inputs(node):
+    """Inputs whose values the node reads.
+
+    zeros_like/size/... read only metadata of their first argument, and copy_
+    overwrites its destination, so those arguments are not value inputs.
+    """
     name = op_name(node)
     if name in SHAPE_ONLY_NAMES:
         reference = node.args[0] if node.args else node.kwargs.get("self")
@@ -275,6 +280,7 @@ def is_mutating(node):
 
 
 def _neutral(node):
+    """Identity arithmetic such as x * 1, x + 0, x - 0, x / 1 or x ** 1."""
     if len(node.args) < 2:
         return False
     a, b = node.args[:2]
@@ -292,7 +298,10 @@ def _neutral(node):
 
 
 def is_computation(node):
-    """Casts, views, copies and allocations never qualify an MM benchmark."""
+    """Real non-MM work: not scaffolding, a tuple projection or identity math.
+
+    Only such nodes make an MM worth benchmarking as a fusion (rule 4).
+    """
     return (
         node.op == "call_function"
         and not is_matmul(node)
@@ -304,15 +313,16 @@ def is_computation(node):
 
 
 def _operands(node):
+    """The two matrix operands of an MM (skipping the bias of addmm & co)."""
     start = 1 if op_name(node) in {"aten::addmm", "aten::baddbmm", "aten::addmv"} else 0
     return node.args[start : start + 2]
 
 
 def horizontal_matmul_shapes_match(dots, ancestors, shapes):
-    """Independent MM pairs must produce identical full tensor shapes.
+    """Rule 3: MMs that do not depend on each other have equal output shapes.
 
-    Contraction dimensions are not compared. Dependent vertical MM may have
-    different output shapes. Missing output metadata cannot establish equality.
+    ancestors[n] holds the MMs that n depends on. K is not compared, and
+    unknown output shapes never count as equal.
     """
     return all(
         shapes[a] is not None and shapes[a] == shapes[b]
@@ -322,7 +332,11 @@ def horizontal_matmul_shapes_match(dots, ancestors, shapes):
 
 
 def reduction_size(node, shapes):
-    """Elements consumed by one contraction, using its actual input axes."""
+    """Elements reduced per output: K for an MM, else the reduced axes' product.
+
+    For example sum(x[8, 4, 16], dim=(1, 2)) reduces 64 elements. Returns
+    None when the input shape or the reduced axes are unknown.
+    """
     if is_matmul(node):
         operands = _operands(node)
         if len(operands) != 2 or not isinstance(operands[0], Node):
@@ -347,6 +361,12 @@ def reduction_size(node, shapes):
 
 
 class _Collector:
+    """Grows and checks candidate regions for one graph.
+
+    A candidate ("core") is a set of FX nodes. Graph order is used as a
+    topological order throughout.
+    """
+
     def __init__(self, gm, supported, limits):
         self.nodes = tuple(gm.graph.nodes)
         self.order = {n: i for i, n in enumerate(self.nodes)}
@@ -356,8 +376,14 @@ class _Collector:
         self.reduction_sizes = {
             n: reduction_size(n, self.shapes) for n in self.nodes if is_reduction(n)
         }
+        # mm_dependent[n]: n depends, through supported nodes, on a supported MM.
         self.mm_dependent = {}
+        # prologue_depth[n]: for supported nodes that do not depend on an MM,
+        # the most reductions on one path ending at n. It bounds the prologue
+        # sizes that are worth trying for a seed (search step a).
         self.prologue_depth = {}
+        # aliases[n]: memory n's value may share: n itself, its storage, and
+        # everything the base of a view or in-place op may alias.
         self.aliases = {}
         self.rejections = Counter()
         for node in self.nodes:
@@ -383,6 +409,7 @@ class _Collector:
             if is_mutating(node) and node.args and isinstance(node.args[0], Node):
                 keys.update(self.aliases[node.args[0]])
             self.aliases[node] = keys
+        # Memory each node reads, and memory its schema says it writes.
         self.reads = {
             n: set().union(*(self.aliases[a] for a in n.all_input_nodes))
             for n in self.nodes
@@ -404,12 +431,15 @@ class _Collector:
                                 keys.update(self.aliases[item])
             self.writes[node] = keys
 
-    def cone(self, roots, stop_at_mm=True, only_mm_paths=False, reduction_budget=None):
-        """Close value dependencies, optionally enumerating shorter prefixes.
+    def cone(self, roots, only_mm_paths=False, reduction_budget=None):
+        """Roots plus their supported producers, walking backward.
 
-        reduction_budget explores candidate windows from the shared chain
-        limit; it is not a separate prologue eligibility limit. measure()
-        checks every resulting region against the full shared budget.
+        The walk never goes past an MM: an MM is included, its inputs are not.
+        only_mm_paths: keep only nodes that depend on a supported MM.
+        reduction_budget: how many reductions the walk may include (None means
+            unlimited). The first reduction over budget, together with its
+            tuple projections, stays outside, so its results become inputs.
+        Returns None if the cone has more than max_nodes nodes.
         """
         result, visited = set(), set()
         pending = [(node, reduction_budget) for node in roots]
@@ -427,7 +457,6 @@ class _Collector:
                     and isinstance(boundary.args[0], Node)
                 ):
                     boundary = boundary.args[0]
-                # A cut tuple reduction exposes tensor projections as inputs.
                 if remaining == 0 and is_reduction(boundary):
                     continue
                 remaining -= int(is_reduction(node))
@@ -436,53 +465,51 @@ class _Collector:
             result.add(node)
             if len(result) > self.limits.max_nodes:
                 return None
-            if is_matmul(node) and stop_at_mm:
+            if is_matmul(node):
                 continue
             pending.extend((parent, remaining) for parent in value_inputs(node))
         return result
 
     def measure(self, core):
+        """Check a candidate against MatmulLimits and rules 2 and 3.
+
+        Returns (metrics, None), or (None, reason) for the first violation.
+        Metrics ("depth" = most such ops on one dependency path):
+          nodes, compute (MMs + real computation), mm,
+          mm_depth: 1 means no MM feeds another MM,
+          reduction_depth: chained ordinary reductions,
+          contraction_depth: chained reductions of any kind (MM or ordinary);
+              this is what max_reductions_chain limits.
+        """
         ordered = sorted(core, key=self.order.__getitem__)
         dots = [n for n in ordered if is_matmul(n)]
         l = self.limits
         if len(core) > l.max_nodes or len(dots) > l.max_mm:
             return None, "size"
-        ancestors, depth, red_depth, combined, coverage = {}, {}, {}, {}, {}
-        extent, handoff, chained_size = 1, 0, 0
+        # mm_ancestors[n]: MMs of the candidate that n depends on, n included.
+        mm_ancestors, mm_depth, reduction_depth, chain_depth = {}, {}, {}, {}
         for node in ordered:
             inputs = [a for a in value_inputs(node) if a in core]
-            upstream = set().union(*(ancestors[a] for a in inputs))
-            reduction = is_reduction(node) and not is_matmul(node)
-            if reduction or (is_matmul(node) and upstream):
-                local_size = self.reduction_sizes[node]
-                if local_size is None or local_size <= 0:
+            upstream = set().union(*(mm_ancestors[a] for a in inputs))
+            ordinary_reduction = is_reduction(node) and not is_matmul(node)
+            # Rule 2. An MM with no MM upstream in the candidate is exempt.
+            if ordinary_reduction or (is_matmul(node) and upstream):
+                size = self.reduction_sizes[node]
+                if size is None or size <= 0:
                     return None, "reduction_metadata"
-                if local_size > l.max_internal_dim:
+                if size > l.max_internal_dim:
                     return None, "chained_reduction_size"
-                chained_size = max(chained_size, local_size)
-                if is_matmul(node):
-                    handoff = max(handoff, local_size)
-            depth[node] = max((depth[a] for a in inputs), default=0) + int(
+            mm_depth[node] = max((mm_depth[a] for a in inputs), default=0) + int(
                 is_matmul(node)
             )
-            red_depth[node] = max((red_depth[a] for a in inputs), default=0) + int(
-                reduction
+            reduction_depth[node] = max(
+                (reduction_depth[a] for a in inputs), default=0
+            ) + int(ordinary_reduction)
+            chain_depth[node] = max((chain_depth[a] for a in inputs), default=0) + int(
+                is_reduction(node)
             )
-            combined[node] = max((combined[a] for a in inputs), default=0) + int(
-                is_matmul(node) or reduction
-            )
+            mm_ancestors[node] = upstream | ({node} if is_matmul(node) else set())
             shape = self.shapes[node]
-            size = math.prod(shape) if shape is not None else None
-            full = [
-                a
-                for a in value_inputs(node)
-                if self.shapes[a] is not None and math.prod(self.shapes[a]) == size
-            ]
-            represented = min(
-                (coverage.get(a, 1) for a in full),
-                default=max((coverage[a] for a in inputs), default=1),
-            )
-            ancestors[node] = upstream | ({node} if is_matmul(node) else set())
             if is_matmul(node):
                 a, b = _operands(node)
                 if not isinstance(a, Node) or not isinstance(b, Node):
@@ -502,43 +529,36 @@ class _Collector:
                     for v in values
                 ):
                     return None, "device_or_layout"
-                represented = 1
-            elif reduction:
+            elif ordinary_reduction:
                 source = node.all_input_nodes[0] if node.all_input_nodes else None
-                ss = self.shapes.get(source)
-                if ss is None or size is None or size == 0:
+                if self.shapes.get(source) is None or shape is None or not math.prod(shape):
                     return None, "reduction_metadata"
-                represented = coverage.get(source, 1) * self.reduction_sizes[node]
-                extent = max(extent, represented)
-            coverage[node] = represented
-        if not horizontal_matmul_shapes_match(dots, ancestors, self.shapes):
+        if not horizontal_matmul_shapes_match(dots, mm_ancestors, self.shapes):
             return None, "parallel_output_shape"
-        compute = sum(is_matmul(n) or is_computation(n) for n in core)
         metrics = {
             "nodes": len(core),
-            "compute": compute,
+            "compute": sum(is_matmul(n) or is_computation(n) for n in core),
             "mm": len(dots),
-            "mm_depth": max(depth.values(), default=0),
-            "reduction_depth": max(red_depth.values(), default=0),
-            "contraction_depth": max(combined.values(), default=0),
-            "reduction_extent": extent,
-            "handoff": handoff,
-            "max_chained_reduction_size": chained_size,
+            "mm_depth": max(mm_depth.values(), default=0),
+            "reduction_depth": max(reduction_depth.values(), default=0),
+            "contraction_depth": max(chain_depth.values(), default=0),
         }
-        for key, cap in (
-            ("compute", l.max_compute),
-            ("contraction_depth", l.max_reductions_chain),
-            ("reduction_extent", l.max_reduction_extent),
-        ):
-            if cap is not None and metrics[key] > cap:
-                return None, key
+        if metrics["compute"] > l.max_compute:
+            return None, "compute"
+        if metrics["contraction_depth"] > l.max_reductions_chain:
+            return None, "contraction_depth"
         return metrics, None
 
     def add_prologues(self, core, reduction_budget=None):
+        """Absorb the producers of the candidate's inputs where limits allow.
+
+        Each input that does not come from an MM is tried once, with its whole
+        backward cone (up to reduction_budget reductions). Values produced by
+        an MM stay with that MM's region: the relu in "mm -> relu -> mm" is an
+        epilogue of the first MM, not a prologue of the second.
+        """
         roots = {a for n in core for a in value_inputs(n) if a not in core}
         for root in sorted(roots, key=self.order.__getitem__):
-            # Inter-MM values stay with their producing MM. Input-side
-            # reductions without an upstream supported MM may grow backward.
             if is_matmul(root) or self.mm_dependent[root]:
                 continue
             prefix = self.cone((root,), reduction_budget=reduction_budget)
@@ -551,6 +571,11 @@ class _Collector:
         return core
 
     def grow(self, seed, backward_budget=0):
+        """Yield ever larger candidates around ``seed`` (search steps a and b).
+
+        The caller keeps the last snapshot that finish() accepts, so an
+        oversized final window falls back to a smaller valid one.
+        """
         core = {seed}
         yield core
         core = self.add_prologues(core, backward_budget)
@@ -562,6 +587,8 @@ class _Collector:
             if node in visited or node not in self.supported:
                 continue
             visited.add(node)
+            # The consumer plus the MM-dependent values it needs (a join pulls
+            # in the other branch up to and including that branch's MM).
             branch = self.cone((node,), only_mm_paths=True)
             if is_matmul(node):
                 parents = self.cone(value_inputs(node), only_mm_paths=True)
@@ -581,10 +608,13 @@ class _Collector:
             yield core
             for n in sorted(added, key=self.order.__getitem__):
                 pending.extend(sorted(n.users, key=self.order.__getitem__))
+        # Finally try the unlimited prologue in front of the grown window.
         yield self.add_prologues(core)
 
     def safe(self, core):
+        """Rule 6: can the candidate run on its own, in one piece?"""
         last = max(self.order[n] for n in core)
+        # (a) No value leaves the candidate and flows back into it.
         pending = [
             u for n in core for u in n.users if u not in core and self.order[u] < last
         ]
@@ -597,6 +627,8 @@ class _Collector:
             if any(u in core for u in n.users):
                 return False
             pending.extend(u for u in n.users if self.order[u] < last)
+        # (b) No outside op between the candidate's first and last node writes
+        #     memory the candidate reads or writes.
         reads, writes = self.reads, self.writes
         ordered = sorted(core, key=self.order.__getitem__)
         touched = set().union(*(reads[n] | writes[n] for n in core))
@@ -606,6 +638,8 @@ class _Collector:
             if n not in core
         ):
             return False
+        # (c) Inside, reading memory that an earlier node wrote requires a
+        #     data dependency on that writer, so replay keeps the order.
         reach = {}
         for n in ordered:
             reach[n] = set().union(
@@ -620,6 +654,13 @@ class _Collector:
         return True
 
     def finish(self, core, *, allow_trivial=False):
+        """Turn a candidate into a MatmulRegion, or return None.
+
+        Outputs are the nodes used outside the candidate (or mutating) that
+        are useful under rule 4. allow_trivial also accepts a window with no
+        real computation at all; such bare-MM regions only survive if the
+        horizontal pass later groups them (rule 4's exception).
+        """
         ancestors, mm_path, math_path = {}, {}, {}
         for n in sorted(core, key=self.order.__getitem__):
             inputs = [a for a in value_inputs(n) if a in core]
@@ -675,11 +716,22 @@ class _Collector:
 
 
 def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostics=None):
-    """Grow bounded windows around MM, then remove redundant subsets."""
+    """Return the benchmark regions of ``gm`` (see the rules above).
+
+    is_supported: extra per-node predicate (the capture hook passes its fusion
+        support check). MM, indexing, view/cast/copy and pointwise or
+        reduction ATen ops are supported regardless, minus rule 6 exceptions.
+    limits: MatmulLimits for the search; defaults when None.
+    excluded: nodes that must stay outside every region, e.g. work that
+        runtime constant folding precomputes.
+    diagnostics: optional dict that receives seed/region counts and why
+        candidates were rejected; useful when tuning the rules.
+    """
     limits = limits or MatmulLimits()
     excluded = set(excluded)
 
     def local_copy(node):
+        """False for a _to_copy that moves data to another device."""
         if (
             op_name(node) != "aten::_to_copy"
             or not node.args
@@ -699,6 +751,7 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostic
             torch.Tag.pointwise in tags or torch.Tag.reduction in tags
         )
 
+    # Nodes that may be inside a region at all.
     supported = {
         n
         for n in gm.graph.nodes
@@ -712,21 +765,20 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostic
             or is_supported(n)
         )
         and local_copy(n)
-        # Unbind is a boundary even if the support callback accepts it. Its
-        # tuple projections are removed below, exposing plain tensor inputs.
+        # Unbind stays a boundary even if is_supported accepts it.
         and op_name(n) != "aten::unbind"
         and not any(x in op_name(n) for x in ("softmax", "attention", "grouped_mm"))
     }
-    # Oversized/unknown ordinary reductions are boundaries on either side
-    # of MM. Projection nodes below expose each cut tuple result as a tensor.
+    # Rule 2: ordinary reductions that are too large or of unknown size are
+    # boundaries on either side of an MM.
     shapes = {node: tensor_shape(node) for node in gm.graph.nodes}
     for node in tuple(supported):
         if is_reduction(node) and not is_matmul(node):
             size = reduction_size(node, shapes)
             if size is None or size <= 0 or size > limits.max_internal_dim:
                 supported.remove(node)
-    # Tuple-valued opaque operations are boundaries. Their tensor projections
-    # must become tensor inputs, rather than unrecorded tuple placeholders.
+    # A tuple projection (getitem) of an op outside the regions is a boundary
+    # too, so each tuple element becomes an ordinary tensor input.
     for node in gm.graph.nodes:
         if (
             node in supported
@@ -739,14 +791,14 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostic
     for node in collector.nodes:
         if not is_matmul(node) or node not in supported:
             continue
-        # Explore prefix windows from the one chain budget. This retains
-        # pre-norm + MM + post-norm when a later reduction uses another slot.
+        # Search step a: one growth per prologue budget. Budget 0 starts with
+        # no reductions in front of the seed. Larger budgets let a pre-norm
+        # in first, which leaves less of the chain budget for work after it.
         backward_depth = max(
             (collector.prologue_depth[a] for a in value_inputs(node)), default=0
         )
         for budget in range(min(backward_depth, limits.max_reductions_chain - 1) + 1):
-            # A maximal window may violate escaping-output or alias/reentry
-            # constraints. Retain the latest valid shorter window in that case.
+            # Step c: keep the latest snapshot that finish() accepts.
             for core in reversed(list(collector.grow(node, budget))):
                 region = collector.finish(core, allow_trivial=True)
                 if region is None:
@@ -756,6 +808,7 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostic
                     seen.add(key)
                     results.append(region)
                 break
+    # Drop regions that another region contains entirely, outputs included.
     results = [
         r
         for r in results
@@ -764,8 +817,10 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostic
             for other in results
         )
     ]
-    # Independent branches need no join or shared input to be horizontal.
-    # Try neighboring candidates only, keeping this pass linear in candidates.
+    # Horizontal pass: merge each region into its predecessor when they share
+    # no MM, the union still meets every rule, no dependency path gets longer
+    # than in either region, and no output is lost. Independent regions need
+    # no shared input or join. Only neighbors are tried, keeping this linear.
     horizontal = []
     for region in results:
         if horizontal:
@@ -790,21 +845,17 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), diagnostic
                     horizontal[-1] = merged
                     continue
         horizontal.append(region)
+    # Rule 4: real computation, or a group of independent MMs.
     results = [
         r
         for r in horizontal
-        if r.metrics["mm"] >= 1
-        and (
-            r.metrics["non_mm_compute"] > 0
-            or (r.metrics["mm"] >= 2 and r.metrics["mm_depth"] == 1)
-        )
+        if r.metrics["non_mm_compute"] > 0
+        or (r.metrics["mm"] >= 2 and r.metrics["mm_depth"] == 1)
     ]
-    # Classify only the selected node set. An outside producer is an opaque
-    # input to this benchmark, even if the full model originally produced
-    # zeros there. Filtering the final windows avoids altering greedy growth
-    # or horizontal adjacency while ensuring low-fusion-value tasks are never
-    # handed to the capture/extraction pipeline.
-    from scripts.mm_corpus_quality import classify_region_quality
+    # Rule 5 runs on finished regions, so it cannot change how other regions
+    # grew or merged. Only nodes inside the region are inspected: a zero
+    # tensor produced outside the region is just an input here.
+    from mm_region_quality import classify_region_quality
 
     core_results = []
     for region in results:

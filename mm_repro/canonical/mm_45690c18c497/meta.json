@@ -8,9 +8,6 @@
   "source_patterns": [
     "45690c18c497"
   ],
-  "legacy_pattern_hashes": [
-    "165e5da6acd5"
-  ],
   "normalizations": {},
   "origin_ops": [
     "aten.mm.default",

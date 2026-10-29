@@ -25995,7 +25995,7 @@
     "shape_hash": "90e18562",
     "input_mapping": [
       {
-        "raw_input_index": 2,
+        "raw_input_index": 0,
         "shape_value": null,
         "views": []
       },
@@ -26005,14 +26005,14 @@
         "views": []
       },
       {
-        "raw_input_index": 0,
+        "raw_input_index": 2,
         "shape_value": null,
         "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },
@@ -26023,7 +26023,7 @@
     "shape_hash": "5c193b76",
     "input_mapping": [
       {
-        "raw_input_index": 2,
+        "raw_input_index": 0,
         "shape_value": null,
         "views": []
       },
@@ -26033,14 +26033,14 @@
         "views": []
       },
       {
-        "raw_input_index": 0,
+        "raw_input_index": 2,
         "shape_value": null,
         "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },
@@ -26051,7 +26051,7 @@
     "shape_hash": "1702733b",
     "input_mapping": [
       {
-        "raw_input_index": 2,
+        "raw_input_index": 0,
         "shape_value": null,
         "views": []
       },
@@ -26061,14 +26061,14 @@
         "views": []
       },
       {
-        "raw_input_index": 0,
+        "raw_input_index": 2,
         "shape_value": null,
         "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },
@@ -26079,7 +26079,7 @@
     "shape_hash": "d4022346",
     "input_mapping": [
       {
-        "raw_input_index": 2,
+        "raw_input_index": 0,
         "shape_value": null,
         "views": []
       },
@@ -26089,14 +26089,14 @@
         "views": []
       },
       {
-        "raw_input_index": 0,
+        "raw_input_index": 2,
         "shape_value": null,
         "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },
@@ -26107,7 +26107,7 @@
     "shape_hash": "6403526d",
     "input_mapping": [
       {
-        "raw_input_index": 2,
+        "raw_input_index": 0,
         "shape_value": null,
         "views": []
       },
@@ -26117,14 +26117,14 @@
         "views": []
       },
       {
-        "raw_input_index": 0,
+        "raw_input_index": 2,
         "shape_value": null,
         "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },
@@ -26185,22 +26185,22 @@
     "shape_hash": "e1e4b2eb",
     "input_mapping": [
       {
-        "raw_input_index": 2,
-        "shape_value": null,
-        "views": []
-      },
-      {
-        "raw_input_index": 3,
-        "shape_value": null,
-        "views": []
-      },
-      {
         "raw_input_index": 0,
         "shape_value": null,
         "views": []
       },
       {
         "raw_input_index": 1,
+        "shape_value": null,
+        "views": []
+      },
+      {
+        "raw_input_index": 2,
+        "shape_value": null,
+        "views": []
+      },
+      {
+        "raw_input_index": 3,
         "shape_value": null,
         "views": []
       },
@@ -26982,16 +26982,6 @@
     "shape_hash": "a90f9ba2",
     "input_mapping": [
       {
-        "raw_input_index": 2,
-        "shape_value": null,
-        "views": []
-      },
-      {
-        "raw_input_index": 3,
-        "shape_value": null,
-        "views": []
-      },
-      {
         "raw_input_index": 0,
         "shape_value": null,
         "views": []
@@ -27000,11 +26990,21 @@
         "raw_input_index": 1,
         "shape_value": null,
         "views": []
+      },
+      {
+        "raw_input_index": 2,
+        "shape_value": null,
+        "views": []
+      },
+      {
+        "raw_input_index": 3,
+        "shape_value": null,
+        "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },
@@ -27015,16 +27015,6 @@
     "shape_hash": "369886ce",
     "input_mapping": [
       {
-        "raw_input_index": 2,
-        "shape_value": null,
-        "views": []
-      },
-      {
-        "raw_input_index": 3,
-        "shape_value": null,
-        "views": []
-      },
-      {
         "raw_input_index": 0,
         "shape_value": null,
         "views": []
@@ -27033,11 +27023,21 @@
         "raw_input_index": 1,
         "shape_value": null,
         "views": []
+      },
+      {
+        "raw_input_index": 2,
+        "shape_value": null,
+        "views": []
+      },
+      {
+        "raw_input_index": 3,
+        "shape_value": null,
+        "views": []
       }
     ],
     "output_permutation": [
-      1,
-      0
+      0,
+      1
     ],
     "normalizations": []
   },

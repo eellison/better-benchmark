@@ -1,4 +1,4 @@
-"""Describe MM corpus DAGs for reporting."""
+"""Describe MM corpus DAGs: size metrics and fusion-pattern coverage labels."""
 from __future__ import annotations
 
 import itertools
@@ -17,7 +17,30 @@ from matmul_partitioner import (
 
 
 def analyze_graph(gm):
-    """Report coverage from actual value dependencies and reduction axes."""
+    """Measure a standalone repro graph and label the fusion patterns in it.
+
+    metrics: mm, compute (MMs + real computation), nodes (ops), inputs
+    (tensor placeholders), outputs, contraction_depth (most reductions,
+    MMs included, on one dependency path).
+
+    coverage labels, from value dependencies ("PW" = pointwise op):
+      horizontal            two MMs that do not depend on each other
+      pure_horizontal       ... and no other real computation at all
+      horizontal_pw_join    a PW op combines two independent MM results
+      gated_parallel_mm     ... and that PW op is a multiply (gate * up)
+      horizontal_then_mm    an MM consumes two independent MM results
+      vertical_mm           an MM consumes another MM's result
+      mm_pw_mm              ... with at least one PW op in between
+      pw_prologue           PW work in front of an MM, not fed by any MM
+      mm_pw_sum             a sum consumes an MM result through a PW op
+      mm_block_amax_sum     sum/amax after an MM over several axes or after
+                            reshaping the MM result to more than 2-D
+      reduction_mm_reduction         ordinary reductions before and after
+                                     the same MM (e.g. norm -> MM -> norm)
+      gather_reduction_mm_reduction  ... with a gather feeding the first one
+
+    horizontal_shapes_match: rule 3 of matmul_partitioner holds.
+    """
     nodes = list(gm.graph.nodes)
     dots = [n for n in nodes if is_matmul(n)]
     ancestors, nearest_mm, frontier, depth = {}, {}, {}, {}

@@ -8,9 +8,6 @@
   "source_patterns": [
     "730c6a80b867"
   ],
-  "legacy_pattern_hashes": [
-    "fda748f83505"
-  ],
   "normalizations": {
     "input_permutation_through_float_cast": 2,
     "reshape_chain": 4

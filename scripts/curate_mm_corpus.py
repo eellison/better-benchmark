@@ -1,8 +1,24 @@
-"""Normalize and export only meaningful core MM fusion regions."""
+"""Turn the raw MM captures into the published core corpus (mm_repro/).
+
+Called by scripts/extract_matmul_corpus.py with a temporary raw corpus. For
+every raw repro that fits the final size limits, and every shape point of it:
+
+1. Re-trace it with FakeTensors and normalize it (mm_corpus_dedup): rewrites
+   are applied only when tensor metadata proves the result is unchanged, e.g.
+   an input transpose becomes a strided input spec.
+2. Drop it if it became a low-value "control" region (mm_region_quality).
+3. Merge it into an existing group when the DAGs are isomorphic, including
+   scalar literals, and replaying the group's code on this point's inputs
+   reproduces the same output metadata. Otherwise it starts a new group.
+
+Each group is written as one canonical/<mm ops>_<hash>/ directory holding its
+code (repro.py), every shape point (shapes.json) and metadata (meta.json).
+curation_mapping.json and occurrences.json map raw captures and source graphs
+to the exported (pattern, shape) pairs.
+"""
 
 from __future__ import annotations
 
-import argparse
 import copy
 import hashlib
 import json
@@ -32,13 +48,13 @@ from mm_corpus_io import (
     load_records,
     write_json,
 )
-from mm_corpus_quality import classify_graph_quality
 from torch.utils._pytree import tree_leaves
 
 from capture_hook import pattern_hash_for_subgraph
 from input_codec import compact_from_spec, spec_from_compact
 from matmul_partitioner import MatmulLimits
 from mm_input_constraints import annotate_external_sqrt_inputs
+from mm_region_quality import classify_graph_quality
 from repro_harness import load_shape_configs, make_inputs_from_config
 from roundtrip_validation import fake_tensor_ctx
 
@@ -170,10 +186,9 @@ if __name__ == "__main__":
 
 def export_core(output, groups, rows, mappings, source_report, limits):
     output.mkdir(parents=True)
-    selected = groups
-    hashes = {g["hash"] for g in selected}
+    hashes = {g["hash"] for g in groups}
     inventory, model_patterns = [], defaultdict(set)
-    for group in selected:
+    for group in groups:
         prefix = "_".join(
             sorted(
                 {
@@ -208,7 +223,6 @@ def export_core(output, groups, rows, mappings, source_report, limits):
             "curation": "metadata_normalization_v1",
             "category": "core",
             "source_patterns": sorted(group["raw_hashes"]),
-            "legacy_pattern_hashes": sorted(group["legacy_hashes"]),
             "normalizations": dict(group["changes"]),
             "origin_ops": sorted(
                 str(n.target)
@@ -248,8 +262,6 @@ def export_core(output, groups, rows, mappings, source_report, limits):
         row["regions"] = kept
         row["source_partition_selected_mm"] = row.pop("selected_mm")
         row["exported_regions"] = len(kept)
-        if "diagnostics" in row:
-            row["source_partition_diagnostics"] = row.pop("diagnostics")
     write_json(output / "occurrences.json", filtered_rows)
     for model, patterns in model_patterns.items():
         write_json(
@@ -258,7 +270,7 @@ def export_core(output, groups, rows, mappings, source_report, limits):
         )
     write_json(output / "inventory.json", inventory)
     coverage = {
-        key: sum(key in g["coverage"] for g in selected)
+        key: sum(key in g["coverage"] for g in groups)
         for key in {k for g in groups for k in g["coverage"]}
     }
     report = {
@@ -275,7 +287,9 @@ def export_core(output, groups, rows, mappings, source_report, limits):
                     for name in (
                         "scripts/curate_mm_corpus.py",
                         "scripts/mm_corpus_dedup.py",
-                        "scripts/mm_corpus_quality.py",
+                        "scripts/mm_corpus_features.py",
+                        "scripts/mm_corpus_io.py",
+                        "mm_region_quality.py",
                         "capture_hook.py",
                         "mm_input_constraints.py",
                         "input_codec.py",
@@ -285,13 +299,12 @@ def export_core(output, groups, rows, mappings, source_report, limits):
             ).hexdigest()[:16],
             "corpus_count_limit": None,
         },
-        "unique_repros": len(selected),
-        "shape_points": sum(len(g["points"]) for g in selected),
+        "unique_repros": len(groups),
+        "shape_points": sum(len(g["points"]) for g in groups),
         "region_occurrences": sum(len(r["regions"]) for r in filtered_rows),
         "sources": len(rows),
         "original_mm": sum(r["original_mm"] for r in rows),
         "coverage_repros": dict(sorted(coverage.items())),
-        "failures": [],
     }
     write_json(output / "report.json", report)
     write_json(
@@ -314,15 +327,11 @@ def curate_corpus(source: Path, output: Path):
     output = output.resolve()
     if output.exists():
         raise ValueError("Use a fresh curation output directory")
+    # Final size limits of an exported repro (the search allowed more).
     limits = MatmulLimits(
         max_mm=3, max_compute=32, max_nodes=42, max_inputs=8, max_outputs=2
     )
-    cache = Path("/tmp") / (
-        "bb_curate_features_"
-        + hashlib.sha256(str(source).encode()).hexdigest()[:16]
-        + ".json"
-    )
-    records, rows = load_records(source, cache)
+    records, rows = load_records(source)
     kept = filter_patterns(records, limits)
     raw_report = json.loads((source / "report.json").read_text())
     groups, buckets, mappings = [], defaultdict(list), {}
@@ -330,7 +339,6 @@ def curate_corpus(source: Path, output: Path):
     processed = 0
     for record in kept:
         path = record["directory"] / "repro.py"
-        raw_meta = json.loads(path.with_name("meta.json").read_text())
         points = json.loads(path.with_name("shapes.json").read_text())["points"]
         configs = list(load_shape_configs(str(path)).values())
         with fake_tensor_ctx():
@@ -342,6 +350,7 @@ def curate_corpus(source: Path, output: Path):
                 )
                 annotate_external_sqrt_inputs(gm, infos)
                 candidate = {"gm": gm, "infos": infos}
+                # Normalization must not change what the repro returns.
                 contract = metadata_contract(gm)
                 if contract != original_contract:
                     raise ValueError(
@@ -361,6 +370,8 @@ def curate_corpus(source: Path, output: Path):
                             "normalized region violates size/topology limits",
                         )
                     )
+                # Find an equivalent group: same WL digest, an isomorphism of
+                # the DAGs, and the group's code replays this point exactly.
                 graph = semantic_graph(gm)
                 candidate["graph"] = graph
                 digest = graph_digest(graph)
@@ -368,6 +379,7 @@ def curate_corpus(source: Path, output: Path):
                 mapping = None
                 validation = None
                 for existing in buckets[digest]:
+                    # Random ops: only merge points of the same raw repro.
                     if has_rng(gm) and record["id"] not in existing["raw_hashes"]:
                         continue
                     mapping = match_graphs(existing["graph"], graph)
@@ -389,7 +401,6 @@ def curate_corpus(source: Path, output: Path):
                         "graph": graph,
                         "points": {},
                         "raw_hashes": set(),
-                        "legacy_hashes": set(),
                         "changes": Counter(),
                         "coverage": set(),
                     }
@@ -429,9 +440,6 @@ def curate_corpus(source: Path, output: Path):
                     item = target["models"].setdefault(model, {"occurrences": 0})
                     item["occurrences"] += counts.get("occurrences") or 0
                 group["raw_hashes"].add(record["id"])
-                group["legacy_hashes"].add(
-                    raw_meta.get("legacy_pattern_hash", record["id"])
-                )
                 group["changes"].update(changes)
                 group["coverage"].update(analysis["coverage"])
                 mappings[(record["id"], point["shape_hash"])] = {
@@ -464,16 +472,3 @@ def curate_corpus(source: Path, output: Path):
     report["curation"]["raw_shape_points"] = processed
     write_json(output / "report.json", report)
     return report
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=ROOT / "mm_repro")
-    args = parser.parse_args()
-    report = curate_corpus(args.source, args.output)
-    print(json.dumps(report, indent=2))
-
-
-if __name__ == "__main__":
-    main()
