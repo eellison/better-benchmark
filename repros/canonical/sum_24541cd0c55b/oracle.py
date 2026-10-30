@@ -44,7 +44,7 @@ def _xlnet_attention_backward_kernel(
     scaled_grad = grad * (keep * 1.1111111111111112)
     product = scaled_grad * div
     row_sum = tl.sum(tl.where(mask, product, 0.0), axis=1)[:, None]
-    out = libdevice.fma(-div, row_sum, product) * 0.125
+    out = tl.fma(-div, row_sum, product) * 0.125
 
     tl.store(out_ptr + offsets, out, mask=mask)
 
