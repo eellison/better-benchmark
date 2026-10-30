@@ -1,0 +1,37 @@
+"""Curated MM repro. Pattern hash: b501acaa8ae0."""
+import sys
+from pathlib import Path
+from math import inf, nan
+import torch
+import torch._inductor.inductor_prims
+from torch import device
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
+_repro_version = 3
+
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "bf16[512, 128, 64]", arg1_1: "bf16[512, 64, 128]", arg2_1: "b8[512, 128, 128]", arg3_1: "bf16[512, 128, 128]", arg4_1: "f32[32, 1, 128, 128]", arg5_1: "f32[512, 128, 1]", arg6_1: "f32[512, 128, 1]", _shape_param_0, _shape_param_1):
+        # No stacktrace found for following nodes
+        bmm: "bf16[512, 128, 128]" = torch.ops.aten.bmm.default(arg0_1, arg1_1);  arg0_1 = arg1_1 = None
+        convert_element_type: "f32[512, 128, 128]" = torch.ops.prims.convert_element_type.default(bmm, torch.float32);  bmm = None
+        convert_element_type_1: "f32[512, 128, 128]" = torch.ops.prims.convert_element_type.default(arg2_1, torch.float32);  arg2_1 = None
+        mul: "f32[512, 128, 128]" = torch.ops.aten.mul.Tensor(convert_element_type_1, 1.1111111111111112);  convert_element_type_1 = None
+        mul_1: "f32[512, 128, 128]" = torch.ops.aten.mul.Tensor(convert_element_type, mul);  convert_element_type = mul = None
+        view: "bf16[32, 16, 128, 128]" = torch.ops.aten.view.default(arg3_1, _shape_param_0);  arg3_1 = _shape_param_0 = None
+        add: "f32[32, 16, 128, 128]" = torch.ops.aten.add.Tensor(view, arg4_1);  view = arg4_1 = None
+        full: "f32[]" = torch.ops.aten.full.default([], -3.4028234663852886e+38, dtype = torch.float32, layout = torch.strided, device = device(type='cuda', index=0), pin_memory = False)
+        maximum: "f32[32, 16, 128, 128]" = torch.ops.aten.maximum.default(add, full);  add = full = None
+        view_1: "f32[512, 128, 128]" = torch.ops.aten.view.default(maximum, _shape_param_1);  maximum = _shape_param_1 = None
+        sub: "f32[512, 128, 128]" = torch.ops.aten.sub.Tensor(view_1, arg5_1);  view_1 = arg5_1 = None
+        exp: "f32[512, 128, 128]" = torch.ops.aten.exp.default(sub);  sub = None
+        div: "f32[512, 128, 128]" = torch.ops.aten.div.Tensor(exp, arg6_1);  exp = arg6_1 = None
+        mul_2: "f32[512, 128, 128]" = torch.ops.aten.mul.Tensor(mul_1, div);  mul_1 = div = None
+        return mul_2
+
+def make_inputs(shape_config=None):
+    if shape_config is None:
+        shape_config = next(iter(load_shape_configs(__file__).values()))
+    return make_inputs_from_config(shape_config)
+
+if __name__ == "__main__":
+    benchmark_repro(Repro(), make_inputs, __file__)

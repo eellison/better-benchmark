@@ -1,0 +1,61 @@
+{
+  "policy": {
+    "reduction_limit": 128,
+    "intermediate_limit": 128,
+    "max_horizontal": 3,
+    "max_mm": 3,
+    "max_nodes": 48,
+    "max_compute": 32,
+    "max_inputs": 12,
+    "max_outputs": 4,
+    "max_stages": 8
+  },
+  "policy_id": "677e84faa09ea0bb",
+  "curation": {
+    "input_source": "repros/models/**/full_graph_*.py",
+    "version": "metadata_normalization_v1",
+    "dependency_id": "b910331d4cfd7a91",
+    "raw_size_admitted_repros": 1361,
+    "raw_shape_points": 2038
+  },
+  "unique_repros": 585,
+  "shape_points": 1019,
+  "family_members": 962,
+  "deduplicated_repros": 377,
+  "region_occurrences": 13275,
+  "sources": 364,
+  "original_mm": 17575,
+  "pattern_categories": {
+    "prologue": {
+      "repros": 49,
+      "shape_points": 91,
+      "family_members": 107
+    },
+    "epilogue": {
+      "repros": 284,
+      "shape_points": 602,
+      "family_members": 518
+    },
+    "prologue_epilogue": {
+      "repros": 79,
+      "shape_points": 104,
+      "family_members": 112
+    },
+    "horizontal": {
+      "repros": 74,
+      "shape_points": 112,
+      "family_members": 118
+    },
+    "horizontal_combine": {
+      "repros": 5,
+      "shape_points": 7,
+      "family_members": 5
+    },
+    "vertical": {
+      "repros": 94,
+      "shape_points": 103,
+      "family_members": 102
+    }
+  },
+  "families": 585
+}

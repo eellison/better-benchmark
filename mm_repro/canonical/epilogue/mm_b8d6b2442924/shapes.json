@@ -1,0 +1,129 @@
+{
+  "points": [
+    {
+      "shape_hash": "06b1b6db",
+      "inputs": [
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/AllenaiLongformerBase": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "480d2a25",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GPTJForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/infer/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

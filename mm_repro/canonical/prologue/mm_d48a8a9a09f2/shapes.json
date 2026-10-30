@@ -1,0 +1,43 @@
+{
+  "points": [
+    {
+      "shape_hash": "3b0faca3",
+      "inputs": [
+        [
+          [
+            96,
+            65
+          ],
+          "bf16"
+        ],
+        [
+          [
+            96,
+            65
+          ],
+          "bf16"
+        ],
+        [
+          [
+            96,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

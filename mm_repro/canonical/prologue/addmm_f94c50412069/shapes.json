@@ -1,0 +1,592 @@
+{
+  "points": [
+    {
+      "shape_hash": "fd86d2c4",
+      "inputs": [
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            32,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            4096,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            32,
+            80
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "874761d5",
+      "inputs": [
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            2048,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            32,
+            80
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "3c3201eb",
+      "inputs": [
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            16,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "582c8a73",
+      "inputs": [
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            16,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MBartForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "1228f769",
+      "inputs": [
+        [
+          [
+            4,
+            2048,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            4,
+            2048,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            4,
+            2048,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8192,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            4,
+            2048,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "33622267",
+      "inputs": [
+        [
+          [
+            128,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            128,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16384,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            128,
+            16,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/PegasusForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

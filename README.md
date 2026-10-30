@@ -347,3 +347,18 @@ benchmarks/              # frozen benchmark set definitions
 ```
 
 </details>
+
+
+## Matmul pattern corpus
+
+```bash
+python scripts/extract_matmul_corpus.py --workers 32   # regenerates mm_repro/
+python scripts/validate_matmul_repros.py               # FakeTensor-runs every shape point
+```
+
+`mm_repro/` holds small MM fusion-pattern repros cut out of the saved model
+graphs, one per pattern family in six categories (prologue, epilogue,
+prologue_epilogue, horizontal, horizontal_combine, vertical;
+**585 repros / 1019 shapes**). Regeneration runs on CPU with FakeTensors and is
+deterministic. See [docs/matmul_partitioning.md](docs/matmul_partitioning.md)
+for the selection rules, layout and validation.

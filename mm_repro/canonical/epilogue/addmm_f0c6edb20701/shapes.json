@@ -1,0 +1,244 @@
+{
+  "points": [
+    {
+      "shape_hash": "9fbd10be",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 6,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "12438463",
+      "inputs": [
+        [
+          [
+            144
+          ],
+          "f32"
+        ],
+        [
+          [
+            288,
+            144
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              288
+            ]
+          }
+        ],
+        [
+          [
+            131072,
+            288
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            256,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            256,
+            144
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 6,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "e8065696",
+      "inputs": [
+        [
+          [
+            192
+          ],
+          "f32"
+        ],
+        [
+          [
+            384,
+            192
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            64,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            192
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 6,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "161b9178",
+      "inputs": [
+        [
+          [
+            240
+          ],
+          "f32"
+        ],
+        [
+          [
+            480,
+            240
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              480
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            480
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            16,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            240
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 6,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

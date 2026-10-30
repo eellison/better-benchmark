@@ -1,0 +1,57 @@
+{
+  "points": [
+    {
+      "shape_hash": "83a51d54",
+      "inputs": [
+        [
+          [
+            512,
+            1280,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000
+          ],
+          "f32"
+        ],
+        [
+          [
+            1280,
+            1000
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1280
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            512,
+            1280
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/ghostnet_100": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

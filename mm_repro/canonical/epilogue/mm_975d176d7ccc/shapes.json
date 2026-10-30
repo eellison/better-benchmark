@@ -1,0 +1,58 @@
+{
+  "points": [
+    {
+      "shape_hash": "fec32a1f",
+      "inputs": [
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            197,
+            192
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            192
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

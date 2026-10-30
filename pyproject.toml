@@ -1,9 +1,10 @@
 [project]
 name = "better-benchmark"
 version = "0.1.0"
+dependencies = ["networkx"]
 
 [tool.setuptools]
-py-modules = ["repro_harness", "oracle_harness", "byte_accounting", "full_graph_harness", "input_codec", "capture_hook", "merge_captures", "roundtrip_validation", "numerics", "replay_dependencies"]
+py-modules = ["repro_harness", "oracle_harness", "byte_accounting", "full_graph_harness", "input_codec", "capture_hook", "fusion_partitioner", "matmul_partitioner", "mm_region_quality", "mm_input_constraints", "merge_captures", "roundtrip_validation", "numerics", "replay_dependencies"]
 
 [tool.pytest.ini_options]
 # All tests live under tests/. tests/conftest.py puts repo-root and

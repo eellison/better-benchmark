@@ -1,0 +1,87 @@
+{
+  "points": [
+    {
+      "shape_hash": "b6dcd60d",
+      "inputs": [
+        [
+          [
+            96,
+            65
+          ],
+          "bf16"
+        ],
+        [
+          [
+            96,
+            65
+          ],
+          "bf16"
+        ],
+        [
+          [
+            65,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            96,
+            512,
+            4,
+            4
+          ],
+          "bf16"
+        ],
+        [
+          [
+            96,
+            512,
+            4,
+            4
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              2048,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            1,
+            512,
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            96,
+            512,
+            1,
+            1
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/LearningToPaint": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 16,
+        "inputs": 6,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

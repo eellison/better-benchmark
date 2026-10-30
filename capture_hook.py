@@ -246,7 +246,8 @@ def _split_connected_components(nodes):
     return result_components
 
 
-def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
+def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
+                          only_include_mm: bool = False) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
 
@@ -262,8 +263,20 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
     partition, as if they were not fusible.
 
+    ``only_include_mm=True`` instead returns small matmul benchmark regions
+    (matmul_partitioner.MatmulRegion), one per fusion pattern category
+    (prologue, epilogue, prologue_epilogue, horizontal, horizontal_combine,
+    vertical); each names its outputs explicitly. Unlike the default
+    partitions, MM regions may overlap; the graph itself is never changed.
+
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
+    if only_include_mm:
+        from matmul_partitioner import get_matmul_regions
+
+        return get_matmul_regions(gm, partition_node_is_supported,
+                                  excluded=excluded or ())
+
     import inspect
 
     from torch.fx.passes.operator_support import create_op_support
@@ -436,6 +449,12 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
 
     Returns (sub_gm, placeholder_info, shape_params) or None.
     """
+    from matmul_partitioner import MatmulRegion
+
+    # MM regions choose their benchmark outputs themselves (values that only
+    # feed views/casts outside the region are not returned).
+    requested_outputs = (set(origin_nodes.outputs)
+                         if isinstance(origin_nodes, MatmulRegion) else None)
     seen = set()
     unique_origins = []
     for n in origin_nodes:
@@ -468,10 +487,11 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         name = getattr(target, "__name__", "") or str(target)
         return name.rstrip(".default").endswith("_")
 
-    output_nodes = [
-        n for n in origin_nodes
-        if any(user not in needed_nodes for user in n.users) or _is_mutating(n)
-    ]
+    output_nodes = ([n for n in origin_nodes if n in requested_outputs]
+                    if requested_outputs is not None else [
+                        n for n in origin_nodes
+                        if any(user not in needed_nodes for user in n.users) or _is_mutating(n)
+                    ])
     if not output_nodes:
         output_nodes = origin_nodes
 
@@ -731,15 +751,21 @@ def canonicalize_for_hash(gm):
     return nodes, resolve, op_name
 
 
-def compute_dag_signature(gm) -> list:
+_SCALAR_PATTERN_HASH_MODE = "scalar_literals_v1"
+
+
+def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
     """Compute a DAG-structure signature for the graph.
 
     Encodes: for each node in topological order, its op name, which
     predecessor nodes feed each argument (by index), and structural
     literal args (list/tuple values like reduction dims, permute orders).
 
-    Does NOT encode scalar int/float constants (e.g., mul by 3.0,
-    eps=1e-6) — those don't affect kernel structure.
+    The legacy default omits scalar int/float constants. Matmul captures
+    opt into ``scalar_sensitive`` because their canonical repros retain
+    these literals: changing a scale or normalization epsilon changes the
+    function even when the tensor shapes and operator DAG stay the same.
+    This mode also preserves tuple getitem indices and numeric kwargs.
 
     Op spellings are canonicalized via canonicalize_for_hash so that
     trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
@@ -753,6 +779,13 @@ def compute_dag_signature(gm) -> list:
     original order — input position is semantics, not spelling.
     """
     nodes, _resolve, _op_name = canonicalize_for_hash(gm)
+    if scalar_sensitive:
+        # Fake retracing creates projections for every result of tuple ops,
+        # even when the caller only uses one. Such dead projections are not
+        # part of the MM's value computation; ignore that tracing noise.
+        nodes = [n for n in nodes if not (
+            n.op == "call_function" and n.target is _operator.getitem and not n.users
+        )]
 
     # --- canonical node order: deterministic Kahn topological sort -------
     node_set = set(nodes)
@@ -838,6 +871,10 @@ def compute_dag_signature(gm) -> list:
         if isinstance(arg, torch.fx.Node) and arg in node_to_idx:
             return ("node", node_to_idx[arg], arg_idx)
         elif isinstance(arg, (list, tuple)):
+            if scalar_sensitive:
+                return ("list", [
+                    _encode_arg(value, i) for i, value in enumerate(arg)
+                ], arg_idx)
             # Structural args: reduction dims, permute orders, reshape targets
             # Encode the structure (length + which are ints) but not concrete values
             # EXCEPT for small int lists (dims) where the values matter
@@ -864,10 +901,16 @@ def compute_dag_signature(gm) -> list:
             # Bare 'int'-typed schema slot: a dim (cat/gather/cumsum) —
             # structural. 'Scalar'-typed int constants fall through below.
             return ("int", arg, arg_idx)
-        # Scalar int/float constants — don't encode (same kernel regardless)
+        elif scalar_sensitive and isinstance(arg, int):
+            # Scalar-typed integer constants and schema-less getitem indices.
+            return ("scalar_int", arg, arg_idx)
+        elif scalar_sensitive and isinstance(arg, float):
+            # Hex spelling preserves exact values, signed zero and inf/nan.
+            return ("scalar_float", arg.hex(), arg_idx)
+        # Keep legacy non-MM signatures byte-compatible by default.
         return None
 
-    signature = []
+    signature = [("hash_mode", _SCALAR_PATTERN_HASH_MODE)] if scalar_sensitive else []
     for node in nodes:
         if node.op == "placeholder":
             signature.append(("input", node_to_idx[node]))
@@ -879,7 +922,9 @@ def compute_dag_signature(gm) -> list:
                 if enc is not None:
                     encoded_args.append(enc)
             # Also encode relevant kwargs (like correction, keepdim)
-            for kw, val in (node.kwargs or {}).items():
+            kwargs = node.kwargs or {}
+            keyword_items = sorted(kwargs.items()) if scalar_sensitive else kwargs.items()
+            for kw, val in keyword_items:
                 if isinstance(val, bool):
                     encoded_args.append(("kw_bool", kw, val))
                 elif isinstance(val, (list, tuple)) and all(isinstance(x, int) for x in val):
@@ -895,6 +940,10 @@ def compute_dag_signature(gm) -> list:
                     # dim passed as kwarg (argmax(x, dim=1)) — same
                     # structural slot as the positional form.
                     encoded_args.append(("kw_int", kw, val))
+                elif scalar_sensitive and isinstance(val, int):
+                    encoded_args.append(("kw_scalar_int", kw, val))
+                elif scalar_sensitive and isinstance(val, float):
+                    encoded_args.append(("kw_scalar_float", kw, val.hex()))
             signature.append((_op_name(node), encoded_args))
         elif node.op == "output":
             def _collect_output_indices(x):
@@ -914,19 +963,24 @@ def compute_dag_signature(gm) -> list:
             if isinstance(out_indices, list):
                 out_indices = sorted(
                     out_indices,
-                    key=lambda x: (x is None, x if isinstance(x, int) else repr(x)),
+                    key=lambda x: (
+                        x is None, not isinstance(x, int),
+                        x if isinstance(x, int) else repr(x),
+                    ),
                 )
             signature.append(("output", out_indices))
 
     return signature
 
 
-def pattern_hash_for_subgraph(sub_gm) -> str:
-    """Content-addressed pattern hash: ops + wiring, ignoring shapes.
+def pattern_hash_for_subgraph(sub_gm, *, scalar_sensitive: bool = False) -> str:
+    """Content-addressed pattern hash: ops + wiring, ignoring tensor shapes.
 
+    ``scalar_sensitive=True`` preserves the numeric literals baked into MM
+    repros. The default keeps the legacy non-MM pattern identities.
     This is the 12-hex hash in repros/canonical/<family>_<hash> dir names.
     """
-    dag_signature = compute_dag_signature(sub_gm)
+    dag_signature = compute_dag_signature(sub_gm, scalar_sensitive=scalar_sensitive)
     return hashlib.md5(json.dumps(dag_signature).encode()).hexdigest()[:12]
 
 
@@ -1246,8 +1300,20 @@ def compute_partition_pattern(
             info["observed"] = observed_stats[name]
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
+    from matmul_partitioner import MatmulRegion
+
+    is_mm_region = isinstance(comp, MatmulRegion)
+    if is_mm_region:
+        # An input that only feeds sqrt/rsqrt (e.g. an external variance)
+        # must be generated positive, or the repro computes NaNs.
+        from mm_input_constraints import annotate_external_sqrt_inputs
+
+        annotate_external_sqrt_inputs(sub_gm, placeholder_info)
     return {
-        "pattern_hash": pattern_hash_for_subgraph(sub_gm),
+        # MM repros keep their scalar constants (scales, epsilons), so those
+        # constants are part of their identity.
+        "pattern_hash": pattern_hash_for_subgraph(
+            sub_gm, scalar_sensitive=is_mm_region),
         "shape_hash": shape_hash_for_placeholders(placeholder_info),
         "sub_gm": sub_gm,
         "placeholder_info": placeholder_info,
@@ -1291,8 +1357,9 @@ def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
                  validate: bool = True, capture_only: bool = False,
-                 constant_folding: bool = False):
+                 constant_folding: bool = False, only_include_mm: bool = False):
         self.output_dir = output_dir
+        self.only_include_mm = only_include_mm
         # The compiled model folds constants at load time (AOTInductor's
         # use_runtime_constant_folding): constant-only work is not per-call
         # work, so it is kept out of the captured regions.
@@ -1775,11 +1842,17 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
-    def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
+    def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None,
+                      *, components=None):
         """Called by the hook for each post-grad graph. Partitions and captures.
 
         ``is_inference`` is what Inductor passes inference-aware custom passes
         (None when unknown, which disables constant folding for the graph).
+        ``components`` captures already computed partitions instead of
+        partitioning ``gm`` again (the MM corpus extractor reuses its own).
+
+        Returns one {pattern_hash, shape_hash} record per
+        captured partition, in partition order.
         """
         # Compute observed stats for the full graph's integer/bool placeholders
         # using the stashed real inputs from compile_fx.
@@ -1799,7 +1872,9 @@ if __name__ == "__main__":
 
         # Partition ONCE; both the metadata sidecar (node_accounting) and the
         # capture loop below consume the same components.
-        components = get_fusion_partitions(gm, excluded=folded)
+        if components is None:
+            components = get_fusion_partitions(
+                gm, excluded=folded, only_include_mm=self.only_include_mm)
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
@@ -1866,6 +1941,7 @@ if __name__ == "__main__":
         # Shared partitioning + hashing (see module-level helpers above):
         # this is the single source of truth for how graphs are cut into
         # canonical repros and how each partition is content-addressed.
+        observations = []
         for comp in components:
             is_reduction = partition_has_reduction(comp)
 
@@ -1892,6 +1968,9 @@ if __name__ == "__main__":
             shape_key = pattern["shape_hash"]
 
             full_key = f"{pattern_key}_{shape_key}"
+            observations.append({
+                "pattern_hash": pattern_key, "shape_hash": shape_key,
+            })
             # Count EVERY occurrence (pre-dedup): the repro file is written
             # once per point, but the count is what the accounting joins on.
             self.occurrence_counts[full_key] = (
@@ -1914,7 +1993,10 @@ if __name__ == "__main__":
                             "dtype": dtype,
                         })
 
-            kind = "reduction" if is_reduction else "pointwise"
+            from matmul_partitioner import MatmulRegion
+
+            is_mm_region = isinstance(comp, MatmulRegion)
+            kind = "matmul" if is_mm_region else ("reduction" if is_reduction else "pointwise")
             meta = {
                 "kind": kind,
                 "pattern_hash": pattern_key,
@@ -1925,7 +2007,10 @@ if __name__ == "__main__":
                 "reduction_types": [r["reduction_type"] for r in reduction_infos],
             }
 
-            if is_reduction:
+            if is_mm_region:
+                mm_label = "_".join(comp.mm_types)
+                filename = f"region_{self.counter:03d}_{mm_label}_{pattern_key}_{shape_key}.py"
+            elif is_reduction:
                 red_types = "_".join(sorted(set(r["reduction_type"] for r in reduction_infos)))
                 filename = f"region_{self.counter:03d}_{red_types}_{pattern_key}_{shape_key}.py"
             else:
@@ -1950,6 +2035,9 @@ if __name__ == "__main__":
                 }
                 if alias_group_nbytes:
                     entry["alias_group_nbytes"] = alias_group_nbytes
+                if is_mm_region:
+                    entry["matmul"] = comp.metrics
+                    entry["mm_types"] = list(comp.mm_types)
                 self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report
@@ -1967,6 +2055,8 @@ if __name__ == "__main__":
                     f"{shape_key}): {type(e).__name__}: {str(e)[:160]}",
                     file=sys.stderr,
                 )
+
+        return observations
 
     def finalize(self):
         """Write index.json for the captured session.
@@ -1999,8 +2089,10 @@ if __name__ == "__main__":
         os.replace(tmp_path, index_path)
         n_red = sum(1 for c in self.captured if c.get("kind") == "reduction")
         n_pw = sum(1 for c in self.captured if c.get("kind") == "pointwise")
+        n_mm = sum(1 for c in self.captured if c.get("kind") == "matmul")
         msg = (f"[capture_hook] Captured {len(self.captured)} regions "
-               f"({n_red} reduction, {n_pw} pointwise) -> {self.output_dir}")
+               f"({n_red} reduction, {n_pw} pointwise"
+               + (f", {n_mm} matmul" if n_mm else "") + f") -> {self.output_dir}")
         if self.dropped:
             msg += f" | DROPPED {len(self.dropped)} regions (see index.json)"
         print(msg)
@@ -2011,7 +2103,7 @@ _active_state: _CaptureState | None = None
 
 def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
                          validate: bool = True, capture_only: bool = False,
-                         constant_folding: bool = False):
+                         constant_folding: bool = False, only_include_mm: bool = False):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -2023,6 +2115,10 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         capture_only: If True, raise _CaptureComplete after capture to skip
             expensive inductor compilation. Caller should catch the error.
         validate: If True, run eager validation on captured repros (can trigger CUDA errors).
+        only_include_mm: Capture small matmul pattern regions instead of the
+            default fusion partitions (one region per pattern category, see
+            matmul_partitioner). Also set by REPRO_CAPTURE_ONLY_INCLUDE_MM=1
+            for the env-var auto-install.
         constant_folding: Set when the model is deployed with AOTInductor's
             runtime constant folding (aot_inductor.use_runtime_constant_folding):
             in inference graphs, work derived only from module parameters,
@@ -2035,7 +2131,8 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
     """
     global _active_state
     _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate,
-                                  capture_only=capture_only, constant_folding=constant_folding)
+                                  capture_only=capture_only, constant_folding=constant_folding,
+                                  only_include_mm=only_include_mm)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 
@@ -2153,4 +2250,7 @@ def uninstall_capture_hook():
 _auto_dir = os.environ.get("REPRO_CAPTURE_DIR")
 if _auto_dir:
     _auto_label = os.environ.get("REPRO_CAPTURE_LABEL", "auto")
-    install_capture_hook(_auto_dir, _auto_label)
+    install_capture_hook(
+        _auto_dir, _auto_label,
+        only_include_mm=os.environ.get("REPRO_CAPTURE_ONLY_INCLUDE_MM") == "1",
+    )

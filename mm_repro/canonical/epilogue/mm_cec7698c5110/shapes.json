@@ -1,0 +1,181 @@
+{
+  "points": [
+    {
+      "shape_hash": "b32c130d",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 5,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "38754245",
+      "inputs": [
+        [
+          [
+            16384,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              16384
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 5,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "73e8716a",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 5,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

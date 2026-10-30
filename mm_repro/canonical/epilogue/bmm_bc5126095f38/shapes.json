@@ -1,0 +1,68 @@
+{
+  "points": [
+    {
+      "shape_hash": "a5a5d9e5",
+      "inputs": [
+        [
+          [
+            1,
+            1,
+            2048,
+            2048
+          ],
+          "b8"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            1,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

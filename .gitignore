@@ -1,4 +1,5 @@
 __pycache__/
+.mm_repro_build_*/
 *.pyc
 *.log
 output/

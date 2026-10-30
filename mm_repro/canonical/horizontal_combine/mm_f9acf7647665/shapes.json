@@ -1,0 +1,94 @@
+{
+  "points": [
+    {
+      "shape_hash": "82d7bd78",
+      "inputs": [
+        [
+          [
+            512,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          [
+            512,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16",
+          {
+            "alias": 0
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 16
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 11,
+        "nodes": 14,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "alias_group_nbytes": [
+        4194304
+      ]
+    }
+  ]
+}

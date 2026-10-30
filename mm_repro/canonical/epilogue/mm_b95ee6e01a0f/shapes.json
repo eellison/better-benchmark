@@ -1,0 +1,88 @@
+{
+  "points": [
+    {
+      "shape_hash": "00430006",
+      "inputs": [
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "b8"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 4,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "points": [
+    {
+      "shape_hash": "59aeb372",
+      "inputs": [
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

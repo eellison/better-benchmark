@@ -1,0 +1,55 @@
+{
+  "points": [
+    {
+      "shape_hash": "fdbe497b",
+      "inputs": [
+        [
+          [
+            32,
+            1280
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000
+          ],
+          "f32"
+        ],
+        [
+          [
+            1280,
+            1000
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1280
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            1280
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/mnasnet1_0": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 10,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

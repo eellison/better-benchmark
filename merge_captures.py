@@ -464,6 +464,10 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         kind = entry.get("kind", "region")
         reduction_types = entry.get("reduction_types", [])
         kind_label = "_".join(reduction_types[:3]) if reduction_types else kind
+        if kind == "matmul":
+            # Name MM directories by their MM ops, e.g. addmm_bmm_<hash>.
+            mm_types = entry.get("mm_types", [])
+            kind_label = "_".join(mm_types) or kind
         dir_name = f"{kind_label}_{pattern_hash}"
         repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
         if repro_dir is None:
@@ -523,6 +527,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 "n_models": 1,
                 "models": [qual_key],
             }
+            if kind == "matmul":
+                meta["mm_types"] = mm_types
             _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
         # Write canonical repro.py if it doesn't exist or is older-format

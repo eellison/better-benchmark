@@ -1,0 +1,9 @@
+{
+  "pattern_hash": "d953aa3c500a",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "shape_points": 3,
+  "pattern_category": "prologue_epilogue",
+  "pattern_family": "ab9ba3f366ac"
+}

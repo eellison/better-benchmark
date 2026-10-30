@@ -1,0 +1,44 @@
+{
+  "points": [
+    {
+      "shape_hash": "9c28c8da",
+      "inputs": [
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 5,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

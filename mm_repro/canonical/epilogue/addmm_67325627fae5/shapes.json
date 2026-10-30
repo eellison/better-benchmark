@@ -1,0 +1,122 @@
+{
+  "points": [
+    {
+      "shape_hash": "c71c6e41",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            4096
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "4a2a40b6",
+      "inputs": [
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 96
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

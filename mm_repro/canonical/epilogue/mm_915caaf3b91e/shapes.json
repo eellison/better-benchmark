@@ -1,0 +1,148 @@
+{
+  "points": [
+    {
+      "shape_hash": "8614cea7",
+      "inputs": [
+        [
+          [
+            768,
+            2
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              8
+            ]
+          }
+        ],
+        [
+          [
+            8
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            2
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPT2ForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "5355cb07",
+      "inputs": [
+        [
+          [
+            2048,
+            2
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              2048
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              32
+            ]
+          }
+        ],
+        [
+          [
+            32
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              128
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

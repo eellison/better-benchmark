@@ -1,0 +1,154 @@
+{
+  "points": [
+    {
+      "shape_hash": "aa0df925",
+      "inputs": [
+        [
+          [
+            128,
+            1370,
+            12,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            1370,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            175360,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1370,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 6,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "bca04fc9",
+      "inputs": [
+        [
+          [
+            128,
+            197,
+            12,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            197,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            25216,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 6,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

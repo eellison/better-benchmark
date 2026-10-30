@@ -1,0 +1,61 @@
+{
+  "points": [
+    {
+      "shape_hash": "a7a72bc3",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2
+          ],
+          "i64"
+        ],
+        [
+          "S",
+          [
+            64,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

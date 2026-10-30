@@ -1,0 +1,160 @@
+{
+  "points": [
+    {
+      "shape_hash": "61d8da27",
+      "inputs": [
+        [
+          [
+            1,
+            1000,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1,
+            1000,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            2048
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1000,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            16,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/Qwen/Qwen3-0.6B": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 10,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "8c8a4a18",
+      "inputs": [
+        [
+          [
+            1,
+            1000,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1,
+            1000,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1000,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            8,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/Qwen/Qwen3-0.6B": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 10,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

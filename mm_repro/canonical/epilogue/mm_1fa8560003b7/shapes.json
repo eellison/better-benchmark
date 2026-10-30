@@ -1,0 +1,196 @@
+{
+  "points": [
+    {
+      "shape_hash": "0ad8fedc",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            16384
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 21,
+        "nodes": 30,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "d54e62bf",
+      "inputs": [
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            16384
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 21,
+        "nodes": 30,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "76a1b9b7",
+      "inputs": [
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            8192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            8192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            8192
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            8192
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            8192
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 21,
+        "nodes": 30,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

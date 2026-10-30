@@ -1,0 +1,129 @@
+{
+  "points": [
+    {
+      "shape_hash": "cdebc61a",
+      "inputs": [
+        [
+          [
+            1,
+            1,
+            2048,
+            2048
+          ],
+          "b8"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            1,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GPTNeoForCausalLM": {
+          "occurrences": 24
+        },
+        "hf/infer/GPTNeoForSequenceClassification": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 9,
+        "nodes": 19,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 4,
+        "vertical": {
+          "slice_axes": [
+            16,
+            32,
+            128
+          ],
+          "stages": [
+            {
+              "op": "bmm",
+              "R": 128,
+              "F": 128
+            },
+            {
+              "op": "amax",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "bmm",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

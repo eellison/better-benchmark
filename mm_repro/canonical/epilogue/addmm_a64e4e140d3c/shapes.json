@@ -1,0 +1,150 @@
+{
+  "points": [
+    {
+      "shape_hash": "e5b88590",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            4096
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            99
+          ],
+          "i64"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 11,
+        "nodes": 18,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "1de05997",
+      "inputs": [
+        [
+          [
+            3072
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            2048,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            61
+          ],
+          "i64"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            2048,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 11,
+        "nodes": 18,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

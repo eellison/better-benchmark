@@ -1,0 +1,92 @@
+{
+  "points": [
+    {
+      "shape_hash": "c4eb900e",
+      "inputs": [
+        [
+          [
+            3072
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "12662a2f",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

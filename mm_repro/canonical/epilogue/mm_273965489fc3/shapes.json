@@ -1,0 +1,220 @@
+{
+  "points": [
+    {
+      "shape_hash": "58767d79",
+      "inputs": [
+        [
+          [
+            4096,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            512
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 8
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 9,
+        "inputs": 6,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "335b56f0",
+      "inputs": [
+        [
+          [
+            8192,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 9,
+        "inputs": 6,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "5910303a",
+      "inputs": [
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 6
+        },
+        "hf/train/T5Small": {
+          "occurrences": 6
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 9,
+        "inputs": 6,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

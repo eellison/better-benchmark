@@ -1,0 +1,126 @@
+{
+  "points": [
+    {
+      "shape_hash": "5df7285f",
+      "inputs": [
+        [
+          [
+            32768,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128,
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "ed954d49",
+      "inputs": [
+        [
+          [
+            32768,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}
