@@ -140,10 +140,6 @@
         "outputs": 3,
         "contraction_depth": 1
       },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ],
       "alias_group_nbytes": [
         16777216
       ]
@@ -279,10 +275,6 @@
         "outputs": 3,
         "contraction_depth": 1
       },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ],
       "alias_group_nbytes": [
         20971520
       ]
@@ -418,10 +410,6 @@
         "outputs": 3,
         "contraction_depth": 1
       },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ],
       "alias_group_nbytes": [
         10485760
       ]
@@ -557,10 +545,6 @@
         "outputs": 3,
         "contraction_depth": 1
       },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ],
       "alias_group_nbytes": [
         25165824
       ]
@@ -696,10 +680,6 @@
         "outputs": 3,
         "contraction_depth": 1
       },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ],
       "alias_group_nbytes": [
         33554432
       ]

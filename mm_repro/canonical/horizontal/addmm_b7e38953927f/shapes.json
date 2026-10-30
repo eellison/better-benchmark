@@ -179,11 +179,7 @@
         "inputs": 11,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

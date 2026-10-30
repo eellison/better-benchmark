@@ -23,7 +23,6 @@ import contextlib
 import hashlib
 import json
 import multiprocessing
-import re
 import subprocess
 import sys
 import tempfile
@@ -46,27 +45,12 @@ POLICY_ID = hashlib.sha256(
     + (ROOT / "repro_harness.py").read_bytes()
 ).hexdigest()[:16]
 
-VISIBLE_MM = re.compile(
-    r"torch\.ops\.aten\.(?:mm|bmm|matmul|addmm|baddbmm|mv|addmv|_scaled_mm|_int_mm)\."
-)
-
-
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2))
     temporary.replace(path)
-
-
-def source_id(path):
-    """Hash of a source graph and its .meta.json sidecar."""
-    path = Path(path)
-    digest = hashlib.sha256(path.read_bytes())
-    sidecar = path.with_suffix(".meta.json")
-    if sidecar.exists():
-        digest.update(sidecar.read_bytes())
-    return digest.hexdigest()
 
 
 def extract_one(task):
@@ -90,17 +74,12 @@ def extract_one(task):
         contextlib.redirect_stderr(log),
     ):
         try:
-            row["source_id"] = source_id(source)
-            # Cheap text check first: most graphs without an MM need no trace.
-            if not VISIBLE_MM.search(Path(source).read_text()):
-                row.update(status="no_visible_mm", original_mm=0, selected_mm=0)
-                return row
             gm = trace_full_graph_fake(load_full_graph_definition(source))
-            diagnostics = {}
-            components = get_matmul_regions(
-                gm, partition_node_is_supported, diagnostics=diagnostics
-            )
-            row["pattern_diagnostics"] = diagnostics
+            original_mm = sum(is_matmul(n) for n in gm.graph.nodes)
+            if not original_mm:
+                row.update(status="no_mm", original_mm=0)
+                return row
+            components = get_matmul_regions(gm, partition_node_is_supported)
             state = _CaptureState(
                 str(capture_dir), label=source, only_include_mm=True, validate=False
             )
@@ -113,16 +92,14 @@ def extract_one(task):
             for region, observed in zip(components, observations, strict=True):
                 row["regions"].append(
                     {
-                        **observed,
-                        "outputs": [n.name for n in region.outputs],
+                        "pattern_hash": observed["pattern_hash"],
+                        "shape_hash": observed["shape_hash"],
                         "metrics": region.metrics,
                     }
                 )
             row.update(
                 status="ok",
-                original_mm=sum(is_matmul(n) for n in gm.graph.nodes),
-                selected_mm=len({n for r in components for n in r if is_matmul(n)}),
-                graph_nodes=len(gm.graph.nodes),
+                original_mm=original_mm,
             )
         except Exception:  # noqa: BLE001 -- reported by merge_raw_captures
             row.update(status="failed", error=traceback.format_exc())

@@ -277,19 +277,6 @@ def mm_operands(node):
     return [a for a in node.args[start : start + 2] if isinstance(a, Node)]
 
 
-def horizontal_matmul_shapes_match(dots, ancestors, shapes):
-    """MMs that do not depend on each other have equal output shapes.
-
-    ancestors[n] holds the MMs that n depends on. K is not compared, and
-    unknown output shapes never count as equal.
-    """
-    return all(
-        shapes[a] is not None and shapes[a] == shapes[b]
-        for a, b in itertools.combinations(dots, 2)
-        if a not in ancestors[b] and b not in ancestors[a]
-    )
-
-
 def reduction_size(node, shapes):
     """Elements reduced per output: K for an MM, else the reduced axes' product.
 
@@ -453,8 +440,7 @@ _SHARING_TRANSPARENT = _SAME_VALUES | _RESHAPES | {
 class MatmulLimits:
     """Size limits of one extracted region (also applied by curation)."""
 
-    # 128 = one Triton tile without padding; at 192 (padded to 256) fused
-    # kernels lost to separate ones (docs/vertical_fusion_study.md).
+    # Bound reduction domains and intermediate elements per independent slice.
     reduction_limit: int = 128  # R of every vertical stage
     intermediate_limit: int = 128  # F of every vertical stage
     max_horizontal: int = 3  # MMs in a horizontal group; growth stops at 3

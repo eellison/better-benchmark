@@ -35,6 +35,7 @@ class GraphModule(torch.nn.Module):
     assert repros[0].parent.parent.name == "epilogue"
     assert all("control" not in p.name for p in tmp_path.iterdir())
     assert not list(tmp_path.glob(".mm_repro_build_*"))
-    rows = json.loads((output / "occurrences.json").read_text())
-    assert sum(len(r["regions"]) for r in rows) == 1
-    assert rows[0]["source"] == "repros/models/test/infer/demo/full_graph_000.py"
+    points = json.loads(repros[0].with_name("shapes.json").read_text())["points"]
+    assert points[0]["models"] == {"test/infer/demo": {"occurrences": 1}}
+    assert result["region_occurrences"] == 1
+    assert {p.name for p in output.iterdir()} == {"canonical", "report.json", "README.md"}

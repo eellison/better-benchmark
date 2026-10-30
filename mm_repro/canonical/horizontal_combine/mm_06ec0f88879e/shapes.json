@@ -59,13 +59,7 @@
         "inputs": 5,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "gated_parallel_mm",
-        "horizontal",
-        "horizontal_pw_join",
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

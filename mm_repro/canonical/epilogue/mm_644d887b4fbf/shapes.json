@@ -103,8 +103,7 @@
         "inputs": 10,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     },
     {
       "shape_hash": "bf522dbc",
@@ -209,8 +208,7 @@
         "inputs": 10,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     }
   ]
 }

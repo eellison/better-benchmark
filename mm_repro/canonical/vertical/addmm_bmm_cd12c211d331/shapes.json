@@ -156,13 +156,7 @@
             }
           ]
         }
-      },
-      "coverage": [
-        "mm_block_amax_sum",
-        "mm_pw_mm",
-        "mm_pw_sum",
-        "vertical_mm"
-      ]
+      }
     }
   ]
 }

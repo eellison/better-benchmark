@@ -361,6 +361,4 @@ graphs, one per pattern family in six categories (prologue, epilogue,
 prologue_epilogue, horizontal, horizontal_combine, vertical;
 **585 repros / 1019 shapes**). Regeneration runs on CPU with FakeTensors and is
 deterministic. See [docs/matmul_partitioning.md](docs/matmul_partitioning.md)
-for the selection rules, layout and validation, and
-[docs/vertical_fusion_study.md](docs/vertical_fusion_study.md) for the
-single-kernel Helion study behind the vertical limits.
+for the selection rules, layout and validation.

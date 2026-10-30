@@ -116,12 +116,7 @@
             }
           ]
         }
-      },
-      "coverage": [
-        "mm_pw_sum",
-        "pw_prologue",
-        "reduction_mm_reduction"
-      ]
+      }
     }
   ]
 }

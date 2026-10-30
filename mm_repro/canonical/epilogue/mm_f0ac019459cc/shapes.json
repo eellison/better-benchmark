@@ -100,8 +100,7 @@
         "inputs": 10,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     },
     {
       "shape_hash": "67ea3c3f",
@@ -206,8 +205,7 @@
         "inputs": 10,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     }
   ]
 }

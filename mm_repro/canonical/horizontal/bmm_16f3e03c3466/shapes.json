@@ -97,11 +97,7 @@
         "inputs": 3,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ]
+      }
     }
   ]
 }

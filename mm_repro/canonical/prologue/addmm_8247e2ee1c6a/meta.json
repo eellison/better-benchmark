@@ -3,32 +3,7 @@
   "pattern_hash_mode": "scalar_literals_v1",
   "shape_hash_mode": "ordered_input_specs_v1",
   "kind": "matmul",
-  "curation": "metadata_normalization_v1",
-  "category": "core",
-  "source_patterns": [
-    "fce81ebd68da"
-  ],
-  "normalizations": {
-    "input_permutation": 8,
-    "reshape_chain": 8
-  },
-  "origin_ops": [
-    "aten.add.Tensor",
-    "aten.add.Tensor",
-    "aten.addmm.default",
-    "aten.mul.Tensor",
-    "aten.mul.Tensor",
-    "aten.permute.default",
-    "aten.rsqrt.default",
-    "aten.sub.Tensor",
-    "aten.view.default",
-    "aten.view.default",
-    "prims.convert_element_type.default"
-  ],
   "shape_points": 8,
-  "coverage": [
-    "pw_prologue"
-  ],
   "pattern_category": "prologue",
   "pattern_family": "0357e75ade4d"
 }

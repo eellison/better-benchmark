@@ -99,10 +99,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "a68cdab9",
@@ -200,10 +197,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "d395ca71",
@@ -301,10 +295,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "3e7e50df",
@@ -402,10 +393,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "9e8e944a",
@@ -503,10 +491,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "ee3df7d1",
@@ -604,10 +589,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "5005eaa8",
@@ -705,10 +687,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "74ee6910",
@@ -806,10 +785,7 @@
         "inputs": 7,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

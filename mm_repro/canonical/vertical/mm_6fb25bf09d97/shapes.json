@@ -86,13 +86,7 @@
             }
           ]
         }
-      },
-      "coverage": [
-        "mm_pw_mm",
-        "mm_pw_sum",
-        "pw_prologue",
-        "vertical_mm"
-      ]
+      }
     }
   ]
 }

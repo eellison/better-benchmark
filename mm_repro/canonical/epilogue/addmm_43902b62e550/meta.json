@@ -3,22 +3,7 @@
   "pattern_hash_mode": "scalar_literals_v1",
   "shape_hash_mode": "ordered_input_specs_v1",
   "kind": "matmul",
-  "curation": "metadata_normalization_v1",
-  "category": "core",
-  "source_patterns": [
-    "33117e3f4e89"
-  ],
-  "normalizations": {
-    "input_permutation": 1
-  },
-  "origin_ops": [
-    "aten.addmm.default",
-    "aten.relu.default",
-    "aten.view.default",
-    "prims.convert_element_type.default"
-  ],
   "shape_points": 1,
-  "coverage": [],
   "pattern_category": "epilogue",
   "pattern_family": "fd510e9f5d8d"
 }

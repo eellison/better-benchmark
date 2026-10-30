@@ -76,10 +76,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "bbc6f143",
@@ -157,10 +154,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "695832c4",
@@ -238,10 +232,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "0149ee99",
@@ -319,10 +310,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "4d00b0dd",
@@ -400,10 +388,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

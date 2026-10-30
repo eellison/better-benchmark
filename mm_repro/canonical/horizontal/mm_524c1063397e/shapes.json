@@ -72,10 +72,6 @@
         "outputs": 2,
         "contraction_depth": 1
       },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ],
       "alias_group_nbytes": [
         33554432
       ]

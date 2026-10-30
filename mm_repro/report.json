@@ -10,24 +10,11 @@
     "max_outputs": 4,
     "max_stages": 8
   },
-  "policy_id": "698f7047590f6b96",
+  "policy_id": "677e84faa09ea0bb",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
-    "size_limits": {
-      "reduction_limit": 128,
-      "intermediate_limit": 128,
-      "max_horizontal": 3,
-      "max_mm": 3,
-      "max_nodes": 48,
-      "max_compute": 32,
-      "max_inputs": 12,
-      "max_outputs": 4,
-      "max_stages": 8
-    },
-    "category": "core",
     "version": "metadata_normalization_v1",
-    "dependency_id": "b626354cf684f611",
-    "corpus_count_limit": null,
+    "dependency_id": "b910331d4cfd7a91",
     "raw_size_admitted_repros": 1361,
     "raw_shape_points": 2038
   },
@@ -38,18 +25,6 @@
   "region_occurrences": 13275,
   "sources": 364,
   "original_mm": 17575,
-  "coverage_repros": {
-    "gated_parallel_mm": 5,
-    "horizontal": 92,
-    "horizontal_pw_join": 5,
-    "mm_block_amax_sum": 41,
-    "mm_pw_mm": 55,
-    "mm_pw_sum": 47,
-    "pure_horizontal": 10,
-    "pw_prologue": 202,
-    "reduction_mm_reduction": 1,
-    "vertical_mm": 60
-  },
   "pattern_categories": {
     "prologue": {
       "repros": 49,
@@ -82,10 +57,5 @@
       "family_members": 102
     }
   },
-  "families": 585,
-  "fake_tensor_validation": {
-    "repros": 585,
-    "shape_points": 1019,
-    "failures": []
-  }
+  "families": 585
 }

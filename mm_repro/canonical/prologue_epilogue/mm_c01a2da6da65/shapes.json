@@ -76,10 +76,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "aff09c0b",
@@ -157,10 +154,7 @@
         "inputs": 4,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

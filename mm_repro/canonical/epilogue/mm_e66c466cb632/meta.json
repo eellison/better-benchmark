@@ -3,43 +3,7 @@
   "pattern_hash_mode": "scalar_literals_v1",
   "shape_hash_mode": "ordered_input_specs_v1",
   "kind": "matmul",
-  "curation": "metadata_normalization_v1",
-  "category": "core",
-  "source_patterns": [
-    "0f9abfde46f3",
-    "1998de186443",
-    "1b816fd8b3d9",
-    "1c1b791245e6",
-    "40c6a19aecc1",
-    "6fbed5b51363",
-    "7b3ca578b213",
-    "9722e5801075",
-    "a681fadfa8ea",
-    "aa3fc3db3442",
-    "d481ddf5f3e0",
-    "e720c2e960f6"
-  ],
-  "normalizations": {
-    "input_permutation_through_float_cast": 12,
-    "seed_slot": 12
-  },
-  "origin_ops": [
-    "aten.gt.Scalar",
-    "aten.le.Scalar",
-    "aten.mm.default",
-    "aten.mul.Tensor",
-    "aten.mul.Tensor",
-    "aten.relu.default",
-    "aten.view.default",
-    "aten.view.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default",
-    "prims.inductor_lookup_seed.default",
-    "prims.inductor_random.default"
-  ],
   "shape_points": 1,
-  "coverage": [],
   "pattern_category": "epilogue",
   "pattern_family": "ae759ba32021"
 }

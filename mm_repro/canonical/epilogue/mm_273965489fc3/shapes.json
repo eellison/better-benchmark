@@ -68,8 +68,7 @@
         "inputs": 6,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     },
     {
       "shape_hash": "335b56f0",
@@ -142,8 +141,7 @@
         "inputs": 6,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     },
     {
       "shape_hash": "5910303a",
@@ -216,8 +214,7 @@
         "inputs": 6,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     }
   ]
 }

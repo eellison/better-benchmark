@@ -22,6 +22,7 @@ pytest tests/test_matmul_partitioner.py tests/test_mm_*.py
   older run never survive. Intermediate files live in a temporary directory.
 - The output is deterministic: the same sources and code give an identical
   `mm_repro/`, independent of worker count.
+- The output contains only `canonical/`, `report.json` and `README.md`.
 - Options: `--output DIR`, `--workers N`, `--source FILE` (repeatable).
 
 Current snapshot: **585 repros / 1019 shape points** from 13275 region
@@ -93,10 +94,8 @@ For every stage:
 - `F` = elements of the stage result needed per slice by later stages (0 if
   none), `F <= 128`.
 
-128 is one Triton tile without padding. Hand-written single-kernel Helion
-versions of the vertical repros showed that regions at R/F = 144-192 (padded
-to 256) were not faster as one kernel
-([vertical_fusion_study.md](vertical_fusion_study.md)).
+The default limits bound both the reduction domain and the intermediate
+elements needed per independent slice to 128 (`MatmulLimits`).
 
 Stages are absorbed greedily in graph order and the analysis is re-run for
 every trial. Candidates are rejected when an internal index relation is
@@ -134,7 +133,7 @@ R and F.
    DAG plus the input/output dtypes that ignores transparent ops and scalar
    literals. Only the member with the most source occurrences is exported.
    This drops layout and scalar variants and the shape points of the other
-   members; `families.json` lists them.
+   members. The report records the number of folded members per category.
 4. **Publish**: the curated tree replaces `mm_repro/`.
 
 Real layouts, storage offsets, aliasing between inputs, casts and scalar
@@ -147,12 +146,9 @@ scalar-sensitive (`pattern_hash_mode: scalar_literals_v1`).
 | --- | --- |
 | `canonical/<category>/<mm ops>_<hash>/repro.py` | FX code of the region (`class Repro`) plus `make_inputs()` |
 | `canonical/<category>/<mm ops>_<hash>/shapes.json` | every shape point: input shapes, dtypes, strides, offsets, generators, source models, partition metrics |
-| `canonical/<category>/<mm ops>_<hash>/meta.json` | pattern hash, category, family, applied normalizations, coverage labels |
-| `families.json` | every family: representative, members (hash, occurrences, shape points) |
-| `models/<suite>/<mode>/<model>/manifest.json` | the repros found in each model |
-| `occurrences.json` | per source graph: each region (source node names, outputs) and the repro/shape it became; folded family members carry `family_member` and `shape_hash: null` |
-| `curation_mapping.json` | raw capture (pattern, shape) -> exported (pattern, shape), with input order and views |
-| `inventory.json`, `report.json`, `validation.json` | summary, generation settings, FakeTensor results |
+| `canonical/<category>/<mm ops>_<hash>/meta.json` | pattern hash, category, family and shape count |
+| `report.json` | corpus counts and generation settings |
+| `README.md` | category counts and regeneration command |
 
 ## Capturing MM regions from other models
 
@@ -166,9 +162,5 @@ or set `REPRO_CAPTURE_ONLY_INCLUDE_MM=1` next to `REPRO_CAPTURE_DIR`.
 
 ## Limits of this corpus
 
-Selection does not certify that fusing a region is faster; that needs real
-compilation and measurement. For the vertical category,
-[vertical_fusion_study.md](vertical_fusion_study.md) measured hand-written
-Helion kernels: every written vertical repro became one kernel without
-recomputation, but regions with few independent slices (e.g.
-`bmm_c044adeba521`, 16 slices) are still slower as one kernel.
+Selection uses graph structure and tensor metadata. Fusion performance
+requires separate compilation and measurement.

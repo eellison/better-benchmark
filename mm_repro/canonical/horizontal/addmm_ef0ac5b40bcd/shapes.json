@@ -123,10 +123,7 @@
         "inputs": 7,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal"
-      ]
+      }
     },
     {
       "shape_hash": "84e1c4f4",
@@ -254,10 +251,7 @@
         "inputs": 7,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal"
-      ]
+      }
     },
     {
       "shape_hash": "9358e644",
@@ -382,10 +376,7 @@
         "inputs": 7,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal"
-      ]
+      }
     },
     {
       "shape_hash": "f25e6a28",
@@ -510,10 +501,7 @@
         "inputs": 7,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal"
-      ]
+      }
     }
   ]
 }

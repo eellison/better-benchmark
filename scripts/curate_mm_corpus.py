@@ -17,8 +17,7 @@ Groups are then collected into pattern families (structure_key: compute DAG
 plus input/output dtypes, ignoring transparent ops and scalars) and only the
 representative of each family is written, as canonical/<category>/<mm
 ops>_<hash>/ with its code (repro.py), every shape point (shapes.json) and
-metadata (meta.json). families.json lists every member; occurrences.json and
-curation_mapping.json map source graphs and raw captures to the export.
+metadata (meta.json). Only the canonical repros and a summary are exported.
 """
 
 from __future__ import annotations
@@ -26,10 +25,8 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-import re
 import sys
-from collections import Counter, defaultdict
-from dataclasses import asdict
+from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,10 +41,10 @@ from mm_corpus_dedup import (
     tensor_metadata,
     trace_repro,
 )
-from mm_corpus_features import analyze_graph
 from mm_corpus_io import (
     admits,
     filter_patterns,
+    graph_metrics,
     load_records,
     write_json,
 )
@@ -91,7 +88,7 @@ def input_entries(gm, infos, nbytes, order=None):
 
 
 def canonicalize_seed_slots(gm):
-    """Read every inductor_lookup_seed from slot 0; True if anything changed.
+    """Read every inductor_lookup_seed from slot 0.
 
     Which slot of the seed buffer a dropout reads does not change its kernel,
     but the slot number is a literal that would split identical patterns.
@@ -103,7 +100,6 @@ def canonicalize_seed_slots(gm):
             changed = True
     if changed:
         gm.recompile()
-    return changed
 
 
 def shape_identity(inputs, nbytes, compile_policy=None):
@@ -155,35 +151,13 @@ def validate_candidate(group, candidate, mapping, config):
     ]
     if aliases(result) != aliases(expected):
         return None
-    candidate_graph = candidate["graph"]
-    reference_edges = sorted(
-        (
-            (data["output_index"], node)
-            for node, data in group["graph"].nodes(data=True)
-            if "output_index" in data
-        ),
-        key=lambda item: item[0],
-    )
-    permutation = (
-        [
-            candidate_graph.nodes[mapping[node]]["output_index"]
-            for _, node in reference_edges
-        ]
-        if reference_edges
-        else [0]
-    )
-    return entries, sizes, candidate_phs, permutation
+    return entries, sizes
 
 
 def write_repro(gm, path, pattern):
-    code = gm.print_readable(print_output=False)
-    code = re.sub(
-        r"^class \S+\(torch\.nn\.Module\):",
-        "class Repro(torch.nn.Module):",
-        code,
-        count=1,
-        flags=re.MULTILINE,
-    )
+    code = torch.fx.GraphModule(
+        gm, copy.deepcopy(gm.graph), class_name="Repro"
+    ).print_readable(print_output=False)
     header = f'''"""Curated MM repro. Pattern hash: {pattern}."""
 import sys
 from pathlib import Path
@@ -208,7 +182,7 @@ if __name__ == "__main__":
     path.write_text(header + code + tail)
 
 
-def pattern_families(groups):
+def family_representatives(groups):
     """Group repros by (category, structure_key); pick one representative.
 
     structure_key includes the input/output dtypes. The representative is the
@@ -220,45 +194,17 @@ def pattern_families(groups):
     families = defaultdict(list)
     for group in groups:
         families[(group["pattern_category"], group["family"])].append(group)
-    result = []
-    for (category, family), members in sorted(families.items()):
-        members.sort(key=lambda g: (-occurrences(g), g["hash"]))
-        for member in members:
-            member["family_representative"] = member is members[0]
-        result.append(
-            {
-                "pattern_category": category,
-                "family": family,
-                "representative": members[0]["hash"],
-                "members": [
-                    {
-                        "pattern_hash": g["hash"],
-                        "occurrences": occurrences(g),
-                        "shape_points": len(g["points"]),
-                    }
-                    for g in members
-                ],
-                "occurrences": sum(occurrences(g) for g in members),
-            }
-        )
-    return result
-
-
-def export_core(output, groups, rows, mappings, source_report, limits):
-    output.mkdir(parents=True)
-    families = pattern_families(groups)
-    # Pattern corpus: one repro per family; other members map to it.
-    representative = {
-        m["pattern_hash"]: f["representative"] for f in families for m in f["members"]
+    return {
+        min(members, key=lambda g: (-occurrences(g), g["hash"]))["hash"]
+        for members in families.values()
     }
+
+
+def export_core(output, groups, rows, admitted_points, source_report):
+    output.mkdir(parents=True)
     members = groups
-    groups = [g for g in groups if g["family_representative"]]
-    hashes = {g["hash"] for g in groups}
-    inventory, model_patterns = [], defaultdict(set)
-    for group in members:
-        for point in group["points"].values():
-            for model in point["models"]:
-                model_patterns[model].add(representative.get(group["hash"], group["hash"]))
+    representatives = family_representatives(groups)
+    groups = [g for g in groups if g["hash"] in representatives]
     for group in groups:
         prefix = "_".join(
             sorted(
@@ -292,80 +238,16 @@ def export_core(output, groups, rows, mappings, source_report, limits):
             "pattern_hash_mode": "scalar_literals_v1",
             "shape_hash_mode": "ordered_input_specs_v1",
             "kind": "matmul",
-            "curation": "metadata_normalization_v1",
-            "category": "core",
-            "source_patterns": sorted(group["raw_hashes"]),
-            "normalizations": dict(group["changes"]),
-            "origin_ops": sorted(
-                str(n.target)
-                for n in group["gm"].graph.nodes
-                if n.op == "call_function"
-            ),
             "shape_points": len(points),
-            "coverage": sorted(group["coverage"]),
         }
         meta["pattern_category"] = group["pattern_category"]
         meta["pattern_family"] = group["family"]
         write_json(directory / "meta.json", meta)
-        inventory.append(
-            {
-                "pattern_hash": group["hash"],
-                "repro": str((directory / "repro.py").relative_to(output)),
-                "shape_points": len(points),
-                "traits": sorted(group["coverage"]),
-                "pattern_category": group["pattern_category"],
-            }
-        )
-    filtered_rows = copy.deepcopy(rows)
-    for row in filtered_rows:
-        kept = []
-        for region in row["regions"]:
-            entry = mappings.get((region["pattern_hash"], region["shape_hash"]))
-            if entry is None:
-                continue
-            if entry["pattern_hash"] not in hashes:
-                if entry["pattern_hash"] in representative:
-                    # Deduplicated family member: point at the representative.
-                    kept.append(
-                        {
-                            **region,
-                            "raw_pattern_hash": region["pattern_hash"],
-                            "raw_shape_hash": region["shape_hash"],
-                            "pattern_hash": representative[entry["pattern_hash"]],
-                            "shape_hash": None,
-                            "family_member": entry["pattern_hash"],
-                        }
-                    )
-                continue
-            kept.append(
-                {
-                    **region,
-                    "raw_pattern_hash": region["pattern_hash"],
-                    "raw_shape_hash": region["shape_hash"],
-                    **entry,
-                }
-            )
-        row["regions"] = kept
-        row["source_partition_selected_mm"] = row.pop("selected_mm")
-        row["exported_regions"] = len(kept)
-    write_json(output / "occurrences.json", filtered_rows)
-    for model, patterns in model_patterns.items():
-        write_json(
-            output / "models" / model / "manifest.json",
-            {"patterns": sorted(patterns), "category": "core"},
-        )
-    write_json(output / "inventory.json", inventory)
-    coverage = {
-        key: sum(key in g["coverage"] for g in groups)
-        for key in {k for g in groups for k in g["coverage"]}
-    }
     report = {
         "policy": source_report["policy"],
         "policy_id": source_report["policy_id"],
         "curation": {
             "input_source": "repros/models/**/full_graph_*.py",
-            "size_limits": asdict(limits),
-            "category": "core",
             "version": "metadata_normalization_v1",
             "dependency_id": hashlib.sha256(
                 b"".join(
@@ -373,7 +255,6 @@ def export_core(output, groups, rows, mappings, source_report, limits):
                     for name in (
                         "scripts/curate_mm_corpus.py",
                         "scripts/mm_corpus_dedup.py",
-                        "scripts/mm_corpus_features.py",
                         "scripts/mm_corpus_io.py",
                         "mm_region_quality.py",
                         "capture_hook.py",
@@ -383,16 +264,17 @@ def export_core(output, groups, rows, mappings, source_report, limits):
                     )
                 )
             ).hexdigest()[:16],
-            "corpus_count_limit": None,
         },
         "unique_repros": len(groups),
         "shape_points": sum(len(g["points"]) for g in groups),
         "family_members": len(members),
         "deduplicated_repros": len(members) - len(groups),
-        "region_occurrences": sum(len(r["regions"]) for r in filtered_rows),
+        "region_occurrences": sum(
+            (region["pattern_hash"], region["shape_hash"]) in admitted_points
+            for row in rows for region in row["regions"]
+        ),
         "sources": len(rows),
         "original_mm": sum(r["original_mm"] for r in rows),
-        "coverage_repros": dict(sorted(coverage.items())),
     }
     report["pattern_categories"] = {
         category: {
@@ -404,17 +286,8 @@ def export_core(output, groups, rows, mappings, source_report, limits):
         }
         for category in CATEGORIES
     }
-    report["families"] = len(families)
-    write_json(output / "families.json", families)
+    report["families"] = len(groups)
     write_json(output / "report.json", report)
-    write_json(
-        output / "curation_mapping.json",
-        [
-            {"raw_pattern_hash": p, "raw_shape_hash": s, **m}
-            for (p, s), m in mappings.items()
-            if m["pattern_hash"] in hashes
-        ],
-    )
     per_category = (
         "\n".join(
             f"- `{c}`: {v['repros']} repros (one per family; {v['family_members']} before dedup) / {v['shape_points']} shape points"
@@ -423,7 +296,7 @@ def export_core(output, groups, rows, mappings, source_report, limits):
         + "\n\n"
     )
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Scalar values, input domains, strides, offsets and output aliases are preserved. Alignment/copy-only and infinity-mask regions are excluded by the partitioner. There is no corpus-count cap.\n\n[Report](report.json) · [Source input/output mappings](curation_mapping.json) · [Source occurrences](occurrences.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Scalar values, input domains, strides, offsets and output aliases are preserved. Alignment/copy-only and infinity-mask regions are excluded by the partitioner. There is no corpus-count cap.\n\n[Report](report.json)\n"
     )
     return report
 
@@ -440,7 +313,7 @@ def curate_corpus(source: Path, output: Path):
     # Independent MMs of a vertical chain may differ in shape.
     kept = filter_patterns(records, limits)
     raw_report = json.loads((source / "report.json").read_text())
-    groups, buckets, mappings = [], defaultdict(list), {}
+    groups, buckets, admitted_points = [], defaultdict(list), set()
     torch.set_num_threads(1)
     processed = 0
     for record in kept:
@@ -449,14 +322,13 @@ def curate_corpus(source: Path, output: Path):
         configs = list(load_shape_configs(str(path)).values())
         with fake_tensor_ctx():
             for point, config in zip(points, configs):
-                gm, infos, positions = trace_repro(path, config)
+                gm, infos = trace_repro(path, config)
                 original_contract = metadata_contract(gm)
-                gm, infos, _shape_params, transforms, changes = normalize_graph(
+                gm, infos, _shape_params = normalize_graph(
                     gm, infos
                 )
                 annotate_external_sqrt_inputs(gm, infos)
-                if canonicalize_seed_slots(gm):
-                    changes.append("seed_slot")
+                canonicalize_seed_slots(gm)
                 candidate = {"gm": gm, "infos": infos}
                 # Normalization must not change what the repro returns.
                 contract = metadata_contract(gm)
@@ -468,14 +340,14 @@ def curate_corpus(source: Path, output: Path):
                 if quality["category"] != "core":
                     processed += 1
                     continue
-                analysis = analyze_graph(gm)
+                metrics = graph_metrics(gm)
                 category = classify_pattern_graph(gm)
                 extracted = point["partition_metrics"].get("category")
                 if category is None or category != extracted:
                     raise ValueError(
                         (record["id"], "pattern category changed", extracted, category)
                     )
-                if not admits(analysis["metrics"], limits):
+                if not admits(metrics, limits):
                     raise ValueError(
                         (
                             record["id"],
@@ -485,7 +357,6 @@ def curate_corpus(source: Path, output: Path):
                 # Find an equivalent group: same WL digest, an isomorphism of
                 # the DAGs, and the group's code replays this point exactly.
                 graph = semantic_graph(gm)
-                candidate["graph"] = graph
                 digest = graph_digest(graph)
                 group = None
                 mapping = None
@@ -509,9 +380,6 @@ def curate_corpus(source: Path, output: Path):
                         "gm": gm,
                         "graph": graph,
                         "points": {},
-                        "raw_hashes": set(),
-                        "changes": Counter(),
-                        "coverage": set(),
                         "pattern_category": category,
                         "family": structure_key(gm),
                     }
@@ -523,7 +391,7 @@ def curate_corpus(source: Path, output: Path):
                         raise ValueError(
                             "new representative fails own metadata contract"
                         )
-                entries, sizes, mapped_phs, permutation = validation
+                entries, sizes = validation
                 shape, payload = shape_identity(
                     entries, sizes, config.get("compile_policy")
                 )
@@ -539,7 +407,7 @@ def curate_corpus(source: Path, output: Path):
                         "inputs": entries,
                         "models": {},
                         "partition_metrics": {
-                            **analysis["metrics"],
+                            **metrics,
                             # Slice axes and per-stage R/F of a vertical region.
                             **{
                                 k: v
@@ -547,7 +415,6 @@ def curate_corpus(source: Path, output: Path):
                                 if k == "vertical"
                             },
                         },
-                        "coverage": analysis["coverage"],
                         "_signature": payload,
                     },
                 )
@@ -558,25 +425,7 @@ def curate_corpus(source: Path, output: Path):
                 for model, counts in point["models"].items():
                     item = target["models"].setdefault(model, {"occurrences": 0})
                     item["occurrences"] += counts.get("occurrences") or 0
-                group["raw_hashes"].add(record["id"])
-                group["changes"].update(changes)
-                group["coverage"].update(analysis["coverage"])
-                mappings[(record["id"], point["shape_hash"])] = {
-                    "pattern_hash": group["hash"],
-                    "shape_hash": shape,
-                    "input_mapping": [
-                        {
-                            "raw_input_index": positions.get(n.name),
-                            "shape_value": list(n.meta["val"])
-                            if n.name not in infos
-                            else None,
-                            "views": transforms.get(n.name, []),
-                        }
-                        for n in mapped_phs
-                    ],
-                    "output_permutation": permutation,
-                    "normalizations": changes,
-                }
+                admitted_points.add((record["id"], point["shape_hash"]))
                 processed += 1
         if processed % 50 < len(points):
             print(
@@ -586,7 +435,7 @@ def curate_corpus(source: Path, output: Path):
     for group in groups:
         for point in group["points"].values():
             point.pop("_signature")
-    report = export_core(output, groups, rows, mappings, raw_report, limits)
+    report = export_core(output, groups, rows, admitted_points, raw_report)
     report["curation"]["raw_size_admitted_repros"] = len(kept)
     report["curation"]["raw_shape_points"] = processed
     write_json(output / "report.json", report)

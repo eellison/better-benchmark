@@ -57,8 +57,7 @@
         "inputs": 5,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     },
     {
       "shape_hash": "38754245",
@@ -117,8 +116,7 @@
         "inputs": 5,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     },
     {
       "shape_hash": "73e8716a",
@@ -177,8 +175,7 @@
         "inputs": 5,
         "outputs": 1,
         "contraction_depth": 1
-      },
-      "coverage": []
+      }
     }
   ]
 }

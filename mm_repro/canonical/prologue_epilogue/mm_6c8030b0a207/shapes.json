@@ -117,10 +117,7 @@
         "inputs": 6,
         "outputs": 4,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

@@ -176,9 +176,6 @@
         "outputs": 1,
         "contraction_depth": 1
       },
-      "coverage": [
-        "pw_prologue"
-      ],
       "alias_group_nbytes": [
         308281344
       ]
@@ -359,9 +356,6 @@
         "outputs": 1,
         "contraction_depth": 1
       },
-      "coverage": [
-        "pw_prologue"
-      ],
       "alias_group_nbytes": [
         154140672
       ]
@@ -542,9 +536,6 @@
         "outputs": 1,
         "contraction_depth": 1
       },
-      "coverage": [
-        "pw_prologue"
-      ],
       "alias_group_nbytes": [
         77070336
       ]

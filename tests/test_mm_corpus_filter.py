@@ -1,10 +1,9 @@
-"""Size limits (mm_corpus_io) and coverage labels (mm_corpus_features)."""
+"""Size limits applied to the actual standalone MM repro graph."""
 
 from __future__ import annotations
 
 import torch
-from mm_corpus_features import analyze_graph
-from mm_corpus_io import admits, filter_patterns
+from mm_corpus_io import admits, filter_patterns, graph_metrics
 from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import get_fusion_partitions
@@ -31,12 +30,14 @@ def test_filter_keeps_every_record_within_the_limits_without_a_count_cap():
     assert [r["id"] for r in filter_patterns(records, FINAL_LIMITS)] == list(range(350))
 
 
-def test_coverage_labels_follow_value_dependencies():
+def test_graph_metrics_follow_value_dependencies():
     gm = make_fx(
         lambda x, y, a, b, c: (((x @ a).relu() + y @ b) @ c).relu(), tracing_mode="fake"
     )(*(torch.randn(8, 64) for _ in range(2)), *(torch.randn(64, 64) for _ in range(3)))
-    coverage = set(analyze_graph(gm)["coverage"])
-    assert {"horizontal", "horizontal_pw_join", "horizontal_then_mm", "mm_pw_mm"} <= coverage
+    metrics = graph_metrics(gm)
+    assert metrics["mm"] == 3
+    assert metrics["contraction_depth"] == 2
+    assert metrics["inputs"] == 5 and metrics["outputs"] == 1
 
 
 def test_gather_norm_mm_residual_norm_fits_the_final_limits():
@@ -59,9 +60,7 @@ def test_gather_norm_mm_residual_norm_fits_the_final_limits():
         torch.randn(8, 128, **bf16),
         *(torch.randn(128, **bf16) for _ in range(4)),
     )
-    analysis = analyze_graph(gm)
-    assert "gather_reduction_mm_reduction" in analysis["coverage"]
-    assert admits(analysis["metrics"], FINAL_LIMITS)
+    assert admits(graph_metrics(gm), FINAL_LIMITS)
     assert any(
         r.metrics["contraction_depth"] == 5 and admits(r.metrics, FINAL_LIMITS)
         for r in get_fusion_partitions(gm, only_include_mm=True)

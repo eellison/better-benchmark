@@ -1851,7 +1851,7 @@ if __name__ == "__main__":
         ``components`` captures already computed partitions instead of
         partitioning ``gm`` again (the MM corpus extractor reuses its own).
 
-        Returns one {pattern_hash, shape_hash, source_nodes} record per
+        Returns one {pattern_hash, shape_hash} record per
         captured partition, in partition order.
         """
         # Compute observed stats for the full graph's integer/bool placeholders
@@ -1970,7 +1970,6 @@ if __name__ == "__main__":
             full_key = f"{pattern_key}_{shape_key}"
             observations.append({
                 "pattern_hash": pattern_key, "shape_hash": shape_key,
-                "source_nodes": [n.name for n in comp],
             })
             # Count EVERY occurrence (pre-dedup): the repro file is written
             # once per point, but the count is what the accounting joins on.

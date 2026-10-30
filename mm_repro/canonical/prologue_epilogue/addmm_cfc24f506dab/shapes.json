@@ -72,10 +72,7 @@
         "inputs": 3,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

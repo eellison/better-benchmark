@@ -48,8 +48,7 @@ def trace_repro(path: Path, config: dict):
         n.name: copy.deepcopy(config["inputs"][i])
         for n, i in zip(placeholders, tensor_positions)
     }
-    positions = {n.name: i for n, i in zip(placeholders, tensor_positions)}
-    return gm, infos, positions
+    return gm, infos
 
 
 _PERMUTATIONS = {"aten.permute.default", "aten.t.default", "aten.transpose.int"}
@@ -101,7 +100,6 @@ def normalize_graph(gm, infos):
     logical ordering matters are kept. Views are removed only if their entire
     metadata matches, or collapsed when a direct view has identical metadata.
     """
-    changes = []
     # Reduction axes are a set; singleton reduced axes can be represented
     # consistently by keepdim=True and an explicit metadata view.
     for node in list(gm.graph.nodes):
@@ -151,9 +149,6 @@ def normalize_graph(gm, infos):
             node.meta["val"] = probe
             for user in users:
                 user.replace_input_with(node, view)
-            changes.append("canonical_reduction_keepdim")
-        if axes != dims:
-            changes.append("canonical_reduction_axes")
 
     initial_output = next(n for n in gm.graph.nodes if n.op == "output")
     exposed_storages = {
@@ -178,8 +173,6 @@ def normalize_graph(gm, infos):
         ):
             node.replace_all_uses_with(source)
             gm.graph.erase_node(node)
-            changes.append("internal_identity_adaptive_pool")
-    input_transforms = {n.name: [] for n in gm.graph.nodes if n.op == "placeholder"}
     for ph in [n for n in gm.graph.nodes if n.op == "placeholder"]:
         info = infos[ph.name]
         value = ph.meta.get("val")
@@ -207,29 +200,18 @@ def normalize_graph(gm, infos):
                     if tensor_metadata(cast_result) == tensor_metadata(
                         permutation.meta.get("val")
                     ):
-                        input_transforms[ph.name].append(
-                            {
-                                "op": str(permutation.target),
-                                "args": list(permutation.args[1:]),
-                            }
-                        )
                         ph.meta["val"] = transformed
                         node.meta["val"] = cast_result
                         _refresh_info(ph, info)
                         permutation.replace_all_uses_with(node)
                         gm.graph.erase_node(permutation)
-                        changes.append("input_permutation_through_float_cast")
                         continue
             if str(node.target) not in _PERMUTATIONS:
                 break
-            input_transforms[ph.name].append(
-                {"op": str(node.target), "args": list(node.args[1:])}
-            )
             ph.meta["val"] = node.meta["val"]
             _refresh_info(ph, info)
             node.replace_all_uses_with(ph)
             gm.graph.erase_node(node)
-            changes.append("input_permutation")
 
     changed = True
     while changed:
@@ -249,7 +231,6 @@ def normalize_graph(gm, infos):
             if tensor_metadata(value) == tensor_metadata(before):
                 node.replace_all_uses_with(parent)
                 gm.graph.erase_node(node)
-                changes.append("identity_view")
                 changed = True
                 continue
             if (
@@ -270,7 +251,6 @@ def normalize_graph(gm, infos):
                     node.args = (base, list(value.shape))
                     node.kwargs = {}
                     node.target = torch.ops.aten.view.default
-                    changes.append("reshape_chain")
                     if not parent.users:
                         gm.graph.erase_node(parent)
                     changed = True
@@ -279,7 +259,6 @@ def normalize_graph(gm, infos):
                 node.target = torch.ops.aten.view.default
                 node.args = (parent, list(value.shape))
                 node.kwargs = {}
-                changes.append("contiguous_shape_view")
                 changed = True
     gm.graph.eliminate_dead_code()
 
@@ -315,7 +294,6 @@ def normalize_graph(gm, infos):
         ) == tensor_metadata(value):
             node.replace_all_uses_with(previous)
             gm.graph.erase_node(node)
-            changes.append("internal_pointwise_cse")
         else:
             expressions[key] = node
     gm.graph.eliminate_dead_code()
@@ -324,18 +302,18 @@ def normalize_graph(gm, infos):
     gm.recompile()
     live_names = {n.name for n in gm.graph.nodes if n.op == "placeholder"}
     infos = {k: v for k, v in infos.items() if k in live_names}
-    return gm, infos, shape_params, input_transforms, changes
+    return gm, infos, shape_params
 
 
 def semantic_graph(gm):
     graph = nx.DiGraph()
     serial = 0
 
-    def add(label, **attrs):
+    def add(label):
         nonlocal serial
         key = ("aux", serial)
         serial += 1
-        graph.add_node(key, label=label, **attrs)
+        graph.add_node(key, label=label)
         return key
 
     def link(child, dest, slot):
@@ -358,20 +336,20 @@ def semantic_graph(gm):
             kind = (
                 "tensor" if isinstance(node.meta.get("val"), torch.Tensor) else "shape"
             )
-            graph.add_node(node, label="input:" + kind, role="input")
+            graph.add_node(node, label="input:" + kind)
             continue
         if node.op == "output":
-            graph.add_node(node, label="output", role="output")
+            graph.add_node(node, label="output")
             outputs = node.args[0]
             if isinstance(outputs, (tuple, list)):
-                for i, out in enumerate(outputs):
-                    edge = add("edge:output", output_index=i)
+                for out in outputs:
+                    edge = add("edge:output")
                     graph.add_edge(value(out), edge)
                     graph.add_edge(edge, node)
             else:
                 link(value(outputs), node, "output")
             continue
-        graph.add_node(node, label="op:" + str(node.target), role="op")
+        graph.add_node(node, label="op:" + str(node.target))
         symmetric = str(node.target) in {
             "aten.mul.Tensor",
             "prims.mul.default",

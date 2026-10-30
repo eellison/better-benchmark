@@ -49,11 +49,7 @@
         "inputs": 3,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ]
+      }
     },
     {
       "shape_hash": "5c193b76",
@@ -104,11 +100,7 @@
         "inputs": 3,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ]
+      }
     },
     {
       "shape_hash": "173ccdd8",
@@ -159,11 +151,7 @@
         "inputs": 3,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ]
+      }
     },
     {
       "shape_hash": "d4022346",
@@ -214,11 +202,7 @@
         "inputs": 3,
         "outputs": 2,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pure_horizontal"
-      ]
+      }
     }
   ]
 }

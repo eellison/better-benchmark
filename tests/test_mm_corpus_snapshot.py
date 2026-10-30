@@ -29,6 +29,10 @@ def test_committed_snapshot_and_source_references():
         shape_points = json.loads(path.with_name("shapes.json").read_text())["points"]
         points[meta["pattern_hash"]] = {p["shape_hash"] for p in shape_points}
         for p in shape_points:
+            assert p["models"]
+            for model in p["models"]:
+                source = ROOT / "repros" / "models" / model
+                assert next(source.glob("full_graph_*.py"), None) is not None
             metrics = p["partition_metrics"]
             assert metrics["mm"] <= limits.max_mm
             assert metrics["contraction_depth"] <= limits.max_stages
@@ -37,15 +41,5 @@ def test_committed_snapshot_and_source_references():
                 assert stage["F"] <= limits.intermediate_limit
     assert sum(len(p) for p in points.values()) == report["shape_points"] == 1019
     assert len(families) == report["families"]
-    rows = json.loads((corpus / "occurrences.json").read_text())
-    for row in rows:
-        assert (ROOT / row["source"]).is_file()
-        for region in row["regions"]:
-            if region.get("family_member"):
-                # Folded into its family representative: no exported shape.
-                assert region["pattern_hash"] in points and region["shape_hash"] is None
-            else:
-                assert region["shape_hash"] in points[region["pattern_hash"]]
-    assert sum(len(r["regions"]) for r in rows) == report["region_occurrences"]
-    for manifest in (corpus / "models").rglob("manifest.json"):
-        assert set(json.loads(manifest.read_text())["patterns"]) <= points.keys()
+    assert report["deduplicated_repros"] == report["family_members"] - len(families)
+    assert {p.name for p in corpus.iterdir()} == {"canonical", "report.json", "README.md"}

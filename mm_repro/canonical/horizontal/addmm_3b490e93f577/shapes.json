@@ -198,11 +198,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "dfd97431",
@@ -402,11 +398,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

@@ -3,32 +3,7 @@
   "pattern_hash_mode": "scalar_literals_v1",
   "shape_hash_mode": "ordered_input_specs_v1",
   "kind": "matmul",
-  "curation": "metadata_normalization_v1",
-  "category": "core",
-  "source_patterns": [
-    "eac0f1798a82"
-  ],
-  "normalizations": {
-    "input_permutation_through_float_cast": 3
-  },
-  "origin_ops": [
-    "aten.addmm.default",
-    "aten.addmm.default",
-    "aten.addmm.default",
-    "aten.tanh.default",
-    "aten.tanh.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default",
-    "prims.convert_element_type.default"
-  ],
   "shape_points": 1,
-  "coverage": [
-    "mm_pw_mm",
-    "vertical_mm"
-  ],
   "pattern_category": "vertical",
   "pattern_family": "d974c754777b"
 }

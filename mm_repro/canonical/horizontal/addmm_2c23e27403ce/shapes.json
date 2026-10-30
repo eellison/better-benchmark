@@ -169,11 +169,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "d70bcf32",
@@ -341,11 +337,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "bab35012",
@@ -513,11 +505,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "ac32547d",
@@ -685,11 +673,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "c94f3ec0",
@@ -857,11 +841,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     },
     {
       "shape_hash": "fd24a42d",
@@ -1029,11 +1009,7 @@
         "inputs": 11,
         "outputs": 3,
         "contraction_depth": 1
-      },
-      "coverage": [
-        "horizontal",
-        "pw_prologue"
-      ]
+      }
     }
   ]
 }

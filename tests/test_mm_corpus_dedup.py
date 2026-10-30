@@ -86,8 +86,8 @@ def test_reduction_axes_and_keepdim_are_canonical():
     def b(x, w):
         return x.mean((-1, -2), keepdim=True).view(4, 8) @ w
 
-    ga, _, pa, _, _ = trace(a, x, w)
-    gb, _, pb, _, _ = trace(b, x, w)
+    ga, _, pa = trace(a, x, w)
+    gb, _, pb = trace(b, x, w)
     assert same_dag(ga, gb)
     torch.testing.assert_close(ga(x, w, *pa.values()), a(x, w), atol=0, rtol=0)
     torch.testing.assert_close(gb(x, w, *pb.values()), b(x, w), atol=0, rtol=0)
@@ -100,9 +100,8 @@ def test_identity_view_removal_keeps_output_aliasing():
         y = (x @ w).relu()
         return y, y[-4095:]
 
-    gm, _, _, _, changes = trace(fn, x, w)
+    gm, _, _ = trace(fn, x, w)
     a, b = gm(x, w)
-    assert "identity_view" in changes
     assert torch._C._is_alias_of(a, b)
     assert a.stride() == b.stride()
 
@@ -114,8 +113,8 @@ def test_pointwise_cse_merges_internal_values_but_not_returned_buffers():
         first, second = labels.ne(-100), labels.ne(-100)
         return (x @ w).relu() + first[:, None].float() + second[:, None].float()
 
-    gm, _, params, _, changes = trace(internal, x, w, labels)
-    assert "internal_pointwise_cse" in changes
+    gm, _, params = trace(internal, x, w, labels)
+    assert sum(n.target == torch.ops.aten.ne.Scalar for n in gm.graph.nodes) == 1
     torch.testing.assert_close(
         gm(x, w, labels, *params.values()), internal(x, w, labels), atol=0, rtol=0
     )
@@ -124,7 +123,7 @@ def test_pointwise_cse_merges_internal_values_but_not_returned_buffers():
         y = x @ w
         return y.relu(), y.relu()
 
-    gm, _, _, _, _ = trace(returned, x, w)
+    gm, _, _ = trace(returned, x, w)
     a, b = gm(x, w)
     assert not torch._C._is_alias_of(a, b)
 
@@ -135,14 +134,16 @@ def test_identity_adaptive_pool_is_removed_only_when_internal():
     def internal(x, w):
         return torch.nn.functional.adaptive_avg_pool2d(x, (2, 2)).flatten(1) @ w
 
-    gm, _, params, _, changes = trace(internal, x, w)
-    assert "internal_identity_adaptive_pool" in changes
+    gm, _, params = trace(internal, x, w)
+    pool_ops = {torch.ops.aten._adaptive_avg_pool2d.default, torch.ops.aten.adaptive_avg_pool2d.default}
+    assert not any(n.target in pool_ops for n in gm.graph.nodes)
     torch.testing.assert_close(gm(x, w, *params.values()), internal(x, w), atol=0, rtol=0)
 
     def exposed(x, w):
         return torch.nn.functional.adaptive_avg_pool2d(x, (2, 2)), x.flatten(1) @ w
 
-    assert "internal_identity_adaptive_pool" not in trace(exposed, x, w)[4]
+    exposed_gm = trace(exposed, x, w)[0]
+    assert any(n.target in pool_ops for n in exposed_gm.graph.nodes)
 
 
 def test_matching_symmetric_graphs_is_deterministic():
