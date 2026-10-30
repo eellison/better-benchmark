@@ -1,0 +1,113 @@
+{
+  "points": [
+    {
+      "shape_hash": "d30e6f8b",
+      "inputs": [
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            16,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            1024,
+            64,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 18,
+        "inputs": 7,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

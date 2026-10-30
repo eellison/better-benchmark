@@ -1,0 +1,75 @@
+{
+  "points": [
+    {
+      "shape_hash": "87bab962",
+      "inputs": [
+        [
+          [
+            512,
+            2048
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64
+          ],
+          "i64"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 12
+        },
+        "hf/train/T5Small": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 13,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

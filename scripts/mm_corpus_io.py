@@ -25,7 +25,7 @@ def write_json(path, value):
 
 
 def admits(metrics, limits):
-    """True if every measured size is within ``limits`` (a MatmulLimits)."""
+    """True if every measured size is within ``limits`` (matmul_partitioner.MatmulLimits)."""
     return all(
         metrics[key] <= cap
         for key, cap in (
@@ -34,18 +34,14 @@ def admits(metrics, limits):
             ("nodes", limits.max_nodes),
             ("inputs", limits.max_inputs),
             ("outputs", limits.max_outputs),
-            ("contraction_depth", limits.max_reductions_chain),
+            ("contraction_depth", limits.max_stages),
         )
     )
 
 
 def filter_patterns(records, limits):
     """Keep every record that fits; there is no count limit or sampling."""
-    return [
-        record
-        for record in records
-        if record["horizontal_shapes_match"] and admits(record["metrics"], limits)
-    ]
+    return [record for record in records if admits(record["metrics"], limits)]
 
 
 def load_records(source):
@@ -67,14 +63,12 @@ def load_records(source):
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         traced = Counter()
-        horizontal_shapes_match = True
         with fake_tensor_ctx():
             for config in load_shape_configs(str(path)).values():
                 gm = make_fx(module.Repro(), tracing_mode="fake")(
                     *make_inputs_from_config(config)
                 )
                 analysis = analyze_graph(gm)
-                horizontal_shapes_match &= analysis["horizontal_shapes_match"]
                 for key, value in analysis["metrics"].items():
                     traced[key] = max(traced[key], value)
         metrics = {
@@ -86,7 +80,6 @@ def load_records(source):
                 "id": pattern,
                 "directory": path.parent,
                 "metrics": metrics,
-                "horizontal_shapes_match": horizontal_shapes_match,
             }
         )
         if (index + 1) % 100 == 0:

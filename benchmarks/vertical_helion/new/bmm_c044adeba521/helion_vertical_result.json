@@ -1,0 +1,124 @@
+{
+  "repro": "bmm_c044adeba521",
+  "shape_index": 0,
+  "inputs": [
+    [
+      1,
+      16,
+      128,
+      128
+    ],
+    [
+      1,
+      16,
+      128,
+      128
+    ],
+    [
+      16,
+      256,
+      128
+    ],
+    [
+      16,
+      128,
+      256
+    ],
+    [
+      1,
+      128,
+      1,
+      32,
+      1
+    ],
+    [
+      1,
+      128,
+      1,
+      32,
+      1
+    ],
+    [
+      16,
+      128,
+      128
+    ],
+    [
+      1,
+      16,
+      256,
+      128
+    ],
+    [
+      1,
+      16,
+      128,
+      256
+    ],
+    [
+      1,
+      128,
+      1,
+      32,
+      2
+    ],
+    [
+      1,
+      128,
+      1,
+      64
+    ],
+    [
+      1,
+      128,
+      1,
+      32,
+      2
+    ],
+    [
+      1,
+      128,
+      1,
+      64
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel only with one program per head (16 programs): dq reads rows and dk reads columns of ds, which needs every row sum of the head.",
+  "unfused_first_call_s": 207.5,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.001445086705202312,
+      0.0016556291390728477,
+      9.585889570552147e-05,
+      0.00020292207792207794
+    ]
+  },
+  "unfused_kernels": 3,
+  "unfused_kernel_names": [
+    "_helion_dk_kernel",
+    "_helion_dq_kernel",
+    "_helion_ds_kernel"
+  ],
+  "fused_first_call_s": 139.2,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.001445086705202312,
+      0.0004139072847682119,
+      0.00019171779141104295,
+      0.00020292207792207794
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 39.78,
+  "inductor_us": 15.81,
+  "inductor_kernels": 5,
+  "unfused_us": 12.83,
+  "fused_us": 19.01,
+  "fused_speedup_vs_unfused": 0.675,
+  "fused_speedup_vs_inductor": 0.832
+}

@@ -1,0 +1,43 @@
+{
+  "pattern_hash": "d9dcbdfd77fa",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "6b63d22b6afb",
+    "b4fe4d387a21"
+  ],
+  "normalizations": {
+    "contiguous_shape_view": 7,
+    "reshape_chain": 9
+  },
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.div.Scalar",
+    "aten.expand.default",
+    "aten.full.default",
+    "aten.le.Scalar",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.relu.default",
+    "aten.squeeze.dims",
+    "aten.sub.Tensor",
+    "aten.sub.Tensor",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "shape_points": 2,
+  "coverage": [],
+  "pattern_category": "epilogue",
+  "pattern_family": "9ea6567dd0df"
+}

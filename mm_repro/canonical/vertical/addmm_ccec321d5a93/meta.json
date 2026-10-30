@@ -1,0 +1,48 @@
+{
+  "pattern_hash": "ccec321d5a93",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "3ea09e0d1f9a"
+  ],
+  "normalizations": {
+    "input_permutation_through_float_cast": 4
+  },
+  "origin_ops": [
+    "aten.add.Tensor",
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.addmm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.tanh.default",
+    "aten.tanh.default",
+    "aten.tanh.default",
+    "aten.tanh.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default"
+  ],
+  "shape_points": 1,
+  "coverage": [
+    "mm_pw_mm",
+    "pw_prologue",
+    "vertical_mm"
+  ],
+  "pattern_category": "vertical",
+  "pattern_family": "ca3671bb93bd"
+}

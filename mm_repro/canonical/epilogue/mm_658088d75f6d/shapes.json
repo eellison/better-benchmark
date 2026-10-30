@@ -1,0 +1,148 @@
+{
+  "points": [
+    {
+      "shape_hash": "a7f480f5",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            512,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "abc9a88b",
+      "inputs": [
+        [
+          [
+            32768,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            512,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            512,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            512,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 7,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

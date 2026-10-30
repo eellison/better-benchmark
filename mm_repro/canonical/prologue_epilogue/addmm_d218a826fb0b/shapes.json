@@ -1,0 +1,114 @@
+{
+  "points": [
+    {
+      "shape_hash": "a3c0b0d5",
+      "inputs": [
+        [
+          [
+            1,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1,
+            128,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            16384
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            16384
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 1
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 23,
+        "inputs": 7,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

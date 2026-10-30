@@ -1,0 +1,84 @@
+{
+  "points": [
+    {
+      "shape_hash": "01fa2b8a",
+      "inputs": [
+        [
+          [
+            256,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "333ff9fd",
+      "inputs": [
+        [
+          [
+            256,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            512
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

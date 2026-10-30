@@ -1,0 +1,80 @@
+{
+  "repro": "bmm_mm_9519247d9dd3",
+  "shape_index": 0,
+  "inputs": [
+    [
+      16384,
+      768
+    ],
+    [
+      768,
+      768
+    ],
+    [
+      384,
+      64,
+      512
+    ],
+    [
+      32,
+      12,
+      512,
+      512
+    ],
+    [
+      32,
+      12,
+      512,
+      512
+    ],
+    [
+      32,
+      512,
+      12,
+      64
+    ],
+    [
+      384,
+      512,
+      64
+    ],
+    [
+      32,
+      12,
+      512,
+      512
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "Fusable without recomputation: program per (b, h, i-tile) computes q tile with a K=768 loop, keeps it (F=64) and streams scores over j.",
+  "unfused_first_call_s": 259.3,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0
+    ]
+  },
+  "unfused_kernels": 2,
+  "unfused_kernel_names": [
+    "_helion_q_proj_kernel",
+    "_helion_scores_kernel"
+  ],
+  "fused_first_call_s": 138.9,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 1284.77,
+  "inductor_us": 717.47,
+  "inductor_kernels": 4,
+  "unfused_us": 509.28,
+  "fused_us": 545.76,
+  "fused_speedup_vs_unfused": 0.933,
+  "fused_speedup_vs_inductor": 1.315
+}

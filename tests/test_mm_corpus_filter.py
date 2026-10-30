@@ -1,38 +1,33 @@
-"""Final size limits (mm_corpus_io) and coverage labels (mm_corpus_features)."""
+"""Size limits (mm_corpus_io) and coverage labels (mm_corpus_features)."""
 
 from __future__ import annotations
 
 import torch
 from mm_corpus_features import analyze_graph
-from mm_corpus_io import admits, filter_patterns, load_records, write_json
+from mm_corpus_io import admits, filter_patterns
 from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import get_fusion_partitions
 from matmul_partitioner import MatmulLimits
 
-# The limits curate_mm_corpus applies to exported repros.
-FINAL_LIMITS = MatmulLimits(
-    max_mm=3, max_compute=32, max_nodes=42, max_inputs=8, max_outputs=2
-)
+# The limits curate_mm_corpus applies to exported repros (the defaults).
+FINAL_LIMITS = MatmulLimits()
 
 
 def test_filter_keeps_every_record_within_the_limits_without_a_count_cap():
     at_limit = {
         "mm": 3,
         "compute": 32,
-        "nodes": 42,
-        "inputs": 8,
-        "outputs": 2,
-        "contraction_depth": 5,
+        "nodes": 48,
+        "inputs": 12,
+        "outputs": 4,
+        "contraction_depth": 8,
     }
     assert admits(at_limit, FINAL_LIMITS)
     for key, value in at_limit.items():
         assert not admits({**at_limit, key: value + 1}, FINAL_LIMITS)
-    records = [
-        {"id": i, "metrics": at_limit, "horizontal_shapes_match": True}
-        for i in range(350)
-    ]
-    records.append({"id": "rule3", "metrics": at_limit, "horizontal_shapes_match": False})
+    records = [{"id": i, "metrics": at_limit} for i in range(350)]
+    records.append({"id": "big", "metrics": {**at_limit, "mm": 4}})
     assert [r["id"] for r in filter_patterns(records, FINAL_LIMITS)] == list(range(350))
 
 
@@ -71,31 +66,3 @@ def test_gather_norm_mm_residual_norm_fits_the_final_limits():
         r.metrics["contraction_depth"] == 5 and admits(r.metrics, FINAL_LIMITS)
         for r in get_fusion_partitions(gm, only_include_mm=True)
     )
-
-
-def test_a_repro_is_dropped_if_any_shape_point_breaks_rule_3(tmp_path):
-    # A raw repro whose horizontal MMs match at one shape but not the other.
-    source = tmp_path / "raw"
-    directory = source / "canonical" / "mm_pair"
-    directory.mkdir(parents=True)
-    (directory / "repro.py").write_text(
-        "import torch\n"
-        "class Repro(torch.nn.Module):\n"
-        "    def forward(self, x, a, y, b):\n"
-        "        return (x @ a).relu(), (y @ b).relu()\n"
-    )
-    write_json(directory / "meta.json", {"pattern_hash": "pair"})
-    metrics = {"mm": 2, "compute": 4, "nodes": 4, "inputs": 4, "outputs": 2, "contraction_depth": 1}
-    points = [
-        {
-            "shape_hash": str(width),
-            "inputs": [[[8, 256], "f32"], [[256, 64], "f32"], [[8, 512], "f32"], [[512, width], "f32"]],
-            "partition_metrics": metrics,
-        }
-        for width in [64, 32]
-    ]
-    write_json(directory / "shapes.json", {"points": points})
-    write_json(source / "occurrences.json", [])
-    records, _ = load_records(source)
-    assert len(records) == 1 and not records[0]["horizontal_shapes_match"]
-    assert filter_patterns(records, MatmulLimits()) == []

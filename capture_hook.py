@@ -264,8 +264,9 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
     partition, as if they were not fusible.
 
     ``only_include_mm=True`` instead returns small matmul benchmark regions
-    (matmul_partitioner.MatmulRegion): each has at least one MM plus real
-    surrounding work and names its outputs explicitly. Unlike the default
+    (matmul_partitioner.MatmulRegion), one per fusion pattern category
+    (prologue, epilogue, prologue_epilogue, horizontal, horizontal_combine,
+    vertical); each names its outputs explicitly. Unlike the default
     partitions, MM regions may overlap; the graph itself is never changed.
 
     Returns: list of partitions, each a list of fx.Node from gm.graph.
@@ -2115,10 +2116,10 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
         capture_only: If True, raise _CaptureComplete after capture to skip
             expensive inductor compilation. Caller should catch the error.
         validate: If True, run eager validation on captured repros (can trigger CUDA errors).
-        only_include_mm: Capture small matmul regions instead of the default
-            fusion partitions: an MM plus real surrounding work, or several
-            independent MMs side by side (see matmul_partitioner). Also set
-            by REPRO_CAPTURE_ONLY_INCLUDE_MM=1 for the env-var auto-install.
+        only_include_mm: Capture small matmul pattern regions instead of the
+            default fusion partitions (one region per pattern category, see
+            matmul_partitioner). Also set by REPRO_CAPTURE_ONLY_INCLUDE_MM=1
+            for the env-var auto-install.
         constant_folding: Set when the model is deployed with AOTInductor's
             runtime constant folding (aot_inductor.use_runtime_constant_folding):
             in inference graphs, work derived only from module parameters,

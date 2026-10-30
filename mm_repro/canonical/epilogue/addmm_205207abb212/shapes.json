@@ -1,0 +1,164 @@
+{
+  "points": [
+    {
+      "shape_hash": "c604dc26",
+      "inputs": [
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 72
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 9,
+        "inputs": 6,
+        "outputs": 3,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "0f31e818",
+      "inputs": [
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            512
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128,
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          [
+            512
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 9,
+        "inputs": 6,
+        "outputs": 3,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

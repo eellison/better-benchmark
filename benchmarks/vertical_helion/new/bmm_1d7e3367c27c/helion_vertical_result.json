@@ -1,0 +1,54 @@
+{
+  "repro": "bmm_1d7e3367c27c",
+  "shape_index": 0,
+  "inputs": [
+    [
+      98304,
+      9,
+      1
+    ],
+    [
+      98304,
+      64,
+      9
+    ],
+    [
+      32,
+      512,
+      6,
+      64
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel: program per row tile; memory-bound N=1 matvec.",
+  "unfused_first_call_s": 115.6,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0011574074074074073
+    ]
+  },
+  "unfused_kernels": 2,
+  "unfused_kernel_names": [
+    "_helion_matvec_kernel",
+    "_helion_softmax_kernel"
+  ],
+  "fused_first_call_s": 100.2,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0011574074074074073
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 174.59,
+  "inductor_us": 154.94,
+  "inductor_kernels": 3,
+  "unfused_us": 92.16,
+  "fused_us": 84.38,
+  "fused_speedup_vs_unfused": 1.092,
+  "fused_speedup_vs_inductor": 1.836
+}

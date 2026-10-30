@@ -1,0 +1,53 @@
+{
+  "pattern_hash": "08359660b697",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "41623f94aef6"
+  ],
+  "normalizations": {
+    "contiguous_shape_view": 7,
+    "identity_view": 1,
+    "reshape_chain": 7
+  },
+  "origin_ops": [
+    "aten.cat.default",
+    "aten.clone.default",
+    "aten.cos.default",
+    "aten.div.Tensor",
+    "aten.expand.default",
+    "aten.mm.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.pow.Scalar",
+    "aten.reciprocal.default",
+    "aten.sin.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.iota.default",
+    "prims.iota.default"
+  ],
+  "shape_points": 1,
+  "coverage": [
+    "pw_prologue"
+  ],
+  "pattern_category": "prologue",
+  "pattern_family": "8583af26b123"
+}

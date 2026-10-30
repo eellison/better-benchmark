@@ -1,4 +1,4 @@
-"""Spot single-MM regions whose extra work is only bookkeeping (rule 5).
+"""Spot single-MM regions whose extra work is only bookkeeping.
 
 A region is labeled "control" when it has exactly one MM and every other
 real op is one of these:

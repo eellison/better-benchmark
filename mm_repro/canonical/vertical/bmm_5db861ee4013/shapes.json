@@ -1,0 +1,280 @@
+{
+  "points": [
+    {
+      "shape_hash": "33e6cd06",
+      "inputs": [
+        [
+          [
+            3072,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            64,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            256,
+            12,
+            128,
+            128
+          ],
+          "b8"
+        ],
+        [
+          [
+            256,
+            12,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            128,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            256,
+            12,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            3072,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            256,
+            12,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 5
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 9,
+        "nodes": 20,
+        "inputs": 5,
+        "outputs": 3,
+        "contraction_depth": 3,
+        "vertical": {
+          "slice_axes": [
+            12,
+            128,
+            256
+          ],
+          "stages": [
+            {
+              "op": "bmm",
+              "R": 64,
+              "F": 128
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "bmm",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "mm_block_amax_sum",
+        "mm_pw_mm",
+        "mm_pw_sum",
+        "pw_prologue",
+        "vertical_mm"
+      ]
+    },
+    {
+      "shape_hash": "7ec2f6ef",
+      "inputs": [
+        [
+          [
+            1024,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            64,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            16,
+            128,
+            128
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            16,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            128,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            64,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            1024,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            16,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 9,
+        "nodes": 20,
+        "inputs": 5,
+        "outputs": 3,
+        "contraction_depth": 3,
+        "vertical": {
+          "slice_axes": [
+            16,
+            64,
+            128
+          ],
+          "stages": [
+            {
+              "op": "bmm",
+              "R": 64,
+              "F": 128
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "bmm",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "mm_block_amax_sum",
+        "mm_pw_mm",
+        "mm_pw_sum",
+        "pw_prologue",
+        "vertical_mm"
+      ]
+    }
+  ]
+}

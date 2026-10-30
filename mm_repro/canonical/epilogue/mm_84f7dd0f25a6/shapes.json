@@ -1,0 +1,67 @@
+{
+  "points": [
+    {
+      "shape_hash": "014a828e",
+      "inputs": [
+        [
+          [
+            32768,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            512,
+            128
+          ],
+          "b8"
+        ],
+        [
+          [
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            512,
+            128
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 9,
+        "inputs": 5,
+        "outputs": 4,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

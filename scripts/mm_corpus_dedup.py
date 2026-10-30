@@ -410,12 +410,5 @@ def match_graphs(reference, candidate):
     return {ref.nodes[a]["node"]: cand.nodes[b]["node"] for a, b in mapping.items()}
 
 
-def has_rng(gm):
-    return any(
-        any("nondeterministic" in str(t) for t in getattr(n.target, "tags", ()))
-        for n in gm.graph.nodes
-    )
-
-
 def graph_digest(graph):
     return nx.weisfeiler_lehman_graph_hash(graph, node_attr="label", iterations=6)

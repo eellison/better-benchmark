@@ -1,0 +1,71 @@
+{
+  "points": [
+    {
+      "shape_hash": "fcf09c45",
+      "inputs": [
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            198,
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 9,
+        "nodes": 12,
+        "inputs": 5,
+        "outputs": 4,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "gated_parallel_mm",
+        "horizontal",
+        "horizontal_pw_join",
+        "pw_prologue"
+      ]
+    }
+  ]
+}

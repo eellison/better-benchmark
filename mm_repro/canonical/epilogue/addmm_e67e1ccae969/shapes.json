@@ -1,0 +1,49 @@
+{
+  "points": [
+    {
+      "shape_hash": "34bb1ed8",
+      "inputs": [
+        [
+          [
+            16
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              16
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

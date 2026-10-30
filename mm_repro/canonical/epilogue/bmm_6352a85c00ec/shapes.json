@@ -1,0 +1,137 @@
+{
+  "points": [
+    {
+      "shape_hash": "1e27810b",
+      "inputs": [
+        [
+          [
+            16,
+            128,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              256,
+              4096,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            16,
+            256,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              256,
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            1,
+            16,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            1,
+            16,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "9ef6406b",
+      "inputs": [
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              16384,
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            16,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 23
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 23
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

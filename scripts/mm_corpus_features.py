@@ -39,7 +39,8 @@ def analyze_graph(gm):
                                      the same MM (e.g. norm -> MM -> norm)
       gather_reduction_mm_reduction  ... with a gather feeding the first one
 
-    horizontal_shapes_match: rule 3 of matmul_partitioner holds.
+    horizontal_shapes_match: MMs that do not depend on each other have equal
+    output shapes.
     """
     nodes = list(gm.graph.nodes)
     dots = [n for n in nodes if is_matmul(n)]

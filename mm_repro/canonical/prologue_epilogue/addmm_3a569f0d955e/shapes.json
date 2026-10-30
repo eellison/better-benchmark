@@ -1,0 +1,70 @@
+{
+  "points": [
+    {
+      "shape_hash": "dc88c5c4",
+      "inputs": [
+        [
+          [
+            16
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            16
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            16
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              16
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 16,
+        "inputs": 5,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

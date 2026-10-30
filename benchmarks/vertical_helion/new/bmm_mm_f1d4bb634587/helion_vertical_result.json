@@ -1,0 +1,133 @@
+{
+  "repro": "bmm_mm_f1d4bb634587",
+  "shape_index": 0,
+  "inputs": [
+    [
+      401408,
+      128
+    ],
+    [
+      128,
+      128
+    ],
+    [
+      32768,
+      32,
+      49
+    ],
+    [
+      32768,
+      56,
+      56
+    ],
+    [
+      49,
+      49
+    ],
+    [
+      169,
+      4
+    ],
+    [
+      8192,
+      4,
+      49,
+      1
+    ],
+    [
+      8192,
+      4,
+      49,
+      1
+    ],
+    [
+      32768,
+      49,
+      32
+    ],
+    [
+      8192,
+      49,
+      4,
+      32
+    ],
+    [
+      32768,
+      49,
+      32
+    ],
+    [
+      8192,
+      4,
+      49,
+      49
+    ],
+    [
+      8192,
+      4,
+      49,
+      49
+    ],
+    [
+      49,
+      49,
+      -1
+    ],
+    [
+      1,
+      4,
+      49,
+      49
+    ],
+    [
+      32768,
+      49,
+      49
+    ],
+    [
+      8192,
+      4,
+      49,
+      32
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel: program per (window, head), all four stages on the 49 rows.",
+  "unfused_first_call_s": 299.2,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0,
+      2.566899826734262e-07,
+      6.411255908613445e-08,
+      1.2887490762246622e-08
+    ]
+  },
+  "unfused_kernels": 3,
+  "unfused_kernel_names": [
+    "_helion_ds_v_kernel",
+    "_helion_q_proj_kernel",
+    "_helion_softmax_bwd_kernel"
+  ],
+  "fused_first_call_s": 133.3,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0,
+      2.566899826734262e-07,
+      6.411255908613445e-08,
+      1.2887490762246622e-08
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 5107.01,
+  "inductor_us": 1199.9,
+  "inductor_kernels": 6,
+  "unfused_us": 825.12,
+  "fused_us": 836.06,
+  "fused_speedup_vs_unfused": 0.987,
+  "fused_speedup_vs_inductor": 1.435
+}

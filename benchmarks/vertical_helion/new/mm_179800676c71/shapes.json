@@ -1,0 +1,84 @@
+{
+  "points": [
+    {
+      "shape_hash": "e6d32e5f",
+      "inputs": [
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            16
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 6,
+        "nodes": 14,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            16
+          ],
+          "stages": [
+            {
+              "op": "mm",
+              "R": 16,
+              "F": 128
+            },
+            {
+              "op": "mm",
+              "R": 128,
+              "F": 0
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "mm_pw_mm",
+        "mm_pw_sum",
+        "pw_prologue",
+        "vertical_mm"
+      ]
+    }
+  ]
+}

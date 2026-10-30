@@ -1,0 +1,105 @@
+{
+  "points": [
+    {
+      "shape_hash": "0fb68fa0",
+      "inputs": [
+        [
+          [
+            2,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            8
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            0,
+            0,
+            0,
+            6
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            4096
+          ],
+          "stages": [
+            {
+              "op": "mm",
+              "R": 8,
+              "F": 128
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 0
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "mm_block_amax_sum",
+        "mm_pw_sum"
+      ]
+    }
+  ]
+}

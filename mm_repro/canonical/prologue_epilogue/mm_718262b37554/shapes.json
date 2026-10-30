@@ -1,0 +1,92 @@
+{
+  "points": [
+    {
+      "shape_hash": "8d3e722f",
+      "inputs": [
+        [
+          [
+            16,
+            2
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            2
+          ],
+          "f32"
+        ],
+        [
+          [
+            2,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            128,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            768
+          ],
+          "b8"
+        ],
+        [
+          [
+            16,
+            128,
+            768
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            2048,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 18,
+        "inputs": 7,
+        "outputs": 3,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

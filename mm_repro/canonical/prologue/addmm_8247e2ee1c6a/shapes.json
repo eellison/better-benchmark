@@ -1,0 +1,815 @@
+{
+  "points": [
+    {
+      "shape_hash": "0652f2da",
+      "inputs": [
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            16,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 3
+        },
+        "hf/infer/MBartForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "a68cdab9",
+      "inputs": [
+        [
+          [
+            32,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            4096,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            32,
+            80
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/BlenderbotForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "d395ca71",
+      "inputs": [
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            2048,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            32,
+            80
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/BlenderbotForConditionalGeneration": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "3e7e50df",
+      "inputs": [
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            64,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            16,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/M2M100ForConditionalGeneration": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "9e8e944a",
+      "inputs": [
+        [
+          [
+            4,
+            2048,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            4,
+            2048,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            4,
+            2048,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8192,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            4,
+            2048,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "ee3df7d1",
+      "inputs": [
+        [
+          [
+            16,
+            1024,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            1024,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            1024,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            1024,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "5005eaa8",
+      "inputs": [
+        [
+          [
+            128,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16384,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            128,
+            16,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/PegasusForCausalLM": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "74ee6910",
+      "inputs": [
+        [
+          [
+            1,
+            1,
+            384
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            1,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            1,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            384
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            6,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 11,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

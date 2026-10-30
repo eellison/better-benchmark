@@ -1,0 +1,480 @@
+{
+  "points": [
+    {
+      "shape_hash": "9df782c1",
+      "inputs": [
+        [
+          [
+            128,
+            32,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            32,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            32,
+            49
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              32
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            49,
+            32
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              49
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            4096,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            32,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 6,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            32,
+            128
+          ],
+          "stages": [
+            {
+              "op": "sum",
+              "R": 49,
+              "F": 49
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "horizontal",
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "7d8bd5ea",
+      "inputs": [
+        [
+          [
+            512,
+            16,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            512,
+            16,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            32,
+            49
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              32
+            ]
+          }
+        ],
+        [
+          [
+            8192,
+            49,
+            32
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              49
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8192,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            32,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 6,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            16,
+            512
+          ],
+          "stages": [
+            {
+              "op": "sum",
+              "R": 49,
+              "F": 49
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "horizontal",
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "4c699dfb",
+      "inputs": [
+        [
+          [
+            2048,
+            8,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            2048,
+            8,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            32,
+            49
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              32
+            ]
+          }
+        ],
+        [
+          [
+            16384,
+            49,
+            32
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              49
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16384,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            2048,
+            8,
+            32,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            2048,
+            8,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 6,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            8,
+            2048
+          ],
+          "stages": [
+            {
+              "op": "sum",
+              "R": 49,
+              "F": 49
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "horizontal",
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "df2a09ab",
+      "inputs": [
+        [
+          [
+            8192,
+            4,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            8192,
+            4,
+            49,
+            49
+          ],
+          "f32"
+        ],
+        [
+          [
+            32768,
+            32,
+            49
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              32
+            ]
+          }
+        ],
+        [
+          [
+            32768,
+            49,
+            32
+          ],
+          "bf16",
+          {
+            "st": [
+              1600,
+              1,
+              49
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32768,
+            49,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            4,
+            32,
+            49
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            4,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 6,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            4,
+            8192
+          ],
+          "stages": [
+            {
+              "op": "sum",
+              "R": 49,
+              "F": 49
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            },
+            {
+              "op": "bmm",
+              "R": 49,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "horizontal",
+        "pw_prologue"
+      ]
+    }
+  ]
+}

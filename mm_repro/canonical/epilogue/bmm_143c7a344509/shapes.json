@@ -1,0 +1,129 @@
+{
+  "points": [
+    {
+      "shape_hash": "966dd5b2",
+      "inputs": [
+        [
+          [
+            192,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            6,
+            128,
+            128
+          ],
+          "f32",
+          {
+            "st": [
+              98304,
+              1,
+              768,
+              6
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            6,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 14
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "b660b8e0",
+      "inputs": [
+        [
+          [
+            64,
+            1024,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            64,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            8,
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              8388608,
+              1,
+              8192,
+              8
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8,
+            8,
+            1024,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 10
+        },
+        "hf/train/T5Small": {
+          "occurrences": 10
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

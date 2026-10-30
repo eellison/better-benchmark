@@ -1,0 +1,60 @@
+{
+  "pattern_hash": "6584872d1642",
+  "pattern_hash_mode": "scalar_literals_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "curation": "metadata_normalization_v1",
+  "category": "core",
+  "source_patterns": [
+    "3232a3e3b43d",
+    "4589785e0115",
+    "9627d01263a3",
+    "9af136634d6d",
+    "f7cd83531f03"
+  ],
+  "normalizations": {
+    "canonical_reduction_axes": 10,
+    "identity_view": 5,
+    "reshape_chain": 5,
+    "seed_slot": 5
+  },
+  "origin_ops": [
+    "aten.amax.default",
+    "aten.any.dim",
+    "aten.bmm.default",
+    "aten.bmm.default",
+    "aten.clone.default",
+    "aten.div.Tensor",
+    "aten.eq.Scalar",
+    "aten.exp.default",
+    "aten.gt.Scalar",
+    "aten.logical_not.default",
+    "aten.logical_not.default",
+    "aten.mul.Tensor",
+    "aten.mul.Tensor",
+    "aten.permute.default",
+    "aten.permute.default",
+    "aten.sub.Tensor",
+    "aten.sum.dim_IntList",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.view.default",
+    "aten.where.self",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.convert_element_type.default",
+    "prims.inductor_lookup_seed.default",
+    "prims.inductor_random.default"
+  ],
+  "shape_points": 1,
+  "coverage": [
+    "mm_block_amax_sum",
+    "mm_pw_mm",
+    "mm_pw_sum",
+    "pw_prologue",
+    "vertical_mm"
+  ],
+  "pattern_category": "vertical",
+  "pattern_family": "150fdc600f02"
+}

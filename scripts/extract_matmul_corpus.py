@@ -1,15 +1,17 @@
-"""Regenerate the core MM fusion corpus (mm_repro/) from the saved model graphs.
+"""Regenerate the MM pattern corpus (mm_repro/) from the saved model graphs.
 
-    python scripts/extract_matmul_corpus.py
+    python scripts/extract_matmul_corpus.py --workers 32
     python scripts/validate_matmul_repros.py     # FakeTensor-run every shape
 
 Everything runs on CPU with FakeTensors; nothing is compiled.
 
 1. Capture: trace every repros/models/**/full_graph_*.py, select its MM
-   regions with get_fusion_partitions(only_include_mm=True) and capture them
-   with the regular capture/merge code into a temporary "raw" corpus.
+   pattern regions (matmul_partitioner.get_matmul_regions, one region per
+   category) and capture them with the regular capture/merge code into a
+   temporary "raw" corpus.
 2. Curate: scripts/curate_mm_corpus.py normalizes the raw repros, applies the
-   final size limits, merges equivalent DAGs and writes the corpus.
+   size limits, merges equivalent DAGs, keeps one repro per pattern family
+   and writes canonical/<category>/<mm ops>_<hash>/.
 3. Publish: the finished tree atomically replaces mm_repro/, so files from an
    older run can never mix with the new ones.
 """
@@ -72,9 +74,9 @@ def extract_one(task):
     index, source, work_dir = task
     import torch
 
-    from capture_hook import _CaptureState, get_fusion_partitions
+    from capture_hook import _CaptureState, partition_node_is_supported
     from full_graph_harness import load_full_graph_definition
-    from matmul_partitioner import is_matmul
+    from matmul_partitioner import get_matmul_regions, is_matmul
     from roundtrip_validation import trace_full_graph_fake
 
     torch.set_num_threads(1)
@@ -94,7 +96,11 @@ def extract_one(task):
                 row.update(status="no_visible_mm", original_mm=0, selected_mm=0)
                 return row
             gm = trace_full_graph_fake(load_full_graph_definition(source))
-            components = get_fusion_partitions(gm, only_include_mm=True)
+            diagnostics = {}
+            components = get_matmul_regions(
+                gm, partition_node_is_supported, diagnostics=diagnostics
+            )
+            row["pattern_diagnostics"] = diagnostics
             state = _CaptureState(
                 str(capture_dir), label=source, only_include_mm=True, validate=False
             )
@@ -218,7 +224,7 @@ def extract_raw_corpus(output: Path, sources=None, workers: int = 2):
 
 
 def generate_corpus(output: Path, sources=None, workers: int = 2):
-    """Regenerate the core corpus and atomically replace ``output``."""
+    """Regenerate the corpus and atomically replace ``output``."""
     from scripts.curate_mm_corpus import curate_corpus
 
     output = output.resolve()
@@ -258,6 +264,7 @@ def main():
                 "output": str(args.output.resolve()),
                 "unique_repros": report["unique_repros"],
                 "shape_points": report["shape_points"],
+                "pattern_categories": report["pattern_categories"],
             },
             indent=2,
         )

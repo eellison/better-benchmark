@@ -1,0 +1,81 @@
+{
+  "repro": "bmm_0f0f8a25f92c",
+  "shape_index": 0,
+  "inputs": [
+    [
+      512,
+      128,
+      80
+    ],
+    [
+      512,
+      80,
+      128
+    ],
+    [
+      512,
+      128,
+      80
+    ],
+    [
+      16,
+      32,
+      128,
+      128
+    ],
+    [
+      16,
+      32,
+      128,
+      128
+    ],
+    [
+      512,
+      128,
+      128
+    ],
+    [
+      16,
+      32,
+      128,
+      80
+    ],
+    [
+      2048,
+      2560
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel: program per (bh, row tile), 128-wide score rows on chip.",
+  "unfused_first_call_s": 352.7,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0030864197530864196
+    ]
+  },
+  "unfused_kernels": 3,
+  "unfused_kernel_names": [
+    "_helion_pv_kernel",
+    "_helion_scores_kernel",
+    "_helion_softmax_kernel"
+  ],
+  "fused_first_call_s": 152.2,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0015432098765432098
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 259.39,
+  "inductor_us": 52.22,
+  "inductor_kernels": 4,
+  "unfused_us": 45.28,
+  "fused_us": 30.69,
+  "fused_speedup_vs_unfused": 1.475,
+  "fused_speedup_vs_inductor": 1.702
+}

@@ -1,0 +1,70 @@
+{
+  "points": [
+    {
+      "shape_hash": "96a98d89",
+      "inputs": [
+        [
+          [
+            1536
+          ],
+          "f32"
+        ],
+        [
+          [
+            1536,
+            1536
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1536
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            24,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            512,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 10,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

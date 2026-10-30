@@ -1,0 +1,352 @@
+{
+  "points": [
+    {
+      "shape_hash": "1aa8c966",
+      "inputs": [
+        [
+          [
+            384,
+            512,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            64,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              32768,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            512
+          ],
+          "b8"
+        ],
+        [
+          [
+            32,
+            12,
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            12,
+            512,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 11
+        },
+        "hf/train/RobertaForCausalLM": {
+          "occurrences": 11
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 8,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "542c376e",
+      "inputs": [
+        [
+          [
+            3072,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            64,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            256,
+            12,
+            128,
+            128
+          ],
+          "b8"
+        ],
+        [
+          [
+            256,
+            12,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            12,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 5
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 8,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "37931c99",
+      "inputs": [
+        [
+          [
+            256,
+            512,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            64,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              32768,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            4,
+            512,
+            512
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            4,
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            4,
+            512,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/ElectraForCausalLM": {
+          "occurrences": 11
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 8,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "7ad1a189",
+      "inputs": [
+        [
+          [
+            1024,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            64,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            16,
+            128,
+            128
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            16,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            16,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 8,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "9df1ff6a",
+      "inputs": [
+        [
+          [
+            1024,
+            128,
+            32
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            32,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              4096,
+              1,
+              32
+            ]
+          }
+        ],
+        [
+          [
+            256,
+            4,
+            128,
+            128
+          ],
+          "b8"
+        ],
+        [
+          [
+            256,
+            4,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            4,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 23
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 4,
+        "nodes": 8,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

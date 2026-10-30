@@ -1,0 +1,65 @@
+{
+  "points": [
+    {
+      "shape_hash": "c0c9a397",
+      "inputs": [
+        [
+          [
+            32,
+            960,
+            1,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1280
+          ],
+          "f32"
+        ],
+        [
+          [
+            960,
+            1280
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              960
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            960
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            1280
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/mobilenet_v3_large": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 12,
+        "nodes": 18,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

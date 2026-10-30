@@ -1,0 +1,33 @@
+"""Curated MM repro. Pattern hash: ff52024278db."""
+import sys
+from pathlib import Path
+from math import inf, nan
+import torch
+import torch._inductor.inductor_prims
+from torch import device
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
+_repro_version = 3
+
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "bf16[512, 128, 128]", arg1_1: "bf16[512, 128, 128]", arg2_1: "bf16[512, 128, 128]", arg3_1: "f32[32, 16, 128, 128]", _shape_param_0, _shape_param_1, _shape_param_2):
+        # No stacktrace found for following nodes
+        bmm: "bf16[512, 128, 128]" = torch.ops.aten.bmm.default(arg0_1, arg1_1);  arg0_1 = None
+        bmm_1: "bf16[512, 128, 128]" = torch.ops.aten.bmm.default(arg1_1, arg2_1);  arg1_1 = arg2_1 = None
+        view: "bf16[32, 16, 128, 128]" = torch.ops.aten.view.default(bmm, _shape_param_0);  bmm = _shape_param_0 = None
+        view_1: "bf16[32, 16, 128, 128]" = torch.ops.aten.view.default(bmm_1, _shape_param_1);  bmm_1 = _shape_param_1 = None
+        convert_element_type: "f32[32, 16, 128, 128]" = torch.ops.prims.convert_element_type.default(view_1, torch.float32);  view_1 = None
+        mul: "f32[32, 16, 128, 128]" = torch.ops.aten.mul.Tensor(convert_element_type, arg3_1);  convert_element_type = arg3_1 = None
+        permute: "bf16[32, 128, 16, 128]" = torch.ops.aten.permute.default(view, [0, 2, 1, 3]);  view = None
+        clone: "bf16[32, 128, 16, 128]" = torch.ops.aten.clone.default(permute, memory_format = torch.contiguous_format);  permute = None
+        view_3: "bf16[4096, 2048]" = torch.ops.aten.view.default(clone, _shape_param_2);  clone = _shape_param_2 = None
+        permute_1: "bf16[2048, 4096]" = torch.ops.aten.permute.default(view_3, [1, 0])
+        return (mul, view_3, permute_1)
+
+def make_inputs(shape_config=None):
+    if shape_config is None:
+        shape_config = next(iter(load_shape_configs(__file__).values()))
+    return make_inputs_from_config(shape_config)
+
+if __name__ == "__main__":
+    benchmark_repro(Repro(), make_inputs, __file__)

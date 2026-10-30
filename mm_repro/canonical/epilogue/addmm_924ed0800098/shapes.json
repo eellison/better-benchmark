@@ -1,0 +1,160 @@
+{
+  "points": [
+    {
+      "shape_hash": "3d733a31",
+      "inputs": [
+        [
+          [
+            8,
+            1024,
+            16,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "f32"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 13,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "c5133bf9",
+      "inputs": [
+        [
+          [
+            16,
+            1024,
+            12,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            16,
+            1024,
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            1024,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            1024,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/PLBartForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 13,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "points": [
+    {
+      "shape_hash": "1de9253f",
+      "inputs": [
+        [
+          [
+            512,
+            128
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MobileBertForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 3,
+        "compute": 3,
+        "nodes": 7,
+        "inputs": 7,
+        "outputs": 4,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "horizontal",
+        "pure_horizontal"
+      ]
+    }
+  ]
+}

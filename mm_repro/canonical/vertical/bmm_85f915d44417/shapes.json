@@ -1,0 +1,99 @@
+{
+  "points": [
+    {
+      "shape_hash": "f0093526",
+      "inputs": [
+        [
+          [
+            1,
+            16,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            16,
+            128,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              256,
+              4096,
+              1
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            16,
+            128,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GPTJForCausalLM": {
+          "occurrences": 28
+        },
+        "hf/infer/GPTJForQuestionAnswering": {
+          "occurrences": 28
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 12,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 3,
+        "vertical": {
+          "slice_axes": [
+            16,
+            128
+          ],
+          "stages": [
+            {
+              "op": "amax",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "bmm",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

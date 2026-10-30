@@ -1,0 +1,95 @@
+{
+  "repro": "bmm_mm_52f22734ce29",
+  "shape_index": 0,
+  "inputs": [
+    [
+      1024,
+      32,
+      128
+    ],
+    [
+      1024,
+      128,
+      128
+    ],
+    [
+      128,
+      128
+    ],
+    [
+      256,
+      128,
+      128
+    ],
+    [
+      128
+    ],
+    [
+      128,
+      512
+    ],
+    [
+      256,
+      4,
+      32,
+      128
+    ],
+    [
+      256,
+      128,
+      128
+    ],
+    [
+      32768,
+      128
+    ],
+    [
+      256,
+      128,
+      128
+    ],
+    [
+      32768,
+      128
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel: program per (batch, token tile), head loop = out-proj K split.",
+  "unfused_first_call_s": 338.8,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "unfused_kernels": 3,
+  "unfused_kernel_names": [
+    "_helion_ctx_kernel",
+    "_helion_mm_kernel",
+    "_helion_proj_kernel"
+  ],
+  "fused_first_call_s": 138.3,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 104.1,
+  "inductor_us": 78.66,
+  "inductor_kernels": 5,
+  "unfused_us": 70.18,
+  "fused_us": 59.65,
+  "fused_speedup_vs_unfused": 1.177,
+  "fused_speedup_vs_inductor": 1.319
+}

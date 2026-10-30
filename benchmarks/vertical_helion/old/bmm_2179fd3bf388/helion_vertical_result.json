@@ -1,0 +1,65 @@
+{
+  "repro": "bmm_2179fd3bf388",
+  "shape_index": 0,
+  "inputs": [
+    [
+      16,
+      128,
+      256
+    ],
+    [
+      16,
+      256,
+      128
+    ],
+    [
+      1,
+      1,
+      128,
+      128
+    ],
+    [
+      1,
+      16,
+      128,
+      128
+    ],
+    [
+      16,
+      128,
+      128
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel: program per (head, row tile), K = 256 streamed, F = 128.",
+  "unfused_first_call_s": 180.1,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.002631578947368421
+    ]
+  },
+  "unfused_kernels": 2,
+  "unfused_kernel_names": [
+    "_helion_scores_kernel",
+    "_helion_softmax_kernel"
+  ],
+  "fused_first_call_s": 83.8,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      0.002631578947368421
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 33.15,
+  "inductor_us": 16.13,
+  "inductor_kernels": 2,
+  "unfused_us": 9.86,
+  "fused_us": 9.25,
+  "fused_speedup_vs_unfused": 1.066,
+  "fused_speedup_vs_inductor": 1.744
+}

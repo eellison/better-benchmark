@@ -1,0 +1,102 @@
+{
+  "points": [
+    {
+      "shape_hash": "1cf628d0",
+      "inputs": [
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 2
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 11,
+        "inputs": 9,
+        "outputs": 4,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

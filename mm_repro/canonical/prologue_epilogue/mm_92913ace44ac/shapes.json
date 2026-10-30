@@ -1,0 +1,82 @@
+{
+  "points": [
+    {
+      "shape_hash": "7b50bf15",
+      "inputs": [
+        [
+          [
+            128,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            1,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 13,
+        "nodes": 22,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

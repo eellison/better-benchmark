@@ -1,0 +1,185 @@
+{
+  "points": [
+    {
+      "shape_hash": "7b1dabe1",
+      "inputs": [
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            32,
+            128,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            384
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            4096,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            6,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            192,
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "8e21e578",
+      "inputs": [
+        [
+          [
+            8,
+            1024,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8192,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            8,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            1024,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 4
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

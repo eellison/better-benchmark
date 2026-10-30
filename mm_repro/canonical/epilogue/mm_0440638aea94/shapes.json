@@ -1,0 +1,226 @@
+{
+  "points": [
+    {
+      "shape_hash": "15fb6771",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            16384
+          ],
+          "f32"
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 7,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "7bcb390d",
+      "inputs": [
+        [
+          [
+            16384,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              16384
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 7,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "6e3297b7",
+      "inputs": [
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "f32"
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 7,
+        "inputs": 7,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "points": [
+    {
+      "shape_hash": "d4f406f9",
+      "inputs": [
+        [
+          [
+            192,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            6,
+            128,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              98304,
+              1,
+              768,
+              6
+            ]
+          }
+        ],
+        [
+          [
+            192,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            6,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            192,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            6,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            384
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 14
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 8,
+        "nodes": 16,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 4,
+        "vertical": {
+          "slice_axes": [
+            6,
+            32,
+            128
+          ],
+          "stages": [
+            {
+              "op": "bmm",
+              "R": 64,
+              "F": 128
+            },
+            {
+              "op": "amax",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "sum",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "bmm",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "mm_block_amax_sum",
+        "mm_pw_mm",
+        "mm_pw_sum",
+        "vertical_mm"
+      ]
+    }
+  ]
+}

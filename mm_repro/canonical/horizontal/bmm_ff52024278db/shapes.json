@@ -1,0 +1,100 @@
+{
+  "points": [
+    {
+      "shape_hash": "669df413",
+      "inputs": [
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              16384,
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16",
+          {
+            "st": [
+              16384,
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            16,
+            128,
+            128
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            16,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 23
+        },
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 23
+        }
+      },
+      "partition_metrics": {
+        "mm": 2,
+        "compute": 3,
+        "nodes": 10,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "horizontal"
+      ]
+    }
+  ]
+}

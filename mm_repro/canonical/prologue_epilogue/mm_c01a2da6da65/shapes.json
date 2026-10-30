@@ -1,0 +1,166 @@
+{
+  "points": [
+    {
+      "shape_hash": "1ffb0c58",
+      "inputs": [
+        [
+          [
+            1,
+            1000,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1,
+            1000,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            2048
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1000,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            8,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    },
+    {
+      "shape_hash": "aff09c0b",
+      "inputs": [
+        [
+          [
+            1,
+            1000,
+            1
+          ],
+          "f32",
+          {
+            "gen": [
+              "positive",
+              0.1
+            ],
+            "x": {
+              "constraint": "nonnegative"
+            }
+          }
+        ],
+        [
+          [
+            1,
+            1000,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1000,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            4,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 13,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}

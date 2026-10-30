@@ -1,0 +1,126 @@
+{
+  "points": [
+    {
+      "shape_hash": "423576b3",
+      "inputs": [
+        [
+          [
+            16,
+            1,
+            128,
+            128
+          ],
+          "b8",
+          {
+            "st": [
+              0,
+              128,
+              1,
+              0
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            128,
+            80
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            80,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16,
+            32,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "d705833a",
+      "inputs": [
+        [
+          [
+            64,
+            1,
+            128,
+            128
+          ],
+          "b8",
+          {
+            "st": [
+              0,
+              128,
+              1,
+              0
+            ]
+          }
+        ],
+        [
+          [
+            1024,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            16,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

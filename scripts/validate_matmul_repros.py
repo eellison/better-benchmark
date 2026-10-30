@@ -28,7 +28,8 @@ def main():
     report = json.loads(report_path.read_text())
     start = time.perf_counter()
     failures, points, files = [], 0, 0
-    for path in sorted((output / "canonical").glob("*/repro.py")):
+    # canonical/<repro>/ or, for the pattern corpus, canonical/<category>/<repro>/
+    for path in sorted((output / "canonical").rglob("repro.py")):
         try:
             spec = importlib.util.spec_from_file_location(
                 "mm_validation_" + path.parent.name, path

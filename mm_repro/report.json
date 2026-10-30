@@ -1,53 +1,91 @@
 {
   "policy": {
-    "max_mm": 4,
-    "max_nodes": 96,
-    "max_compute": 48,
+    "reduction_limit": 128,
+    "intermediate_limit": 128,
+    "max_horizontal": 3,
+    "max_mm": 3,
+    "max_nodes": 48,
+    "max_compute": 32,
+    "max_inputs": 12,
     "max_outputs": 4,
-    "max_inputs": 24,
-    "max_reductions_chain": 5,
-    "max_internal_dim": 128
+    "max_stages": 8
   },
-  "policy_id": "53754120d96663ca",
+  "policy_id": "698f7047590f6b96",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "size_limits": {
+      "reduction_limit": 128,
+      "intermediate_limit": 128,
+      "max_horizontal": 3,
       "max_mm": 3,
-      "max_nodes": 42,
+      "max_nodes": 48,
       "max_compute": 32,
-      "max_outputs": 2,
-      "max_inputs": 8,
-      "max_reductions_chain": 5,
-      "max_internal_dim": 128
+      "max_inputs": 12,
+      "max_outputs": 4,
+      "max_stages": 8
     },
     "category": "core",
     "version": "metadata_normalization_v1",
-    "dependency_id": "e7192abdcc254f69",
+    "dependency_id": "b626354cf684f611",
     "corpus_count_limit": null,
-    "raw_size_admitted_repros": 304,
-    "raw_shape_points": 512
+    "raw_size_admitted_repros": 1361,
+    "raw_shape_points": 2038
   },
-  "unique_repros": 276,
-  "shape_points": 501,
-  "region_occurrences": 4671,
+  "unique_repros": 585,
+  "shape_points": 1019,
+  "family_members": 962,
+  "deduplicated_repros": 377,
+  "region_occurrences": 13275,
   "sources": 364,
-  "original_mm": 17527,
+  "original_mm": 17575,
   "coverage_repros": {
-    "gated_parallel_mm": 4,
-    "horizontal": 49,
-    "horizontal_pw_join": 20,
-    "horizontal_then_mm": 18,
-    "mm_block_amax_sum": 19,
-    "mm_pw_mm": 12,
-    "mm_pw_sum": 21,
-    "pure_horizontal": 9,
-    "pw_prologue": 52,
+    "gated_parallel_mm": 5,
+    "horizontal": 92,
+    "horizontal_pw_join": 5,
+    "mm_block_amax_sum": 41,
+    "mm_pw_mm": 55,
+    "mm_pw_sum": 47,
+    "pure_horizontal": 10,
+    "pw_prologue": 202,
     "reduction_mm_reduction": 1,
-    "vertical_mm": 30
+    "vertical_mm": 60
   },
+  "pattern_categories": {
+    "prologue": {
+      "repros": 49,
+      "shape_points": 91,
+      "family_members": 107
+    },
+    "epilogue": {
+      "repros": 284,
+      "shape_points": 602,
+      "family_members": 518
+    },
+    "prologue_epilogue": {
+      "repros": 79,
+      "shape_points": 104,
+      "family_members": 112
+    },
+    "horizontal": {
+      "repros": 74,
+      "shape_points": 112,
+      "family_members": 118
+    },
+    "horizontal_combine": {
+      "repros": 5,
+      "shape_points": 7,
+      "family_members": 5
+    },
+    "vertical": {
+      "repros": 94,
+      "shape_points": 103,
+      "family_members": 102
+    }
+  },
+  "families": 585,
   "fake_tensor_validation": {
-    "repros": 276,
-    "shape_points": 501,
+    "repros": 585,
+    "shape_points": 1019,
     "failures": []
   }
 }

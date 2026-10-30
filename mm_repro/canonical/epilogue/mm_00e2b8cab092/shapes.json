@@ -1,0 +1,314 @@
+{
+  "points": [
+    {
+      "shape_hash": "b102e3ff",
+      "inputs": [
+        [
+          [
+            512,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 16
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "f9a50bf4",
+      "inputs": [
+        [
+          [
+            1024,
+            3072
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            3072
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            3072
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/Qwen/Qwen3-0.6B": {
+          "occurrences": 28
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "92da5409",
+      "inputs": [
+        [
+          [
+            2304,
+            9216
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2304
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000,
+            9216
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            9216
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            9216
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 26
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "b16acd80",
+      "inputs": [
+        [
+          [
+            2560,
+            10240
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            10240
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            10240
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 34
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    },
+    {
+      "shape_hash": "ece5f763",
+      "inputs": [
+        [
+          [
+            4096,
+            14336
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            1000,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000,
+            14336
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            14336
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            14336
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/mistralai/Mistral-7B-Instruct-v0.3": {
+          "occurrences": 32
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      },
+      "coverage": []
+    }
+  ]
+}

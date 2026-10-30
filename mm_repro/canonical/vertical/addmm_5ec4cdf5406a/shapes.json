@@ -1,0 +1,132 @@
+{
+  "points": [
+    {
+      "shape_hash": "d58fbdc4",
+      "inputs": [
+        [
+          [
+            128,
+            1
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            16
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              16
+            ]
+          }
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              16
+            ]
+          }
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16,
+            16
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              16
+            ]
+          }
+        ],
+        [
+          [
+            16
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/infer/lennard_jones": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 3,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 9,
+        "outputs": 1,
+        "contraction_depth": 3,
+        "vertical": {
+          "slice_axes": [
+            128
+          ],
+          "stages": [
+            {
+              "op": "addmm",
+              "R": 16,
+              "F": 16
+            },
+            {
+              "op": "addmm",
+              "R": 16,
+              "F": 16
+            },
+            {
+              "op": "addmm",
+              "R": 16,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "mm_pw_mm",
+        "pw_prologue",
+        "vertical_mm"
+      ]
+    }
+  ]
+}

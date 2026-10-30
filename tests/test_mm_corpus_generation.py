@@ -30,8 +30,9 @@ class GraphModule(torch.nn.Module):
     result = extract_matmul_corpus.generate_corpus(output, [source], workers=1)
     assert result["unique_repros"] == 1 and result["shape_points"] == 1
     assert not stale.exists()
-    repros = list((output / "canonical").glob("*/repro.py"))
+    repros = list((output / "canonical").glob("*/*/repro.py"))
     assert len(repros) == 1 and "relu" in repros[0].read_text()
+    assert repros[0].parent.parent.name == "epilogue"
     assert all("control" not in p.name for p in tmp_path.iterdir())
     assert not list(tmp_path.glob(".mm_repro_build_*"))
     rows = json.loads((output / "occurrences.json").read_text())

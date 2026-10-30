@@ -21,7 +21,9 @@ def trace(fn, *shapes):
 
 
 def mm_pattern(gm):
-    (region,) = get_fusion_partitions(gm, only_include_mm=True)
+    # The largest region holds the literal (e.g. the var_mean projection is
+    # only inside the vertical region; the prologue region takes it as input).
+    region = max(get_fusion_partitions(gm, only_include_mm=True), key=len)
     return compute_partition_pattern(region, gm)
 
 

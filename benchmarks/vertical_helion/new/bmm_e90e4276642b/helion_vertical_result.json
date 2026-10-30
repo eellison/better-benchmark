@@ -1,0 +1,82 @@
+{
+  "repro": "bmm_e90e4276642b",
+  "shape_index": 0,
+  "inputs": [
+    [
+      128,
+      32,
+      49,
+      49
+    ],
+    [
+      128,
+      32,
+      49,
+      49
+    ],
+    [
+      4096,
+      32,
+      49
+    ],
+    [
+      4096,
+      49,
+      32
+    ],
+    [
+      4096,
+      49,
+      49
+    ],
+    [
+      128,
+      32,
+      32,
+      49
+    ],
+    [
+      128,
+      32,
+      49,
+      32
+    ]
+  ],
+  "device": "NVIDIA H100",
+  "notes": "One kernel: program per (window, head); 4096 small slices.",
+  "unfused_first_call_s": 253.8,
+  "unfused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      2.2736127760061703e-07,
+      0.002232142857142857,
+      0.0018656716417910447
+    ]
+  },
+  "unfused_kernels": 3,
+  "unfused_kernel_names": [
+    "_helion_dk_kernel",
+    "_helion_dq_kernel",
+    "_helion_ds_kernel"
+  ],
+  "fused_first_call_s": 91.8,
+  "fused_check": {
+    "ok": true,
+    "scaled_max_error": [
+      2.2736127760061703e-07,
+      0.002232142857142857,
+      0.0018656716417910447
+    ]
+  },
+  "fused_kernels": 1,
+  "fused_kernel_names": [
+    "_helion_fused_kernel"
+  ],
+  "eager_us": 370.18,
+  "inductor_us": 149.92,
+  "inductor_kernels": 4,
+  "unfused_us": 112.19,
+  "fused_us": 81.41,
+  "fused_speedup_vs_unfused": 1.378,
+  "fused_speedup_vs_inductor": 1.842
+}

@@ -1,0 +1,75 @@
+{
+  "points": [
+    {
+      "shape_hash": "c5b0f736",
+      "inputs": [
+        [
+          [
+            128,
+            64,
+            8,
+            8
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            10
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            10
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/infer/phlippe_resnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 3,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            128
+          ],
+          "stages": [
+            {
+              "op": "mean",
+              "R": 64,
+              "F": 64
+            },
+            {
+              "op": "addmm",
+              "R": 64,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": []
+    }
+  ]
+}

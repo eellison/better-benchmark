@@ -1,0 +1,119 @@
+{
+  "points": [
+    {
+      "shape_hash": "ddfffd49",
+      "inputs": [
+        [
+          [
+            64,
+            512,
+            128
+          ],
+          "f32"
+        ],
+        [
+          [
+            30522
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            30522
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            6
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            6,
+            0,
+            0
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            30522
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            30522
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 19,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 2,
+        "vertical": {
+          "slice_axes": [
+            64,
+            512
+          ],
+          "stages": [
+            {
+              "op": "var_mean",
+              "R": 128,
+              "F": 1
+            },
+            {
+              "op": "addmm",
+              "R": 128,
+              "F": 0
+            }
+          ]
+        }
+      },
+      "coverage": [
+        "pw_prologue"
+      ]
+    }
+  ]
+}
