@@ -118,7 +118,7 @@ def _softmax_backward_kernel(
     tmp18 = tl_math.exp(tmp17)
     tmp19 = tmp18 / tmp9
     tmp20 = -tmp19
-    tmp21 = libdevice.fma(tmp20, tmp14, tmp11)
+    tmp21 = tl.fma(tmp20, tmp14, tmp11)
     tmp22 = tmp21.to(tl.float32)
     tl.store(out_ptr2 + (r0_2 + 256 * x3), tmp22, None)
 
