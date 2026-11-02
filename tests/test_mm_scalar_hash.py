@@ -92,7 +92,8 @@ def test_non_mm_pattern_hash_still_ignores_scalars():
 def test_mm_pattern_hash_survives_retracing():
     pattern = mm_pattern(trace(lambda x, w: ((x / 49.0) @ w).relu(), (4, 8), (8, 8)))
     retraced = trace(pattern["sub_gm"], (4, 8), (8, 8))
-    assert pattern_hash_for_subgraph(retraced, scalar_sensitive=True) == pattern["pattern_hash"]
+    from mm_replay import execution_hash
+    assert execution_hash(retraced) == pattern["pattern_hash"]
 
 
 def test_mm_pattern_hash_ignores_unused_tuple_projections():

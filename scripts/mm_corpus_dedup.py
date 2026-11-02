@@ -13,7 +13,6 @@ from torch.fx.experimental.proxy_tensor import make_fx
 from torch.utils._pytree import tree_leaves
 
 from capture_hook import lift_shape_params
-from repro_harness import make_inputs_from_config
 
 
 def tensor_metadata(value):
@@ -31,7 +30,7 @@ def trace_repro(path: Path, config: dict):
     spec = importlib.util.spec_from_file_location("curate_" + path.parent.name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    args = make_inputs_from_config(config)
+    args = module.make_inputs(shape_config=config)
     tensor_positions = [i for i, v in enumerate(args) if isinstance(v, torch.Tensor)]
 
     def bound(*tensors):

@@ -1,0 +1,376 @@
+{
+  "points": [
+    {
+      "shape_hash": "75dce9a3",
+      "inputs": [
+        [
+          [
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            2304
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            2304
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            3,
+            12,
+            -1
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 3,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "af9b411f",
+      "inputs": [
+        [
+          [
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25344,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            2304
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            2304
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            3,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 3,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "1e58538e",
+      "inputs": [
+        [
+          [
+            576
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            576
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              192
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            576
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            3,
+            3,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 3,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "60ff3550",
+      "inputs": [
+        [
+          [
+            576
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            576
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              192
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            576
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            3,
+            4,
+            48
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 3,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "8604fc1b",
+      "inputs": [
+        [
+          [
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            175360,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            2304
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            1370,
+            2304
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            1370,
+            3,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/vit_base_patch14_dinov2.lvd142m": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 3,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "9841e97f",
+      "inputs": [
+        [
+          [
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            2304
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            128,
+            256,
+            2304
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            256,
+            3,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 3,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

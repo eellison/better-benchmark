@@ -1,0 +1,150 @@
+{
+  "points": [
+    {
+      "shape_hash": "76585380",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/DistillGPT2": {
+          "occurrences": 6
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "5c14b9dc",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GPT2ForSequenceClassification": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

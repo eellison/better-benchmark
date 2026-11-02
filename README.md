@@ -352,13 +352,16 @@ benchmarks/              # frozen benchmark set definitions
 ## Matmul pattern corpus
 
 ```bash
-python scripts/extract_matmul_corpus.py --workers 32   # regenerates mm_repro/
-python scripts/validate_matmul_repros.py               # FakeTensor-runs every shape point
+python scripts/extract_matmul_corpus.py --workers 8    # regenerates mm_repro/
+python scripts/validate_matmul_repros.py                # reloads every repro/config
 ```
 
-`mm_repro/` holds small MM fusion-pattern repros cut out of the saved model
-graphs, one per pattern family in six categories (prologue, epilogue,
-prologue_epilogue, horizontal, horizontal_combine, vertical;
-**585 repros / 1019 shapes**). Regeneration runs on CPU with FakeTensors and is
-deterministic. See [docs/matmul_partitioning.md](docs/matmul_partitioning.md)
-for the selection rules, layout and validation.
+`mm_repro/` holds **622 repros / 1279 shapes** in five categories:
+prologue (105), epilogue (345), horizontal (74), horizontal_combine (5), and
+vertical (93). The new single-MM pass starts with normal BB partitions,
+absorbs one consumer MM into pure-pointwise partitions first, then absorbs
+one available producer MM into remaining MM-free partitions. Augmented
+partitions are never reused; epilogues have no reduction-count limit.
+Horizontal grouping is unchanged. Vertical windows exclude any actually
+reduced FX axis whose extent is one, independently of R/F. Regeneration and
+validation use CPU/FakeTensors. See [docs/matmul_partitioning.md](docs/matmul_partitioning.md).

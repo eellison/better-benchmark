@@ -15,7 +15,7 @@ import torch
 from torch.fx.experimental.proxy_tensor import make_fx
 
 from matmul_partitioner import is_computation, is_matmul, is_reduction, value_inputs
-from repro_harness import load_shape_configs, make_inputs_from_config
+from repro_harness import load_shape_configs
 from roundtrip_validation import fake_tensor_ctx
 
 
@@ -58,7 +58,9 @@ def admits(metrics, limits):
 
 def filter_patterns(records, limits):
     """Keep every record that fits; there is no count limit or sampling."""
-    return [record for record in records if admits(record["metrics"], limits)]
+    return [record for record in records
+            if record.get("category") in {"prologue", "epilogue"}
+            or admits(record["metrics"], limits)]
 
 
 def load_records(source):
@@ -83,7 +85,7 @@ def load_records(source):
         with fake_tensor_ctx():
             for config in load_shape_configs(str(path)).values():
                 gm = make_fx(module.Repro(), tracing_mode="fake")(
-                    *make_inputs_from_config(config)
+                    *module.make_inputs(shape_config=config)
                 )
                 for key, value in graph_metrics(gm).items():
                     traced[key] = max(traced[key], value)
@@ -96,6 +98,7 @@ def load_records(source):
                 "id": pattern,
                 "directory": path.parent,
                 "metrics": metrics,
+                "category": points[0]["partition_metrics"]["category"],
             }
         )
         if (index + 1) % 100 == 0:

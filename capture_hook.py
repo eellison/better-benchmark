@@ -263,11 +263,11 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
     partition, as if they were not fusible.
 
-    ``only_include_mm=True`` instead returns small matmul benchmark regions
-    (matmul_partitioner.MatmulRegion), one per fusion pattern category
-    (prologue, epilogue, prologue_epilogue, horizontal, horizontal_combine,
-    vertical); each names its outputs explicitly. Unlike the default
-    partitions, MM regions may overlap; the graph itself is never changed.
+    ``only_include_mm=True`` returns the five matmul corpus categories. The
+    prologue/epilogue pass assigns one MM to a whole normal partition, pointwise
+    consumer absorption first, and never reuses an augmented partition. The
+    horizontal/horizontal_combine/vertical window searches remain separate and
+    may overlap those examples. Every MM region names its escaping outputs.
 
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
@@ -1309,15 +1309,20 @@ def compute_partition_pattern(
         from mm_input_constraints import annotate_external_sqrt_inputs
 
         annotate_external_sqrt_inputs(sub_gm, placeholder_info)
+    normal = is_mm_region and comp.category in {"prologue", "epilogue"}
+    if normal:
+        from mm_replay import execution_hash
+        pattern_key = execution_hash(sub_gm)
+    else:
+        pattern_key = pattern_hash_for_subgraph(sub_gm, scalar_sensitive=is_mm_region)
     return {
-        # MM repros keep their scalar constants (scales, epsilons), so those
-        # constants are part of their identity.
-        "pattern_hash": pattern_hash_for_subgraph(
-            sub_gm, scalar_sensitive=is_mm_region),
+        "pattern_hash": pattern_key,
         "shape_hash": shape_hash_for_placeholders(placeholder_info),
         "sub_gm": sub_gm,
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
+        **({"normal_pattern_hash": pattern_hash_for_subgraph(sub_gm)}
+           if is_mm_region and comp.category in {"prologue", "epilogue"} else {}),
     }
 
 
@@ -1548,13 +1553,9 @@ class _CaptureState:
     def _infer_permutation_indices(gm, placeholder_info) -> dict[str, int]:
         return infer_permutation_indices_from_gm(gm, placeholder_info)
 
-    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
+    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None, *, dry_run=False):
         shape_params = shape_params or {}
-        code = gm.print_readable(print_output=False)
-        import re as _re
-        code = _re.sub(r"^class \S+\(torch\.nn\.Module\):",
-                       "class Repro(torch.nn.Module):", code, count=1,
-                       flags=_re.M)
+        code = fx.GraphModule(gm, gm.graph, class_name="Repro").print_readable(print_output=False)
 
         # Infer index bounds for int64 placeholders (graph inference = tier 1).
         # constant_values: placeholders where only a CONSTANT is safe
@@ -1578,101 +1579,8 @@ class _CaptureState:
                 # Observed fallback: bound = observed.max + 1
                 index_bounds[name] = int(observed["max"]) + 1
 
-        # Replace symbolic shape refs (s0, s1, ...) in annotations with concrete values
-        import re
-        for name, info in placeholder_info.items():
-            if not info.get("shape"):
-                continue
-            ann_match = re.search(rf'{re.escape(name)}: "(\w+)\[([^\]]+)\]"', code)
-            if ann_match:
-                sym_dims = ann_match.group(2).split(", ")
-                concrete_dims = info["shape"]
-                if len(sym_dims) == len(concrete_dims):
-                    for sym, conc in zip(sym_dims, concrete_dims):
-                        if re.match(r's\d+', sym):
-                            code = re.sub(rf'\b{re.escape(sym)}\b', str(conc), code)
-
-        input_lines = []
         ph_names = [n.name for n in gm.graph.nodes if n.op == "placeholder"]
-        for name in ph_names:
-            if name in shape_params:
-                input_lines.append(f"    {shape_params[name]},  # {name}")
-                continue
-            info = placeholder_info.get(name)
-            if info and info["dtype"] != "symint":
-                shape = info["shape"]
-                stride = info.get("stride", [])
-                dtype = info["dtype"]
-                device = info.get("device", "cuda")
-                if "cuda" in device:
-                    device = "cuda"
-                if stride and shape:
-                    storage_size = sum(
-                        s * (d - 1) for s, d in zip(stride, shape) if d > 1
-                    ) + 1
-                    if "int" in dtype:
-                        # int8 = pool offsets (0..8), int64 = indices (inferred or shape[0])
-                        default_hi = 9 if "int8" in dtype else max(shape)
-                        hi = index_bounds.get(name, default_hi)
-                        if name in permutation_indices:
-                            input_lines.append(
-                                f"    torch.randperm({permutation_indices[name]}, dtype={dtype}, device='{device}')"
-                                f".as_strided({shape}, {stride}),  # {name}"
-                            )
-                        else:
-                            input_lines.append(
-                                f"    torch.randint(0, {hi}, ({storage_size},), dtype={dtype}, device='{device}')"
-                                f".as_strided({shape}, {stride}),  # {name}"
-                            )
-                    elif "bool" in dtype:
-                        input_lines.append(
-                            f"    torch.randint(0, 2, ({storage_size},), dtype=torch.bool, device='{device}')"
-                            f".as_strided({shape}, {stride}),  # {name}"
-                        )
-                    else:
-                        input_lines.append(
-                            f"    torch.randn({storage_size}, dtype={dtype}, device='{device}')"
-                            f".as_strided({shape}, {stride}),  # {name}"
-                        )
-                else:
-                    if "int" in dtype:
-                        default_hi = 9 if "int8" in dtype else max(shape) if shape else 2
-                        hi = index_bounds.get(name, default_hi)
-                        if name in permutation_indices:
-                            input_lines.append(
-                                f"    torch.randperm({permutation_indices[name]}, dtype={dtype}, device='{device}')"
-                                f".reshape({shape}),"
-                            )
-                        else:
-                            input_lines.append(
-                                f"    torch.randint(0, {hi}, {shape}, dtype={dtype}, device='{device}'),"
-                            )
-                    elif "bool" in dtype:
-                        input_lines.append(
-                            f"    torch.randint(0, 2, {shape}, dtype=torch.bool, device='{device}'),"
-                        )
-                    else:
-                        input_lines.append(
-                            f"    torch.randn({shape}, dtype={dtype}, device='{device}'),"
-                        )
-            elif info and info.get("dtype") == "symint":
-                # SymInt placeholder — emit the concrete hint value as a plain int
-                # This is a scalar dimension (like seq_len) passed to ops like iota/full
-                val = info.get("hint", 1)
-                input_lines.append(f"    {val},  # {name} (symbolic dim)")
-            else:
-                input_lines.append(f"    torch.tensor(1),  # {name} (unknown shape)")
 
-        inputs_code = "\n".join(input_lines)
-
-        # Build compact shapes config line (same format as shapes.txt)
-        _DTYPE_SHORT = {
-            "torch.float32": "f32", "torch.float16": "f16",
-            "torch.bfloat16": "bf16", "torch.float64": "f64",
-            "torch.int64": "i64", "torch.int32": "i32",
-            "torch.int16": "i16", "torch.int8": "i8",
-            "torch.bool": "b8", "torch.uint8": "u8",
-        }
         # Build the inputs as DATA (compact shared encoding); the T()/S()
         # string is a RENDERING of that data for repro.py documentation —
         # the same value flows to shapes.json structurally, never re-parsed.
@@ -1718,6 +1626,8 @@ class _CaptureState:
                         "dtype": info["dtype"],
                         "stride": info.get("stride", []),
                     }
+                    if meta.get("normal_partition"):
+                        spec["device"] = info.get("device", "cuda")
                     if info.get("storage_offset"):
                         spec["storage_offset"] = info["storage_offset"]
                     sk = info.get("_storage_key")
@@ -1742,6 +1652,9 @@ class _CaptureState:
                 elif info and info.get("dtype") == "symint":
                     compact_inputs.append(["sym", info.get("hint", 1)])
         shapes_config_line = render_signature(compact_inputs)
+        if dry_run:
+            return None, shapes_config_line, compact_inputs, alias_group_nbytes
+        adapter = "from mm_replay import make_inputs_from_config" if meta.get("normal_partition") else ""
 
         script = f'''"""
 Standalone repro captured via capture_hook.
@@ -1759,6 +1672,7 @@ from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
+{adapter}
 
 _repro_version = {CURRENT_REPRO_VERSION}
 # Input shapes/strides/dtypes live in the sibling shapes.json (structured,
@@ -1794,7 +1708,6 @@ if __name__ == "__main__":
         # Validate: the repro must run in eager without error
         if self.validate:
             try:
-                import importlib.util
                 import math as _math
                 import types
                 # Ensure project root is on sys.path so repro_harness is importable
@@ -1820,7 +1733,6 @@ if __name__ == "__main__":
                 # compact entries that BECOME the shapes.json point means
                 # we validate exactly what consumers will load.
                 from input_codec import spec_from_compact
-                from repro_harness import make_inputs_from_config as _mific
                 _vcfg = {
                     "inputs": [spec_from_compact(e) for e in compact_inputs]}
                 if alias_group_nbytes:
@@ -1966,10 +1878,23 @@ if __name__ == "__main__":
             # retrace of the serialized artifact will produce.
             pattern_key = pattern["pattern_hash"]
             shape_key = pattern["shape_hash"]
+            # Single-MM absorption and vertical windows can overlap structurally.
+            # Namespace only their raw captures; curation hashes the actual FX.
+            if "normal_pattern_hash" in pattern:
+                category = comp.category
+                pattern_key = hashlib.sha256(f"{category}:{pattern_key}".encode()).hexdigest()[:12]
+                _, _, entries, allocation_sizes = self._generate_repro_file(
+                    sub_gm, placeholder_info, {"normal_partition": True}, "", shape_params,
+                    dry_run=True,
+                )
+                payload = {"inputs": entries, "alias_group_nbytes": allocation_sizes}
+                shape_key = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()[:8]
 
             full_key = f"{pattern_key}_{shape_key}"
             observations.append({
                 "pattern_hash": pattern_key, "shape_hash": shape_key,
+                **({"normal_pattern_hash": pattern["normal_pattern_hash"]}
+                   if "normal_pattern_hash" in pattern else {}),
             })
             # Count EVERY occurrence (pre-dedup): the repro file is written
             # once per point, but the count is what the accounting joins on.
@@ -2005,6 +1930,7 @@ if __name__ == "__main__":
                 "n_ops": len(comp),
                 "origin_ops": origin_ops,
                 "reduction_types": [r["reduction_type"] for r in reduction_infos],
+                "normal_partition": "normal_pattern_hash" in pattern,
             }
 
             if is_mm_region:

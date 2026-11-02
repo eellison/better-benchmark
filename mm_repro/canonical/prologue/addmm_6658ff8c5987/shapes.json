@@ -1,0 +1,42 @@
+{
+  "points": [
+    {
+      "shape_hash": "bca7a4a5",
+      "inputs": [
+        [
+          [
+            2304,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            2304
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            768
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "timm/train/beit_base_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 4,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "points": [
+    {
+      "shape_hash": "de7fb2b2",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            4,
+            2048,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            4,
+            -1,
+            12,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "3ac68922",
+      "inputs": [
+        [
+          [
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            384
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1,
+            -1,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/openai/whisper-tiny": {
+          "occurrences": 8
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 5,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

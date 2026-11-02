@@ -1,0 +1,178 @@
+{
+  "points": [
+    {
+      "shape_hash": "ae4b8b61",
+      "inputs": [
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            24,
+            -1
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            512,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 7,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "4dde1dfe",
+      "inputs": [
+        [
+          [
+            16384,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            256,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            256,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            -1,
+            16,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            1024,
+            256,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 7,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "023d9004",
+      "inputs": [
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            512,
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 7,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

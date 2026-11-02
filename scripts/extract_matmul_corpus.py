@@ -21,8 +21,11 @@ from __future__ import annotations
 import argparse
 import contextlib
 import hashlib
+import inspect
 import json
+import math
 import multiprocessing
+import runpy
 import subprocess
 import sys
 import tempfile
@@ -38,7 +41,8 @@ sys.path.insert(0, str(ROOT))
 # their inputs are generated. Recorded in report.json.
 POLICY_ID = hashlib.sha256(
     (ROOT / "matmul_partitioner.py").read_bytes()
-    + (ROOT / "mm_region_quality.py").read_bytes()
+    + (ROOT / "mm_partition_absorption.py").read_bytes()
+    + (ROOT / "mm_replay.py").read_bytes()
     + (ROOT / "capture_hook.py").read_bytes()
     + (ROOT / "mm_input_constraints.py").read_bytes()
     + (ROOT / "input_codec.py").read_bytes()
@@ -53,15 +57,68 @@ def write_json(path, value):
     temporary.replace(path)
 
 
+def load_source_graph(source):
+    """Load real Python/FX and sidecars, retaining aliases and dotted attributes."""
+    import torch
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (
+        load_full_graph_sidecar, make_inputs_from_full_graph_specs, make_tensor_from_spec,
+    )
+    from roundtrip_validation import fake_tensor_ctx
+
+    source = Path(source)
+    sidecar = load_full_graph_sidecar(source)
+    if "inputs" not in sidecar:
+        raise ValueError(f"Missing structured input sidecar: {source}")
+    with fake_tensor_ctx(), torch.no_grad():
+        name = "_mm_corpus_source"
+        globals = {**vars(torch.nn), "torch": torch, "fx": torch.fx,
+                   "inf": math.inf, "nan": math.nan, "device": torch.device,
+                   "tensor": torch.tensor}
+        namespace = runpy.run_path(str(source), init_globals=globals, run_name=name)
+        classes = [v for v in namespace.values() if isinstance(v, type)
+                   and issubclass(v, torch.nn.Module) and v.__module__ == name]
+        specs = sidecar["inputs"]
+        names = [spec["name"] for spec in specs]
+        matching = [cls for cls in classes
+                    if list(inspect.signature(cls.forward).parameters)[1:] == names]
+        cls = matching[0] if matching else classes[0]
+        instance = cls()
+        for attr, spec in sidecar.get("tensor_attrs", {}).items():
+            parent = instance
+            parts = attr.split(".")
+            for part in parts[:-1]:
+                if not hasattr(parent, part):
+                    parent.add_module(part, torch.nn.Module())
+                parent = getattr(parent, part)
+            if not hasattr(parent, parts[-1]):
+                parent.register_buffer(parts[-1], make_tensor_from_spec(spec, default_device="cuda"))
+        inputs = list(make_inputs_from_full_graph_specs(specs, default_device="cuda"))
+        by_name = {spec["name"]: i for i, spec in enumerate(specs)}
+        for names in sidecar.get("storage_groups", []):
+            indices = [by_name[n] for n in names]
+            devices = {inputs[i].device for i in indices}
+            if len(devices) != 1:
+                raise ValueError("Recorded input alias group spans devices")
+            nbytes = max(inputs[i].untyped_storage().nbytes() for i in indices)
+            alignment = max(inputs[i].element_size() for i in indices)
+            nbytes = (nbytes + alignment - 1) // alignment * alignment
+            storage = torch.empty(nbytes, dtype=torch.uint8, device=devices.pop())
+            for i in indices:
+                value = inputs[i]
+                inputs[i] = storage.view(value.dtype).as_strided(
+                    value.shape, value.stride(), value.storage_offset()
+                )
+        return make_fx(instance, tracing_mode="fake")(*inputs)
+
+
 def extract_one(task):
     """Capture the MM regions of one source graph (runs in a worker process)."""
     index, source, work_dir = task
     import torch
 
     from capture_hook import _CaptureState, partition_node_is_supported
-    from full_graph_harness import load_full_graph_definition
     from matmul_partitioner import get_matmul_regions, is_matmul
-    from roundtrip_validation import trace_full_graph_fake
 
     torch.set_num_threads(1)
     capture_dir = Path(work_dir) / f"{index:04d}"
@@ -74,7 +131,7 @@ def extract_one(task):
         contextlib.redirect_stderr(log),
     ):
         try:
-            gm = trace_full_graph_fake(load_full_graph_definition(source))
+            gm = load_source_graph(source)
             original_mm = sum(is_matmul(n) for n in gm.graph.nodes)
             if not original_mm:
                 row.update(status="no_mm", original_mm=0)
@@ -94,7 +151,11 @@ def extract_one(task):
                     {
                         "pattern_hash": observed["pattern_hash"],
                         "shape_hash": observed["shape_hash"],
-                        "metrics": region.metrics,
+                        "metrics": {
+                            **region.metrics,
+                            **({"normal_pattern_hash": observed["normal_pattern_hash"]}
+                               if "normal_pattern_hash" in observed else {}),
+                        },
                     }
                 )
             row.update(
@@ -162,10 +223,9 @@ def extract_raw_corpus(output: Path, sources=None, workers: int = 2):
     sources = sources or [
         ROOT / p
         for p in subprocess.check_output(
-            ["rg", "--files", "repros/models", "-g", "full_graph_*.py"],
-            cwd=ROOT,
-            text=True,
-        ).splitlines()
+            ["git", "ls-files", "-z", "repros/models"], cwd=ROOT, text=True
+        ).split("\0")
+        if p and Path(p).name.startswith("full_graph_") and p.endswith(".py")
     ]
     sources = sorted(Path(p).resolve() for p in sources)
     work = output / ".work"

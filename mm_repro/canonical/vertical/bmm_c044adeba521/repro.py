@@ -46,4 +46,4 @@ def make_inputs(shape_config=None):
     return make_inputs_from_config(shape_config)
 
 if __name__ == "__main__":
-    benchmark_repro(Repro(), make_inputs, __file__)
+    benchmark_repro(__file__, Repro, make_inputs)

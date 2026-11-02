@@ -1,77 +1,32 @@
-"""Extract matmul (MM) micro-graphs from an FX graph, one pattern category at a time.
+"""Select MM benchmark regions from a full post-grad FX graph.
 
-Input is the post-grad FX graph of a whole model. Output is a list of
-MatmulRegion: small pieces of that graph, each one fusion pattern around one
-to three MMs, so every category is covered on its own and a benchmark can be
-read per category:
+Prologue/epilogue use unchanged normal BB partitions (mm_partition_absorption):
+1. A pure-pointwise partition absorbs one available consumer mm/addmm/bmm.
+2. An MM-free partition absorbs one available producer mm/addmm/bmm.
+3. Every original partition/MM is used once; augmented partitions do not grow.
+4. Only augmented partitions containing exactly one MM are extracted.
 
-  prologue           one MM; only pointwise/gather/transparent work in front
-                     of its operands (no work after it)
-  epilogue           one MM; only pointwise/scatter/transparent work on its
-                     result, possibly with side inputs (no work in front)
-  prologue_epilogue  one MM with both
-  horizontal         2 or 3 MMs that do not depend on each other, share an
-                     operand (through transparent ops) and have the same
-                     output shape; prologues/epilogues may surround them, and
-                     every output depends on only one of the MMs
-  horizontal_combine the same, but some op combines the results of >= 2 of
-                     the MMs (e.g. silu(x @ wg) * (x @ wu))
-  vertical           a connected chain of >= 2 dependent reduction stages
-                     (MMs and ordinary reductions) with >= 1 MM, accepted by
-                     the tensor-level slice analysis below
+Whole partitions and all escaping outputs are retained. Prologues contain no
+ordinary reduction; epilogues may contain any normal-BB-supported computation,
+without a reduction-count or region-size cap. No pointwise suffix is cut from
+a reduction partition. Their category is the source absorption direction.
 
-The single-MM categories are exclusive: an MM with work on both sides is only
-"prologue_epilogue", never also "prologue" or "epilogue". Likewise a group
-with a combining op is only "horizontal_combine". The categories
-are structurally disjoint (one MM and no reduction / several independent MMs
-and no reduction / chained reductions), so classify_pattern_graph() recovers
-the category from a standalone repro.
+Horizontal/horizontal_combine keep the independent 2..3-MM window search:
+shared operands, equal output shapes, and optional surrounding local work.
+Vertical keeps connected dependent reduction windows with at least one MM.
+These multi-stage windows may overlap the normal-partition examples; the model
+graph is never rewritten.
 
-"Transparent" ops (views, permutes, casts, expand, squeeze, ...) are always
-included and never count as work. Producers of side inputs (an epilogue's
-residual, an addmm bias) are absorbed through transparent and gather ops and
-when computed only from graph inputs and constants (dropout masks, iota
-masks, gelu' of a saved activation); side inputs computed from other
-intermediates stay outside. Reductions other than MMs only appear in
-"vertical"; in the other categories they are boundaries and their results
-become inputs. Regions must replay standalone: no value leaves a region and
-flows back into it, no outside op writes memory it uses, and unbind, softmax,
-attention ops and copies to another device are boundaries.
-
-Regions are benchmark windows, not a partition of the model: regions may
-overlap and the graph is never modified. Selection looks only at op schemas,
-value dependencies and tensor metadata.
-
-Vertical regions
-----------------
-Every MM is a logical reduction: H[m, n] = sum_k A[m, k] * B[k, n] over the
-domain [M, K, N] with reduced axis K. Tensor axes are tracked symbolically as
-"atoms" (union-find classes with sizes): pointwise broadcasting, views,
-reshapes (axis split/merge), permutes and MM batch/row/column axes unify
-atoms; partial slices, gathers and unknown ops create fresh atoms. Values
-computed from region inputs only get fresh atoms at every use, so only
-dependencies on reduction stages relate axes.
-
-Independent slices: an atom is a slice axis when it appears in every region
-output and in every internal reduction-stage result that output depends on.
-Different coordinates along it therefore read disjoint coordinates of every
-internally computed reduction result; sharing external inputs does not
-matter. For every stage:
-
-  R = product of the reduced axis lengths              must be <= reduction_limit
-  F = stage output elements needed per slice by later  must be <= intermediate_limit
-      stages (0 if no later stage consumes it)
-
-Candidates whose internal index relations are unknown (a gather/scatter or
-unknown op reading an internal reduction result, a reshape that does not
-align, an atom that appears twice in one tensor) are rejected. Gathers of
-external tables stay eligible. Stages are absorbed greedily in graph order
-and the analysis is recomputed for every trial.
+Vertical slice analysis tracks axes with union-find atoms through broadcasts,
+views, reshapes and linear maps. Every stage's reduced domain R and intermediate
+values F per independent slice must fit the configured limits (128 by default).
+In addition, any FX stage reducing an input axis of extent one is rejected,
+regardless of total R/F; an unreduced singleton axis, MM N=1 or F=1 alone is fine.
+Unknown internal index relations and unsafe standalone windows are rejected.
 """
 
 from __future__ import annotations
 
-import itertools
 import math
 import operator
 from collections import deque
@@ -306,6 +261,29 @@ def reduction_size(node, shapes):
     return math.prod(shape[axis] for axis in axes)
 
 
+def singleton_reduction(node, shapes):
+    """Whether the original FX op reduces an axis whose extent is one.
+
+    This is independent of slice R/F. An unreduced singleton/output axis is
+    not a reason to reject a region; MM's reduced axis is its operand K.
+    """
+    if is_matmul(node):
+        operands = mm_operands(node)
+        shape = shapes.get(operands[0]) if operands else None
+        return bool(shape and shape[-1] == 1)
+    inputs = value_inputs(node)
+    shape = shapes.get(inputs[0]) if inputs else None
+    if shape is None:
+        return False
+    bindings = _bindings(node)
+    dims = bindings.get("dim", bindings.get("dims"))
+    dims = [dims] if isinstance(dims, int) else dims
+    dims = range(len(shape)) if dims is None or list(dims) == [] else dims
+    return bool(shape) and any(
+        isinstance(dim, int) and shape[dim % len(shape)] == 1 for dim in dims
+    )
+
+
 class _ReplaySafety:
     """Can a node subset of the graph run on its own, in one piece?
 
@@ -402,7 +380,6 @@ class _ReplaySafety:
 CATEGORIES = (
     "prologue",
     "epilogue",
-    "prologue_epilogue",
     "horizontal",
     "horizontal_combine",
     "vertical",
@@ -804,6 +781,8 @@ def analyze_vertical(region, outputs, order, limits):
         f = math.prod(atoms.size[a] for a in stage_atoms[s] - slices) if feeds[s] else 0
         if r is None or r <= 0:
             return None, "reduction_size_unknown"
+        if singleton_reduction(s, shapes):
+            return None, "singleton_reduction"
         if r > limits.reduction_limit:
             return None, "reduction_limit"
         if f > limits.intermediate_limit:
@@ -990,34 +969,7 @@ class _Extractor:
             return None
         return self.sort(needed), outputs, metrics
 
-    # --- categories 1, 2 and prologue+epilogue ---------------------------
-
-    def single(self, mm):
-        operands = mm_operands(mm)
-        core = self.grow_backward({mm}, operands)
-        prologue = set(core) - {mm}
-        snapshots = list(self.grow_forward(core, [mm]))
-        for window in reversed(snapshots):
-            window = self.grow_backward(window, self.side_inputs(window, prologue | {mm}) | (
-                {a for a in mm.all_input_nodes if a not in operands}
-            ), side_branch=True)
-            # Values computed only from the prologue are not outputs.
-            finished = self.finish(window, lambda n: n is mm or self._after(n, mm, window), (mm,))
-            if finished is None:
-                continue
-            nodes, outputs, metrics = finished
-            pro = self._prologue_nodes(set(nodes), mm)
-            has_pro = any(is_computation(n) for n in pro)
-            has_epi = any(is_computation(n) for n in set(nodes) - pro - {mm})
-            if not has_pro and not has_epi:
-                self.reject("bare_mm")
-                return None
-            category = (
-                "prologue_epilogue" if has_pro and has_epi
-                else "prologue" if has_pro else "epilogue"
-            )
-            return MatmulRegion(nodes, outputs, metrics, category)
-        return None
+    # --- horizontal benchmark windows ------------------------------------
 
     def _after(self, node, mm, window):
         """node depends on mm inside window."""
@@ -1031,17 +983,6 @@ class _Extractor:
                     seen.add(a)
                     stack.append(a)
         return False
-
-    def _prologue_nodes(self, nodes, mm):
-        """Nodes producing mm's multiplied operands (not the addmm bias)."""
-        result, stack = set(), [a for a in mm_operands(mm) if a in nodes]
-        while stack:
-            n = stack.pop()
-            if n in result:
-                continue
-            result.add(n)
-            stack.extend(a for a in value_inputs(n) if a in nodes)
-        return result
 
     # --- category 3 --------------------------------------------------------
 
@@ -1256,20 +1197,42 @@ def supported_nodes(gm, is_supported, excluded=()):
     return supported
 
 
+def _normal_mm_regions(gm, excluded, categories):
+    """Augmented whole normal partitions; no window pruning or size cap."""
+    from mm_partition_absorption import absorb_matmuls
+
+    regions = []
+    for nodes, category in absorb_matmuls(gm, excluded=excluded):
+        if category not in categories:
+            continue
+        core = set(nodes)
+        outputs = [n for n in nodes if is_mutating(n) or any(u not in core for u in n.users)]
+        depth = {}
+        for node in nodes:
+            depth[node] = max((depth[a] for a in value_inputs(node) if a in core), default=0) + int(is_reduction(node))
+        metrics = {
+            "nodes": len(nodes), "mm": 1,
+            "compute": sum(is_matmul(n) or is_computation(n) for n in nodes),
+            "non_mm_compute": sum(is_computation(n) for n in nodes),
+            "inputs": len({a for n in nodes for a in n.all_input_nodes if a not in core}),
+            "outputs": len(outputs), "contraction_depth": max(depth.values(), default=0),
+            "selection": "normal_absorption_v1",
+        }
+        regions.append(MatmulRegion(nodes, outputs, metrics, category))
+    return regions
+
+
 def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), categories=CATEGORIES, diagnostics=None):
     """Return MatmulRegions of ``gm`` for the requested categories."""
     limits = limits or MatmulLimits()
     supported = supported_nodes(gm, is_supported, excluded)
     ex = _Extractor(gm, supported, limits)
-    from mm_region_quality import classify_region_quality
 
     mms = [n for n in ex.nodes if is_matmul(n) and n in supported]
-    regions = []
-    if {"prologue", "epilogue", "prologue_epilogue"} & set(categories):
-        for mm in mms:
-            region = ex.single(mm)
-            if region is not None and region.category in categories:
-                regions.append(region)
+    regions = (
+        _normal_mm_regions(gm, excluded, set(categories))
+        if {"prologue", "epilogue"} & set(categories) else []
+    )
     if {"horizontal", "horizontal_combine"} & set(categories):
         for group in ex.horizontal_groups(mms):
             region = ex.horizontal(group)
@@ -1286,46 +1249,42 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), categories
             r for r in vertical
             if not any(set(r) < set(o) for o in vertical)
         )
-    kept = []
-    for region in regions:
-        if classify_region_quality(region)["category"] == "core":
-            kept.append(region)
-        else:
-            ex.reject("no_substantive_fusion")
     if diagnostics is not None:
         diagnostics.update(
             {
                 "mm_seeds": len(mms),
-                "regions": {c: sum(r.category == c for r in kept) for c in CATEGORIES},
+                "regions": {c: sum(r.category == c for r in regions) for c in CATEGORIES},
                 "rejections": dict(sorted(ex.rejections.items())),
             }
         )
-    return kept
+    return regions
 
 
-def classify_pattern_graph(gm):
-    """Category of a standalone repro graph, or None if it fits none."""
+def classify_pattern_graph(gm, *, expected=None):
+    """Validate a category; single-MM absorption direction comes from source metadata.
+
+    A one-MM reduction graph may be either a normal-partition epilogue or a
+    vertical window, so those labels cannot be inferred from standalone FX alone.
+    """
     nodes = list(gm.graph.nodes)
     mms = [n for n in nodes if is_matmul(n)]
     reductions = [n for n in nodes if is_reduction(n) and not is_matmul(n)]
+    if expected in {"prologue", "epilogue"}:
+        if len(mms) != 1 or op_name(mms[0]) not in {"aten::mm", "aten::addmm", "aten::bmm"}:
+            return None
+        if expected == "prologue" and reductions:
+            return None
+        if not any(n.op == "call_function" and n not in mms for n in nodes):
+            return None
+        return expected
     ancestors = {}
     for n in nodes:
         ancestors[n] = set().union(*(ancestors[a] | {a} for a in value_inputs(n)))
     chained = any(s in ancestors[t] for s in mms + reductions for t in mms + reductions)
     if chained and mms:
         return "vertical"
-    if reductions or not mms:
+    if reductions or len(mms) < 2:
         return None
-    if len(mms) == 1:
-        mm = mms[0]
-        pro = set()
-        for operand in mm_operands(mm):
-            pro |= ancestors[operand] | {operand}
-        has_pro = any(is_computation(n) for n in pro)
-        has_epi = any(is_computation(n) for n in nodes if n not in pro and n is not mm)
-        if has_pro and has_epi:
-            return "prologue_epilogue"
-        return "prologue" if has_pro else "epilogue" if has_epi else None
     shapes = {tensor_shape(m) for m in mms}
     if len(mms) <= 3 and len(shapes) == 1 and None not in shapes:
         return "horizontal_combine" if combines(nodes, mms) else "horizontal"

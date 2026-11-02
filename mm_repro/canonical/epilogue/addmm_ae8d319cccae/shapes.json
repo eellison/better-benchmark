@@ -1,0 +1,70 @@
+{
+  "points": [
+    {
+      "shape_hash": "3f601ed7",
+      "inputs": [
+        [
+          [
+            16,
+            512
+          ],
+          "i64"
+        ],
+        [
+          [
+            29056
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            29056
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16,
+            512,
+            29056
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            29056
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MegatronBertForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 18,
+        "nodes": 29,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

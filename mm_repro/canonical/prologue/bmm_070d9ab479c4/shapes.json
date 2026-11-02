@@ -1,0 +1,208 @@
+{
+  "points": [
+    {
+      "shape_hash": "074b2cb5",
+      "inputs": [
+        [
+          [
+            4096,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            6,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            192,
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 7,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "20eee33e",
+      "inputs": [
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            64,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            8,
+            1024,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            1024,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 18
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 7,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "1949bb7e",
+      "inputs": [
+        [
+          [
+            2048,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            -1,
+            12,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            12,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            192,
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/infer/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 7,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

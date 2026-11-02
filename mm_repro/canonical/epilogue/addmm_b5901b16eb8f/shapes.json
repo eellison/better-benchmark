@@ -1,0 +1,64 @@
+{
+  "points": [
+    {
+      "shape_hash": "94e49ab1",
+      "inputs": [
+        [
+          [
+            32,
+            512
+          ],
+          "i64"
+        ],
+        [
+          [
+            50272
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            50272
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            50265
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            50265
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 18,
+        "nodes": 30,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

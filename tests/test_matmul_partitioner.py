@@ -40,55 +40,65 @@ def ln(x):
 R = torch.randn
 
 
-# --- 1. prologue -> MM -------------------------------------------------------
+# --- normal BB partition absorption ----------------------------------------
 
 
-def test_gather_prologue():
+def normal_regions(fn, *inputs):
+    gm = make_fx(fn, tracing_mode="fake")(*inputs)
+    return get_matmul_regions(gm, partition_node_is_supported, categories=("prologue", "epilogue"))
+
+
+def test_pointwise_partition_absorbs_consumer_mm_first():
+    (region,) = normal_regions(lambda x, w: torch.cos(torch.sin(x) @ w), R(M, 32), R(32, 48))
+    assert region.category == "prologue"
+    assert any(n.target is torch.ops.aten.sin.default for n in region)
+    assert not any(n.target is torch.ops.aten.cos.default for n in region)
+    assert sum(is_matmul(n) for n in region) == 1
+
+
+def test_reduction_pointwise_partition_is_not_split_for_a_prologue():
+    assert normal_regions(lambda x, w: ln(x) @ w, R(M, 32), R(32, 48)) == []
+
+
+def test_gather_partition_is_not_a_pointwise_prologue():
     idx = torch.randint(0, 100, (M,))
-    assert categories(lambda t, i, w: t[i] @ w, R(100, 32), idx, R(32, 48)) == ["prologue"]
+    assert normal_regions(lambda t, i, w: t[i] @ w, R(100, 32), idx, R(32, 48)) == []
 
 
-def test_branching_pointwise_prologue():
-    def fn(mask, a, x, c, w):
-        return torch.where(mask, a * x + 1, torch.sigmoid(c + 5)) @ w
+def test_epilogue_keeps_the_whole_reduction_partition():
+    def fn(x, w):
+        z = x @ w
+        e = (z - z.amax(-1, keepdim=True)).exp()
+        return (e / e.sum(-1, keepdim=True)).sum(-1)
 
-    args = (torch.rand(M, 32) > 0.5, R(M, 32), R(M, 32), R(M, 32), R(32, 48))
-    assert categories(fn, *args) == ["prologue"]
-
-
-# --- 2. MM -> epilogue -------------------------------------------------------
-
-
-def test_bias_relu_epilogue():
-    assert categories(lambda x, w, b: torch.relu(x @ w + b), R(M, 32), R(32, 48), R(48)) == [
-        "epilogue"
-    ]
-
-
-def test_epilogue_with_side_inputs_and_gather():
-    def fn(x, w, b, i):
-        return torch.relu(x @ w) + b[i]
-
-    (region,) = regions(fn, R(M, 32), R(32, 48), R(100, 48), torch.randint(0, 100, (M,)))
+    (region,) = normal_regions(fn, R(M, 32), R(32, 48))
     assert region.category == "epilogue"
-    assert any("index" in str(n.target) for n in region)
+    assert sum(torch.Tag.reduction in getattr(n.target, "tags", ()) for n in region) == 3
 
 
-def test_prologue_and_epilogue_is_its_own_category():
-    def fn(x, g, b, w, res):
-        return torch.relu(ln(x) * g + b) @ w + res
+def test_absorbed_partitions_and_mms_are_not_reused():
+    def fn(x, a, b):
+        h = torch.sin(x)
+        first, second = h @ a, h @ b
+        return torch.cos(first) + second, h
 
-    args = (R(M, 32), R(32), R(32), R(32, 48), R(M, 48))
-    # Only the combined category: the MM is not also "prologue" or "epilogue".
-    # (norm -> MM is additionally a vertical chain.)
-    assert categories(fn, *args) == ["prologue_epilogue", "vertical"]
+    found = normal_regions(fn, R(M, 32), R(32, 48), R(32, 48))
+    assert sorted(r.category for r in found) == ["epilogue", "prologue"]
+    assert not set(found[0]) & set(found[1])
+    assert all(sum(is_matmul(n) for n in r) == 1 for r in found)
+    assert any(len(r.outputs) == 2 for r in found)  # h also escapes to the other MM/output
+
+
+def test_single_mm_category_filter_does_not_change_absorption_order():
+    gm = make_fx(lambda x, w: torch.cos(torch.sin(x) @ w), tracing_mode="fake")(R(M, 32), R(32, 48))
+    assert get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",)) == []
 
 
 def test_bare_mm_is_not_a_region():
     assert categories(lambda x, w: x @ w, R(M, 32), R(32, 48)) == []
 
 
-# --- 3. horizontal -----------------------------------------------------------
+# --- horizontal ------------------------------------------------------------
 
 
 def test_qkv_horizontal_group():
@@ -119,12 +129,10 @@ def test_horizontal_join_is_horizontal_combine():
     def fn(x, a, b):
         return torch.relu(x @ a) + torch.sigmoid(x @ b)
 
-    # The group is only "horizontal_combine"; each MM is also an epilogue.
-    assert categories(fn, R(M, 32), R(32, 48), R(32, 48)) == [
-        "epilogue",
-        "epilogue",
-        "horizontal_combine",
-    ]
+    # Horizontal windows stay independent of the disjoint absorption pass.
+    found = regions(fn, R(M, 32), R(32, 48), R(32, 48))
+    assert [r.category for r in found if is_mm_group(r)] == ["horizontal_combine"]
+    assert sum(r.category == "epilogue" for r in found) == 1
 
 
 def test_horizontal_with_separate_epilogues_is_not_combine():
@@ -217,7 +225,7 @@ def test_softmax_axis_is_not_independent():
 
 def test_classify_pattern_graph_matches_extraction():
     cases = [
-        (lambda t, i, w: t[i] @ w, (R(100, 32), torch.randint(0, 100, (M,)), R(32, 48))),
+        (lambda x, w: torch.sin(x) @ w, (R(M, 32), R(32, 48))),
         (lambda x, w, b: torch.relu(x @ w + b), (R(M, 32), R(32, 48), R(48))),
         (lambda x, a, b: (x @ a, x @ b), (R(M, 32), R(32, 48), R(32, 48))),
         (
@@ -226,11 +234,14 @@ def test_classify_pattern_graph_matches_extraction():
         ),
         (lambda a, b: (a @ b).view(M, 128, 32).sum(-1), (R(M, 128), R(128, 4096))),
     ]
+    from capture_hook import extract_partition_subgraph
+
     for fn, args in cases:
-        # The region covering the whole function (MMs may also be epilogues).
-        region = max(regions(fn, *args), key=len)
         gm = make_fx(fn, tracing_mode="fake")(*args)
-        assert classify_pattern_graph(gm) == region.category
+        for region in get_matmul_regions(gm, partition_node_is_supported):
+            subset, _, _ = extract_partition_subgraph(region, gm)
+            expected = region.category if region.category in {"prologue", "epilogue"} else None
+            assert classify_pattern_graph(subset, expected=expected) == region.category
 
 
 def test_swiglu_join_reached_from_either_branch():
@@ -268,13 +279,12 @@ def test_side_input_from_graph_inputs_is_absorbed():
     assert any("erf" in str(n.target) for n in region)
 
 
-def test_side_input_from_intermediates_stays_outside():
+def test_epilogue_keeps_reduction_side_work_in_its_original_partition():
     def fn(x, w, h, g):
-        normed = ln(h) * g  # computed from a reduction: stays an input
-        return x @ w + normed
+        return x @ w + ln(h) * g
 
-    found = [r for r in regions(fn, R(M, 32), R(32, 48), R(M, 48), R(48)) if r.category != "vertical"]
+    found = normal_regions(fn, R(M, 32), R(32, 48), R(M, 48), R(48))
     assert [r.category for r in found] == ["epilogue"]
-    assert not any("rsqrt" in str(n.target) for n in found[0])
+    assert any("rsqrt" in str(n.target) for n in found[0])
 
 

@@ -1,0 +1,210 @@
+{
+  "points": [
+    {
+      "shape_hash": "a845e3e5",
+      "inputs": [
+        [
+          [
+            192,
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            512,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            24,
+            512,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            1536
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 11,
+        "inputs": 2,
+        "outputs": 3,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "fb9974a1",
+      "inputs": [
+        [
+          [
+            384,
+            512,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            512,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              32768,
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            12,
+            512,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 11,
+        "inputs": 2,
+        "outputs": 3,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "20c67f96",
+      "inputs": [
+        [
+          [
+            192,
+            128,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            128,
+            64
+          ],
+          "bf16",
+          {
+            "st": [
+              8192,
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16,
+            12,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            2048,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 11,
+        "inputs": 2,
+        "outputs": 3,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

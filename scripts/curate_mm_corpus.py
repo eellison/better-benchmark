@@ -1,23 +1,15 @@
-"""Turn the raw MM captures into the published corpus (mm_repro/).
+"""Curate captured MM regions into the five-category mm_repro corpus.
 
-Called by scripts/extract_matmul_corpus.py with a temporary raw corpus. For
-every raw repro that fits the size limits, and every shape point of it:
+Normal-partition prologues/epilogues retain their whole views/casts and have no
+window-size filter. Their families are the normal BB structural pattern hashes.
+For horizontal/horizontal_combine/vertical, the existing metadata-proven graph
+normalization, size limits and compute-DAG families remain unchanged.
 
-1. Re-trace it with FakeTensors and normalize it (mm_corpus_dedup): rewrites
-   are applied only when tensor metadata proves the result is unchanged, e.g.
-   an input transpose becomes a strided input spec. Dropout seed slots are
-   set to slot 0.
-2. Drop it if it became a low-value "control" region (mm_region_quality), and
-   re-derive its pattern category from the graph (it must match extraction).
-3. Merge it into an existing group when the DAGs are isomorphic, including
-   scalar literals, and replaying the group's code on this point's inputs
-   reproduces the same output metadata. Otherwise it starts a new group.
-
-Groups are then collected into pattern families (structure_key: compute DAG
-plus input/output dtypes, ignoring transparent ops and scalars) and only the
-representative of each family is written, as canonical/<category>/<mm
-ops>_<hash>/ with its code (repro.py), every shape point (shapes.json) and
-metadata (meta.json). Only the canonical repros and a summary are exported.
+Scalar-sensitive graph matching keeps executable variants distinct. One member
+with the most source occurrences represents each family; only that member's
+compatible shape points are exported. Different literals are never replayed
+using the representative's code. The output is canonical/, report.json and
+README.md, with no benchmark/study or diagnostic artifact trees.
 """
 
 from __future__ import annotations
@@ -50,7 +42,7 @@ from mm_corpus_io import (
 )
 from torch.utils._pytree import tree_leaves
 
-from capture_hook import pattern_hash_for_subgraph
+from capture_hook import lift_shape_params, pattern_hash_for_subgraph
 from input_codec import compact_from_spec, spec_from_compact
 from matmul_partitioner import (
     CATEGORIES,
@@ -59,7 +51,7 @@ from matmul_partitioner import (
     structure_key,
 )
 from mm_input_constraints import annotate_external_sqrt_inputs
-from mm_region_quality import classify_graph_quality
+from mm_replay import execution_hash, make_inputs_from_config as make_normal_inputs
 from repro_harness import load_shape_configs, make_inputs_from_config
 from roundtrip_validation import fake_tensor_ctx
 
@@ -137,10 +129,13 @@ def validate_candidate(group, candidate, mapping, config):
     replay = {"inputs": [spec_from_compact(e) for e in entries]}
     if sizes:
         replay["alias_group_nbytes"] = sizes
-    vals = reference(*make_inputs_from_config(replay))
+    factory = make_normal_inputs if group.get("normal") else make_inputs_from_config
+    vals = reference(*factory(replay))
     result = list(tree_leaves(vals))
     source_nodes = [mapping[n] for n in outputs(reference)]
     expected = [n.meta["val"] for n in source_nodes]
+    if group.get("normal") and [str(v.device) for v in result] != [str(v.device) for v in expected]:
+        return None
     if [tensor_metadata(v) for v in result] != [tensor_metadata(v) for v in expected]:
         return None
     aliases = lambda values: [
@@ -154,7 +149,8 @@ def validate_candidate(group, candidate, mapping, config):
     return entries, sizes
 
 
-def write_repro(gm, path, pattern):
+def write_repro(gm, path, pattern, *, normal=False):
+    adapter = "from mm_replay import make_inputs_from_config, benchmark_repro_safe as benchmark_repro\n" if normal else ""
     code = torch.fx.GraphModule(
         gm, copy.deepcopy(gm.graph), class_name="Repro"
     ).print_readable(print_output=False)
@@ -167,7 +163,7 @@ import torch._inductor.inductor_prims
 from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
-_repro_version = 3
+{adapter}_repro_version = 3
 
 '''
     tail = """
@@ -177,7 +173,7 @@ def make_inputs(shape_config=None):
     return make_inputs_from_config(shape_config)
 
 if __name__ == "__main__":
-    benchmark_repro(Repro(), make_inputs, __file__)
+    benchmark_repro(__file__, Repro, make_inputs)
 """
     path.write_text(header + code + tail)
 
@@ -195,8 +191,9 @@ def family_representatives(groups):
     for group in groups:
         families[(group["pattern_category"], group["family"])].append(group)
     return {
-        min(members, key=lambda g: (-occurrences(g), g["hash"]))["hash"]
+        (g["pattern_category"], g["hash"])
         for members in families.values()
+        for g in [min(members, key=lambda g: (-occurrences(g), g["hash"]))]
     }
 
 
@@ -204,7 +201,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
     output.mkdir(parents=True)
     members = groups
     representatives = family_representatives(groups)
-    groups = [g for g in groups if g["hash"] in representatives]
+    groups = [g for g in groups if (g["pattern_category"], g["hash"]) in representatives]
     for group in groups:
         prefix = "_".join(
             sorted(
@@ -230,12 +227,13 @@ def export_core(output, groups, rows, admitted_points, source_report):
         )
         directory = output / "canonical" / group["pattern_category"] / (prefix + "_" + group["hash"])
         directory.mkdir(parents=True)
-        write_repro(group["gm"], directory / "repro.py", group["hash"])
+        normal = group["pattern_category"] in {"prologue", "epilogue"}
+        write_repro(group["gm"], directory / "repro.py", group["hash"], normal=normal)
         points = list(group["points"].values())
         write_json(directory / "shapes.json", {"points": points})
         meta = {
             "pattern_hash": group["hash"],
-            "pattern_hash_mode": "scalar_literals_v1",
+            "pattern_hash_mode": "ordered_fx_v1" if normal else "scalar_literals_v1",
             "shape_hash_mode": "ordered_input_specs_v1",
             "kind": "matmul",
             "shape_points": len(points),
@@ -248,7 +246,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
         "policy_id": source_report["policy_id"],
         "curation": {
             "input_source": "repros/models/**/full_graph_*.py",
-            "version": "metadata_normalization_v1",
+            "version": "normal_absorption_and_metadata_windows_v2",
             "dependency_id": hashlib.sha256(
                 b"".join(
                     (ROOT / name).read_bytes()
@@ -256,7 +254,6 @@ def export_core(output, groups, rows, admitted_points, source_report):
                         "scripts/curate_mm_corpus.py",
                         "scripts/mm_corpus_dedup.py",
                         "scripts/mm_corpus_io.py",
-                        "mm_region_quality.py",
                         "capture_hook.py",
                         "mm_input_constraints.py",
                         "input_codec.py",
@@ -296,7 +293,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
         + "\n\n"
     )
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Scalar values, input domains, strides, offsets and output aliases are preserved. Alignment/copy-only and infinity-mask regions are excluded by the partitioner. There is no corpus-count cap.\n\n[Report](report.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Prologue/epilogue use whole normal BB partitions with pointwise-consumer absorption first and one MM per augmented partition. Epilogues have no reduction-count limit. Horizontal windows retain their existing policy; vertical windows exclude any FX reduction axis of extent one, independently of R/F. Each family exports one scalar-preserving representative and only its compatible input points. There is no corpus-count cap.\n\n[Report](report.json)\n"
     )
     return report
 
@@ -324,45 +321,48 @@ def curate_corpus(source: Path, output: Path):
             for point, config in zip(points, configs):
                 gm, infos = trace_repro(path, config)
                 original_contract = metadata_contract(gm)
-                gm, infos, _shape_params = normalize_graph(
-                    gm, infos
-                )
+                extracted = point["partition_metrics"]["category"]
+                normal = extracted in {"prologue", "epilogue"}
+                if normal:
+                    # Keep whole normal partitions, including their views/casts.
+                    # Restore shape parameters bound by trace_repro, without the
+                    # old single-MM window normalization or size/quality filters.
+                    gm, _shape_params = lift_shape_params(gm)
+                    gm.graph.set_codegen(torch.fx.graph.CodeGen())
+                    gm.recompile()
+                else:
+                    gm, infos, _shape_params = normalize_graph(gm, infos)
                 annotate_external_sqrt_inputs(gm, infos)
-                canonicalize_seed_slots(gm)
+                if not normal:
+                    canonicalize_seed_slots(gm)
                 candidate = {"gm": gm, "infos": infos}
-                # Normalization must not change what the repro returns.
                 contract = metadata_contract(gm)
                 if contract != original_contract:
                     raise ValueError(
                         (record["id"], "normalization changed output metadata/aliases")
                     )
-                quality = classify_graph_quality(gm)
-                if quality["category"] != "core":
-                    processed += 1
-                    continue
                 metrics = graph_metrics(gm)
-                category = classify_pattern_graph(gm)
-                extracted = point["partition_metrics"].get("category")
+                category = classify_pattern_graph(gm, expected=extracted if normal else None)
                 if category is None or category != extracted:
                     raise ValueError(
                         (record["id"], "pattern category changed", extracted, category)
                     )
-                if not admits(metrics, limits):
+                if not normal and not admits(metrics, limits):
                     raise ValueError(
-                        (
-                            record["id"],
-                            "normalized region violates size/topology limits",
-                        )
+                        (record["id"], "normalized region violates size/topology limits")
                     )
+                family = point["partition_metrics"]["normal_pattern_hash"] if normal else structure_key(gm)
                 # Find an equivalent group: same WL digest, an isomorphism of
                 # the DAGs, and the group's code replays this point exactly.
                 graph = semantic_graph(gm)
                 digest = graph_digest(graph)
+                strict = execution_hash(gm) if normal else None
+                bucket = (category, family, strict) if normal else digest
                 group = None
                 mapping = None
                 validation = None
-                for existing in buckets[digest]:
-                    mapping = match_graphs(existing["graph"], graph)
+                for existing in buckets[bucket]:
+                    mapping = dict(zip(existing["gm"].graph.nodes, gm.graph.nodes)) if normal else match_graphs(existing["graph"], graph)
                     if mapping is None:
                         continue
                     validation = validate_candidate(
@@ -372,20 +372,21 @@ def curate_corpus(source: Path, output: Path):
                         group = existing
                         break
                 if group is None:
-                    pattern = pattern_hash_for_subgraph(gm, scalar_sensitive=True)
-                    if any(g["hash"] == pattern for g in groups):
-                        raise ValueError(("unmatched strict hash collision", pattern))
+                    pattern = strict if normal else pattern_hash_for_subgraph(gm, scalar_sensitive=True)
+                    if any(g["hash"] == pattern and g["pattern_category"] == category for g in groups):
+                        raise ValueError(("unmatched strict hash collision", category, pattern))
                     group = {
                         "hash": pattern,
                         "gm": gm,
                         "graph": graph,
                         "points": {},
                         "pattern_category": category,
-                        "family": structure_key(gm),
+                        "family": family,
+                        "normal": normal,
                     }
                     groups.append(group)
-                    buckets[digest].append(group)
-                    mapping = {node: node for node in graph}
+                    buckets[bucket].append(group)
+                    mapping = {node: node for node in (gm.graph.nodes if normal else graph)}
                     validation = validate_candidate(group, candidate, mapping, config)
                     if validation is None:
                         raise ValueError(

@@ -1,0 +1,140 @@
+{
+  "points": [
+    {
+      "shape_hash": "c6f95504",
+      "inputs": [
+        [
+          [
+            1000,
+            9216
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            9216
+          ],
+          "bf16"
+        ],
+        [
+          [
+            9216,
+            2304
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              9216
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            9216
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            9216
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            9216
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-2-2b": {
+          "occurrences": 26
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 11,
+        "nodes": 16,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "4482962b",
+      "inputs": [
+        [
+          [
+            1000,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            10240,
+            2560
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              10240
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            10240
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            10240
+          ]
+        ],
+        [
+          "S",
+          [
+            1000,
+            10240
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/google/gemma-3-4b-it": {
+          "occurrences": 34
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 11,
+        "nodes": 16,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

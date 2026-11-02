@@ -1,0 +1,275 @@
+{
+  "points": [
+    {
+      "shape_hash": "54a76475",
+      "inputs": [
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            64,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            12,
+            512,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            384,
+            512,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "074b2cb5",
+      "inputs": [
+        [
+          [
+            4096,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            384
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            6,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            192,
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "20eee33e",
+      "inputs": [
+        [
+          [
+            8192,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            64,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            -1,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            8,
+            8,
+            1024,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            1024,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/T5ForConditionalGeneration": {
+          "occurrences": 18
+        },
+        "hf/train/T5Small": {
+          "occurrences": 18
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "1949bb7e",
+      "inputs": [
+        [
+          [
+            2048,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            -1,
+            12,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            12,
+            128,
+            64
+          ]
+        ],
+        [
+          "S",
+          [
+            192,
+            128,
+            64
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/BERT_pytorch": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 8,
+        "inputs": 2,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "points": [
+    {
+      "shape_hash": "e0241a09",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "f32",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GoogleFnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 3,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}
