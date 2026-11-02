@@ -10,7 +10,7 @@
     "max_outputs": 4,
     "max_stages": 8
   },
-  "policy_id": "8761f197e22d40b0",
+  "policy_id": "e3a50a3bc492268e",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",

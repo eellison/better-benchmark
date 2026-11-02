@@ -359,8 +359,9 @@ python scripts/validate_matmul_repros.py                # reloads every repro/co
 `mm_repro/` holds **622 repros / 1279 shapes** in five categories:
 prologue (105), epilogue (345), horizontal (74), horizontal_combine (5), and
 vertical (93). The new single-MM pass starts with normal BB partitions,
-absorbs one consumer MM into pure-pointwise partitions first, then absorbs
-one available producer MM into remaining MM-free partitions. Augmented
+absorbs one consumer MM into pure-pointwise partitions first, through an
+actual multiplied input (not addmm's bias), then absorbs one available producer
+MM into remaining MM-free partitions. Augmented
 partitions are never reused; epilogues have no reduction-count limit.
 Horizontal grouping is unchanged. Vertical windows exclude any actually
 reduced FX axis whose extent is one, independently of R/F. Regeneration and

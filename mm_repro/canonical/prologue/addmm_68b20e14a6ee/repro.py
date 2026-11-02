@@ -1,4 +1,4 @@
-"""Curated MM repro. Pattern hash: 6fab67fb4c00."""
+"""Curated MM repro. Pattern hash: 68b20e14a6ee."""
 import sys
 from pathlib import Path
 from math import inf, nan
@@ -11,11 +11,13 @@ from mm_replay import make_inputs_from_config, benchmark_repro_safe as benchmark
 _repro_version = 3
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "f32[4096]", arg1_1: "bf16[4096, 4096]", arg2_1: "bf16[4096, 4096]"):
+    def forward(self, arg0_1: "f32[4096, 4096]", arg1_1: "bf16[4096]", arg2_1: "bf16[4096, 4096]"):
         # No stacktrace found for following nodes
-        convert_element_type: "bf16[4096]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.bfloat16);  arg0_1 = None
-        addmm: "bf16[4096, 4096]" = torch.ops.aten.addmm.default(convert_element_type, arg1_1, arg2_1);  arg1_1 = arg2_1 = None
-        return (convert_element_type, addmm)
+        convert_element_type: "bf16[4096, 4096]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.bfloat16);  arg0_1 = None
+        permute: "bf16[4096, 4096]" = torch.ops.aten.permute.default(convert_element_type, [1, 0]);  convert_element_type = None
+        addmm: "bf16[4096, 4096]" = torch.ops.aten.addmm.default(arg1_1, arg2_1, permute);  arg1_1 = arg2_1 = None
+        permute_1: "bf16[4096, 4096]" = torch.ops.aten.permute.default(permute, [1, 0])
+        return (permute, addmm, permute_1)
 
 def make_inputs(shape_config=None):
     if shape_config is None:

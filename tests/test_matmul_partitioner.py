@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 import torch
 from torch.fx.experimental.proxy_tensor import make_fx
 
@@ -54,6 +55,71 @@ def test_pointwise_partition_absorbs_consumer_mm_first():
     assert any(n.target is torch.ops.aten.sin.default for n in region)
     assert not any(n.target is torch.ops.aten.cos.default for n in region)
     assert sum(is_matmul(n) for n in region) == 1
+
+
+def test_addmm_bias_only_partition_does_not_absorb_consumer():
+    assert normal_regions(
+        lambda bias, x, w: torch.addmm(torch.tanh(bias), x, w),
+        R(16), R(128, 16), R(16, 16),
+    ) == []
+
+
+def test_addmm_bias_dtype_cast_is_not_a_prologue():
+    assert normal_regions(
+        lambda bias, x, w: torch.addmm(
+            torch.ops.prims.convert_element_type.default(bias, torch.bfloat16), x, w
+        ),
+        R(16), R(128, 16).bfloat16(), R(16, 16).bfloat16(),
+    ) == []
+
+
+def test_addmm_bias_only_leaves_mm_available_for_an_epilogue():
+    (region,) = normal_regions(
+        lambda bias, x, w: torch.cos(torch.addmm(torch.tanh(bias), x, w)),
+        R(16), R(128, 16), R(16, 16),
+    )
+    assert region.category == "epilogue"
+    assert not any(n.target is torch.ops.aten.tanh.default for n in region)
+
+
+def test_addmm_bias_partition_cannot_claim_mm_before_matrix_input_partition():
+    def fn(bias, x, w):
+        b = torch.tanh(bias)
+        h = torch.sin(x)
+        return torch.addmm(b, h, w)
+
+    (region,) = normal_regions(fn, R(16), R(128, 16), R(16, 16))
+    assert region.category == "prologue"
+    assert any(n.target is torch.ops.aten.sin.default for n in region)
+    assert not any(n.target is torch.ops.aten.tanh.default for n in region)
+
+
+@pytest.mark.parametrize("operand", [0, 1])
+def test_addmm_pointwise_on_either_multiplied_operand_remains_prologue(operand):
+    def fn(bias, x, w):
+        h = torch.tanh(x) if operand == 0 else x
+        weight = torch.tanh(w) if operand == 1 else w
+        return (h if operand == 0 else weight), torch.addmm(bias, h, weight)
+
+    (region,) = normal_regions(fn, R(16), R(128, 16), R(16, 16))
+    assert region.category == "prologue"
+    mm = next(n for n in region if is_matmul(n))
+    transformed = next(n for n in region if n.target is torch.ops.aten.tanh.default)
+    assert mm.args[1 + operand] is transformed
+    assert len(region.outputs) == 2
+
+
+@pytest.mark.parametrize("packet", [torch.ops.aten.mm, torch.ops.aten.bmm, torch.ops.aten.addmm])
+def test_multiplication_operand_binding_excludes_bias_and_supports_keywords(packet):
+    from mm_partition_absorption import _matmul_inputs
+
+    graph = torch.fx.Graph()
+    bias, left, right = [graph.placeholder(name) for name in ("bias", "left", "right")]
+    kwargs = {"mat1": left, "mat2": right, "self": bias} if packet is torch.ops.aten.addmm else {
+        "self": left, "mat2": right,
+    }
+    node = graph.call_function(packet.default, kwargs=kwargs)
+    assert _matmul_inputs(node) == [left, right]
 
 
 def test_reduction_pointwise_partition_is_not_split_for_a_prologue():

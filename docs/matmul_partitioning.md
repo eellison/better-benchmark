@@ -32,7 +32,9 @@ partition as atomic: do not split a reduction→pointwise partition or grow a
 window of individual operations around an MM.
 
 1. In original partition order, a **pure-pointwise partition** absorbs one
-   available **consumer** `aten.mm`, `aten.addmm`, or `aten.bmm`.
+   available **consumer** `aten.mm`, `aten.addmm`, or `aten.bmm`, only through
+   one of its **two multiplied operands**. For `addmm(bias, mat1, mat2)`, a
+   partition feeding only `bias` does not qualify as a prologue.
 2. Then a partition that still contains no MM absorbs one available **producer**
    MM of those same types.
 3. An original MM and partition can each be used only once. An augmented

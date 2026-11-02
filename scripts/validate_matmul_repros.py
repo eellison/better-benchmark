@@ -16,7 +16,7 @@ from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import lift_shape_params, pattern_hash_for_subgraph
 from matmul_partitioner import (
-    CATEGORIES, classify_pattern_graph, is_matmul, is_reduction,
+    CATEGORIES, classify_pattern_graph, is_matmul, is_reduction, mm_operands,
     singleton_reduction, tensor_shape,
 )
 from mm_replay import execution_hash
@@ -67,6 +67,17 @@ def main():
                             assert execution_hash(gm) == meta["pattern_hash"]
                         else:
                             assert pattern_hash_for_subgraph(gm, scalar_sensitive=True) == meta["pattern_hash"]
+                        if category == "prologue":
+                            # Bias-only work is not a matmul-input prologue.
+                            mm = next(n for n in gm.graph.nodes if is_matmul(n))
+                            pending, input_preparation = list(mm_operands(mm)), set()
+                            while pending:
+                                node = pending.pop()
+                                if node in input_preparation:
+                                    continue
+                                input_preparation.add(node)
+                                pending.extend(node.all_input_nodes)
+                            assert any(n.op == "call_function" for n in input_preparation)
                         if category == "vertical":
                             shapes = {n: tensor_shape(n) for n in gm.graph.nodes}
                             assert not any(singleton_reduction(n, shapes)

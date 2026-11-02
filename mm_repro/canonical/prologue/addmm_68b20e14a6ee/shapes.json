@@ -1,17 +1,17 @@
 {
   "points": [
     {
-      "shape_hash": "05064997",
+      "shape_hash": "69ffe255",
       "inputs": [
         [
           [
+            4096,
             4096
           ],
           "f32"
         ],
         [
           [
-            4096,
             4096
           ],
           "bf16"
@@ -21,13 +21,7 @@
             4096,
             4096
           ],
-          "bf16",
-          {
-            "st": [
-              1,
-              4096
-            ]
-          }
+          "bf16"
         ]
       ],
       "models": {
@@ -38,20 +32,27 @@
       "partition_metrics": {
         "mm": 1,
         "compute": 1,
-        "nodes": 2,
+        "nodes": 4,
         "inputs": 3,
-        "outputs": 2,
+        "outputs": 3,
         "contraction_depth": 1
       }
     },
     {
-      "shape_hash": "f51ec874",
+      "shape_hash": "c60b8a75",
       "inputs": [
+        [
+          [
+            16384,
+            4096
+          ],
+          "f32"
+        ],
         [
           [
             16384
           ],
-          "f32"
+          "bf16"
         ],
         [
           [
@@ -59,19 +60,6 @@
             4096
           ],
           "bf16"
-        ],
-        [
-          [
-            4096,
-            16384
-          ],
-          "bf16",
-          {
-            "st": [
-              1,
-              4096
-            ]
-          }
         ]
       ],
       "models": {
@@ -82,9 +70,9 @@
       "partition_metrics": {
         "mm": 1,
         "compute": 1,
-        "nodes": 2,
+        "nodes": 4,
         "inputs": 3,
-        "outputs": 2,
+        "outputs": 3,
         "contraction_depth": 1
       }
     }

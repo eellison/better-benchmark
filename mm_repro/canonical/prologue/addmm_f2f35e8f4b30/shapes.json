@@ -1,0 +1,42 @@
+{
+  "points": [
+    {
+      "shape_hash": "c16c0295",
+      "inputs": [
+        [
+          [
+            512,
+            197951
+          ],
+          "f32"
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            197951
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 3,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

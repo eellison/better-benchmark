@@ -1,6 +1,7 @@
 """Absorb one unassigned mm/addmm/bmm into each unchanged normal BB partition.
 
-Pointwise partitions take a consumer MM first. Then MM-free partitions take a
+Pointwise partitions take a consumer MM through a multiplied operand first;
+addmm bias-only preparation is excluded. Then MM-free partitions take a
 producer MM. Each original partition/MM is used once; augmented partitions do
 not grow. This is a disjoint assignment inside these two categories, not a
 size-limited window search. Horizontal/vertical benchmark windows are separate.
@@ -78,6 +79,23 @@ def _is_mm(node):
         and isinstance(node.target, torch._ops.OpOverload)
         and node.target.overloadpacket in _MM
     )
+
+
+def _matmul_inputs(node):
+    """Only the two multiplied operands; addmm's self/bias is not a prologue."""
+    bindings = {
+        argument.name: value
+        for argument, value in zip(node.target._schema.arguments, node.args)
+    }
+    bindings.update(node.kwargs)
+    names = (
+        ("mat1", "mat2")
+        if node.target.overloadpacket is torch.ops.aten.addmm
+        else ("self", "mat2")
+    )
+    return [
+        bindings[name] for name in names if isinstance(bindings[name], torch.fx.Node)
+    ]
 
 
 def _storage_keys(value):
@@ -184,7 +202,7 @@ def absorb_matmuls(gm, *, excluded=()):
     for mm in matmuls:
         if mm in membership:
             raise ValueError("normal BB partition unexpectedly contains a target MM")
-        front = {membership[n] for n in mm.all_input_nodes if n in membership}
+        front = {membership[n] for n in _matmul_inputs(mm) if n in membership}
         back = {membership[n] for n in mm.users if n in membership}
         for pid in front:
             if pointwise[pid]:
