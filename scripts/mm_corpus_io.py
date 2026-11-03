@@ -51,7 +51,6 @@ def admits(metrics, limits):
             ("nodes", limits.max_nodes),
             ("inputs", limits.max_inputs),
             ("outputs", limits.max_outputs),
-            ("contraction_depth", limits.max_stages),
         )
     )
 

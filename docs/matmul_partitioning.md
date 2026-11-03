@@ -1,7 +1,7 @@
 # Matmul pattern corpus (`mm_repro/`)
 
-The corpus contains five categories: `prologue`, `epilogue`, `horizontal`,
-`horizontal_combine`, and `vertical`. Each repro is extracted from a saved
+The corpus contains four categories: `prologue`, `epilogue`, `horizontal`, and
+`horizontal_combine`. Each repro is extracted from a saved
 post-grad FX model graph and includes its input configurations.
 
 ## Regenerate and validate
@@ -64,13 +64,12 @@ allowed, but gather/scatter and reductions do not make a partition pointwise.
 - **`epilogue`**: the partition absorbed a producer MM in step 2.
 
 Epilogues may contain any computation admitted by normal BB, including multiple
-reductions. There is no reduction-count, block-local, R/F, or window-size cap
+reductions. There is no reduction-count or window-size cap
 for these two categories. A `[reduction -> pointwise]` front partition is not
 cut into a pointwise suffix for a prologue.
 
-Absorption direction is recorded from the source graph. A standalone one-MM
-reduction graph can be both an epilogue-shaped normal partition and a vertical
-benchmark window; its category is not inferred from standalone topology alone.
+Absorption direction is recorded from the source graph; the prologue/epilogue
+label is not inferred from standalone topology alone.
 
 ## Horizontal categories: existing window policy
 
@@ -86,36 +85,9 @@ The existing group selection, local producer/consumer growth, and metadata
 normalization are retained. The multiplied dimensions may differ; output shapes
 must match. A group stops at three MMs.
 
-## Vertical: existing window policy, excluding singleton reduction axes
-
-A vertical window contains at least two dependent reduction stages, including
-at least one MM. Pointwise/view operations may connect the stages. The existing
-slice analysis and default limits remain:
-
-- **R**: product of the reduced-axis extents at a stage; `R <= 128`.
-- **F**: intermediate values needed per independent slice by later stages;
-  `F <= 128` (zero for a terminal stage).
-
-For example, in `H[M,N] = A[M,K] @ B[K,N]`, R is K. For a sum over several
-axes, R is their product. Slice axes are tracked through broadcasts, reshapes,
-permutations and linear maps; unknown internal index relations are rejected.
-
-Additionally, reject a candidate if **any FX reduction stage actually reduces
-an input axis whose size is one**, independently of R/F:
-
-- `[1,6].sum((0,1))` is rejected even though total R is 6.
-- `[1,6].sum(1)` is not rejected by this rule: the singleton axis is not reduced.
-- `dim=1` is an axis number, not the exclusion criterion.
-- MM's reduced axis is K. N=1 or F=1 alone does not exclude an MM/window.
-- A subsequent mean over an MM's N=1 axis is excluded.
-
-The guard applies during candidate growth and final selection. Valid prefixes
-or suffixes can remain after an offending stage is excluded; the entire source
-model is not discarded.
-
-Other window limits remain in `MatmulLimits`: at most three MMs, 48 nodes, 32
-compute operations, 12 inputs, four outputs and eight reduction stages. These
-limits apply to horizontal/vertical windows, not whole normal partitions.
+Window limits remain in `MatmulLimits`: at most three MMs, 48 nodes, 32
+compute operations, 12 inputs and four outputs. These limits apply to horizontal
+windows, not whole normal partitions.
 
 ## Curation and deduplication
 
@@ -126,7 +98,7 @@ the most source occurrences to represent each family. Only that variant's
 compatible input points are exported; different literal values are not silently
 replayed with the representative's code. Whole-partition views/casts are kept.
 
-Horizontal/vertical use the existing metadata-proven normalization and
+Horizontal categories use the existing metadata-proven normalization and
 compute-DAG-plus-dtypes `structure_key` families. Scalar-sensitive matching,
 input-spec remapping and output-alias checks preserve each chosen representative.
 No count cap is applied.

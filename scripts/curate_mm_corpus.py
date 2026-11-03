@@ -1,8 +1,8 @@
-"""Curate captured MM regions into the five-category mm_repro corpus.
+"""Curate captured MM regions into the four-category mm_repro corpus.
 
 Normal-partition prologues/epilogues retain their whole views/casts and have no
 window-size filter. Their families are the normal BB structural pattern hashes.
-For horizontal/horizontal_combine/vertical, the existing metadata-proven graph
+For horizontal/horizontal_combine, the existing metadata-proven graph
 normalization, size limits and compute-DAG families remain unchanged.
 
 Scalar-sensitive graph matching keeps executable variants distinct. One member
@@ -293,7 +293,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
         + "\n\n"
     )
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Prologue/epilogue use whole normal BB partitions with pointwise-consumer absorption first and one MM per augmented partition. Epilogues have no reduction-count limit. Horizontal windows retain their existing policy; vertical windows exclude any FX reduction axis of extent one, independently of R/F. Each family exports one scalar-preserving representative and only its compatible input points. There is no corpus-count cap.\n\n[Report](report.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Prologue/epilogue use whole normal BB partitions with pointwise-consumer absorption first and one MM per augmented partition. Epilogues have no reduction-count limit. Horizontal windows retain their existing policy. Each family exports one scalar-preserving representative and only its compatible input points. There is no corpus-count cap.\n\n[Report](report.json)\n"
     )
     return report
 
@@ -307,7 +307,6 @@ def curate_corpus(source: Path, output: Path):
     # Final size limits of an exported repro (the search allowed more).
     limits = MatmulLimits()
     records, rows = load_records(source)
-    # Independent MMs of a vertical chain may differ in shape.
     kept = filter_patterns(records, limits)
     raw_report = json.loads((source / "report.json").read_text())
     groups, buckets, admitted_points = [], defaultdict(list), set()
@@ -407,15 +406,7 @@ def curate_corpus(source: Path, output: Path):
                         "shape_hash": shape,
                         "inputs": entries,
                         "models": {},
-                        "partition_metrics": {
-                            **metrics,
-                            # Slice axes and per-stage R/F of a vertical region.
-                            **{
-                                k: v
-                                for k, v in point["partition_metrics"].items()
-                                if k == "vertical"
-                            },
-                        },
+                        "partition_metrics": metrics,
                         "_signature": payload,
                     },
                 )

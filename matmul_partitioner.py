@@ -13,21 +13,12 @@ a reduction partition. Their category is the source absorption direction.
 
 Horizontal/horizontal_combine keep the independent 2..3-MM window search:
 shared operands, equal output shapes, and optional surrounding local work.
-Vertical keeps connected dependent reduction windows with at least one MM.
-These multi-stage windows may overlap the normal-partition examples; the model
-graph is never rewritten.
-
-Vertical slice analysis tracks axes with union-find atoms through broadcasts,
-views, reshapes and linear maps. Every stage's reduced domain R and intermediate
-values F per independent slice must fit the configured limits (128 by default).
-In addition, any FX stage reducing an input axis of extent one is rejected,
-regardless of total R/F; an unreduced singleton axis, MM N=1 or F=1 alone is fine.
-Unknown internal index relations and unsafe standalone windows are rejected.
+These windows may overlap the normal-partition examples; the model graph is
+never rewritten.
 """
 
 from __future__ import annotations
 
-import math
 import operator
 from collections import deque
 from dataclasses import dataclass
@@ -232,58 +223,6 @@ def mm_operands(node):
     return [a for a in node.args[start : start + 2] if isinstance(a, Node)]
 
 
-def reduction_size(node, shapes):
-    """Elements reduced per output: K for an MM, else the reduced axes' product.
-
-    For example sum(x[8, 4, 16], dim=(1, 2)) reduces 64 elements. Returns
-    None when the input shape or the reduced axes are unknown.
-    """
-    if is_matmul(node):
-        operands = mm_operands(node)
-        if len(operands) != 2:
-            return None
-        shape = shapes.get(operands[0])
-        return shape[-1] if shape else None
-    inputs = value_inputs(node)
-    shape = shapes.get(inputs[0]) if inputs else None
-    if shape is None:
-        return None
-    bindings = {
-        arg.name: value for arg, value in zip(node.target._schema.arguments, node.args)
-    }
-    bindings.update(node.kwargs)
-    dims = bindings.get("dim", bindings.get("dims"))
-    dims = [dims] if isinstance(dims, int) else dims
-    dims = range(len(shape)) if dims is None or dims == [] else dims
-    if any(not isinstance(dim, int) for dim in dims):
-        return None
-    axes = {dim % len(shape) for dim in dims} if shape else set()
-    return math.prod(shape[axis] for axis in axes)
-
-
-def singleton_reduction(node, shapes):
-    """Whether the original FX op reduces an axis whose extent is one.
-
-    This is independent of slice R/F. An unreduced singleton/output axis is
-    not a reason to reject a region; MM's reduced axis is its operand K.
-    """
-    if is_matmul(node):
-        operands = mm_operands(node)
-        shape = shapes.get(operands[0]) if operands else None
-        return bool(shape and shape[-1] == 1)
-    inputs = value_inputs(node)
-    shape = shapes.get(inputs[0]) if inputs else None
-    if shape is None:
-        return False
-    bindings = _bindings(node)
-    dims = bindings.get("dim", bindings.get("dims"))
-    dims = [dims] if isinstance(dims, int) else dims
-    dims = range(len(shape)) if dims is None or list(dims) == [] else dims
-    return bool(shape) and any(
-        isinstance(dim, int) and shape[dim % len(shape)] == 1 for dim in dims
-    )
-
-
 class _ReplaySafety:
     """Can a node subset of the graph run on its own, in one piece?
 
@@ -382,10 +321,8 @@ CATEGORIES = (
     "epilogue",
     "horizontal",
     "horizontal_combine",
-    "vertical",
 )
 
-_BIASED = {"aten::addmm", "aten::baddbmm", "aten::addmv"}
 # Ops whose result is their first argument's values, possibly re-indexed.
 _SAME_VALUES = {
     "aten::clone",
@@ -417,23 +354,19 @@ _SHARING_TRANSPARENT = _SAME_VALUES | _RESHAPES | {
 class MatmulLimits:
     """Size limits of one extracted region (also applied by curation)."""
 
-    # Bound reduction domains and intermediate elements per independent slice.
-    reduction_limit: int = 128  # R of every vertical stage
-    intermediate_limit: int = 128  # F of every vertical stage
     max_horizontal: int = 3  # MMs in a horizontal group; growth stops at 3
     max_mm: int = 3
     max_nodes: int = 48
     max_compute: int = 32  # MMs plus real computation
     max_inputs: int = 12
     max_outputs: int = 4
-    max_stages: int = 8  # reduction stages in a vertical region
 
 
 class MatmulRegion(list):
     """The FX nodes of one region, in graph order.
 
     outputs: nodes whose values the benchmark returns.
-    metrics: sizes of the region (and the slice analysis for "vertical").
+    metrics: sizes of the region.
     category: one of CATEGORIES.
     mm_types: sorted MM op names such as ("addmm", "bmm"), used for naming.
     """
@@ -447,351 +380,6 @@ class MatmulRegion(list):
         self.mm_types = tuple(
             sorted({op_name(n).split("::")[-1] for n in nodes if is_matmul(n)})
         )
-
-
-def stage_size(node, shapes):
-    """R: elements reduced per output (K for an MM), or None if unknown."""
-    if op_name(node) in {"aten::_grouped_mm", "aten::_scaled_grouped_mm"}:
-        return None
-    return reduction_size(node, shapes)
-
-
-def _value_shapes(node):
-    """Concrete shape, or a list of shapes for a tuple value, or None."""
-    value = node.meta.get("val")
-    if isinstance(value, (tuple, list)):
-        shapes = []
-        for item in value:
-            if not isinstance(item, torch.Tensor):
-                return None
-            shape = _concrete(item.shape)
-            if shape is None:
-                return None
-            shapes.append(shape)
-        return shapes
-    return tensor_shape(node)
-
-
-def _concrete(dims):
-    result = []
-    for dim in dims:
-        if isinstance(dim, int):
-            result.append(dim)
-        elif isinstance(dim, torch.SymInt) and dim.node.has_hint():
-            result.append(dim.node.hint)
-        else:
-            return None
-    return tuple(result)
-
-
-def _bindings(node):
-    schema = getattr(node.target, "_schema", None)
-    if schema is None:
-        return dict(node.kwargs)
-    values = {arg.name: value for arg, value in zip(schema.arguments, node.args)}
-    values.update(node.kwargs)
-    for arg in schema.arguments:
-        if arg.name not in values and arg.has_default_value():
-            values[arg.name] = arg.default_value
-    return values
-
-
-# ---------------------------------------------------------------------------
-# Index analysis for vertical candidates
-# ---------------------------------------------------------------------------
-
-
-class _Atoms:
-    """Union-find over axis atoms; a class can be split into smaller atoms."""
-
-    def __init__(self):
-        self.parent, self.size, self.split = [], [], {}
-
-    def new(self, size):
-        self.parent.append(len(self.parent))
-        self.size.append(size)
-        return len(self.parent) - 1
-
-    def find(self, atom):
-        while self.parent[atom] != atom:
-            self.parent[atom] = self.parent[self.parent[atom]]
-            atom = self.parent[atom]
-        return atom
-
-    def leaves(self, atoms):
-        result, stack = [], list(reversed(atoms))
-        while stack:
-            root = self.find(stack.pop())
-            if root in self.split:
-                stack.extend(reversed(self.split[root]))
-            else:
-                result.append(root)
-        return result
-
-    def unify(self, xs, ys):
-        """Identify two row-major atom sequences of equal total size."""
-        a, b = self.leaves(xs), self.leaves(ys)
-        i = j = 0
-        while i < len(a) and j < len(b):
-            x, y = self.find(a[i]), self.find(b[j])
-            if x in self.split:
-                a[i : i + 1] = self.leaves([x])
-                continue
-            if y in self.split:
-                b[j : j + 1] = self.leaves([y])
-                continue
-            if x != y:
-                sx, sy = self.size[x], self.size[y]
-                if sx == sy:
-                    self.parent[y] = x
-                else:
-                    small, big, seq, k = (x, y, b, j) if sx < sy else (y, x, a, i)
-                    if self.size[big] % self.size[small]:
-                        return False
-                    parts = [self.new(self.size[small]), self.new(self.size[big] // self.size[small])]
-                    self.split[big] = parts
-                    seq[k : k + 1] = parts
-                    continue
-            i += 1
-            j += 1
-        return i == len(a) and j == len(b)
-
-
-class _Unknown(Exception):
-    pass
-
-
-def analyze_vertical(region, outputs, order, limits):
-    """Slice analysis of a vertical candidate (see the module comment).
-
-    Returns (summary, None) or (None, reason).
-    """
-    atoms = _Atoms()
-    dims, tainted = {}, {}
-
-    def fresh(shape):
-        if shape is None or any(d <= 0 for d in shape):
-            raise _Unknown("shape")
-        return [[atoms.new(d)] if d != 1 else [] for d in shape]
-
-    def of(node):
-        """Dims of a value used by a region node.
-
-        Values that do not depend on a stage (region inputs and work on them
-        only) get fresh atoms at every use: they can be recomputed per slice,
-        and relating axes through them (a shared bias, an iota mask [S, S])
-        could equate unrelated axes.
-        """
-        if not tainted.get(node):
-            shapes = _value_shapes(node)
-            if shapes is None or (shapes and isinstance(shapes[0], tuple)):
-                raise _Unknown("input_shape")
-            return fresh(shapes)
-        result = dims[node]
-        if isinstance(result, tuple):
-            raise _Unknown("tuple_input")
-        return result
-
-    def broadcast_into(out, out_shape, arg):
-        shape = tensor_shape(arg)
-        if shape is None or len(shape) > len(out_shape):
-            raise _Unknown("broadcast")
-        arg_dims = of(arg)
-        for k in range(1, len(shape) + 1):
-            if shape[-k] == out_shape[-k] and shape[-k] != 1:
-                if not atoms.unify(arg_dims[-k], out[-k]):
-                    raise _Unknown("broadcast")
-            elif shape[-k] != 1:
-                raise _Unknown("broadcast")
-
-    def reshape(source, shape):
-        out = fresh(shape)
-        if not atoms.unify([a for d in of(source) for a in d], [a for d in out for a in d]):
-            raise _Unknown("reshape")
-        return out
-
-    def rule(node, is_tainted):
-        """Dims of node's value, or raise _Unknown for an unknown index map."""
-        name = op_name(node)
-        shape = _value_shapes(node)
-        args = [a for a in value_inputs(node)]
-        bind = _bindings(node)
-        if node.target is operator.getitem:
-            source, index = node.args
-            value = dims.get(source) if source in region else None
-            if isinstance(value, tuple):
-                return value[index]
-            return fresh(shape)
-        if is_matmul(node):
-            if name not in {"aten::mm", "aten::addmm", "aten::bmm", "aten::baddbmm",
-                            "aten::mv", "aten::addmv", "aten::_int_mm", "aten::_scaled_mm"}:
-                raise _Unknown("mm_kind")
-            a, b = mm_operands(node)
-            da, db = of(a), of(b)
-            if name in {"aten::bmm", "aten::baddbmm"}:
-                ok = atoms.unify(da[0], db[0]) and atoms.unify(da[2], db[1])
-                out = [list(da[0]), list(da[1]), list(db[2])]
-            elif name in {"aten::mv", "aten::addmv"}:
-                ok = atoms.unify(da[1], db[0])
-                out = [list(da[0])]
-            else:
-                ok = atoms.unify(da[1], db[0])
-                out = [list(da[0]), list(db[1])]
-            if not ok:
-                raise _Unknown("mm")
-            for extra in node.all_input_nodes:
-                if extra not in (a, b):
-                    broadcast_into(out, shape, extra)  # bias, scales
-            return out
-        if is_reduction(node):
-            source = node.args[0] if node.args else None
-            if not isinstance(source, Node):
-                raise _Unknown("reduction_input")
-            in_shape = tensor_shape(source)
-            in_dims = of(source)
-            axes = bind.get("dim", bind.get("dims"))
-            axes = [axes] if isinstance(axes, int) else axes
-            axes = range(len(in_shape)) if axes is None or list(axes) == [] else axes
-            axes = {a % len(in_shape) for a in axes} if in_shape else set()
-            outs = shape if isinstance(shape, list) else [shape]
-            results = []
-            for out_shape in outs:
-                if len(out_shape) == len(in_shape):
-                    expected = tuple(1 if k in axes else d for k, d in enumerate(in_shape))
-                    result = [[] if k in axes else list(d) for k, d in enumerate(in_dims)]
-                else:
-                    expected = tuple(d for k, d in enumerate(in_shape) if k not in axes)
-                    result = [list(d) for k, d in enumerate(in_dims) if k not in axes]
-                if tuple(out_shape) != expected:
-                    raise _Unknown("reduction_shape")
-                results.append(result)
-            return tuple(results) if isinstance(shape, list) else results[0]
-        if shape is None or isinstance(shape, list) and name not in {
-            "aten::split", "aten::split_with_sizes", "aten::chunk"
-        }:
-            raise _Unknown("shape")
-        source = node.args[0] if node.args and isinstance(node.args[0], Node) else None
-        if name in _SAME_VALUES or name in _RESHAPES:
-            if source is None:
-                raise _Unknown("view")
-            if tensor_shape(source) == shape:
-                return [list(d) for d in of(source)]
-            return reshape(source, shape)
-        if name in {"aten::permute", "aten::transpose", "aten::t"}:
-            src = of(source)
-            n = len(src)
-            if name == "aten::permute":
-                perm = [p % n for p in bind["dims"]]
-            else:
-                perm = list(range(n))
-                if n >= 2:
-                    d0, d1 = (bind["dim0"] % n, bind["dim1"] % n) if name == "aten::transpose" else (0, 1)
-                    perm[d0], perm[d1] = perm[d1], perm[d0]
-            return [list(src[p]) for p in perm]
-        if name == "aten::expand":
-            src, src_shape = of(source), tensor_shape(source)
-            out = fresh(shape)
-            offset = len(shape) - len(src_shape)
-            for k, d in enumerate(src_shape):
-                if d == shape[offset + k] and d != 1:
-                    out[offset + k] = list(src[k])
-            return out
-        if name == "aten::slice":
-            src, src_shape = of(source), tensor_shape(source)
-            out = [list(d) for d in src]
-            axis = bind.get("dim", 0) % len(src_shape)
-            if shape[axis] != src_shape[axis]:
-                out[axis] = fresh((shape[axis],))[0]
-            return out
-        if name == "aten::select":
-            src, src_shape = of(source), tensor_shape(source)
-            axis = bind["dim"] % len(src_shape)
-            return [list(d) for k, d in enumerate(src) if k != axis]
-        if name in {"aten::split", "aten::split_with_sizes", "aten::chunk"}:
-            src, src_shape = of(source), tensor_shape(source)
-            axis = bind.get("dim", 0) % len(src_shape)
-            pieces = []
-            for piece in shape:
-                out = [list(d) for d in src]
-                if piece[axis] != src_shape[axis]:
-                    out[axis] = fresh((piece[axis],))[0]
-                pieces.append(out)
-            return tuple(pieces)
-        tags = getattr(node.target, "tags", ())
-        if torch.Tag.pointwise in tags and name.startswith(("aten::", "prims::")):
-            out = fresh(shape)
-            for arg in args:
-                broadcast_into(out, shape, arg)
-            return out
-        # Gathers, scatters, cat and anything else: unknown index relation.
-        if is_tainted:
-            raise _Unknown(f"index_map:{name or node.target}")
-        return fresh(shape)
-
-    ordered = sorted(region, key=order.__getitem__)
-    stages = [n for n in ordered if is_reduction(n)]
-    deps = {}
-    try:
-        for node in ordered:
-            inputs = [a for a in value_inputs(node) if a in region]
-            tainted[node] = is_reduction(node) or any(tainted[a] for a in inputs)
-            deps[node] = set().union(*(deps[a] for a in inputs)) | (
-                {node} if is_reduction(node) else set()
-            )
-            if tainted[node]:
-                dims[node] = rule(node, any(tainted[a] for a in inputs))
-    except _Unknown as error:
-        return None, f"unknown_index:{error}"
-    except (KeyError, IndexError, TypeError, ValueError, ZeroDivisionError):
-        return None, "unknown_index:rule"
-
-    def leaves(node):
-        value = dims[node]
-        if isinstance(value, tuple):
-            value = value[0]
-        return atoms.leaves([a for d in value for a in d])
-
-    for node in ordered:
-        if node not in dims:
-            continue
-        value = dims[node]
-        for item in value if isinstance(value, tuple) else (value,):
-            flat = atoms.leaves([a for d in item for a in d])
-            if len(flat) != len(set(flat)):
-                return None, "aliased_axes"
-    stage_atoms = {s: set(leaves(s)) for s in stages}
-    slices = None
-    for output in outputs:
-        if not deps[output]:
-            continue
-        keep = set(leaves(output))
-        for s in deps[output]:
-            keep &= stage_atoms[s]
-        slices = keep if slices is None else slices & keep
-    slices = slices or set()
-    feeds = {s: any(s in deps[t] for t in stages if t is not s) for s in stages}
-    if not any(feeds.values()) or not any(is_matmul(s) for s in stages):
-        return None, "no_vertical_chain"
-    summary = []
-    shapes = {}
-    for s in stages:
-        for a in s.all_input_nodes:
-            shapes[a] = tensor_shape(a)
-        r = stage_size(s, shapes)
-        f = math.prod(atoms.size[a] for a in stage_atoms[s] - slices) if feeds[s] else 0
-        if r is None or r <= 0:
-            return None, "reduction_size_unknown"
-        if singleton_reduction(s, shapes):
-            return None, "singleton_reduction"
-        if r > limits.reduction_limit:
-            return None, "reduction_limit"
-        if f > limits.intermediate_limit:
-            return None, "intermediate_limit"
-        summary.append({"op": op_name(s).split("::")[-1], "R": r, "F": f})
-    return {
-        "slice_axes": sorted(atoms.size[a] for a in slices),
-        "stages": summary,
-    }, None
 
 
 # ---------------------------------------------------------------------------
@@ -873,11 +461,11 @@ class _Extractor:
         """Absorb pointwise/gather/transparent producers of ``roots``.
 
         Reductions, MMs and values computed from an MM stay outside and become
-        inputs. For a side branch (inputs of an epilogue or of a vertical
-        chain) only transparent and gather ops, and work computed only from
-        graph inputs and constants (``rooted``), are absorbed. Computing a
-        side input from other intermediate values (e.g. a residual's norm
-        affine) is not work around the MM.
+        inputs. For a horizontal window's side branch, only transparent and
+        gather ops, and work computed only from graph inputs and constants
+        (``rooted``), are absorbed. Computing a side input from other
+        intermediate values (e.g. a residual's norm affine) is not work
+        around the MM.
         """
         pending = deque(self.sort(r for r in roots if r not in core))
         visited = set()
@@ -902,7 +490,7 @@ class _Extractor:
             pending.extend(self.sort(value_inputs(node)))
         return core
 
-    def grow_forward(self, core, sources, accept=None):
+    def grow_forward(self, core, sources):
         """Yield ever larger windows absorbing consumers of ``sources``."""
         yield core
         pending = deque(self.sort(u for s in sources for u in s.users))
@@ -915,11 +503,7 @@ class _Extractor:
             if not self.connector(node, core):
                 continue
             trial = core | {node}
-            if (
-                not self.fits(trial)
-                or not self.collector.safe(trial)
-                or (accept is not None and not accept(trial))
-            ):
+            if not self.fits(trial) or not self.collector.safe(trial):
                 # A join is unsafe until its other branch is in the window;
                 # adding that branch's last node re-queues it.
                 visited.discard(node)
@@ -984,8 +568,6 @@ class _Extractor:
                     stack.append(a)
         return False
 
-    # --- category 3 --------------------------------------------------------
-
     def horizontal_groups(self, mms):
         """Groups of 2..max_horizontal independent MMs sharing an operand."""
 
@@ -1045,109 +627,6 @@ class _Extractor:
                     "horizontal_combine" if combines(finished[0], group) else "horizontal"
                 )
                 return MatmulRegion(*finished, category)
-        return None
-
-    # --- category 4 --------------------------------------------------------
-
-    def reach(self, start, forward, core):
-        """Connector nodes reachable from ``start`` and the stages they hit."""
-        found, hits = set(), set()
-        pending = self.sort(start)
-        while pending:
-            node = pending.pop()
-            for nxt in node.users if forward else value_inputs(node):
-                if nxt in start or nxt in found or nxt in core:
-                    continue
-                if nxt not in self.supported:
-                    continue
-                if is_reduction(nxt):
-                    hits.add(nxt)
-                elif nxt.target is operator.getitem and is_reduction(nxt.args[0]):
-                    # A tuple projection of a stage (var_mean) is part of
-                    # the path to or from that stage.
-                    found.add(nxt)
-                    if forward:
-                        pending.append(nxt)
-                    else:
-                        hits.add(nxt.args[0])
-                elif self.connector(nxt, core | found) and len(found) < self.limits.max_nodes:
-                    found.add(nxt)
-                    pending.append(nxt)
-        return found, hits
-
-    def vertical_check(self, core):
-        tainted = self._tainted(core)
-        outputs = [
-            n for n in core
-            if n in tainted and (is_mutating(n) or any(u not in core for u in n.users))
-        ]
-        return analyze_vertical(core, outputs, self.order, self.limits)
-
-    def _tainted(self, core):
-        result = set()
-        for n in self.sort(core):
-            if is_reduction(n) or any(a in result for a in value_inputs(n)):
-                result.add(n)
-        return result
-
-    def vertical(self, seed):
-        limits = self.limits
-        size = stage_size(seed, self.shapes)
-        if size is None or size > limits.reduction_limit:
-            return None
-        core = {seed}
-        while sum(is_reduction(n) for n in core) < limits.max_stages:
-            forward, ahead = self.reach(core, True, set())
-            backward, behind = self.reach(core, False, set())
-            candidates = []
-            for stage in ahead:
-                path = forward & self.reach({stage}, False, set())[0]
-                candidates.append((stage, path))
-            for stage in behind:
-                path = backward & self.reach({stage}, True, set())[0]
-                candidates.append((stage, path))
-            added = False
-            for stage, path in sorted(candidates, key=lambda c: self.order[c[0]]):
-                if stage in core or stage not in self.supported:
-                    continue
-                r = stage_size(stage, self.shapes)
-                if r is None or r > limits.reduction_limit:
-                    continue
-                trial = core | path | {stage}
-                # Tuple results (var_mean) bring their projections along.
-                trial |= {u for u in stage.users if u.target is operator.getitem and u in self.supported}
-                if not self.fits(trial) or not self.collector.safe(trial):
-                    continue
-                summary, reason = self.vertical_check(trial)
-                if summary is None and reason != "no_vertical_chain":
-                    self.reject("vertical_" + reason.split(":")[0])
-                    continue
-                core = trial
-                added = True
-                break
-            if not added:
-                break
-        if self.vertical_check(core)[0] is None:
-            return None
-        tainted = self._tainted(core)
-        snapshots = list(
-            self.grow_forward(
-                core, self.sort(tainted),
-                accept=lambda t: self.vertical_check(t)[0] is not None,
-            )
-        )
-        for window in reversed(snapshots):
-            for extended in (self.grow_backward(window, self.side_inputs(window), side_branch=True), window):
-                finished = self.finish(extended, lambda n, w=extended: n in self._tainted(w), (seed,))
-                if finished is None:
-                    continue
-                nodes, outputs, metrics = finished
-                summary, reason = analyze_vertical(set(nodes), outputs, self.order, limits)
-                if summary is None:
-                    self.reject("vertical_final_" + reason.split(":")[0])
-                    continue
-                metrics["vertical"] = summary
-                return MatmulRegion(nodes, outputs, metrics, "vertical")
         return None
 
 
@@ -1238,17 +717,6 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), categories
             region = ex.horizontal(group)
             if region is not None and region.category in categories:
                 regions.append(region)
-    if "vertical" in categories:
-        vertical, seen = [], set()
-        for mm in mms:
-            region = ex.vertical(mm)
-            if region is not None and frozenset(region) not in seen:
-                seen.add(frozenset(region))
-                vertical.append(region)
-        regions.extend(
-            r for r in vertical
-            if not any(set(r) < set(o) for o in vertical)
-        )
     if diagnostics is not None:
         diagnostics.update(
             {
@@ -1263,8 +731,9 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), categories
 def classify_pattern_graph(gm, *, expected=None):
     """Validate a category; single-MM absorption direction comes from source metadata.
 
-    A one-MM reduction graph may be either a normal-partition epilogue or a
-    vertical window, so those labels cannot be inferred from standalone FX alone.
+    A single-MM graph needs source metadata to distinguish prologue from
+    epilogue. Horizontal graphs require independent MMs; dependent MM chains
+    are not a supported category.
     """
     nodes = list(gm.graph.nodes)
     mms = [n for n in nodes if is_matmul(n)]
@@ -1277,13 +746,12 @@ def classify_pattern_graph(gm, *, expected=None):
         if not any(n.op == "call_function" and n not in mms for n in nodes):
             return None
         return expected
+    if reductions or len(mms) < 2:
+        return None
     ancestors = {}
     for n in nodes:
         ancestors[n] = set().union(*(ancestors[a] | {a} for a in value_inputs(n)))
-    chained = any(s in ancestors[t] for s in mms + reductions for t in mms + reductions)
-    if chained and mms:
-        return "vertical"
-    if reductions or len(mms) < 2:
+    if any(s in ancestors[t] for s in mms for t in mms):
         return None
     shapes = {tensor_shape(m) for m in mms}
     if len(mms) <= 3 and len(shapes) == 1 and None not in shapes:

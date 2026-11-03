@@ -21,16 +21,15 @@ def trace(fn, *shapes):
 
 
 def mm_pattern(gm):
-    # The largest region holds the literal (e.g. the var_mean projection is
-    # only inside the vertical region; the prologue region takes it as input).
     region = max(get_fusion_partitions(gm, only_include_mm=True), key=len)
     return compute_partition_pattern(region, gm)
 
 
 def scale_by_stat(index):
     def fn(x, w):
-        stats = torch.var_mean(x, dim=1, keepdim=True, correction=0)
-        return ((x * stats[index]) @ w).relu()
+        z = x @ w
+        stats = torch.var_mean(z, dim=1, keepdim=True, correction=0)
+        return z * stats[index]
 
     return fn
 

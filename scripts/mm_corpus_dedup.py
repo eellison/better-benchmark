@@ -99,56 +99,6 @@ def normalize_graph(gm, infos):
     logical ordering matters are kept. Views are removed only if their entire
     metadata matches, or collapsed when a direct view has identical metadata.
     """
-    # Reduction axes are a set; singleton reduced axes can be represented
-    # consistently by keepdim=True and an explicit metadata view.
-    for node in list(gm.graph.nodes):
-        if str(node.target) not in {
-            "aten.mean.dim",
-            "aten.sum.dim_IntList",
-            "aten.amax.default",
-            "aten.amin.default",
-        }:
-            continue
-        source = node.args[0]
-        value = node.meta.get("val")
-        if (
-            not isinstance(source, fx.Node)
-            or not isinstance(source.meta.get("val"), torch.Tensor)
-            or not isinstance(value, torch.Tensor)
-        ):
-            continue
-        rank = source.meta["val"].ndim
-        if rank == 0:
-            continue
-        dims = node.args[1] if len(node.args) > 1 else node.kwargs.get("dim")
-        if dims is None or dims == []:
-            axes = list(range(rank))
-        elif isinstance(dims, (list, tuple)) and all(isinstance(d, int) for d in dims):
-            axes = sorted(d % rank for d in dims)
-        else:
-            continue
-        keep = node.args[2] if len(node.args) > 2 else node.kwargs.get("keepdim", False)
-        args = list(node.args)
-        while len(args) < 3:
-            args.append(None)
-        args[1], args[2] = axes, True
-        kwargs = {k: v for k, v in node.kwargs.items() if k not in {"dim", "keepdim"}}
-        probe = node.target(source.meta["val"], *args[1:], **kwargs)
-        restored = probe.view(list(value.shape))
-        if tensor_metadata(restored) != tensor_metadata(value):
-            continue
-        node.args, node.kwargs = tuple(args), kwargs
-        if not keep:
-            users = list(node.users)
-            with gm.graph.inserting_after(node):
-                view = gm.graph.call_function(
-                    torch.ops.aten.view.default, (node, list(value.shape))
-                )
-            view.meta = copy.copy(node.meta)
-            node.meta["val"] = probe
-            for user in users:
-                user.replace_input_with(node, view)
-
     initial_output = next(n for n in gm.graph.nodes if n.op == "output")
     exposed_storages = {
         n.meta["val"].untyped_storage()._cdata

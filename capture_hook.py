@@ -263,10 +263,10 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
     partition, as if they were not fusible.
 
-    ``only_include_mm=True`` returns the five matmul corpus categories. The
+    ``only_include_mm=True`` returns the four matmul corpus categories. The
     prologue/epilogue pass assigns one MM to a whole normal partition, pointwise
     consumer absorption first, and never reuses an augmented partition. The
-    horizontal/horizontal_combine/vertical window searches remain separate and
+    horizontal/horizontal_combine window searches remain separate and
     may overlap those examples. Every MM region names its escaping outputs.
 
     Returns: list of partitions, each a list of fx.Node from gm.graph.
@@ -1878,8 +1878,9 @@ if __name__ == "__main__":
             # retrace of the serialized artifact will produce.
             pattern_key = pattern["pattern_hash"]
             shape_key = pattern["shape_hash"]
-            # Single-MM absorption and vertical windows can overlap structurally.
-            # Namespace only their raw captures; curation hashes the actual FX.
+            # Namespace raw captures by absorption direction; the same FX
+            # pattern can occur as a prologue and an epilogue in different graphs.
+            # Curation hashes the actual FX within each category.
             if "normal_pattern_hash" in pattern:
                 category = comp.category
                 pattern_key = hashlib.sha256(f"{category}:{pattern_key}".encode()).hexdigest()[:12]

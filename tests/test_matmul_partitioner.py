@@ -8,14 +8,12 @@ from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import partition_node_is_supported
 from matmul_partitioner import (
-    MatmulLimits,
     classify_pattern_graph,
     get_matmul_regions,
     is_matmul,
 )
 
 M = 64
-WIDE = MatmulLimits(reduction_limit=256, intermediate_limit=256)
 
 
 def regions(fn, *inputs, limits=None):
@@ -25,12 +23,6 @@ def regions(fn, *inputs, limits=None):
 
 def categories(fn, *inputs, limits=None):
     return sorted(r.category for r in regions(fn, *inputs, limits=limits))
-
-
-def vertical(fn, *inputs, limits=None):
-    found = [r for r in regions(fn, *inputs, limits=limits) if r.category == "vertical"]
-    assert len(found) <= 1
-    return found[0].metrics["vertical"] if found else None
 
 
 def ln(x):
@@ -223,69 +215,6 @@ def is_mm_group(region):
     return sum(is_matmul(n) for n in region) >= 2
 
 
-# --- 4. vertical -------------------------------------------------------------
-
-
-def test_gather_ln_mm_residual_ln():
-    def chain(t, i, w, res, g, b):
-        return ln((ln(t[i]) * g + b) @ w + res)
-
-    args = (R(1000, 128), torch.randint(0, 1000, (M,)), R(128, 256), R(M, 256), R(128), R(128))
-    # With 256 limits: var_mean -> MM -> var_mean, slice = row.
-    summary = vertical(chain, *args, limits=WIDE)
-    assert [s["op"] for s in summary["stages"]] == ["var_mean", "mm", "var_mean"]
-    assert summary["slice_axes"] == [M]
-    assert [s["F"] for s in summary["stages"]] == [1, 256, 0]
-    # Default 128: the second norm reduces 256 and stays outside.
-    summary = vertical(chain, *args)
-    assert [s["op"] for s in summary["stages"]] == ["var_mean", "mm"]
-
-
-def test_mm_relu_matvec_needs_f_256():
-    fn = lambda a, b, v: torch.relu(a @ b) @ v
-    args = (R(M, 128), R(128, 256), R(256))
-    assert vertical(fn, *args) is None
-    summary = vertical(fn, *args, limits=WIDE)
-    assert summary["stages"] == [{"op": "mm", "R": 128, "F": 256}, {"op": "mv", "R": 256, "F": 0}]
-
-
-def test_grouped_sum_slices_by_row_and_group():
-    summary = vertical(lambda a, b: (a @ b).view(M, 128, 32).sum(-1), R(M, 128), R(128, 4096))
-    assert sorted(summary["slice_axes"]) == [M, 128]
-    assert summary["stages"] == [{"op": "mm", "R": 128, "F": 32}, {"op": "sum", "R": 32, "F": 0}]
-
-
-def test_mm_chain_slices_by_row():
-    fn = lambda a, b, c, d: (a @ b) @ c @ d
-    summary = vertical(fn, R(M, 128), R(128, 64), R(64, 128), R(128, 64))
-    assert summary["slice_axes"] == [M]
-    assert [s["F"] for s in summary["stages"]] == [64, 128, 0]
-
-
-def test_first_mm_reduction_size_is_checked():
-    fn = lambda a, b, c: (a @ b) @ c
-    assert vertical(fn, R(M, 512), R(512, 128), R(128, 64)) is None
-
-
-def test_chunked_gate_needs_whole_intermediate():
-    def fn(a, b):
-        u, v = (a @ b).chunk(2, dim=-1)
-        return (u.sigmoid() * v).sum(-1)
-
-    assert vertical(fn, R(M, 128), R(128, 512)) is None
-
-
-def test_softmax_axis_is_not_independent():
-    def fn(a, b):
-        s = a @ b
-        e = (s - s.amax(-1, keepdim=True)).exp()
-        return e / e.sum(-1, keepdim=True)
-
-    summary = vertical(fn, R(M, 64), R(64, 128))
-    assert summary["slice_axes"] == [M]
-    assert [s["F"] for s in summary["stages"]] == [128, 1, 0]
-
-
 # --- classification of standalone graphs ----------------------------------
 
 
@@ -320,19 +249,6 @@ def test_swiglu_join_reached_from_either_branch():
     found = [r for r in regions(fn, *args) if is_mm_group(r)]
     assert [r.category for r in found] == ["horizontal_combine"]
     assert len(found[0].outputs) == 1
-
-
-def test_causal_mask_does_not_alias_score_axes():
-    def fn(q, k, v):
-        s = q @ k.T
-        i = torch.arange(M)
-        s = s.masked_fill(i[:, None] < i[None, :], -1e4)
-        e = (s - s.amax(-1, keepdim=True)).exp()
-        return (e / e.sum(-1, keepdim=True)) @ v
-
-    summary = vertical(fn, R(M, 32), R(M, 32), R(M, 32))
-    assert summary["slice_axes"] == [M]
-    assert [s["op"] for s in summary["stages"]] == ["mm", "amax", "sum", "mm"]
 
 
 def test_side_input_from_graph_inputs_is_absorbed():

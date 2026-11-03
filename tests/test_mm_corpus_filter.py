@@ -20,7 +20,6 @@ def test_filter_keeps_every_record_within_the_limits_without_a_count_cap():
         "nodes": 48,
         "inputs": 12,
         "outputs": 4,
-        "contraction_depth": 8,
     }
     assert admits(at_limit, FINAL_LIMITS)
     for key, value in at_limit.items():
@@ -40,28 +39,21 @@ def test_graph_metrics_follow_value_dependencies():
     assert metrics["inputs"] == 5 and metrics["outputs"] == 1
 
 
-def test_gather_norm_mm_residual_norm_fits_the_final_limits():
-    def norm(x, gamma, beta):
-        xf = x.float()
-        mean = xf.sum(-1, keepdim=True) / x.size(-1)
-        centered = xf - mean
-        variance = (centered * centered).sum(-1, keepdim=True) / x.size(-1)
-        normalized = centered * torch.rsqrt(variance + 1e-5)
-        return (normalized * gamma.float() + beta.float()).to(x.dtype)
-
-    def fn(table, ids, w, residual, pg, pb, qg, qb):
-        return norm(norm(table.index_select(0, ids), pg, pb) @ w + residual, qg, qb)
+def test_horizontal_group_with_local_work_fits_the_final_limits():
+    def fn(x, a, b, residual):
+        h = torch.sin(x)
+        return (h @ a).relu() + residual, (h @ b).sigmoid()
 
     bf16 = dict(dtype=torch.bfloat16)
     gm = make_fx(fn, tracing_mode="fake")(
-        torch.randn(64, 128, **bf16),
-        torch.arange(8),
+        torch.randn(8, 128, **bf16),
+        torch.randn(128, 128, **bf16),
         torch.randn(128, 128, **bf16),
         torch.randn(8, 128, **bf16),
-        *(torch.randn(128, **bf16) for _ in range(4)),
     )
     assert admits(graph_metrics(gm), FINAL_LIMITS)
-    assert any(
-        r.metrics["contraction_depth"] == 5 and admits(r.metrics, FINAL_LIMITS)
-        for r in get_fusion_partitions(gm, only_include_mm=True)
-    )
+    (group,) = [r for r in get_fusion_partitions(gm, only_include_mm=True)
+                if r.category == "horizontal"]
+    assert group.metrics["mm"] == 2
+    assert group.metrics["contraction_depth"] == 1
+    assert admits(group.metrics, FINAL_LIMITS)

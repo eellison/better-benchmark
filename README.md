@@ -356,13 +356,12 @@ python scripts/extract_matmul_corpus.py --workers 8    # regenerates mm_repro/
 python scripts/validate_matmul_repros.py                # reloads every repro/config
 ```
 
-`mm_repro/` holds **622 repros / 1279 shapes** in five categories:
-prologue (105), epilogue (345), horizontal (74), horizontal_combine (5), and
-vertical (93). The new single-MM pass starts with normal BB partitions,
+`mm_repro/` holds **529 repros / 1177 shapes** in four categories:
+prologue (105), epilogue (345), horizontal (74), and horizontal_combine (5).
+The new single-MM pass starts with normal BB partitions,
 absorbs one consumer MM into pure-pointwise partitions first, through an
 actual multiplied input (not addmm's bias), then absorbs one available producer
 MM into remaining MM-free partitions. Augmented
 partitions are never reused; epilogues have no reduction-count limit.
-Horizontal grouping is unchanged. Vertical windows exclude any actually
-reduced FX axis whose extent is one, independently of R/F. Regeneration and
-validation use CPU/FakeTensors. See [docs/matmul_partitioning.md](docs/matmul_partitioning.md).
+Horizontal grouping is unchanged. Regeneration and validation use CPU/FakeTensors.
+See [docs/matmul_partitioning.md](docs/matmul_partitioning.md).

@@ -16,8 +16,7 @@ from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import lift_shape_params, pattern_hash_for_subgraph
 from matmul_partitioner import (
-    CATEGORIES, classify_pattern_graph, is_matmul, is_reduction, mm_operands,
-    singleton_reduction, tensor_shape,
+    CATEGORIES, classify_pattern_graph, is_matmul, mm_operands,
 )
 from mm_replay import execution_hash
 from repro_harness import load_shape_configs
@@ -78,10 +77,6 @@ def main():
                                 input_preparation.add(node)
                                 pending.extend(node.all_input_nodes)
                             assert any(n.op == "call_function" for n in input_preparation)
-                        if category == "vertical":
-                            shapes = {n: tensor_shape(n) for n in gm.graph.nodes}
-                            assert not any(singleton_reduction(n, shapes)
-                                           for n in gm.graph.nodes if is_reduction(n))
                         points += 1
                     except Exception:
                         failures.append({"repro": str(path), "shape": label, "error": traceback.format_exc()})

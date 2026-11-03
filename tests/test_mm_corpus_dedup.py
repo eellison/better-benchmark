@@ -76,23 +76,6 @@ def test_equivalent_view_chains_normalize_identically():
     assert av.stride() == bv.stride()
 
 
-def test_reduction_axes_and_keepdim_are_canonical():
-    x = torch.randn(4, 8, 3, 3, dtype=torch.bfloat16)
-    w = torch.randn(8, 5, dtype=torch.bfloat16)
-
-    def a(x, w):
-        return x.mean((2, 3)) @ w
-
-    def b(x, w):
-        return x.mean((-1, -2), keepdim=True).view(4, 8) @ w
-
-    ga, _, pa = trace(a, x, w)
-    gb, _, pb = trace(b, x, w)
-    assert same_dag(ga, gb)
-    torch.testing.assert_close(ga(x, w, *pa.values()), a(x, w), atol=0, rtol=0)
-    torch.testing.assert_close(gb(x, w, *pb.values()), b(x, w), atol=0, rtol=0)
-
-
 def test_identity_view_removal_keeps_output_aliasing():
     x, w = torch.randn(3, 5), torch.randn(5, 7)
 

@@ -1,7 +1,8 @@
-"""Invariants of the committed five-category MM corpus."""
+"""Invariants of the committed four-category MM corpus."""
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 
 from matmul_partitioner import CATEGORIES, MatmulLimits
@@ -12,7 +13,6 @@ EXPECTED = {
     "epilogue": (345, 650),
     "horizontal": (74, 112),
     "horizontal_combine": (5, 7),
-    "vertical": (93, 102),
 }
 
 
@@ -20,9 +20,12 @@ def test_committed_snapshot_and_source_references():
     corpus = ROOT / "mm_repro"
     report = json.loads((corpus / "report.json").read_text())
     files = sorted((corpus / "canonical").glob("*/*/repro.py"))
-    assert len(files) == report["unique_repros"] == 622
+    assert len(files) == report["unique_repros"] == 529
     assert tuple(EXPECTED) == CATEGORIES
+    assert {p.name for p in (corpus / "canonical").iterdir()} == set(CATEGORIES)
+    assert set(report["pattern_categories"]) == set(CATEGORIES)
     limits = MatmulLimits()
+    assert report["policy"] == asdict(limits)
     points, families = {}, set()
     observed = {category: [0, 0] for category in CATEGORIES}
     for path in files:
@@ -49,15 +52,11 @@ def test_committed_snapshot_and_source_references():
             if normal:
                 assert metrics["mm"] == 1
             else:
-                assert metrics["mm"] <= limits.max_mm
-                assert metrics["contraction_depth"] <= limits.max_stages
-            for stage in metrics.get("vertical", {}).get("stages", []):
-                assert stage["R"] <= limits.reduction_limit
-                assert stage["F"] <= limits.intermediate_limit
+                assert 2 <= metrics["mm"] <= limits.max_mm
+                assert metrics["contraction_depth"] == 1
     assert {category: tuple(counts) for category, counts in observed.items()} == EXPECTED
-    assert sum(len(p) for p in points.values()) == report["shape_points"] == 1279
+    assert sum(len(p) for p in points.values()) == report["shape_points"] == 1177
     assert len(families) == report["families"]
+    assert report["family_members"] == sum(c["family_members"] for c in report["pattern_categories"].values())
     assert report["deduplicated_repros"] == report["family_members"] - len(families)
     assert {p.name for p in corpus.iterdir()} == {"canonical", "report.json", "README.md"}
-    # Actual singleton-axis checks are performed by validate_matmul_repros.py,
-    # not inferred from total R (a [1,6] reduction has R=6 but is excluded).

@@ -4,7 +4,7 @@ Pointwise partitions take a consumer MM through a multiplied operand first;
 addmm bias-only preparation is excluded. Then MM-free partitions take a
 producer MM. Each original partition/MM is used once; augmented partitions do
 not grow. This is a disjoint assignment inside these two categories, not a
-size-limited window search. Horizontal/vertical benchmark windows are separate.
+size-limited window search. Horizontal benchmark windows are separate.
 """
 
 from __future__ import annotations
