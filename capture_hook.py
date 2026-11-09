@@ -264,8 +264,8 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
     partition, as if they were not fusible.
 
     ``only_include_mm=True`` returns the four matmul corpus categories. The
-    prologue/epilogue pass assigns one MM to a whole normal partition, pointwise
-    consumer absorption first, and never reuses an augmented partition. The
+    prologue/epilogue pass assigns one MM to a whole normal partition, producer
+    (epilogue) absorption first, and never reuses an augmented partition. The
     horizontal/horizontal_combine window searches remain separate and
     may overlap those examples. Every MM region names its escaping outputs.
 

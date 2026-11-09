@@ -1,8 +1,9 @@
 """Select MM benchmark regions from a full post-grad FX graph.
 
 Prologue/epilogue use unchanged normal BB partitions (mm_partition_absorption):
-1. A pure-pointwise partition absorbs one available consumer mm/addmm/bmm.
-2. An MM-free partition absorbs one available producer mm/addmm/bmm.
+1. A partition absorbs one available producer mm/addmm/bmm (epilogue).
+2. A still-unused pure-pointwise partition absorbs one available consumer
+   mm/addmm/bmm through a multiplied operand (prologue).
 3. Every original partition/MM is used once; augmented partitions do not grow.
 4. Only augmented partitions containing exactly one MM are extracted.
 

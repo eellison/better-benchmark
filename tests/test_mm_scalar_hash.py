@@ -34,21 +34,23 @@ def scale_by_stat(index):
     return fn
 
 
-# Pairs of MM regions that differ only in one scalar literal.
+# Pairs of MM regions that differ only in one scalar literal. The first three
+# keep the literal in a prologue with no consumer partition: epilogues are
+# absorbed first, so a consumer such as .relu() would take the MM instead.
 SCALAR_PAIRS = {
     "int_divisor": (
-        lambda x, w: ((x / 49) @ w).relu(),
-        lambda x, w: ((x / 64) @ w).relu(),
+        lambda x, w: (x / 49) @ w,
+        lambda x, w: (x / 64) @ w,
         [(4, 8), (8, 8)],
     ),
     "float_divisor": (
-        lambda x, w: ((x / 49.0) @ w).relu(),
-        lambda x, w: ((x / 64.0) @ w).relu(),
+        lambda x, w: (x / 49.0) @ w,
+        lambda x, w: (x / 64.0) @ w,
         [(4, 8), (8, 8)],
     ),
     "epsilon": (
-        lambda v, x, w: ((x * torch.rsqrt(v + 1e-3)) @ w).relu(),
-        lambda v, x, w: ((x * torch.rsqrt(v + 1e-5)) @ w).relu(),
+        lambda v, x, w: (x * torch.rsqrt(v + 1e-3)) @ w,
+        lambda v, x, w: (x * torch.rsqrt(v + 1e-5)) @ w,
         [(1, 8), (4, 8), (8, 8)],
     ),
     "keyword_argument": (

@@ -41,12 +41,38 @@ def normal_regions(fn, *inputs):
     return get_matmul_regions(gm, partition_node_is_supported, categories=("prologue", "epilogue"))
 
 
-def test_pointwise_partition_absorbs_consumer_mm_first():
+def test_partition_absorbs_producer_mm_before_consumer_mm():
     (region,) = normal_regions(lambda x, w: torch.cos(torch.sin(x) @ w), R(M, 32), R(32, 48))
-    assert region.category == "prologue"
-    assert any(n.target is torch.ops.aten.sin.default for n in region)
-    assert not any(n.target is torch.ops.aten.cos.default for n in region)
+    assert region.category == "epilogue"
+    assert any(n.target is torch.ops.aten.cos.default for n in region)
+    assert not any(n.target is torch.ops.aten.sin.default for n in region)
     assert sum(is_matmul(n) for n in region) == 1
+
+
+def test_pointwise_partition_between_mms_is_the_producer_epilogue():
+    # relu(x @ w1) @ w2: prologue-first gave only prologue [relu, mm_1].
+    (region,) = normal_regions(
+        lambda x, w1, w2: torch.relu(x @ w1) @ w2, R(M, 32), R(32, 48), R(48, 16),
+    )
+    assert region.category == "epilogue"
+    (mm,) = [n for n in region if is_matmul(n)]
+    (relu,) = [n for n in region if n.target is torch.ops.aten.relu.default]
+    assert relu.args[0] is mm
+    assert list(region.outputs) == [relu]  # relu still feeds mm_1 outside
+
+
+def test_consumer_mm_keeps_a_prologue_from_another_partition():
+    found = normal_regions(
+        lambda x, w1, w2: torch.relu(x @ w1) @ torch.sin(w2), R(M, 32), R(32, 48), R(48, 16),
+    )
+    by_category = {r.category: r for r in found}
+    assert sorted(by_category) == ["epilogue", "prologue"]
+    assert any(n.target is torch.ops.aten.relu.default for n in by_category["epilogue"])
+    prologue = by_category["prologue"]
+    (sin,) = [n for n in prologue if n.target is torch.ops.aten.sin.default]
+    (mm_1,) = [n for n in prologue if is_matmul(n)]
+    assert mm_1.args[1] is sin
+    assert not set(by_category["epilogue"]) & set(prologue)
 
 
 def test_addmm_bias_only_partition_does_not_absorb_consumer():
@@ -149,7 +175,7 @@ def test_absorbed_partitions_and_mms_are_not_reused():
 
 def test_single_mm_category_filter_does_not_change_absorption_order():
     gm = make_fx(lambda x, w: torch.cos(torch.sin(x) @ w), tracing_mode="fake")(R(M, 32), R(32, 48))
-    assert get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",)) == []
+    assert get_matmul_regions(gm, partition_node_is_supported, categories=("prologue",)) == []
 
 
 def test_bare_mm_is_not_a_region():

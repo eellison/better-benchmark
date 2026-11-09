@@ -31,12 +31,12 @@ Start with `capture_hook.get_fusion_partitions(gm)` unchanged. Treat each
 partition as atomic: do not split a reduction→pointwise partition or grow a
 window of individual operations around an MM.
 
-1. In original partition order, a **pure-pointwise partition** absorbs one
-   available **consumer** `aten.mm`, `aten.addmm`, or `aten.bmm`, only through
-   one of its **two multiplied operands**. For `addmm(bias, mat1, mat2)`, a
-   partition feeding only `bias` does not qualify as a prologue.
-2. Then a partition that still contains no MM absorbs one available **producer**
-   MM of those same types.
+1. In original partition order, a partition absorbs one available **producer**
+   `aten.mm`, `aten.addmm`, or `aten.bmm`.
+2. Then, a still-unused **pure-pointwise partition** absorbs one available
+   **consumer** MM of those same types, only through one of its **two
+   multiplied operands**. For `addmm(bias, mat1, mat2)`, a partition feeding
+   only `bias` does not qualify as a prologue.
 3. An original MM and partition can each be used only once. An augmented
    partition cannot absorb another MM or partition.
 4. Extract only augmented partitions containing exactly one MM. Unabsorbed
@@ -53,15 +53,21 @@ Pure pointwise means every nontransparent operation carries
 allowed, but gather/scatter and reductions do not make a partition pointwise.
 
 ```text
-[pointwise partition] -> MM -> [after partition]
+[before partition] -> MM -> [after partition]
 
-# Consumer absorption has priority:
-[pointwise partition + MM] -> [after partition]
-# The augmented partition is locked; it cannot also take after partition.
+# Producer absorption has priority:
+[before partition] -> [MM + after partition]
+# The augmented partition is locked. The before partition stays available as a
+# prologue for another consumer MM.
 ```
 
-- **`prologue`**: the partition absorbed a consumer MM in step 1.
-- **`epilogue`**: the partition absorbed a producer MM in step 2.
+Epilogue fusion is the more common case, so a pointwise partition between two
+MMs goes to the producer. `relu(x @ w1) @ w2` yields `epilogue [mm, relu]`;
+`mm_1` gets a prologue only from another unused pointwise partition, e.g.
+`relu(x @ w1) @ sin(w2)` also yields `prologue [sin, mm_1]`.
+
+- **`prologue`**: the partition absorbed a consumer MM in step 2.
+- **`epilogue`**: the partition absorbed a producer MM in step 1.
 
 Epilogues may contain any computation admitted by normal BB, including multiple
 reductions. There is no reduction-count or window-size cap

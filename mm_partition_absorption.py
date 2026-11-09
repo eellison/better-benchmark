@@ -1,10 +1,11 @@
 """Absorb one unassigned mm/addmm/bmm into each unchanged normal BB partition.
 
-Pointwise partitions take a consumer MM through a multiplied operand first;
-addmm bias-only preparation is excluded. Then MM-free partitions take a
-producer MM. Each original partition/MM is used once; augmented partitions do
-not grow. This is a disjoint assignment inside these two categories, not a
-size-limited window search. Horizontal benchmark windows are separate.
+Partitions take a producer MM first (epilogue). Then still-unused pointwise
+partitions take a consumer MM through a multiplied operand (prologue); addmm
+bias-only preparation is excluded. Each original partition/MM is used once;
+augmented partitions do not grow. This is a disjoint assignment inside these
+two categories, not a size-limited window search. Horizontal benchmark windows
+are separate.
 """
 
 from __future__ import annotations
@@ -210,7 +211,13 @@ def absorb_matmuls(gm, *, excluded=()):
         for pid in back:
             candidates["epilogue"][pid].append(mm)
     used_partitions, used_mms, regions = set(), set(), []
-    for category in ("prologue", "epilogue"):
+    # Epilogues are assigned first. In relu(x @ w1) @ w2 the relu partition both
+    # consumes mm (epilogue candidate) and feeds mm_1 (prologue candidate):
+    #   prologue first: prologue [relu, mm_1]; mm gets no epilogue
+    #   epilogue first: epilogue [mm, relu]; mm_1 can still take a prologue from
+    #                   another unused pointwise partition, e.g. sin(w2)
+    # Epilogue fusion is the more common case, so it gets the shared partition.
+    for category in ("epilogue", "prologue"):
         for pid in sorted(candidates[category]):
             if pid in used_partitions:
                 continue
