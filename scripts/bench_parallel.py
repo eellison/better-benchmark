@@ -79,7 +79,7 @@ for _import_root in (_REPO_ROOT, _SCRIPT_DIR):
     if str(_import_root) not in sys.path:
         sys.path.insert(0, str(_import_root))
 
-from gpu_lock import discover_gpus, matching_gpus  # noqa: E402
+from gpu_lock import matching_gpus  # noqa: E402
 from benchmark_provenance import semantic_benchmark_config  # noqa: E402
 
 
@@ -2862,7 +2862,7 @@ def main():
 
     # Save perf.json per repro
     if args.update_perf and all_results:
-        hardware = args.hardware or _detect_hw()
+        hardware = args.hardware or gpus[0]["kind"]
         tag = args.tag or "latest"
         for repro_path, results in all_results.items():
             perf_path = Path(repro_path).parent / "perf.json"
@@ -4383,11 +4383,6 @@ for shape_name, shape_config in shape_items:
 _result_file.write(json.dumps(all_results) + "\\n")
 _result_file.flush()
 '''
-
-
-def _detect_hw() -> str:
-    gpus = discover_gpus()
-    return gpus[0]["kind"] if gpus else "unknown"
 
 
 def _run_compare(paths: list[Path], tag_a: str, tag_b: str):
