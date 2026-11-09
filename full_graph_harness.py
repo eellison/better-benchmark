@@ -9,6 +9,7 @@ those annotations so the benchmark runner can time the whole graph directly.
 from __future__ import annotations
 
 import math
+import operator
 import re
 from dataclasses import dataclass
 import json
@@ -661,6 +662,18 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.t.default,
         torch.ops.aten.transpose.int,
         torch.ops.aten.where.self,
+        # cat/stack keep each input's values: an index built as
+        # cat(x[:, 0], x[:, 1] + 100, ...) must bound x by the tightest
+        # branch (rows - 100), or the offset columns index out of bounds.
+        torch.ops.aten.cat.default,
+        torch.ops.aten.stack.default,
+        # unbind/split + getitem hand each column to its own consumer: a
+        # feature tensor whose columns index tables of different sizes must
+        # be bounded by the smallest table, or the small lookup asserts OOB.
+        torch.ops.aten.unbind.int,
+        torch.ops.aten.split.Tensor,
+        torch.ops.aten.split_with_sizes.default,
+        operator.getitem,
     }
 
     bounds = {}
@@ -860,7 +873,9 @@ def infer_index_bounds_from_gm(
                             else:
                                 next_frontier.append(
                                     (user, chain + ((kind + "t", None),)))
-                frontier = next_frontier
+                # unbind/split -> getitem -> cat/stack fan-out and fan-in reach a node along many paths;
+                # identical (node, chain) entries give identical bounds.
+                frontier = list(dict.fromkeys(next_frontier))
                 if not frontier:
                     break
             if found:
