@@ -5,6 +5,7 @@
      does, so a post-grad region with mismatched dtypes runs in eager.
   3. A float label reaching gather through a long where/convert chain is bounded.
   4. A lifted index constant reaching index() through lift_fresh_copy is bounded.
+  5. Only a scatter's index argument is bounded, not its float src.
 
 Run: python tests/test_input_synthesis.py  (CPU only)
 """
@@ -89,8 +90,26 @@ def test_lifted_index_constant_is_bounded():
     print("PASS lifted index constant is bounded")
 
 
+def test_scatter_src_is_not_treated_as_an_index():
+    convert = torch.ops.prims.convert_element_type.default
+
+    def f(idx, src):
+        pos = idx.unsqueeze(1).expand(-1, 3)
+        return torch.zeros(7, 3).scatter_add(0, pos, convert(src, torch.float32))
+
+    gm = make_fx(f, tracing_mode="fake")(
+        torch.zeros(50, dtype=torch.int64), torch.randn(50, 3, dtype=torch.bfloat16))
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    idx, src = [n.name for n in gm.graph.nodes if n.op == "placeholder"]
+    assert bounds.get(idx) == 7, bounds
+    assert src not in bounds and "gen" not in info[src], (bounds, info[src])
+    print("PASS scatter src is not treated as an index")
+
+
 if __name__ == "__main__":
     test_fp8_inputs_are_generated()
     test_index_put_values_cast_to_destination()
     test_float_label_through_long_chain_is_bounded()
     test_lifted_index_constant_is_bounded()
+    test_scatter_src_is_not_treated_as_an_index()

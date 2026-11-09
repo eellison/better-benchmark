@@ -647,6 +647,16 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.index_select.default: (0, 1),
         torch.ops.aten.embedding.default: (0, None),
     }
+    # Only the INDEX argument is bounded: a scatter_add's src (a float value
+    # converted from a bf16 input) reaching the consumer must stay random.
+    index_arg_pos = {
+        torch.ops.aten.scatter.src: 2,
+        torch.ops.aten.scatter.value: 2,
+        torch.ops.aten.scatter_add.default: 2,
+        torch.ops.aten.gather.default: 2,
+        torch.ops.aten.index_select.default: 2,
+        torch.ops.aten.embedding.default: 1,
+    }
     passthrough_ops = {
         torch.ops.aten.clone.default,
         torch.ops.aten.reshape.default,
@@ -855,7 +865,8 @@ def infer_index_bounds_from_gm(
 
                         if target in index_consumers:
                             target_arg_idx, dim_arg_idx = index_consumers[target]
-                            if len(user.args) > target_arg_idx:
+                            pos = index_arg_pos[target]
+                            if len(user.args) > max(target_arg_idx, pos) and user.args[pos] is n:
                                 target_node = user.args[target_arg_idx]
                                 target_shape = _node_shape(target_node)
                                 if target_shape and target_node is not n:
