@@ -6,6 +6,8 @@
   3. A float label reaching gather through a long where/convert chain is bounded.
   4. A lifted index constant reaching index() through lift_fresh_copy is bounded.
   5. Only a scatter's index argument is bounded, not its float src.
+  6. Inductor's split scatter (idx + (iota & (P-1)) * N into P*N rows) bounds idx
+     by N.
 
 Run: python tests/test_input_synthesis.py  (CPU only)
 """
@@ -107,9 +109,32 @@ def test_scatter_src_is_not_treated_as_an_index():
     print("PASS scatter src is not treated as an index")
 
 
+def test_split_scatter_index_is_bounded_by_the_split():
+    convert = torch.ops.prims.convert_element_type.default
+
+    def f(idx, src):
+        rows, splits = 7, 4
+        part = torch.ops.prims.iota.default(
+            idx.shape[0], start=0, step=1, dtype=torch.int64,
+            device=idx.device, requires_grad=False)
+        pos = idx.unsqueeze(1).expand(-1, 3) + (part & (splits - 1)).view(-1, 1) * rows
+        acc = torch.zeros(rows * splits, 3).scatter_add(0, pos, convert(src, torch.float32))
+        return acc.view(splits, rows, 3).sum(0)
+
+    gm = make_fx(f, tracing_mode="fake")(
+        torch.zeros(50, dtype=torch.int64), torch.randn(50, 3, dtype=torch.bfloat16))
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    idx, src = [n.name for n in gm.graph.nodes if n.op == "placeholder"]
+    assert bounds.get(idx) == 7, bounds
+    assert src not in bounds and "gen" not in info[src], (bounds, info[src])
+    print("PASS split scatter index is bounded by the split")
+
+
 if __name__ == "__main__":
     test_fp8_inputs_are_generated()
     test_index_put_values_cast_to_destination()
     test_float_label_through_long_chain_is_bounded()
     test_lifted_index_constant_is_bounded()
     test_scatter_src_is_not_treated_as_an_index()
+    test_split_scatter_index_is_bounded_by_the_split()

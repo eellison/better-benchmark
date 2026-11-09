@@ -820,6 +820,51 @@ def infer_index_bounds_from_gm(
             _VALUE_PRESERVING = {
                 torch.ops.prims.convert_element_type.default,
             }
+            _STATIC_PASSTHROUGH = {
+                torch.ops.aten.view.default,
+                torch.ops.aten.reshape.default,
+                torch.ops.aten.expand.default,
+                torch.ops.aten.unsqueeze.default,
+                torch.ops.aten.clone.default,
+                torch.ops.prims.convert_element_type.default,
+            }
+
+            def _static_max(m, depth=0):
+                # Max value of an operand computed only from iota and
+                # constants, else None. Inductor's split scatter indexes
+                # P*N rows with idx + (iota & (P-1)) * N: idx is bounded by
+                # N = rows - (P-1)*N, not rows // 2.
+                if not hasattr(m, "op"):
+                    return int(m) if isinstance(m, int) and m >= 0 else None
+                if m.op != "call_function" or depth > 8:
+                    return None
+                t = m.target
+                if t == torch.ops.prims.iota.default:
+                    length = m.args[0]
+                    start = m.kwargs.get("start", 0)
+                    step = m.kwargs.get("step", 1)
+                    if (isinstance(length, int) and isinstance(start, int)
+                            and isinstance(step, int) and start >= 0 and step >= 0):
+                        return start + max(length - 1, 0) * step
+                    return None
+                if t == torch.ops.aten.full.default and len(m.args) > 1:
+                    v = m.args[1]
+                    return int(v) if isinstance(v, int) and v >= 0 else None
+                if t == torch.ops.aten.bitwise_and.Scalar:
+                    mask = m.args[1]
+                    if isinstance(mask, int) and mask >= 0:
+                        inner = _static_max(m.args[0], depth + 1)
+                        return mask if inner is None else min(mask, inner)
+                    return None
+                if t in (torch.ops.aten.mul.Tensor, torch.ops.aten.add.Tensor):
+                    a = _static_max(m.args[0], depth + 1)
+                    b = _static_max(m.args[1], depth + 1)
+                    if a is None or b is None:
+                        return None
+                    return a * b if t == torch.ops.aten.mul.Tensor else a + b
+                if t in _STATIC_PASSTHROUGH and m.args:
+                    return _static_max(m.args[0], depth + 1)
+                return None
 
             frontier = [(start_node, ())]
             for _hop in range(max_hops):
@@ -885,9 +930,15 @@ def infer_index_bounds_from_gm(
                             for a in user.args[:2]:
                                 if a is not n:
                                     other = a
+                            static = (_static_max(other)
+                                      if kind == "add" and not isinstance(other, (int, float))
+                                      else None)
                             if isinstance(other, (int, float)):
                                 next_frontier.append(
                                     (user, chain + ((kind + "c", other),)))
+                            elif static is not None:
+                                next_frontier.append(
+                                    (user, chain + (("addc", static),)))
                             else:
                                 next_frontier.append(
                                     (user, chain + ((kind + "t", None),)))
