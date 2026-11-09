@@ -687,6 +687,14 @@ def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
     return values
 
 
+def _randn(size, dtype, device) -> torch.Tensor:
+    # randn has no fp8 kernels; draw in fp32 and round (normal values sit well
+    # inside every fp8 format's range).
+    if dtype.is_floating_point and dtype.itemsize == 1:
+        return torch.randn(size, dtype=torch.float32, device=device).to(dtype)
+    return torch.randn(size, dtype=dtype, device=device)
+
+
 def make_inputs_from_config(config: dict) -> list:
     """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
 
@@ -710,7 +718,8 @@ def make_inputs_from_config(config: dict) -> list:
             buf = torch.empty(nbytes, dtype=torch.uint8, device=device)
             if dtype is not None and dtype.is_floating_point and nbytes % dtype.itemsize == 0:
                 # Raw byte noise viewed as a float dtype includes NaN/Inf bit patterns.
-                buf.view(dtype).normal_()
+                typed = buf.view(dtype)
+                typed.copy_(_randn(typed.shape, dtype, device))
             else:
                 buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
             group_storage[g] = buf
@@ -832,10 +841,10 @@ def make_inputs_from_config(config: dict) -> list:
                     result.append(torch.randint(low, hi, shape, dtype=torch.int64, device=device).to(dtype))
             elif stride:
                 numel = _storage_size_for_strided(shape, stride)
-                storage = torch.randn(numel, dtype=dtype, device=device)
+                storage = _randn(numel, dtype, device)
                 result.append(storage.as_strided(shape, stride))
             else:
-                result.append(torch.randn(shape, dtype=dtype, device=device))
+                result.append(_randn(shape, dtype, device))
     return result
 
 
@@ -861,9 +870,13 @@ def _merge_default_shape_params(inputs: list, default_inputs: list) -> list:
 
 
 def _randn_with_bool(old_randn):
-    """Wrapper around torch.randn that handles bool dtype (legacy repro compat)."""
+    """Wrapper around torch.randn that handles bool and fp8 dtypes (legacy repro compat)."""
     def randn(*args, **kwargs):
-        if kwargs.get("dtype") is torch.bool:
+        dtype = kwargs.get("dtype")
+        if dtype is not None and dtype.is_floating_point and dtype.itemsize == 1:
+            kwargs = dict(kwargs, dtype=torch.float32)
+            return old_randn(*args, **kwargs).to(dtype)
+        if dtype is torch.bool:
             kwargs = dict(kwargs)
             kwargs.pop("dtype")
             if "size" in kwargs:
