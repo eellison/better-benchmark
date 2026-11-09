@@ -1351,6 +1351,13 @@ class _CaptureState:
         # accounting join (sum standalone_us x occurrences) is auditable
         # from artifacts without a GPU retrace.
         self.occurrence_counts: dict[str, int] = {}
+        # Provenance of every pre-dedup partition occurrence: the full graph
+        # file it was cut from, when known, and its node names: the original
+        # post-grad names (which kernel names and generated-code provenance
+        # report) on the live path, or the names of a make_fx re-trace of a
+        # retained graph file, which renumbers them. The graph filename is
+        # scoped by the model key when shapes.json is written.
+        self.occurrence_sources: dict[str, list[dict[str, object]]] = {}
         self.counter = 0
         self.graph_counter = 0
         self.captured: list[dict] = []
@@ -1807,12 +1814,24 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
-    def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
+    def process_graph(
+        self,
+        gm: fx.GraphModule,
+        is_inference: bool | None = None,
+        *,
+        retraced_from: str | None = None,
+    ):
         """Called by the hook for each post-grad graph. Partitions and captures.
 
         ``is_inference`` is what Inductor passes inference-aware custom passes
         (None when unknown, which disables constant folding for the graph).
+        ``retraced_from`` names the retained full_graph_*.py that ``gm`` was
+        loaded and re-traced from (recapture/repartition). Its node names are
+        the re-trace's, not the original post-grad names, so occurrences
+        record them as ``retraced_node_names`` instead of
+        ``source_node_names``.
         """
+        source_graph_name = retraced_from
         # Compute observed stats for the full graph's integer/bool placeholders
         # using the stashed real inputs from compile_fx.
         full_graph_placeholder_info = placeholder_info_from_gm(gm)
@@ -1833,9 +1852,12 @@ if __name__ == "__main__":
         # capture loop below consume the same components.
         components = get_fusion_partitions(gm, excluded=folded)
 
-        # Save the FULL post-grad graph (before partitioning) for recovery
+        # Save the FULL post-grad graph (before partitioning) for recovery.
+        # Retain the filename as structured provenance for every partition
+        # occurrence cut from this graph.
         if self.graph_dir:
-            full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
+            full_graph_name = f"full_graph_{self.graph_counter:03d}.py"
+            full_graph_path = os.path.join(self.graph_dir, full_graph_name)
             self.graph_counter += 1
             try:
                 full_code = gm.print_readable(
@@ -1845,6 +1867,7 @@ if __name__ == "__main__":
                 )
                 with open(full_graph_path, "w") as f:
                     f.write(full_code)
+                source_graph_name = full_graph_name
                 try:
                     from full_graph_harness import (
                         infer_full_graph_source,
@@ -1924,6 +1947,13 @@ if __name__ == "__main__":
             shape_key = pattern["shape_hash"]
 
             full_key = f"{pattern_key}_{shape_key}"
+            names_key = "retraced_node_names" if retraced_from else "source_node_names"
+            occurrence_source: dict[str, object] = {
+                names_key: sorted(node.name for node in comp)
+            }
+            if source_graph_name is not None:
+                occurrence_source = {"graph": source_graph_name, **occurrence_source}
+            self.occurrence_sources.setdefault(full_key, []).append(occurrence_source)
             # Count EVERY occurrence (pre-dedup): the repro file is written
             # once per point, but the count is what the accounting joins on.
             self.occurrence_counts[full_key] = (
@@ -2013,6 +2043,9 @@ if __name__ == "__main__":
         # — the accounting join needed a GPU retrace to recover them).
         for entry in self.captured:
             entry["occurrences"] = self.occurrence_counts.get(entry["hash"], 1)
+            occurrence_sources = self.occurrence_sources.get(entry["hash"])
+            if occurrence_sources:
+                entry["occurrence_sources"] = occurrence_sources
         payload = {
             "captured": self.captured,
             "dropped": self.dropped,

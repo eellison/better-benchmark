@@ -353,7 +353,7 @@ def load_graph_module(graph_path: Path):
 
 
 def process_graph_with_hook(gm, label: str, output_dir: Path, suite: str, mode: str | None,
-                            validate: bool = True):
+                            validate: bool = True, retraced_from: str | None = None):
     """Run the capture hook's partitioning on a loaded GraphModule."""
     from capture_hook import _CaptureState
     from merge_captures import temporary_capture_for_merge
@@ -368,14 +368,14 @@ def process_graph_with_hook(gm, label: str, output_dir: Path, suite: str, mode: 
         state = _CaptureState(str(capture.capture_dir), label=label, validate=validate)
 
         try:
-            state.process_graph(gm)
+            state.process_graph(gm, retraced_from=retraced_from)
             state.finalize()
 
             index_path = capture.capture_dir / "index.json"
             if not index_path.exists():
                 return 0
 
-            return capture.merge()
+            return capture.merge(merge_occurrence_sources=True)
         except Exception as e:
             print(f"  Process failed for {label}: {e}")
             return 0
@@ -437,7 +437,8 @@ def main():
 
         n = process_graph_with_hook(
             copy.deepcopy(gm), label, args.output_dir, suite, mode,
-            validate=not args.skip_validation
+            validate=not args.skip_validation,
+            retraced_from=graph_path.name,
         )
         total_regions += n
         print(f"→ {n} regions")

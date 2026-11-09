@@ -190,6 +190,33 @@ class RecaptureFullGraphsTests(unittest.TestCase):
                 ],
             )
 
+    def test_recapture_records_the_graph_file_and_is_idempotent(self):
+        import json
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repros" / "models"
+            graph = _write(root / "hf" / "infer" / "Tiny" / "full_graph_003.py")
+            (target,) = recapture.discover_targets([graph], models_root=root)
+            canonical_root = Path(tmp) / "out"
+            for _ in range(2):
+                gm = load_graph_module(graph)
+                self.assertGreater(
+                    recapture.process_graph_for_target(
+                        gm, target, canonical_root, validate=False
+                    ),
+                    0,
+                )
+            (shapes_path,) = (canonical_root / "canonical").glob("*/shapes.json")
+            (point,) = json.loads(shapes_path.read_text())["points"]
+            model = point["models"]["hf/infer/Tiny"]
+            self.assertEqual(model["occurrences"], 1)
+            (source,) = model["occurrence_sources"]
+            self.assertEqual(source["graph"], "full_graph_003.py")
+            # A re-trace renumbers node names; they must not pose as the
+            # original post-grad names.
+            self.assertNotIn("source_node_names", source)
+            self.assertTrue(source["retraced_node_names"])
+
     def test_recapture_validates_by_default_and_can_disable(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "repros" / "models"
