@@ -249,6 +249,25 @@ def test_aggregate_shape_contents():
     assert out["__failures__"]["dirB"]["reason"] == "no_valid_point"
 
 
+def test_aggregate_preserves_fullgraph_compile_proof():
+    results = {
+        "/r/canonical/dirA/repro.py": {
+            "modA_aaaa1111": {
+                "status": "GOOD",
+                "oracle_us": 10.0,
+                "compile_us": 20.0,
+                "compile_fullgraph": True,
+                "ratio": 2.0,
+            },
+        },
+    }
+    entry = bp._aggregate_oracle_timings(results)["dirA"]
+    assert entry["points"]["modA_aaaa1111"]["compile_fullgraph"] is True
+    # points_by_shape (keyed by the label's trailing shape hash) is what the
+    # roll-up reads.
+    assert entry["points_by_shape"]["aaaa1111"]["compile_fullgraph"] is True
+
+
 # ── _regroup_sharded_oracle_failures ────────────────────────────────────────
 
 def test_regroup_sharded_failures():

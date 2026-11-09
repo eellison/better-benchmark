@@ -1152,6 +1152,7 @@ def bench_oracle(
     compiled = compile_repro(
         instance,
         compile_policy=compile_policy,
+        fullgraph=True,
         options={"coordinate_descent_tuning": True},
     )
     with torch.no_grad():
@@ -1271,6 +1272,7 @@ def bench_oracle(
         "compile_policy": compile_policy,
         "oracle_us": round(best_oracle_us, 2),
         "compile_us": round(best_compile_us, 2),
+        "compile_fullgraph": True,
         "ratio": round(ratio, 3),
         "status": status,
     }
@@ -1316,7 +1318,7 @@ def _bench_oracle_cpu(
     with torch.no_grad():
         oracle_us = _do_bench(lambda: oracle_forward(inputs), torch.device("cpu"),
                               warmup=warmup, rep=rep)
-    compiled = compile_repro(instance, compile_policy=compile_policy)
+    compiled = compile_repro(instance, compile_policy=compile_policy, fullgraph=True)
     with torch.no_grad():
         for _ in range(5):
             compiled(*inputs)
@@ -1329,6 +1331,7 @@ def _bench_oracle_cpu(
         "compile_policy": compile_policy,
         "oracle_us": round(oracle_us, 2),
         "compile_us": round(compile_us, 2),
+        "compile_fullgraph": True,
         "ratio": round(ratio, 3),
         "status": status,
     }

@@ -622,7 +622,12 @@ class TestNumericsOptoutBenchWiring:
                             lambda *a, **k: gate)
         # torch.compile / dynamo.reset / cuda.synchronize -> no-ops.
         import torch._dynamo as _dynamo
-        monkeypatch.setattr(torch, "compile", lambda m, **k: m)
+
+        def compile_fullgraph(module, **kwargs):
+            assert kwargs.get("fullgraph") is True
+            return module
+
+        monkeypatch.setattr(torch, "compile", compile_fullgraph)
         monkeypatch.setattr(_dynamo, "reset", lambda: None)
         monkeypatch.setattr(torch.cuda, "synchronize", lambda *a, **k: None)
         # triton import inside bench_oracle.
@@ -644,6 +649,7 @@ class TestNumericsOptoutBenchWiring:
         # Priced: numeric timings present.
         assert isinstance(res["oracle_us"], (int, float))
         assert isinstance(res["compile_us"], (int, float))
+        assert res["compile_fullgraph"] is True
         # Audit trail recorded on the result.
         assert res["numerics_optout"]["accepted"] is True
         assert res["numerics_optout"]["annotation"] == optout

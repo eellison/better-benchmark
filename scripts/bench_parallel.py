@@ -1371,8 +1371,9 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
     per-dir number badly mis-prices the roll-up.
 
     Emits per dir:
-      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us, status,
-        ratio, fallback}} — the authoritative per-shape data the roll-up uses.
+      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us,
+        compile_fullgraph, status, ratio, fallback}} — the authoritative
+        per-shape data the roll-up uses.
       - ``points``: the original {label -> {...}} dict (back-compat).
       - ``oracle_us`` / ``compile_us``: representative MEDIAN across valid
         points (fallback only, used when an occurrence's shape_hash has no
@@ -1437,6 +1438,7 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
             points[label] = {
                 "oracle_us": us,
                 "compile_us": compile_us,
+                "compile_fullgraph": point.get("compile_fullgraph"),
                 "ratio": ratio,
                 "status": status,
             }
@@ -1447,6 +1449,7 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
             shape_entry = {
                 "oracle_us": us,
                 "compile_us": compile_us,
+                "compile_fullgraph": point.get("compile_fullgraph"),
                 "ratio": ratio,
                 "status": status,
                 "fallback": fallback,
