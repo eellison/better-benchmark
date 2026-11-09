@@ -77,6 +77,13 @@ def _sample_result(compiled_us=10.0, sol_us=5.0):
     }
 
 
+def _write_repro(corpus_root, family, text):
+    path = Path(corpus_root) / "canonical" / family / "repro.py"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    return str(path)
+
+
 def _sample_failure(error="CUDA OOM"):
     return {
         "status": "failed",
@@ -318,6 +325,130 @@ class TestMergeIntoBaseline:
         assert data["__summary__"]["ok"] == 1
         assert data["__summary__"]["points"]["ok"] == 2
         assert data["_metadata"]["n_results"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_partial_rerun_from_relocated_corpus_uses_existing_key(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        old_repro = _write_repro(tmp_path / "old-corpus", "family", "graph")
+        new_repro = _write_repro(tmp_path / "new-corpus", "family", "graph")
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {
+                    old_repro: {
+                        "shape_a": {"compiled_us": 10.0},
+                        "shape_b": {"compiled_us": 20.0},
+                    }
+                }
+            )
+        )
+
+        _merge_into_baseline(
+            baseline,
+            {new_repro: {"shape_a": {"compiled_us": 5.0}}},
+            {},
+            partial_repros={new_repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert new_repro not in data
+        assert data[old_repro]["shape_a"]["compiled_us"] == 5.0
+        assert data[old_repro]["shape_b"] == {"compiled_us": 20.0}
+        assert data["__summary__"]["points"]["ok"] == 2
+        assert data["_metadata"]["n_results"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_relocation_matches_recorded_hash_when_old_corpus_is_gone(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        old_repro = _write_repro(tmp_path / "old-corpus", "family", "graph")
+        baseline = tmp_baseline()
+        _merge_into_baseline(baseline, {old_repro: {"s1": {"compiled_us": 1.0}}}, {})
+        Path(old_repro).unlink()
+        new_repro = _write_repro(tmp_path / "new-corpus", "family", "graph")
+
+        _merge_into_baseline(
+            baseline,
+            {new_repro: {"s2": {"compiled_us": 2.0}}},
+            {},
+            partial_repros={new_repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert new_repro not in data
+        assert set(data[old_repro]) == {"s1", "s2"}
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_different_corpus_with_same_pattern_keeps_its_own_key(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        first = _write_repro(tmp_path / "corpus-a", "sum_x", "graph a")
+        second = _write_repro(tmp_path / "corpus-b", "sum_x", "graph b")
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {first: {"a1": {"compiled_us": 1.0}, "a2": {"compiled_us": 2.0}}}
+            )
+        )
+
+        _merge_into_baseline(
+            baseline,
+            {second: {"b1": {"compiled_us": 5.0}}},
+            {},
+            complete_repros={second},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[first] == {"a1": {"compiled_us": 1.0}, "a2": {"compiled_us": 2.0}}
+        assert set(data[second]) == {"b1"}
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_unverifiable_existing_key_is_not_rebased_onto(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        gone = str(tmp_path / "gone" / "canonical" / "family" / "repro.py")
+        new_repro = _write_repro(tmp_path / "new-corpus", "family", "graph")
+        baseline = tmp_baseline(
+            content=_results_payload({gone: {"s1": {"compiled_us": 1.0}}})
+        )
+
+        _merge_into_baseline(
+            baseline, {new_repro: {"s1": {"compiled_us": 2.0}}}, {},
+            partial_repros={new_repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[gone] == {"s1": {"compiled_us": 1.0}}
+        assert data[new_repro]["s1"]["compiled_us"] == 2.0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_duplicate_baseline_identity_blocks_only_its_own_updates(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        old_a = _write_repro(tmp_path / "old", "a", "graph a")
+        new_a = _write_repro(tmp_path / "new", "a", "graph a")
+        old_b = _write_repro(tmp_path / "old", "b", "graph b")
+        third_a = _write_repro(tmp_path / "third", "a", "graph a")
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {
+                    old_a: {"s1": {"compiled_us": 1.0}},
+                    new_a: {"s1": {"compiled_us": 1.1}},
+                    old_b: {"s1": {"compiled_us": 2.0}},
+                }
+            )
+        )
+
+        _merge_into_baseline(
+            baseline, {old_b: {"s1": {"compiled_us": 3.0}}}, {},
+            partial_repros={old_b},
+        )
+        assert json.loads(baseline.read_text())[old_b]["s1"]["compiled_us"] == 3.0
+
+        with pytest.raises(ValueError, match="matches several baseline keys"):
+            _merge_into_baseline(
+                baseline, {third_a: {"s1": {"compiled_us": 4.0}}}, {},
+                partial_repros={third_a},
+            )
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_complete_rerun_replaces_obsolete_shapes_and_failures(

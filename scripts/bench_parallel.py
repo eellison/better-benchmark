@@ -63,6 +63,7 @@ Usage:
 """
 import argparse
 import dataclasses
+import hashlib
 import inspect
 import json
 import multiprocessing as mp
@@ -80,7 +81,7 @@ for _import_root in (_REPO_ROOT, _SCRIPT_DIR):
         sys.path.insert(0, str(_import_root))
 
 from gpu_lock import matching_gpus  # noqa: E402
-from benchmark_provenance import semantic_benchmark_config  # noqa: E402
+from benchmark_provenance import corpus_relative_path, semantic_benchmark_config  # noqa: E402
 
 
 # Shared inductor cache — all workers read/write the same cache so repeated
@@ -1756,6 +1757,118 @@ def _merge_into_baseline(
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
+def _source_sha256(path_text: str) -> str | None:
+    try:
+        return hashlib.sha256(Path(path_text).read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def _recorded_source_sha256(results: object) -> str | None:
+    if isinstance(results, dict):
+        for _label, result in _metric_result_items(results):
+            if result.get("source_sha256"):
+                return result["source_sha256"]
+    return None
+
+
+def _stamp_source_sha256(new_results: dict) -> None:
+    """Record the content hash of each benchmarked file in its points."""
+    for task_key, results in new_results.items():
+        if not isinstance(results, dict):
+            continue
+        digest = _source_sha256(_split_shape_task_key(str(task_key))[0])
+        if digest is None:
+            continue
+        for _label, result in _metric_result_items(results):
+            result.setdefault("source_sha256", digest)
+
+
+def _rebase_benchmark_update_keys(
+    existing: dict,
+    old_failures: dict,
+    new_results: dict,
+    new_failures: dict,
+    partial_repros: set[str],
+    complete_repros: set[str],
+) -> tuple[dict, dict, set[str], set[str]]:
+    """Match updates from a relocated corpus to existing benchmark keys.
+
+    An update path that is not already a key is mapped to the existing key
+    with the same corpus-relative path *and* the same file content: the hash
+    recorded in its points (source_sha256), else the hash of the existing
+    file if it is still on disk. Two corpora that share a pattern hash but
+    hold different files therefore keep separate keys, and existing keys
+    whose content cannot be established are never rebased onto. Only an
+    update that matches more than one existing key is refused.
+    """
+    existing_paths: dict[str, set[str]] = {}
+    for task_key in (*existing, *old_failures):
+        path_text = _split_shape_task_key(str(task_key))[0]
+        identity = corpus_relative_path(path_text)
+        if identity is not None:
+            existing_paths.setdefault(identity, set()).add(path_text)
+
+    existing_digests: dict[str, str | None] = {}
+
+    def existing_digest(path_text: str) -> str | None:
+        if path_text not in existing_digests:
+            existing_digests[path_text] = _recorded_source_sha256(
+                existing.get(path_text)
+            ) or _source_sha256(path_text)
+        return existing_digests[path_text]
+
+    rebased_paths: dict[str, str] = {}
+
+    def rebase_path(path_text: str) -> str:
+        if path_text in rebased_paths:
+            return rebased_paths[path_text]
+        target = path_text
+        identity = corpus_relative_path(path_text)
+        candidates = existing_paths.get(identity, set()) if identity else set()
+        if path_text not in candidates and candidates:
+            digest = _source_sha256(path_text)
+            matches = sorted(
+                candidate
+                for candidate in candidates
+                if digest is not None and existing_digest(candidate) == digest
+            )
+            if len(matches) > 1:
+                raise ValueError(
+                    f"Benchmark update {path_text!r} matches several baseline "
+                    f"keys with the same content: {', '.join(matches)}"
+                )
+            if matches:
+                target = matches[0]
+        rebased_paths[path_text] = target
+        return target
+
+    def rebase(task_key: str) -> str:
+        path_text, shape_label = _split_shape_task_key(task_key)
+        rebased_path = rebase_path(path_text)
+        if shape_label is None:
+            return rebased_path
+        return _make_shape_task_key(rebased_path, shape_label)
+
+    def rebase_results(results: dict) -> dict:
+        rebased = {}
+        for task_key, value in results.items():
+            target = rebase(str(task_key))
+            if target in rebased:
+                raise ValueError(
+                    f"Benchmark update contains duplicate relocated identity {target!r}"
+                )
+            rebased[target] = value
+        return rebased
+
+    return (
+        rebase_results(new_results),
+        rebase_results(new_failures),
+        {rebase(path) for path in partial_repros},
+        {rebase(path) for path in complete_repros},
+    )
+
+
 def _remove_recovered_shape_failures(
     failures: dict,
     repro_path: str,
@@ -1818,6 +1931,7 @@ def _merge_into_baseline_locked(
             + ", ".join(sorted(overlap))
         )
     requested_inductor_config = extra_inductor_config or {}
+    _stamp_source_sha256(new_results)
     if not baseline_path.exists():
         print(f"[merge-into] {baseline_path} does not exist, writing fresh")
         commit = _git_query(["rev-parse", "HEAD"]) or ""
@@ -1925,6 +2039,17 @@ def _merge_into_baseline_locked(
         raise ValueError(
             f"Cannot merge {workload_kind!r} results into {existing_kind!r} baseline"
         )
+
+    new_results, new_failures, partial_repros, complete_repros = (
+        _rebase_benchmark_update_keys(
+            existing,
+            old_failures,
+            new_results,
+            new_failures,
+            partial_repros,
+            complete_repros,
+        )
+    )
 
     updated = 0
     for repro_path in complete_repros:
