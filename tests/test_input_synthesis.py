@@ -8,6 +8,8 @@
   5. Only a scatter's index argument is bounded, not its float src.
   6. Inductor's split scatter (idx + (iota & (P-1)) * N into P*N rows) bounds idx
      by N.
+  7. bucketize/searchsorted boundaries are generated sorted, and the sorted
+     generator survives the T()/S() text form written into repro.py.
 
 Run: python tests/test_input_synthesis.py  (CPU only)
 """
@@ -22,6 +24,7 @@ from torch.fx.experimental.proxy_tensor import make_fx
 from capture_hook import cast_index_put_values
 from full_graph_harness import (
     infer_index_bounds_from_gm,
+    infer_sorted_inputs_from_gm,
     placeholder_info_from_gm,
 )
 from repro_harness import make_inputs_from_config
@@ -131,6 +134,79 @@ def test_split_scatter_index_is_bounded_by_the_split():
     print("PASS split scatter index is bounded by the split")
 
 
+def test_bucketize_boundaries_are_sorted():
+    gm = make_fx(torch.bucketize, tracing_mode="fake")(
+        torch.randn(32), torch.randn(9))
+    info = placeholder_info_from_gm(gm)
+    infer_sorted_inputs_from_gm(gm, info)
+    names = [n.name for n in gm.graph.nodes if n.op == "placeholder"]
+    assert "gen" not in info[names[0]], info
+    assert info[names[1]]["gen"] == {"kind": "sorted"}, info
+    (b,) = make_inputs_from_config({"inputs": [
+        {"kind": "tensor", "shape": [9], "dtype": "torch.float32",
+         "device": "cpu", "gen": {"kind": "sorted"}}]})
+    assert torch.equal(b, b.sort().values)
+    print("PASS bucketize boundaries are sorted")
+
+
+def test_sorted_generator_survives_the_text_signature():
+    import tempfile
+
+    from input_codec import render_signature
+    from repro_harness import load_shape_configs
+
+    line = render_signature([[[9], "f32", {"gen": ["sorted"]}]])
+    assert line == "(T([9], f32, gen=Sorted()))", line
+    with tempfile.TemporaryDirectory() as tmp:
+        (Path(tmp) / "repro.py").write_text("# repro\n")
+        (Path(tmp) / "shapes.txt").write_text(f"case: {line}\n")
+        configs = load_shape_configs(str(Path(tmp) / "repro.py"))
+    (spec,) = configs["case"]["inputs"]
+    assert spec["gen"] == {"kind": "sorted"}, spec
+    (b,) = make_inputs_from_config({"inputs": [dict(spec, device="cpu")]})
+    assert torch.equal(b, b.sort().values)
+    print("PASS sorted generator survives the text signature")
+
+
+def test_reshaped_sorted_boundaries_stay_sorted():
+    # The detector tags a placeholder reached through reshape, so the generated
+    # tensor must be sorted in its flat (storage) order, not just along the last dim.
+    gm = make_fx(lambda x, b: torch.bucketize(x, b.reshape(-1)), tracing_mode="fake")(
+        torch.randn(32), torch.randn(3, 3))
+    info = placeholder_info_from_gm(gm)
+    infer_sorted_inputs_from_gm(gm, info)
+    names = [n.name for n in gm.graph.nodes if n.op == "placeholder"]
+    assert info[names[1]]["gen"] == {"kind": "sorted"}, info
+    (b,) = make_inputs_from_config({"inputs": [
+        {"kind": "tensor", "shape": [3, 3], "dtype": "torch.float32",
+         "device": "cpu", "gen": {"kind": "sorted"}}]})
+    flat = b.reshape(-1)
+    assert torch.equal(flat, flat.sort().values), b
+    print("PASS reshaped sorted boundaries stay sorted")
+
+
+def test_sorted_generator_handles_overlapping_and_padded_strides():
+    expanded, padded = make_inputs_from_config({"inputs": [
+        {"kind": "tensor", "shape": [4], "stride": [0], "dtype": "torch.float32",
+         "device": "cpu", "gen": {"kind": "sorted"}},
+        {"kind": "tensor", "shape": [3, 3], "stride": [4, 1], "dtype": "torch.bfloat16",
+         "device": "cpu", "gen": {"kind": "sorted"}}]})
+    assert expanded.stride() == (0,) and torch.equal(expanded, expanded.sort().values)
+    assert padded.stride() == (4, 1)
+    flat = padded.float().reshape(-1)
+    assert torch.equal(flat, flat.sort().values), padded
+    print("PASS sorted generator handles overlapping and padded strides")
+
+
+def test_sorted_generator_survives_shapes_txt_writer():
+    from canonicalize_repros import _spec_to_T
+
+    line = _spec_to_T({"shape": [9], "dtype": "torch.float32", "gen": {"kind": "sorted"}})
+    assert line == "T([9], f32, gen=Sorted())", line
+    print("PASS sorted generator survives the shapes.txt writer")
+
+
+
 if __name__ == "__main__":
     test_fp8_inputs_are_generated()
     test_index_put_values_cast_to_destination()
@@ -138,3 +214,8 @@ if __name__ == "__main__":
     test_lifted_index_constant_is_bounded()
     test_scatter_src_is_not_treated_as_an_index()
     test_split_scatter_index_is_bounded_by_the_split()
+    test_bucketize_boundaries_are_sorted()
+    test_sorted_generator_survives_the_text_signature()
+    test_reshaped_sorted_boundaries_stay_sorted()
+    test_sorted_generator_handles_overlapping_and_padded_strides()
+    test_sorted_generator_survives_shapes_txt_writer()

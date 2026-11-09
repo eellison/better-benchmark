@@ -966,6 +966,45 @@ def infer_index_bounds_from_gm(
     return bounds
 
 
+def infer_sorted_inputs_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> None:
+    """Attach a sorted generator to float placeholders used as bucketize
+    boundaries or searchsorted's sorted sequence. Unsorted random boundaries
+    send most values to a few buckets, so a downstream index_put(accumulate)
+    serializes on atomics the model never contends on."""
+    import torch
+
+    sorted_arg = {
+        torch.ops.aten.bucketize.Tensor: 1,
+        torch.ops.aten.searchsorted.Tensor: 0,
+        torch.ops.aten.searchsorted.Scalar: 0,
+    }
+    views = {
+        torch.ops.aten.view.default,
+        torch.ops.aten.reshape.default,
+        torch.ops.aten.slice.Tensor,
+        torch.ops.aten.contiguous.default,
+        torch.ops.aten.clone.default,
+        torch.ops.prims.convert_element_type.default,
+    }
+    for node in gm.graph.nodes:
+        if node.op != "placeholder":
+            continue
+        info = placeholder_info.get(node.name)
+        dtype = (info or {}).get("dtype", "")
+        if info is None or not ("float" in dtype or "bfloat" in dtype):
+            continue
+        frontier = [node]
+        for n in frontier:
+            for user in n.users:
+                if user.op != "call_function":
+                    continue
+                pos = sorted_arg.get(user.target)
+                if pos is not None and len(user.args) > pos and user.args[pos] is n:
+                    info.setdefault("gen", {"kind": "sorted"})
+                elif user.target in views and user.args and user.args[0] is n:
+                    frontier.append(user)
+
+
 def infer_permutation_indices_from_gm(
     gm: Any,
     placeholder_info: dict[str, dict],

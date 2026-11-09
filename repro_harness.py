@@ -341,6 +341,9 @@ def _make_shape_eval_ns():
                 "n_unique": int(unique), "n_runs": int(runs),
                 "sorted": bool(sorted)}
 
+    def Sorted():
+        return {"kind": "sorted"}
+
     def T(shape, dtype, stride=None, max=None, gen=None, constraint=None, index=None):
         spec = {
             "kind": "tensor",
@@ -367,6 +370,7 @@ def _make_shape_eval_ns():
         return {"kind": "shape", "dims": dims}
 
     return {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm, "Runs": Runs,
+            "Sorted": Sorted,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
             "b8": "b8", "u8": "u8"}
@@ -500,6 +504,9 @@ def parse_shapes_config(config_str: str) -> list:
                 "n_unique": int(unique), "n_runs": int(runs),
                 "sorted": bool(sorted)}
 
+    def Sorted():
+        return {"kind": "sorted"}
+
     def T(shape, dtype, stride=None, max=None, gen=None, constraint=None, index=None):
         spec = {
             "kind": "tensor",
@@ -526,6 +533,7 @@ def parse_shapes_config(config_str: str) -> list:
         return {"kind": "shape", "dims": dims}
 
     _ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm, "Runs": Runs,
+            "Sorted": Sorted,
             "torch": torch,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
@@ -839,6 +847,12 @@ def make_inputs_from_config(config: dict) -> list:
                     result.append(storage.to(dtype).as_strided(shape, stride))
                 else:
                     result.append(torch.randint(low, hi, shape, dtype=torch.int64, device=device).to(dtype))
+            elif gen and gen.get("kind") == "sorted":
+                # Sort the flat storage: the input may be reshaped before bucketize, and a
+                # non-decreasing storage stays non-decreasing along every dim with stride >= 0.
+                numel = _storage_size_for_strided(shape, stride) if stride else _numel(shape)
+                storage = _randn(numel, torch.float32, device).sort().values.to(dtype)
+                result.append(storage.as_strided(shape, stride) if stride else storage.view(shape))
             elif stride:
                 numel = _storage_size_for_strided(shape, stride)
                 storage = _randn(numel, dtype, device)

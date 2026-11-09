@@ -39,6 +39,7 @@ from full_graph_harness import (
     _is_fake_or_meta_tensor as _is_fake_or_meta,
     infer_index_bounds_from_gm,
     infer_permutation_indices_from_gm,
+    infer_sorted_inputs_from_gm,
     placeholder_info_from_gm,
 )
 from input_codec import index_gen_from_observed
@@ -1527,6 +1528,7 @@ class _CaptureState:
         index_bounds = infer_index_bounds_from_gm(
             gm, placeholder_info, constants_out=constant_values)
         permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+        infer_sorted_inputs_from_gm(gm, placeholder_info)
 
         # Apply bound hierarchy: observed fallback for integer inputs without
         # graph-inferred bounds. This eliminates the high=512 guess class.
