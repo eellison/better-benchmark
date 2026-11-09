@@ -759,7 +759,9 @@ def infer_index_bounds_from_gm(
                 constants[name] = 0
             continue
 
-        def _find_bound(start_node, max_hops=8):
+        def _find_bound(start_node, max_hops=16):
+            # A cross-entropy label (f64 -> nan_to_num where-chain -> int64 ->
+            # ignore_index where -> unsqueeze -> gather) is 9 hops deep.
             # Collect EVERY bound the value reaches and return the MIN: a
             # value consumed by several index ops must satisfy all of them
             # (Electra: ids flow through gather into the 2-row token-type

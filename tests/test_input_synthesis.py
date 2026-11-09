@@ -3,6 +3,7 @@
   1. fp8 inputs are drawn in fp32 and rounded (randn has no fp8 kernels).
   2. index_put values are cast to the destination dtype, as Inductor's lowering
      does, so a post-grad region with mismatched dtypes runs in eager.
+  3. A float label reaching gather through a long where/convert chain is bounded.
 
 Run: python tests/test_input_synthesis.py  (CPU only)
 """
@@ -15,6 +16,10 @@ import torch
 from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import cast_index_put_values
+from full_graph_harness import (
+    infer_index_bounds_from_gm,
+    placeholder_info_from_gm,
+)
 from repro_harness import make_inputs_from_config
 
 
@@ -47,6 +52,29 @@ def test_index_put_values_cast_to_destination():
     print("PASS index_put values are cast to the destination dtype")
 
 
+def test_float_label_through_long_chain_is_bounded():
+    convert = torch.ops.prims.convert_element_type.default
+
+    def f(logits, label, fill):
+        lab = convert(label, torch.float32)
+        lab = torch.where(torch.isnan(lab), fill, lab)
+        lab = torch.where(lab == float("-inf"), fill, lab)
+        lab = torch.where(lab == float("inf"), fill, lab)
+        idx = convert(lab, torch.int64).squeeze()
+        idx = torch.where(idx != -100, idx, torch.zeros_like(idx))
+        return logits.log_softmax(1).gather(1, idx.unsqueeze(1))
+
+    gm = make_fx(f, tracing_mode="fake")(
+        torch.randn(16, 19), torch.randn(16, dtype=torch.float64),
+        torch.tensor(0.0))
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    label = [n.name for n in gm.graph.nodes if n.op == "placeholder"][1]
+    assert bounds.get(label) == 19, bounds
+    print("PASS float label through a long chain is bounded")
+
+
 if __name__ == "__main__":
     test_fp8_inputs_are_generated()
     test_index_put_values_cast_to_destination()
+    test_float_label_through_long_chain_is_bounded()
