@@ -145,7 +145,7 @@ def _cuda_graph_time(fn, inputs, n_warmup=10, n_iter=200):
 def _benchmark_one_impl(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
     import torch
     import torch._dynamo
-    from byte_accounting import count_bytes_effective, count_bytes_naive
+    from byte_accounting import analyze_bytes_effective, count_bytes_naive, sol_result_fields
     from repro_harness import compile_repro
     # NOT ported to repro_harness.timed_min_us: these do_bench calls use the
     # triton default return_mode='mean' (no return_mode kwarg), which differs
@@ -159,7 +159,8 @@ def _benchmark_one_impl(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True)
         eager_out = mod(*inputs)
 
     total_bytes_naive = count_bytes_naive(inputs, eager_out)
-    total_bytes = count_bytes_effective(mod, inputs)
+    accounting = analyze_bytes_effective(mod, inputs)
+    total_bytes = accounting.total_bytes
     if total_bytes_naive > total_bytes * 1.1:
         print(
             f"\nBytes adjusted: {total_bytes_naive/1e6:.1f} MB naive "
@@ -218,14 +219,22 @@ def _benchmark_one_impl(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True)
     print(f"Gap (default / SOL):     {compiled_us / sol_us:8.2f}x")
     print(f"Gap (CD / SOL):          {cd_us / sol_us:8.2f}x")
 
-    return {
+    result = {
         "compile_policy": compile_policy,
         "compiled_us": compiled_us,
         "coord_descent_us": cd_us,
         "memcopy_sol_us": sol_us,
-        "total_bytes": total_bytes,
         "n_kernels": n_kernels,
     }
+    result.update(
+        sol_result_fields(
+            accounting,
+            proxy_bytes=copy_elems * 8,
+            proxy_op="torch.copy_.float32",
+            sol_us=sol_us,
+        )
+    )
+    return result
 
 
 def benchmark_one(repro_path, n_warmup=25, n_rep=200, use_cuda_graph=True):
