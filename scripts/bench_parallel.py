@@ -268,6 +268,104 @@ def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
     )
 
 
+_TASK_DURATION_LEDGER_SCHEMA_VERSION = 1
+
+
+def _task_duration_key(task: str | Path, workload_kind: str, hardware_kind: str) -> str:
+    """Return a stable ledger key for a queued benchmark task."""
+    task_path_text, shape_label = _split_shape_task_key(str(task))
+    stable_path = corpus_relative_path(task_path_text)
+    if stable_path is None:
+        stable_path = Path(task_path_text).resolve().as_posix()
+    key = f"{hardware_kind}:{workload_kind}:{stable_path}"
+    if shape_label is not None:
+        key = _make_shape_task_key(key, shape_label)
+    return key
+
+
+def _load_task_duration_ledger(path: Path) -> dict:
+    """Load and validate a task-duration ledger, or initialize a missing one."""
+    if not path.exists():
+        return {
+            "schema_version": _TASK_DURATION_LEDGER_SCHEMA_VERSION,
+            "tasks": {},
+        }
+    payload = json.loads(path.read_text())
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") != _TASK_DURATION_LEDGER_SCHEMA_VERSION
+        or not isinstance(payload.get("tasks"), dict)
+    ):
+        raise ValueError(
+            "not a schema_version "
+            f"{_TASK_DURATION_LEDGER_SCHEMA_VERSION} task-duration ledger"
+        )
+    return payload
+
+
+def _sort_tasks_by_known_duration(
+    tasks: list[str | Path],
+    ledger: dict,
+    workload_kind: str,
+    hardware_kind: str,
+) -> tuple[list[str | Path], int]:
+    """Schedule known long tasks first and leave unknown task order stable."""
+    entries = ledger["tasks"]
+    decorated = []
+    known = 0
+    for index, task in enumerate(tasks):
+        entry = entries.get(_task_duration_key(task, workload_kind, hardware_kind))
+        if entry is not None:
+            known += 1
+            decorated.append((0, -entry["wall_time_s"], index, task))
+        else:
+            decorated.append((1, 0.0, index, task))
+    decorated.sort(key=lambda item: item[:3])
+    return [item[3] for item in decorated], known
+
+
+def _record_task_duration(
+    ledger: dict,
+    *,
+    task: str | Path,
+    workload_kind: str,
+    hardware_kind: str,
+    wall_time_s: float,
+    status: str,
+) -> None:
+    """Update a duration ledger from one completed worker task.
+
+    The most recent run wins, so one past hang does not pin a task to the
+    front of every later sweep. A failed run only raises the estimate: a task
+    that crashed early says nothing about how long it takes to finish.
+    """
+    key = _task_duration_key(task, workload_kind, hardware_kind)
+    previous = ledger["tasks"].get(key)
+    if status != "ok" and previous is not None and previous["wall_time_s"] >= wall_time_s:
+        return
+    ledger["tasks"][key] = {"wall_time_s": float(wall_time_s), "status": status}
+
+
+def _update_task_duration_ledger(path: Path, **record) -> None:
+    """Record one finished task in the ledger file under an exclusive lock.
+
+    Concurrent sweeps can share a ledger: the on-disk ledger is re-read under
+    the lock, so one sweep never overwrites entries another one recorded.
+    """
+    import fcntl
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_name(f"{path.name}.lock")
+    with open(lock_path, "a+") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            ledger = _load_task_duration_ledger(path)
+            _record_task_duration(ledger, **record)
+            _atomic_write_json(path, ledger)
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
 def _regroup_sharded_repro_results(all_results: dict) -> dict:
     """Regroup per-(repro, shape) sharded payloads back under their repro.py path.
 
@@ -2602,6 +2700,16 @@ def main():
                         help="Write all results to a JSON file")
     parser.add_argument("--merge-into", type=Path, default=None,
                         help="Merge results into an existing baseline JSON (updates only the benchmarked repros)")
+    parser.add_argument(
+        "--task-duration-ledger",
+        type=Path,
+        default=None,
+        help=(
+            "Read and update a separate per-task duration JSON ledger. Known tasks "
+            "are queued longest-first; tasks absent from the ledger retain their "
+            "existing order. Off by default and does not change benchmark output."
+        ),
+    )
     parser.add_argument("--lock-clocks", action=argparse.BooleanOptionalAction, default=True,
                         help="Lock the SM clock of the sweep's GPUs to a sustainable bin before "
                              "timing to remove boost/ramp variance (best-effort, non-blocking — "
@@ -2799,6 +2907,28 @@ def main():
             f"({', '.join(sorted(selected_kinds))}); pass --device-kind so "
             "roofline and oracle results are hardware-specific"
         )
+    hardware_kind = next(iter(selected_kinds)) if selected_kinds else _UNKNOWN
+
+    task_duration_ledger = None
+    task_duration_ledger_path = args.task_duration_ledger
+    if task_duration_ledger_path is not None:
+        try:
+            task_duration_ledger = _load_task_duration_ledger(
+                task_duration_ledger_path
+            )
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            parser.error(f"invalid --task-duration-ledger: {exc}")
+        repros, known_duration_count = _sort_tasks_by_known_duration(
+            repros,
+            task_duration_ledger,
+            workload_kind,
+            hardware_kind,
+        )
+        print(
+            "Task duration ledger: "
+            f"{known_duration_count}/{len(repros)} known; "
+            "known tasks queued longest-first"
+        )
 
     if args.compile_time and len(gpus) > 1:
         print(f"[compile-time] serializing to 1 GPU: {gpus[0]['index']}:{gpus[0]['kind']}")
@@ -2820,7 +2950,7 @@ def main():
     # Recorded with the results; merges refuse to combine measurements from
     # different hardware kinds or clock policies.
     hardware_metadata = {
-        "hardware_kind": next(iter(selected_kinds)) if selected_kinds else "unknown",
+        "hardware_kind": hardware_kind,
         "gpu_names": [gpu["name"] for gpu in gpus],
         "gpu_indices": [gpu["index"] for gpu in gpus],
         "clock_lock": (
@@ -2970,6 +3100,22 @@ def main():
             continue
 
         repro_name = _task_display_name(result["repro"])
+        if task_duration_ledger is not None:
+            try:
+                _update_task_duration_ledger(
+                    task_duration_ledger_path,
+                    task=result["repro"],
+                    workload_kind=workload_kind,
+                    hardware_kind=hardware_kind,
+                    wall_time_s=result["elapsed"],
+                    status=result["status"],
+                )
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
+                print(
+                    f"[task-duration-ledger] disabling after write failure: {exc}",
+                    flush=True,
+                )
+                task_duration_ledger = None
         if result["status"] == "ok":
             done += 1
             if args.oracles:
