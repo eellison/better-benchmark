@@ -4,6 +4,7 @@
   2. index_put values are cast to the destination dtype, as Inductor's lowering
      does, so a post-grad region with mismatched dtypes runs in eager.
   3. A float label reaching gather through a long where/convert chain is bounded.
+  4. A lifted index constant reaching index() through lift_fresh_copy is bounded.
 
 Run: python tests/test_input_synthesis.py  (CPU only)
 """
@@ -74,7 +75,22 @@ def test_float_label_through_long_chain_is_bounded():
     print("PASS float label through a long chain is bounded")
 
 
+def test_lifted_index_constant_is_bounded():
+    def f(x, rows):
+        return torch.ops.aten.index.Tensor(
+            x, [None, torch.ops.aten.lift_fresh_copy.default(rows)])
+
+    gm = make_fx(f, tracing_mode="fake")(
+        torch.randn(5, 9, 4), torch.zeros(8, dtype=torch.int64))
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    rows = [n.name for n in gm.graph.nodes if n.op == "placeholder"][1]
+    assert bounds.get(rows) == 9, bounds
+    print("PASS lifted index constant is bounded")
+
+
 if __name__ == "__main__":
     test_fp8_inputs_are_generated()
     test_index_put_values_cast_to_destination()
     test_float_label_through_long_chain_is_bounded()
+    test_lifted_index_constant_is_bounded()

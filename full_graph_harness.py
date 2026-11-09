@@ -662,6 +662,11 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.t.default,
         torch.ops.aten.transpose.int,
         torch.ops.aten.where.self,
+        # A lifted tensor constant (e.g. a small table of row ids) reaches
+        # index() through lift_fresh_copy.
+        torch.ops.aten.lift_fresh_copy.default,
+        torch.ops.aten.alias.default,
+        torch.ops.aten.detach.default,
         # cat/stack keep each input's values: an index built as
         # cat(x[:, 0], x[:, 1] + 100, ...) must bound x by the tightest
         # branch (rows - 100), or the offset columns index out of bounds.
