@@ -1036,6 +1036,35 @@ def lift_shape_params(gm):
     return gm, shape_params
 
 
+def cast_index_put_values(gm: fx.GraphModule) -> None:
+    """Make index_put's values -> self dtype cast explicit. Post-grad graphs can
+    carry mismatched dtypes (Inductor's lowering casts values to self's dtype),
+    but eager rejects them, so the region would fail validation."""
+    changed = False
+    for n in list(gm.graph.nodes):
+        if (n.op != "call_function"
+                or n.target not in (torch.ops.aten.index_put.default,
+                                    torch.ops.aten.index_put_.default)
+                or len(n.args) < 3 or not isinstance(n.args[2], fx.Node)):
+            continue
+        self_val = n.args[0].meta.get("val")
+        values = n.args[2]
+        values_val = values.meta.get("val")
+        if (not isinstance(self_val, torch.Tensor)
+                or not isinstance(values_val, torch.Tensor)
+                or self_val.dtype == values_val.dtype):
+            continue
+        with gm.graph.inserting_before(n):
+            cast = gm.graph.call_function(
+                torch.ops.prims.convert_element_type.default,
+                (values, self_val.dtype))
+        cast.meta["val"] = values_val.to(self_val.dtype)
+        n.update_arg(2, cast)
+        changed = True
+    if changed:
+        gm.recompile()
+
+
 def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     """ONE make_fx retrace of an extracted partition: the canonical form.
 
@@ -1244,6 +1273,7 @@ def compute_partition_pattern(
         if observed_stats and name in observed_stats and (
                 "int" in dtype or "bool" in dtype):
             info["observed"] = observed_stats[name]
+    cast_index_put_values(sub_gm)
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
     return {
