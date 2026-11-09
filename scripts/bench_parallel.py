@@ -1130,6 +1130,7 @@ def _run_metadata(
     n_results: int,
     n_repros: int | None = None,
     extra_inductor_config: dict | None = None,
+    hardware_metadata: dict | None = None,
 ) -> dict:
     commit = _git_query(["rev-parse", "HEAD"]) or ""
     pytorch_commit, pytorch_ref = _pytorch_provenance()
@@ -1154,6 +1155,8 @@ def _run_metadata(
         metadata["workload_kind"] = workload_kind
     if extra_inductor_config:
         metadata["inductor_config"] = extra_inductor_config
+    if hardware_metadata:
+        metadata.update(hardware_metadata)
     return metadata
 
 
@@ -1309,6 +1312,7 @@ def _write_results_output(
     repro_skipped: int | None = None,
     extra_inductor_config: dict | None = None,
     config_metadata: dict | None = None,
+    hardware_metadata: dict | None = None,
 ):
     summary = _build_run_summary(
         point_total=total,
@@ -1326,6 +1330,7 @@ def _write_results_output(
         n_results=summary["repros"]["ok"],
         n_repros=summary["repros"]["ok"],
         extra_inductor_config=extra_inductor_config,
+        hardware_metadata=hardware_metadata,
     )
     metadata["benchmark_config"] = dict(config_metadata or {})
     _sync_numerics_check_metadata(metadata)
@@ -1525,7 +1530,10 @@ def _prefer_shape_point(candidate: dict, existing: dict, floor_excluded) -> bool
 
 
 def _write_oracle_timings_output(
-    output_path: Path, all_results: dict, failures: dict | None = None
+    output_path: Path,
+    all_results: dict,
+    failures: dict | None = None,
+    hardware_metadata: dict | None = None,
 ) -> dict:
     """Write flat {dir_name -> {oracle_us,...}} for model_graph_accounting.
 
@@ -1569,6 +1577,13 @@ def _write_oracle_timings_output(
                     existing.setdefault("shape_failures", note)
         if not agg_failures:
             timed.pop("__failures__", None)
+    if hardware_metadata:
+        n_priced = sum(1 for key in timed if key not in _RESERVED_TOP_LEVEL_KEYS)
+        timed["_metadata"] = _run_metadata(
+            workload_kind="oracle",
+            n_results=n_priced,
+            hardware_metadata=hardware_metadata,
+        )
     _atomic_write_json(output_path, timed)
     return timed
 
@@ -1734,6 +1749,7 @@ def _merge_into_baseline(
     complete_repros: set[str] | None = None,
     extra_inductor_config: dict | None = None,
     config_metadata: dict | None = None,
+    hardware_metadata: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     import fcntl
@@ -1752,9 +1768,78 @@ def _merge_into_baseline(
                 complete_repros=complete_repros,
                 extra_inductor_config=extra_inductor_config,
                 config_metadata=config_metadata,
+                hardware_metadata=hardware_metadata,
             )
         finally:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+_HARDWARE_COMPATIBILITY_FIELDS = (
+    "hardware_kind",
+    "clock_lock",
+    "clock_lock_requested_mhz",
+    "timing_method",
+)
+_UNKNOWN = "unknown"
+
+
+def _merge_hardware_metadata(
+    existing: dict,
+    incoming: dict | None,
+    *,
+    baseline_has_results: bool,
+    adds_results: bool,
+) -> None:
+    """Merge run hardware metadata without combining incompatible measurements.
+
+    A field that a baseline with results never recorded (older files), or
+    that the incoming run does not report, is "unknown". Known values on both
+    sides must agree or the merge is refused. Unknown merged with anything
+    stays unknown, so a file never claims a hardware kind, clock policy or
+    timing method that some of its results were not measured with. A
+    baseline without results adopts the incoming run's metadata.
+    """
+    incoming = incoming or {}
+    if not baseline_has_results:
+        if adds_results:
+            existing.update(incoming)
+        return
+
+    def value(meta: dict, field: str):
+        if field not in meta:
+            return _UNKNOWN
+        if field in ("gpu_names", "gpu_indices") and meta[field] != _UNKNOWN:
+            return sorted({str(item) for item in meta[field] or []})
+        return meta[field]
+
+    mismatches = []
+    for field in (*_HARDWARE_COMPATIBILITY_FIELDS, "gpu_names"):
+        old, new = value(existing, field), value(incoming, field)
+        if _UNKNOWN not in (old, new) and old != new:
+            mismatches.append(f"{field}: baseline={old!r}, new={new!r}")
+    if mismatches:
+        raise ValueError(
+            "Cannot merge benchmark results measured with incompatible hardware "
+            "metadata: " + "; ".join(mismatches)
+        )
+    if not adds_results:
+        return
+    for field in (*_HARDWARE_COMPATIBILITY_FIELDS, "gpu_names", "gpu_indices"):
+        old, new = value(existing, field), value(incoming, field)
+        if _UNKNOWN in (old, new):
+            existing[field] = _UNKNOWN
+        elif field == "gpu_indices":
+            existing[field] = sorted(set(old) | set(new))
+        else:
+            existing[field] = old
+
+
+def _timing_method(args: argparse.Namespace) -> str:
+    if args.compile_time:
+        return "cold_compile_wall_time"
+    if args.oracles:
+        return "oracle_harness_interleaved_min"
+    return "cudagraph_interleaved_min"
 
 
 def _source_sha256(path_text: str) -> str | None:
@@ -1782,8 +1867,6 @@ def _stamp_source_sha256(new_results: dict) -> None:
             continue
         for _label, result in _metric_result_items(results):
             result.setdefault("source_sha256", digest)
-
-
 def _rebase_benchmark_update_keys(
     existing: dict,
     old_failures: dict,
@@ -1920,6 +2003,7 @@ def _merge_into_baseline_locked(
     complete_repros: set[str] | None = None,
     extra_inductor_config: dict | None = None,
     config_metadata: dict | None = None,
+    hardware_metadata: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     partial_repros = partial_repros or set()
@@ -1978,6 +2062,7 @@ def _merge_into_baseline_locked(
                     else {}
                 ),
                 "benchmark_config": dict(config_metadata or {}),
+                **(hardware_metadata or {}),
             },
         )
         _sync_numerics_check_metadata(payload["_metadata"])
@@ -2020,6 +2105,12 @@ def _merge_into_baseline_locked(
     else:
         old_meta["benchmark_config"] = dict(config_metadata or {})
     _sync_numerics_check_metadata(old_meta)
+    _merge_hardware_metadata(
+        old_meta,
+        hardware_metadata,
+        baseline_has_results=bool(existing),
+        adds_results=bool(new_results),
+    )
     metadata_kind = old_meta.get("workload_kind")
     content_kind = _infer_workload_kind_from_payload(
         existing,
@@ -2701,6 +2792,13 @@ def main():
             return
 
     gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
+    selected_kinds = {gpu["kind"] for gpu in gpus}
+    if len(selected_kinds) > 1 and args.device_kind is None:
+        parser.error(
+            "selected GPUs span multiple hardware kinds "
+            f"({', '.join(sorted(selected_kinds))}); pass --device-kind so "
+            "roofline and oracle results are hardware-specific"
+        )
 
     if args.compile_time and len(gpus) > 1:
         print(f"[compile-time] serializing to 1 GPU: {gpus[0]['index']}:{gpus[0]['kind']}")
@@ -2711,6 +2809,7 @@ def main():
     # via atexit so the node isn't left pinned regardless of how main() returns
     # (normal exit, worker-death break, or an unexpected exception). We only ever
     # reset the GPUs we actually locked. atexit reset is itself non-blocking.
+    locked_indices: set[str] = set()
     if args.lock_clocks:
         locked_indices = _lock_gpu_clocks(
             [g["index"] for g in gpus], args.lock_clocks_mhz
@@ -2718,6 +2817,20 @@ def main():
         if locked_indices and args.reset_clocks:
             import atexit
             atexit.register(_reset_gpu_clocks, locked_indices)
+    # Recorded with the results; merges refuse to combine measurements from
+    # different hardware kinds or clock policies.
+    hardware_metadata = {
+        "hardware_kind": next(iter(selected_kinds)) if selected_kinds else "unknown",
+        "gpu_names": [gpu["name"] for gpu in gpus],
+        "gpu_indices": [gpu["index"] for gpu in gpus],
+        "clock_lock": (
+            ("locked" if len(locked_indices) == len(gpus) else "lock_failed")
+            if args.lock_clocks
+            else "unlocked"
+        ),
+        "clock_lock_requested_mhz": args.lock_clocks_mhz if args.lock_clocks else None,
+        "timing_method": _timing_method(args),
+    }
 
     try:
         n_workers, workers_per_gpu = _compute_worker_count(
@@ -2904,7 +3017,9 @@ def main():
 
         # Incremental save every 50 results
         if args.output and args.oracles and (done + failed) % 50 == 0:
-            _write_oracle_timings_output(args.output, all_results, failures)
+            _write_oracle_timings_output(
+                args.output, all_results, failures, hardware_metadata
+            )
         elif args.output and (done + failed) % 50 == 0:
             # Regroup sharded (repro, shape) keys back to bare repro.py paths so
             # the incremental snapshot uses the same schema as the final write
@@ -2935,6 +3050,7 @@ def main():
                 repro_skipped=snap_repro_counts[3],
                 extra_inductor_config=extra_inductor_config,
                 config_metadata=benchmark_config,
+                hardware_metadata=hardware_metadata,
             )
 
     # Wait for workers
@@ -3041,7 +3157,9 @@ def main():
 
     # Optional JSON output — include metadata for staleness detection
     if args.output and args.oracles:
-        timed = _write_oracle_timings_output(args.output, all_results, failures)
+        timed = _write_oracle_timings_output(
+            args.output, all_results, failures, hardware_metadata
+        )
         n_priced = sum(1 for k in timed if not k.startswith("_"))
         n_failed = len(timed.get("__failures__", {}))
         print(f"[output] Wrote {args.output} "
@@ -3064,6 +3182,7 @@ def main():
             repro_skipped=repro_counts[3],
             extra_inductor_config=extra_inductor_config,
             config_metadata=benchmark_config,
+            hardware_metadata=hardware_metadata,
         )
         print(f"[output] Wrote {args.output}")
 
@@ -3082,6 +3201,7 @@ def main():
             complete_repros=merge_complete_repros,
             extra_inductor_config=extra_inductor_config,
             config_metadata=benchmark_config,
+            hardware_metadata=hardware_metadata,
         )
 
 
