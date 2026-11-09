@@ -21,6 +21,7 @@ from bench_parallel import (
     _compute_worker_count,
     _filter_gpus,
     _preflight_full_graphs,
+    _worker_python_command,
     _write_results_output,
     find_full_graphs,
     load_benchmark_set,
@@ -184,6 +185,36 @@ def test_compute_worker_count_never_exceeds_repro_count():
         max_workers=8,
         workers_per_gpu=None,
     ) == (3, 4)
+
+
+def test_worker_python_command_preserves_no_site_mode(monkeypatch):
+    monkeypatch.delenv("BETTER_BENCH_PYTHON_LAUNCHER", raising=False)
+    assert _worker_python_command("pass", no_site=True) == [
+        sys.executable,
+        "-S",
+        "-u",
+        "-c",
+        "pass",
+    ]
+    assert _worker_python_command("pass", no_site=False) == [
+        sys.executable,
+        "-u",
+        "-c",
+        "pass",
+    ]
+
+
+def test_worker_python_command_defaults_to_the_parent_no_site_flag(monkeypatch):
+    monkeypatch.delenv("BETTER_BENCH_PYTHON_LAUNCHER", raising=False)
+    expected = ["-S"] if sys.flags.no_site else []
+    assert _worker_python_command("pass")[1:] == [*expected, "-u", "-c", "pass"]
+
+
+def test_worker_python_command_launcher_env(monkeypatch):
+    monkeypatch.setenv("BETTER_BENCH_PYTHON_LAUNCHER", "/opt/launcher")
+    assert _worker_python_command("pass", no_site=True)[:2] == ["/opt/launcher", "-S"]
+    monkeypatch.setenv("BETTER_BENCH_PYTHON_LAUNCHER", "")
+    assert _worker_python_command("pass", no_site=False)[0] == sys.executable
 
 
 def test_load_benchmark_set_accepts_current_patterns_schema():

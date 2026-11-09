@@ -257,6 +257,8 @@ The same runner (workers, GPU lock, recovery) drives three workloads:
 
 Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can compile in parallel, but only one times on a given GPU at once.
 
+Workers are started as `sys.executable -u -c ...`, with `-S` added when the parent runs with `-S` (no `site` import). Set `BETTER_BENCH_PYTHON_LAUNCHER` to start them with a different executable, e.g. a packaged launcher; unset or empty means `sys.executable`.
+
 </details>
 
 ## Key Metrics
