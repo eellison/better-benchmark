@@ -90,15 +90,41 @@ cut into a pointwise suffix for a prologue.
 Absorption direction is recorded from the source graph; the prologue/epilogue
 label is not inferred from standalone topology alone.
 
-## Horizontal categories: existing window policy
+## Horizontal categories: shared-operand windows
 
 These categories are independent of the normal-partition assignment above.
 Their regions may overlap the single-MM examples.
 
-- **`horizontal`**: 2–3 independent MMs share an operand through transparent
-  operations and have equal output shapes. Each output depends on one MM only.
+- **`horizontal`**: 2–3 independent MMs share an operand and have equal output
+  shapes. Each output depends on one MM only.
 - **`horizontal_combine`**: the same grouping, but an operation combines the
   results of at least two MMs, such as `silu(x @ Wg) * (x @ Wu)`.
+
+Sharing an operand means the same slot and the same values, so the MMs
+concatenate into one GEMM: `x @ a, x @ b` share the left operand (concatenate
+`[a b]` along N) and `a @ x, b @ x` share the right one (concatenate along M).
+`matmul_partitioner.operand_keys` gives each multiplied operand a key
+`(slot, root, steps)`: walking up from the operand, copies (`clone`,
+`contiguous`, `alias`, `detach`) are dropped, and casts, reshapes, expands and
+permutes are recorded as steps until another op (the root) is reached. Runs of
+reshapes keep the last shape and runs of permutes compose. MMs group when they
+have an equal key:
+
+| MMs | Keys | Group |
+|---|---|---|
+| `x @ a`, `x @ b` | `(0, x, ())` both | yes |
+| `x.half() @ a`, `x.half() @ b` (two cast nodes) | `(0, x, (cast f16,))` both | yes |
+| `x @ a`, `b @ x` | `(0, x, ())`, `(1, x, ())` | no |
+| `x @ a`, `x.t() @ b` | `(0, x, ())`, `(0, x, (permute (1, 0),))` | no |
+| `x.half() @ a`, `x.bfloat16() @ b` | `(0, x, (cast f16,))`, `(0, x, (cast bf16,))` | no |
+
+The window contains the operand paths up to where they meet, even when they
+are computed from an earlier MM, which local producer growth otherwise leaves
+out. Without them, `x -> view_1 -> mm_1` and `x -> view_2 -> mm_2` would
+extract as two MMs reading separate inputs `view_1` and `view_2`; one view
+feeding both MMs is already a single input and stays out. A window that cannot
+keep the paths within its limits is dropped, and validation checks that every
+horizontal repro's MMs share an operand by the same key.
 
 The existing group selection, local producer/consumer growth, and metadata
 normalization are retained. The multiplied dimensions may differ; output shapes

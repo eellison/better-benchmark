@@ -15,7 +15,8 @@ cap. No pointwise suffix is cut from a reduction partition. Their category is
 the source absorption direction.
 
 Horizontal/horizontal_combine keep the independent 2..3-MM window search:
-shared operands, equal output shapes, and optional surrounding local work.
+a shared operand (same slot and values, operand_keys), equal output shapes,
+and optional surrounding local work.
 These windows may overlap the normal-partition examples; the model graph is
 never rewritten.
 """
@@ -425,9 +426,12 @@ def is_computation(node):
     )
 
 
+_MM_WITH_BIAS = {"aten::addmm", "aten::baddbmm", "aten::addmv"}
+
+
 def mm_operands(node):
     """The two multiplied operands of an MM (skipping the bias of addmm & co)."""
-    start = 1 if op_name(node) in {"aten::addmm", "aten::baddbmm", "aten::addmv"} else 0
+    start = 1 if op_name(node) in _MM_WITH_BIAS else 0
     return [a for a in node.args[start : start + 2] if isinstance(a, Node)]
 
 
@@ -531,16 +535,17 @@ CATEGORIES = (
     "horizontal_combine",
 )
 
-# Ops whose result is their first argument's values, possibly re-indexed.
-_SAME_VALUES = {
+# What shared_operand() looks through between an MM operand and an earlier
+# node. Copies keep the logical values; casts, reshapes, expands and permutes
+# change the dtype or the index mapping and are recorded as steps.
+_COPIES = {
     "aten::clone",
     "aten::contiguous",
     "aten::alias",
     "aten::detach",
-    "aten::_to_copy",
     "aten::lift_fresh_copy",
-    "prims::convert_element_type",
 }
+_CASTS = {"aten::_to_copy", "prims::convert_element_type"}
 _RESHAPES = {
     "aten::view",
     "aten::reshape",
@@ -549,13 +554,120 @@ _RESHAPES = {
     "aten::unsqueeze",
     "aten::flatten",
 }
-# Ops a shared operand may pass through and still count as the same input.
-_SHARING_TRANSPARENT = _SAME_VALUES | _RESHAPES | {
-    "aten::permute",
-    "aten::t",
-    "aten::transpose",
-    "aten::expand",
-}
+_PERMUTES = {"aten::permute", "aten::t", "aten::transpose"}
+
+
+def _shape_key(node):
+    """Hashable shape of the node's tensor; symbolic sizes by expression."""
+    value = node.meta.get("val")
+    if not isinstance(value, torch.Tensor):
+        return None
+    return tuple(d if isinstance(d, int) else str(d) for d in value.shape)
+
+
+def _permutation(node, rank):
+    """permute/t/transpose as dims: output dim i is input dim perm[i]."""
+    perm = list(range(rank))
+    name = op_name(node)
+    if name == "aten::permute":
+        return tuple(d % rank for d in _schema_argument(node, "dims"))
+    if name == "aten::t" or rank == 0:
+        return tuple(reversed(perm))  # t() is the identity on 0-D and 1-D tensors
+    d0, d1 = (_schema_argument(node, d) % rank for d in ("dim0", "dim1"))
+    perm[d0], perm[d1] = perm[d1], perm[d0]
+    return tuple(perm)
+
+
+def _merge_steps(steps):
+    merged = []
+    for kind, arg in steps:
+        if merged and kind == merged[-1][0] == "reshape":
+            merged[-1] = (kind, arg)  # reshape(reshape(x, a), b) == reshape(x, b)
+        elif merged and kind == merged[-1][0] == "permute":
+            first = merged.pop()[1]
+            merged.append((kind, tuple(first[d] for d in arg)))
+        else:
+            merged.append((kind, arg))
+        if merged[-1] == ("permute", tuple(range(len(merged[-1][1])))):
+            merged.pop()  # identity, e.g. x.t().t()
+    return tuple(merged)
+
+
+def shared_operand(value, within=None):
+    """(root, steps) such that ``value`` is ``steps`` applied to node ``root``.
+
+    Operands with equal (root, steps) hold equal values, so they can be the
+    shared operand of one concatenated GEMM:
+      x @ a,        x @ b              (x, ())        == (x, ())
+      x @ a,        x.t() @ b          (x, ())        != (x, (permute (1, 0),))
+      x.half() @ a, x.bfloat16() @ b   (x, (cast f16,)) != (x, (cast bf16,))
+    Copies are dropped and runs of reshapes or permutes are merged, so two
+    separate x.half() or x.view(m, k) nodes match. With ``within`` (a node
+    set) the walk stops at nodes outside it: once the set is extracted, they
+    are inputs.
+    """
+    steps = []
+    while (
+        isinstance(value, Node)
+        and (within is None or value in within)
+        and value.args
+        and isinstance(value.args[0], Node)
+    ):
+        name, source = op_name(value), value.args[0]
+        if name in _COPIES:
+            pass
+        elif name in _CASTS:
+            out, inp = value.meta.get("val"), source.meta.get("val")
+            if not (isinstance(out, torch.Tensor) and isinstance(inp, torch.Tensor)):
+                break
+            if (out.dtype, out.device) != (inp.dtype, inp.device):
+                steps.append(("cast", (out.dtype, out.device)))
+        elif name in _RESHAPES or name == "aten::expand":
+            shape = _shape_key(value)
+            if shape is None:
+                break
+            steps.append(("reshape" if name in _RESHAPES else "expand", shape))
+        elif name in _PERMUTES:
+            source_value = source.meta.get("val")
+            if not isinstance(source_value, torch.Tensor):
+                break
+            steps.append(("permute", _permutation(value, source_value.dim())))
+        else:
+            break
+        value = source
+    return value, _merge_steps(reversed(steps))
+
+
+def operand_keys(mm, within=None):
+    """(slot, root, steps) of each multiplied operand; slot 0 is the left one.
+
+    x @ a and x @ b share (0, x, ()) and concatenate along N; a @ x and b @ x
+    share (1, x, ()) and concatenate along M. x @ a and b @ x share nothing.
+    """
+    start = 1 if op_name(mm) in _MM_WITH_BIAS else 0
+    return {
+        (slot, *shared_operand(operand, within))
+        for slot, operand in enumerate(mm.args[start : start + 2])
+        if isinstance(operand, Node)
+    }
+
+
+def shares_operand(mms, within=None):
+    """All of ``mms`` have a multiplied operand with the same operand_keys key."""
+    return bool(set.intersection(*(operand_keys(mm, within) for mm in mms)))
+
+
+def _operand_at(mm, slot):
+    return mm.args[(1 if op_name(mm) in _MM_WITH_BIAS else 0) + slot]
+
+
+def _operand_path(value, root):
+    """The nodes shared_operand() walked from ``value`` to ``root``, excluding root."""
+    path = []
+    while value is not root:
+        path.append(value)
+        value = value.args[0]
+    return path
 
 
 @dataclass(frozen=True)
@@ -777,18 +889,12 @@ class _Extractor:
         return False
 
     def horizontal_groups(self, mms):
-        """Groups of 2..max_horizontal independent MMs sharing an operand."""
+        """Groups of 2..max_horizontal independent MMs sharing an operand.
 
-        def root(value):
-            while (
-                isinstance(value, Node)
-                and op_name(value) in _SHARING_TRANSPARENT
-                and value.args
-                and isinstance(value.args[0], Node)
-            ):
-                value = value.args[0]
-            return value
-
+        Sharing means an equal operand_keys() key: the same slot and the same
+        values, so x @ a with b @ x, with x.t() @ b, or x.half() @ a with
+        x.bfloat16() @ b never group (none concatenates into one GEMM).
+        """
         ancestors = {}
         for n in self.nodes:
             ancestors[n] = set().union(
@@ -799,14 +905,10 @@ class _Extractor:
             shape = self.shapes.get(mm)
             if shape is None:
                 continue
-            for operand in mm_operands(mm):
-                key = root(operand), shape
-                if mm not in by_key.setdefault(key, []):
-                    by_key[key].append(mm)
+            for key in operand_keys(mm):
+                by_key.setdefault((key, shape), []).append(mm)
         groups, seen = [], set()
-        for (_, _), members in sorted(
-            by_key.items(), key=lambda kv: self.order[kv[1][0]]
-        ):
+        for members in sorted(by_key.values(), key=lambda m: self.order[m[0]]):
             chosen = []
             for mm in self.sort(members):
                 if all(mm not in ancestors[c] and c not in ancestors[mm] for c in chosen):
@@ -821,7 +923,28 @@ class _Extractor:
 
     def horizontal(self, group):
         members = set(group)
-        core = self.grow_backward(members, [a for mm in group for a in mm_operands(mm)])
+        slot, root, _ = min(
+            set.intersection(*(operand_keys(mm) for mm in group)),
+            key=lambda key: (key[0], self.order.get(key[1], -1)),
+        )
+        # The operand paths up to where they meet must be in the window, but
+        # grow_backward leaves out nodes computed from an earlier MM. Without
+        # them each MM reads its own input and the sharing is lost:
+        #   x -> view_1 -> mm_1, x -> view_2 -> mm_2   extracts as   mm_1(arg0), mm_2(arg1)
+        # Adding view_1 and view_2 makes both read x; one view feeding both
+        # MMs is already a single input and stays out.
+        paths = [_operand_path(_operand_at(mm, slot), root) + [root] for mm in group]
+        common = set.intersection(*map(set, paths))
+        path = set()
+        for nodes in paths:
+            for n in nodes:
+                if n in common:
+                    break
+                path.add(n)
+        if not path <= self.supported:
+            self.reject("unsupported_shared_operand")
+            return None
+        core = self.grow_backward(members, [a for mm in group for a in mm_operands(mm)]) | path
         snapshots = list(self.grow_forward(core, group))
         for window in reversed(snapshots):
             window = self.grow_backward(
@@ -830,6 +953,9 @@ class _Extractor:
             finished = self.finish(
                 window, lambda n: any(self._after(n, mm, window) for mm in group), group
             )
+            if finished is not None and not shares_operand(group, within=set(finished[0])):
+                self.reject("unshared_operand")  # the extracted MMs would read separate inputs
+                finished = None
             if finished is not None:
                 category = (
                     "horizontal_combine" if combines(finished[0], group) else "horizontal"
@@ -962,7 +1088,7 @@ def classify_pattern_graph(gm, *, expected=None):
     if any(s in ancestors[t] for s in mms for t in mms):
         return None
     shapes = {tensor_shape(m) for m in mms}
-    if len(mms) <= 3 and len(shapes) == 1 and None not in shapes:
+    if len(mms) <= 3 and len(shapes) == 1 and None not in shapes and shares_operand(mms):
         return "horizontal_combine" if combines(nodes, mms) else "horizontal"
     return None
 

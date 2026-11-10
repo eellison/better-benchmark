@@ -8,6 +8,7 @@ from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import get_fusion_partitions, partition_node_is_supported
 from matmul_partitioner import (
+    MatmulLimits,
     classify_pattern_graph,
     get_matmul_regions,
     is_matmul,
@@ -322,6 +323,103 @@ def test_partial_combine_of_three_is_horizontal_combine():
     assert sum(is_matmul(n) for n in found[0]) == 3
 
 
+def horizontal_regions(fn, *inputs, limits=None):
+    gm = make_fx(fn, tracing_mode="fake")(*inputs)
+    found = get_matmul_regions(
+        gm, partition_node_is_supported, limits=limits, categories=("horizontal", "horizontal_combine")
+    )
+    return gm, found
+
+
+def extracted_category(gm, region):
+    from capture_hook import extract_partition_subgraph
+
+    subset, _, _ = extract_partition_subgraph(region, gm)
+    return classify_pattern_graph(subset)
+
+
+def test_horizontal_shares_an_operand_in_either_slot():
+    # x @ a, x @ b concatenate along N; a @ x, b @ x along M.
+    for fn in (lambda x, a, b: (x @ a, x @ b), lambda x, a, b: (a @ x, b @ x)):
+        gm, found = horizontal_regions(fn, *[R(32, 32) for _ in range(3)])
+        assert [r.category for r in found] == ["horizontal"]
+        assert extracted_category(gm, found[0]) == "horizontal"
+
+
+# Same root and equal output shapes, but no shared operand: none concatenates
+# into one GEMM.
+SAME_ROOT_DIFFERENT_OPERANDS = {
+    # Distinct tensors: make_fx gives repeated tensor objects one placeholder.
+    "opposite_slots": (lambda x, a, b: (x @ a, b @ x), [R(32, 32) for _ in range(3)]),
+    "transpose": (lambda x, a, b: (x @ a, x.t() @ b), [R(32, 32) for _ in range(3)]),
+    "mixed_dtype": (
+        lambda x, a, b: (x.half() @ a, x.bfloat16() @ b),
+        [R(M, 32), R(32, 48).half(), R(32, 48).bfloat16()],
+    ),
+}
+
+
+@pytest.mark.parametrize("name", SAME_ROOT_DIFFERENT_OPERANDS)
+def test_same_root_is_not_a_shared_operand(name):
+    fn, args = SAME_ROOT_DIFFERENT_OPERANDS[name]
+    assert horizontal_regions(fn, *args)[1] == []
+
+
+# Separate nodes with equal values are one shared operand.
+EQUAL_OPERAND_NODES = {
+    "two_casts": (
+        lambda x, a, b: (x.half() @ a, x.half() @ b),
+        [R(M, 32), R(32, 48).half(), R(32, 48).half()],
+    ),
+    "two_views": (
+        lambda x, a, b: (x.view(M, 32) @ a, x.reshape(M, 32) @ b),
+        [R(2, M // 2, 32), R(32, 48), R(32, 48)],
+    ),
+    "double_transpose": (lambda x, a, b: (x @ a, x.t().t() @ b), [R(M, 32), R(32, 48), R(32, 48)]),
+}
+
+
+@pytest.mark.parametrize("name", EQUAL_OPERAND_NODES)
+def test_separate_nodes_with_equal_values_share_the_operand(name):
+    fn, args = EQUAL_OPERAND_NODES[name]
+    gm, found = horizontal_regions(fn, *args)
+    assert [r.category for r in found] == ["horizontal"]
+    assert extracted_category(gm, found[0]) == "horizontal"
+
+
+def test_window_keeps_the_shared_operand_path_computed_from_an_mm():
+    # The views of x depend on an earlier MM, so grow_backward alone leaves
+    # them out and the extracted MMs would read view_1 and view_2 separately.
+    def fn(h, w0, a, b):
+        x = (h @ w0).relu()
+        return x.view(M, 32) @ a, x.view(M, 32) @ b
+
+    gm, found = horizontal_regions(fn, R(M, 32), R(32, 32), R(32, 48), R(32, 48))
+    assert [r.category for r in found] == ["horizontal"]
+    assert sum(op_name(n) == "aten::view" for n in found[0]) == 2
+    assert extracted_category(gm, found[0]) == "horizontal"
+
+
+def test_one_operand_node_feeding_all_mms_stays_an_input():
+    def fn(h, w0, a, b):
+        v = (h @ w0).relu().view(M, 32)
+        return v @ a, v @ b
+
+    gm, found = horizontal_regions(fn, R(M, 32), R(32, 32), R(32, 48), R(32, 48))
+    assert [r.category for r in found] == ["horizontal"]
+    assert not any(op_name(n) == "aten::view" for n in found[0])
+    assert extracted_category(gm, found[0]) == "horizontal"
+
+
+def test_horizontal_is_dropped_when_the_window_cannot_keep_the_sharing():
+    fn = lambda x, a, b: (x.view(M, 32) @ a, x.view(M, 32) @ b)
+    args = (R(2, M // 2, 32), R(32, 48), R(32, 48))
+    assert [r.category for r in horizontal_regions(fn, *args)[1]] == ["horizontal"]
+    # Two MMs and two views do not fit in three nodes; one view alone would
+    # leave the MMs reading separate inputs.
+    assert horizontal_regions(fn, *args, limits=MatmulLimits(max_nodes=3))[1] == []
+
+
 def is_mm_group(region):
     return sum(is_matmul(n) for n in region) >= 2
 
@@ -348,6 +446,15 @@ def test_classify_pattern_graph_matches_extraction():
             subset, _, _ = extract_partition_subgraph(region, gm)
             expected = region.category if region.category in {"prologue", "epilogue"} else None
             assert classify_pattern_graph(subset, expected=expected) == region.category
+
+
+def test_classify_requires_horizontal_mms_to_share_an_operand():
+    shared = make_fx(lambda x, a, b: (x @ a, x @ b), tracing_mode="fake")(R(M, 32), R(32, 48), R(32, 48))
+    unshared = make_fx(lambda x, y, a, b: (x @ a, y @ b), tracing_mode="fake")(
+        R(M, 32), R(M, 32), R(32, 48), R(32, 48)
+    )
+    assert classify_pattern_graph(shared) == "horizontal"
+    assert classify_pattern_graph(unshared) is None
 
 
 def test_swiglu_join_reached_from_either_branch():
