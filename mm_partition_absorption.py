@@ -1,11 +1,11 @@
 """Absorb one unassigned mm/addmm/bmm into each unchanged normal BB partition.
 
-Partitions take a producer MM first (epilogue). Then still-unused pointwise
-partitions take a consumer MM through a multiplied operand (prologue); addmm
-bias-only preparation is excluded. Each original partition/MM is used once;
-augmented partitions do not grow. This is a disjoint assignment inside these
-two categories, not a size-limited window search. Horizontal benchmark windows
-are separate.
+Partitions take a producer MM first (epilogue). Then still-unused partitions
+without reduction/scan ops take a consumer MM through a multiplied operand
+(prologue); addmm bias-only preparation is excluded. Each original
+partition/MM is used once; augmented partitions do not grow. This is a disjoint
+assignment inside these two categories, not a size-limited window search.
+Horizontal benchmark windows are separate.
 """
 
 from __future__ import annotations
@@ -13,6 +13,8 @@ from __future__ import annotations
 from collections import defaultdict, deque
 
 import torch
+
+from matmul_partitioner import is_reduction_or_scan
 
 
 _MM = {torch.ops.aten.mm, torch.ops.aten.addmm, torch.ops.aten.bmm}
@@ -184,21 +186,20 @@ def absorb_matmuls(gm, *, excluded=()):
     graph = _PartitionGraph(edges)
     excluded = set(excluded)
     matmuls = [n for n in nodes if _is_mm(n) and n not in excluded]
-    pointwise = []
+    # A prologue is computed while the MM loads its operand, so each operand
+    # element may read only a few computable input positions:
+    #   eligible:   a[i,k] = table[ids[i], k] * 2           (gather + pointwise)
+    #   ineligible: a[i,k] = x[i,k] / (x[i,0] + ... + x[i,K-1])  (needs the whole row)
+    # The test is "no reduction/scan op", not "every op has Tag.pointwise": the
+    # tag rejects gathers, constants and views that Inductor lowers to Pointwise.
+    prologue_eligible = []
     for partition in partitions:
         real = [
             n
             for n in partition
             if n.op == "call_function" and n.target not in TRANSPARENT_OPS
         ]
-        pointwise.append(
-            bool(real)
-            and all(
-                isinstance(n.target, torch._ops.OpOverload)
-                and torch.Tag.pointwise in n.target.tags
-                for n in real
-            )
-        )
+        prologue_eligible.append(bool(real) and not any(map(is_reduction_or_scan, real)))
     candidates = {"prologue": defaultdict(list), "epilogue": defaultdict(list)}
     for mm in matmuls:
         if mm in membership:
@@ -206,7 +207,7 @@ def absorb_matmuls(gm, *, excluded=()):
         front = {membership[n] for n in _matmul_inputs(mm) if n in membership}
         back = {membership[n] for n in mm.users if n in membership}
         for pid in front:
-            if pointwise[pid]:
+            if prologue_eligible[pid]:
                 candidates["prologue"][pid].append(mm)
         for pid in back:
             candidates["epilogue"][pid].append(mm)
@@ -215,7 +216,7 @@ def absorb_matmuls(gm, *, excluded=()):
     # consumes mm (epilogue candidate) and feeds mm_1 (prologue candidate):
     #   prologue first: prologue [relu, mm_1]; mm gets no epilogue
     #   epilogue first: epilogue [mm, relu]; mm_1 can still take a prologue from
-    #                   another unused pointwise partition, e.g. sin(w2)
+    #                   another unused eligible partition, e.g. sin(w2)
     # Epilogue fusion is the more common case, so it gets the shared partition.
     for category in ("epilogue", "prologue"):
         for pid in sorted(candidates[category]):

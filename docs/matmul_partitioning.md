@@ -33,7 +33,7 @@ window of individual operations around an MM.
 
 1. In original partition order, a partition absorbs one available **producer**
    `aten.mm`, `aten.addmm`, or `aten.bmm`.
-2. Then, a still-unused **pure-pointwise partition** absorbs one available
+2. Then, a still-unused partition with **no reduction/scan op** absorbs one available
    **consumer** MM of those same types, only through one of its **two
    multiplied operands**. For `addmm(bias, mat1, mat2)`, a partition feeding
    only `bias` does not qualify as a prologue.
@@ -48,9 +48,22 @@ partition quotient after each absorption so successive merges cannot introduce
 a cycle. Preserve all escaping outputs and reject interleaved external reads or
 writes that conflict with mutations in the candidate.
 
-Pure pointwise means every nontransparent operation carries
-`torch.Tag.pointwise`. Normal BB's transparent view/metadata operations are
-allowed, but gather/scatter and reductions do not make a partition pointwise.
+No reduction/scan op means no node satisfies
+`matmul_partitioner.is_reduction_or_scan`: no op where one output element
+combines a whole axis, window or segment of an input. That covers reductions
+and norms (`sum`, `var_mean`, `native_layer_norm`, `prims.sum`), softmax,
+scans and prefix-sum compaction (`cumsum`, `nonzero`, `unique`), sorts
+(`sort`, `topk`, `median`), pooling, losses, and scatter-accumulation
+(`index_add`, `scatter_add`, `index_put(accumulate=True)`, upsample and
+embedding backwards). The list is `REDUCTION_SCAN_NAMES`, plus any overload
+tagged `torch.Tag.reduction` and not tagged `torch.Tag.pointwise`.
+
+Tags alone are not enough in either direction. `Tag.reduction` is missing on
+`aten.cumsum`, `aten._softmax`, `aten.native_layer_norm` and `prims.sum`.
+`Tag.pointwise` is missing on gathers (`aten.embedding`, `aten.index.Tensor`,
+`aten.gather`), constants (`aten.full`, `prims.iota`), views (`aten.split`,
+`aten._unsafe_view`) and copies (`aten.cat`, `aten.slice_scatter`), which
+Inductor lowers to Pointwise IR, so `embedding -> mm` is a prologue.
 
 ```text
 [before partition] -> MM -> [after partition]
@@ -61,9 +74,9 @@ allowed, but gather/scatter and reductions do not make a partition pointwise.
 # prologue for another consumer MM.
 ```
 
-Epilogue fusion is the more common case, so a pointwise partition between two
+Epilogue fusion is the more common case, so a partition between two
 MMs goes to the producer. `relu(x @ w1) @ w2` yields `epilogue [mm, relu]`;
-`mm_1` gets a prologue only from another unused pointwise partition, e.g.
+`mm_1` gets a prologue only from another unused eligible partition, e.g.
 `relu(x @ w1) @ sin(w2)` also yields `prologue [sin, mm_1]`.
 
 - **`prologue`**: the partition absorbed a consumer MM in step 2.

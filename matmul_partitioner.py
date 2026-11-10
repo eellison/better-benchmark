@@ -2,15 +2,17 @@
 
 Prologue/epilogue use unchanged normal BB partitions (mm_partition_absorption):
 1. A partition absorbs one available producer mm/addmm/bmm (epilogue).
-2. A still-unused pure-pointwise partition absorbs one available consumer
-   mm/addmm/bmm through a multiplied operand (prologue).
+2. A still-unused partition with no reduction/scan op (is_reduction_or_scan)
+   absorbs one available consumer mm/addmm/bmm through a multiplied operand
+   (prologue).
 3. Every original partition/MM is used once; augmented partitions do not grow.
 4. Only augmented partitions containing exactly one MM are extracted.
 
 Whole partitions and all escaping outputs are retained. Prologues contain no
-ordinary reduction; epilogues may contain any normal-BB-supported computation,
-without a reduction-count or region-size cap. No pointwise suffix is cut from
-a reduction partition. Their category is the source absorption direction.
+reduction, scan, sort, pooling or scatter-accumulation; epilogues may contain
+any normal-BB-supported computation, without a reduction-count or region-size
+cap. No pointwise suffix is cut from a reduction partition. Their category is
+the source absorption direction.
 
 Horizontal/horizontal_combine keep the independent 2..3-MM window search:
 shared operands, equal output shapes, and optional surrounding local work.
@@ -143,6 +145,211 @@ def is_reduction(node):
         node.op == "call_function"
         and torch.Tag.reduction in getattr(node.target, "tags", ())
     )
+
+
+# Ops where one output element combines a whole axis, window or segment of an
+# input. Elementwise and gather ops instead read a few computable positions:
+#   elementwise a[i,k] = x[i,k] * 2
+#   gather      a[i,k] = table[ids[i], k]
+#   reduction   s[i]   = x[i,0] + x[i,1] + ... + x[i,K-1]     (sum, var_mean, norms, losses)
+#   scan        c[i,k] = x[i,0] + ... + x[i,k]                  (cumsum, nonzero, unique)
+#   sort        y[i,:] = sorted(x[i,:])                         (sort, topk, median)
+#   window      y[i,j] = max(x[i,2j], x[i,2j+1])                (pooling)
+#   accumulate  y[ids[k], j] += x[k, j]                         (index_add, *_backward)
+# Tags alone cannot find them: Tag.reduction is missing on aten.cumsum,
+# aten._softmax, aten.native_layer_norm and prims.sum, while Tag.pointwise is
+# missing on gathers (aten.embedding, aten.index.Tensor), constants (aten.full,
+# prims.iota) and views (aten.split, aten._unsafe_view). Matmuls and convolutions
+# are not listed: normal BB partitions never contain them.
+REDUCTION_SCAN_NAMES = frozenset(
+    {
+        # Reductions over one or more axes.
+        "aten::all", "aten::any", "aten::amax", "aten::amin", "aten::aminmax",
+        "aten::_aminmax", "aten::argmax", "aten::argmin", "aten::count_nonzero",
+        "aten::max", "aten::min", "aten::mean", "aten::nanmean", "aten::sum",
+        "aten::nansum", "aten::sum_to_size", "aten::prod", "aten::std",
+        "aten::std_mean", "aten::var", "aten::var_mean", "aten::logsumexp",
+        "aten::special_logsumexp", "aten::trace", "aten::_sparse_sum",
+        "aten::_sparse_sum_backward", "aten::_sparse_csr_sum", "aten::_sparse_csr_prod",
+        "aten::_foreach_max", "aten::_foreach_norm", "aten::_foreach_powsum",
+        "aten::segment_reduce", "aten::_segment_reduce_backward",
+        "aten::_sparse_mm_reduce_impl", "aten::_sparse_mm_reduce_impl_backward",
+        "aten::bincount", "aten::histc", "aten::histogram", "aten::histogramdd",
+        "aten::_histogramdd_bin_edges", "aten::_histogramdd_from_bin_cts",
+        "aten::_histogramdd_from_bin_tensors", "aten::trapezoid", "aten::trapz",
+        "prims::sum", "prims::prod", "prims::xor_sum", "prims::amax",
+        "prims::amin", "prims::var", "prims::prepare_softmax_online",
+        # Norms and distances.
+        "aten::norm", "aten::native_norm", "aten::norm_except_dim",
+        "aten::linalg_vector_norm", "aten::linalg_matrix_norm", "aten::linalg_norm",
+        "aten::linalg__powsum", "aten::frobenius_norm", "aten::nuclear_norm",
+        "aten::renorm", "aten::renorm_", "aten::embedding_renorm",
+        "aten::embedding_renorm_", "aten::_weight_norm", "aten::_weight_norm_interface",
+        "aten::_weight_norm_interface_backward",
+        "aten::_weight_norm_differentiable_backward", "aten::dist", "aten::cdist",
+        "aten::_cdist_forward", "aten::_cdist_backward", "aten::_euclidean_dist",
+        "aten::pdist", "aten::_pdist_forward", "aten::_pdist_backward",
+        "aten::pairwise_distance",
+        # Softmax.
+        "aten::softmax", "aten::_softmax", "aten::special_softmax",
+        "aten::log_softmax", "aten::_log_softmax", "aten::special_log_softmax",
+        "aten::_safe_softmax", "aten::_masked_softmax", "aten::_sparse_softmax",
+        "aten::_sparse_log_softmax", "aten::_nested_tensor_softmax_with_shape",
+        "aten::_softmax_backward_data", "aten::_log_softmax_backward_data",
+        "aten::_masked_softmax_backward", "aten::_sparse_softmax_backward_data",
+        "aten::_sparse_log_softmax_backward_data",
+        # Normalizations that compute statistics.
+        "aten::layer_norm", "aten::native_layer_norm",
+        "aten::native_layer_norm_backward", "aten::group_norm",
+        "aten::native_group_norm", "aten::native_group_norm_backward",
+        "aten::instance_norm", "aten::rms_norm", "aten::_fused_rms_norm",
+        "aten::_fused_rms_norm_backward", "aten::batch_norm",
+        "aten::native_batch_norm", "aten::native_batch_norm_backward",
+        "aten::_native_batch_norm_legit", "aten::_native_batch_norm_legit_functional",
+        "aten::_batch_norm_with_update", "aten::_batch_norm_with_update_functional",
+        "aten::_batch_norm_impl_index", "aten::_batch_norm_impl_index_backward",
+        "aten::batch_norm_backward", "aten::batch_norm_stats",
+        "aten::batch_norm_gather_stats", "aten::batch_norm_gather_stats_with_counts",
+        "aten::batch_norm_backward_reduce", "aten::batch_norm_update_stats",
+        "aten::cudnn_batch_norm", "aten::cudnn_batch_norm_backward",
+        "aten::miopen_batch_norm", "aten::miopen_batch_norm_backward",
+        # Losses that reduce over the batch or classes.
+        "aten::binary_cross_entropy", "aten::binary_cross_entropy_with_logits",
+        "aten::cosine_embedding_loss", "aten::cross_entropy_loss", "aten::ctc_loss",
+        "aten::_ctc_loss", "aten::_ctc_loss_backward", "aten::_cudnn_ctc_loss",
+        "aten::miopen_ctc_loss", "aten::hinge_embedding_loss", "aten::huber_loss",
+        "aten::kl_div", "aten::l1_loss", "aten::margin_ranking_loss",
+        "aten::mse_loss", "aten::multi_margin_loss", "aten::multi_margin_loss_backward",
+        "aten::multilabel_margin_loss", "aten::multilabel_margin_loss_forward",
+        "aten::multilabel_margin_loss_backward", "aten::nll_loss", "aten::nll_loss_nd",
+        "aten::nll_loss_forward", "aten::nll_loss2d", "aten::nll_loss2d_forward",
+        "aten::poisson_nll_loss", "aten::smooth_l1_loss", "aten::soft_margin_loss",
+        "aten::triplet_margin_loss",
+        # Attention (contains softmax).
+        "aten::scaled_dot_product_attention",
+        "aten::_scaled_dot_product_attention_math",
+        "aten::_scaled_dot_product_flash_attention",
+        "aten::_scaled_dot_product_flash_attention_backward",
+        "aten::_scaled_dot_product_flash_attention_for_cpu",
+        "aten::_scaled_dot_product_flash_attention_for_cpu_backward",
+        "aten::_scaled_dot_product_efficient_attention",
+        "aten::_scaled_dot_product_efficient_attention_backward",
+        "aten::_scaled_dot_product_cudnn_attention",
+        "aten::_scaled_dot_product_cudnn_attention_backward",
+        "aten::_scaled_dot_product_fused_attention_overrideable",
+        "aten::_scaled_dot_product_fused_attention_overrideable_backward",
+        "aten::_flash_attention_forward", "aten::_flash_attention_backward",
+        "aten::_efficient_attention_forward", "aten::_efficient_attention_backward",
+        # Scans, including prefix-sum compaction.
+        "aten::cumsum", "aten::cumsum_", "aten::cumprod", "aten::cumprod_",
+        "aten::cumprod_backward", "aten::cummax", "aten::cummin",
+        "aten::_cummax_helper", "aten::_cummin_helper", "aten::cummaxmin_backward",
+        "aten::logcumsumexp", "aten::_logcumsumexp", "aten::cumulative_trapezoid",
+        "aten::masked_scatter", "aten::masked_scatter_", "aten::masked_scatter_backward",
+        "aten::masked_select", "aten::masked_select_backward", "aten::nonzero",
+        "aten::nonzero_static", "aten::nonzero_numpy", "aten::argwhere",
+        "aten::_unique", "aten::_unique2", "aten::unique_dim",
+        "aten::unique_consecutive", "aten::unique_dim_consecutive",
+        # Sorts and order statistics.
+        "aten::sort", "aten::argsort", "aten::msort", "aten::topk",
+        "aten::kthvalue", "aten::median", "aten::nanmedian", "aten::mode",
+        "aten::quantile", "aten::nanquantile",
+        # Pooling (window reductions) and their backwards.
+        "aten::avg_pool1d", "aten::avg_pool2d", "aten::avg_pool3d",
+        "aten::avg_pool2d_backward", "aten::avg_pool3d_backward",
+        "aten::adaptive_avg_pool1d", "aten::adaptive_avg_pool2d",
+        "aten::adaptive_avg_pool3d", "aten::_adaptive_avg_pool2d",
+        "aten::_adaptive_avg_pool3d", "aten::_adaptive_avg_pool2d_backward",
+        "aten::_adaptive_avg_pool3d_backward", "aten::adaptive_avg_pool3d_backward",
+        "aten::adaptive_max_pool1d", "aten::adaptive_max_pool2d",
+        "aten::adaptive_max_pool3d", "aten::adaptive_max_pool2d_backward",
+        "aten::adaptive_max_pool3d_backward", "aten::max_pool1d",
+        "aten::max_pool1d_with_indices", "aten::max_pool2d",
+        "aten::max_pool2d_backward", "aten::max_pool2d_with_indices",
+        "aten::max_pool2d_with_indices_backward", "aten::max_pool3d",
+        "aten::max_pool3d_with_indices", "aten::max_pool3d_with_indices_backward",
+        "aten::fractional_max_pool2d", "aten::fractional_max_pool2d_backward",
+        "aten::fractional_max_pool3d", "aten::fractional_max_pool3d_backward",
+        "aten::mkldnn_max_pool2d", "aten::mkldnn_max_pool2d_backward",
+        "aten::mkldnn_max_pool3d", "aten::mkldnn_max_pool3d_backward",
+        "aten::mkldnn_adaptive_avg_pool2d", "aten::mkldnn_adaptive_avg_pool2d_backward",
+        "aten::quantized_max_pool1d", "aten::quantized_max_pool2d",
+        "aten::quantized_max_pool3d", "prims::_low_memory_max_pool_with_offsets",
+        # Scatter-accumulation: several inputs are added into one output element.
+        "aten::index_add", "aten::index_add_", "aten::index_reduce",
+        "aten::index_reduce_", "aten::scatter_add", "aten::scatter_add_",
+        "aten::scatter_reduce", "aten::scatter_reduce_",
+        "aten::_unsafe_masked_index_put_accumulate", "aten::embedding_bag",
+        "aten::_embedding_bag", "aten::_embedding_bag_forward_only",
+        "aten::embedding_backward", "aten::embedding_dense_backward",
+        "aten::embedding_sparse_backward", "aten::_embedding_bag_backward",
+        "aten::_embedding_bag_dense_backward", "aten::_embedding_bag_sparse_backward",
+        "aten::_embedding_bag_per_sample_weights_backward", "aten::gather_backward",
+        "aten::_gather_sparse_backward", "aten::index_select_backward",
+        "aten::col2im", "aten::unfold_backward", "aten::upsample_nearest1d_backward",
+        "aten::upsample_nearest2d_backward", "aten::upsample_nearest3d_backward",
+        "aten::_upsample_nearest_exact1d_backward",
+        "aten::_upsample_nearest_exact2d_backward",
+        "aten::_upsample_nearest_exact3d_backward",
+        "aten::upsample_linear1d_backward", "aten::upsample_bilinear2d_backward",
+        "aten::upsample_bicubic2d_backward", "aten::upsample_trilinear3d_backward",
+        "aten::_upsample_bilinear2d_aa_backward", "aten::_upsample_bicubic2d_aa_backward",
+        "aten::_upsample_lanczos2d_aa_backward", "aten::grid_sampler_2d_backward",
+        "aten::grid_sampler_3d_backward", "aten::_grid_sampler_2d_cpu_fallback_backward",
+        "aten::cudnn_grid_sampler_backward", "aten::reflection_pad1d_backward",
+        "aten::reflection_pad2d_backward", "aten::reflection_pad3d_backward",
+        "aten::replication_pad1d_backward", "aten::replication_pad2d_backward",
+        "aten::replication_pad3d_backward",
+    }
+)
+
+# These accumulate only when asked: index_put(..., accumulate=True) adds into
+# y[ids[k]], while accumulate=False writes; scatter accumulates only with reduce=.
+_ACCUMULATE_FLAG_NAMES = frozenset(
+    {
+        "aten::index_put", "aten::index_put_", "aten::_index_put_impl",
+        "aten::_index_put_impl_", "aten::_unsafe_index_put",
+        "prims::_unsafe_index_put_", "aten::put", "aten::put_",
+    }
+)
+_SCATTER_NAMES = frozenset({"aten::scatter", "aten::scatter_"})
+_SCAN_HIGHER_ORDER_OPS = frozenset({"scan", "associative_scan"})
+
+
+def _schema_argument(node, name):
+    """Value of schema argument ``name`` for a call, or None if the op has none."""
+    for i, argument in enumerate(node.target._schema.arguments):
+        if argument.name == name:
+            if i < len(node.args) and not argument.kwarg_only:
+                return node.args[i]
+            return node.kwargs.get(name, argument.default_value)
+    return None
+
+
+def is_reduction_or_scan(node):
+    """Whether one output element of ``node`` combines a whole axis, window or segment.
+
+    The pointwise overloads of a listed op, such as aten.max.other, do not count.
+    """
+    if node.op != "call_function":
+        return False
+    target = node.target
+    if isinstance(target, torch._ops.HigherOrderOperator):
+        return target.name() in _SCAN_HIGHER_ORDER_OPS
+    if not isinstance(target, torch._ops.OpOverload):
+        return False
+    if torch.Tag.pointwise in target.tags:
+        return False
+    if torch.Tag.reduction in target.tags:
+        return True
+    name = op_name(node)
+    if name in REDUCTION_SCAN_NAMES:
+        return True
+    if name in _ACCUMULATE_FLAG_NAMES:
+        return bool(_schema_argument(node, "accumulate"))
+    if name in _SCATTER_NAMES:
+        return _schema_argument(node, "reduce") is not None
+    return False
 
 
 def tensor_shape(node):
@@ -742,7 +949,7 @@ def classify_pattern_graph(gm, *, expected=None):
     if expected in {"prologue", "epilogue"}:
         if len(mms) != 1 or op_name(mms[0]) not in {"aten::mm", "aten::addmm", "aten::bmm"}:
             return None
-        if expected == "prologue" and reductions:
+        if expected == "prologue" and any(map(is_reduction_or_scan, nodes)):
             return None
         if not any(n.op == "call_function" and n not in mms for n in nodes):
             return None

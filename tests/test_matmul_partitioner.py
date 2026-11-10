@@ -6,11 +6,13 @@ import pytest
 import torch
 from torch.fx.experimental.proxy_tensor import make_fx
 
-from capture_hook import partition_node_is_supported
+from capture_hook import get_fusion_partitions, partition_node_is_supported
 from matmul_partitioner import (
     classify_pattern_graph,
     get_matmul_regions,
     is_matmul,
+    is_reduction_or_scan,
+    op_name,
 )
 
 M = 64
@@ -144,9 +146,92 @@ def test_reduction_pointwise_partition_is_not_split_for_a_prologue():
     assert normal_regions(lambda x, w: ln(x) @ w, R(M, 32), R(32, 48)) == []
 
 
-def test_gather_partition_is_not_a_pointwise_prologue():
-    idx = torch.randint(0, 100, (M,))
-    assert normal_regions(lambda t, i, w: t[i] @ w, R(100, 32), idx, R(32, 48)) == []
+# Ops without torch.Tag.pointwise that Inductor still lowers to Pointwise IR.
+NO_POINTWISE_TAG_PROLOGUES = {
+    "index": ("aten::index", lambda t, i, w: t[i] @ w),
+    "embedding": ("aten::embedding", lambda t, i, w: torch.nn.functional.embedding(i, t) @ w),
+    "gather": ("aten::gather", lambda t, i, w: torch.gather(t[:M], 0, i[:, None].expand(M, 32)) @ w),
+    "full": ("aten::full", lambda t, i, w: (t[:M] + torch.full((M, 32), 2.0)) @ w),
+    "iota": ("prims::iota", lambda t, i, w: (t[:M] + torch.ops.prims.iota(
+        32, start=0, step=1, dtype=torch.int64, device=t.device, requires_grad=False)) @ w),
+    "split": ("aten::split", lambda t, i, w: torch.split(t[:M] * 2, 16, dim=1)[0] @ w[:16]),
+    "index_put": ("aten::index_put", lambda t, i, w: t.index_put((i,), torch.ones(M, 32))[:M] @ w),
+}
+
+
+@pytest.mark.parametrize("name", NO_POINTWISE_TAG_PROLOGUES)
+def test_partition_without_reduction_or_scan_is_a_prologue(name):
+    op, fn = NO_POINTWISE_TAG_PROLOGUES[name]
+    idx = torch.randint(0, 100 if name != "gather" else M, (M,))
+    (region,) = normal_regions(fn, R(100, 32), idx, R(32, 48))
+    assert region.category == "prologue"
+    assert any(op_name(n) == op for n in region)
+
+
+# Partition members that combine a whole axis or accumulate, without Tag.reduction.
+REDUCTION_OR_SCAN_PROLOGUES = {
+    "sort": ("aten::sort", lambda x, i, w: torch.sort(x, dim=1).values @ w),
+    "index_put_accumulate": (
+        "aten::index_put", lambda x, i, w: x.index_put((i,), torch.ones(M, 32), accumulate=True) @ w,
+    ),
+    "scatter_add": (
+        "aten::scatter_add", lambda x, i, w: x.scatter_add(0, i[:, None].expand(M, 32), torch.ones(M, 32)) @ w,
+    ),
+}
+
+
+@pytest.mark.parametrize("name", REDUCTION_OR_SCAN_PROLOGUES)
+def test_partition_with_untagged_reduction_or_scan_is_not_a_prologue(name):
+    op, fn = REDUCTION_OR_SCAN_PROLOGUES[name]
+    gm = make_fx(fn, tracing_mode="fake")(R(M, 32), torch.randint(0, M, (M,)), R(32, 48))
+    assert any(op_name(n) == op for p in get_fusion_partitions(gm) for n in p)
+    assert get_matmul_regions(gm, partition_node_is_supported, categories=("prologue", "epilogue")) == []
+
+
+def _call(target, *args, **kwargs):
+    graph = torch.fx.Graph()
+    placeholders = [graph.placeholder(f"a{i}") if a is None else a for i, a in enumerate(args)]
+    return graph.call_function(target, tuple(placeholders), kwargs)
+
+
+aten, prims = torch.ops.aten, torch.ops.prims
+
+
+@pytest.mark.parametrize(
+    "node, expected",
+    [
+        # Missing torch.Tag.reduction, still a reduction or scan.
+        (_call(aten.cumsum.default, None, 1), True),
+        (_call(aten._softmax.default, None, -1, False), True),
+        (_call(aten.native_layer_norm.default, None, [8], None, None, 1e-5), True),
+        (_call(prims.sum.default, None, [1]), True),
+        (_call(aten.sort.default, None, 1), True),
+        (_call(aten.avg_pool2d.default, None, [2, 2]), True),
+        (_call(aten.embedding_dense_backward.default, None, None, 10, -1, False), True),
+        # Accumulation depends on an argument.
+        (_call(aten.index_put.default, None, [None], None, True), True),
+        (_call(aten.index_put.default, None, [None], None), False),
+        (_call(aten.index_put.default, None, [None], None, accumulate=True), True),
+        (_call(aten.scatter.reduce, None, 0, None, None, reduce="add"), True),
+        (_call(aten.scatter.src, None, 0, None, None), False),
+        # Tagged reductions, and pointwise overloads of the same packet.
+        (_call(aten.max.dim, None, 1), True),
+        (_call(aten.max.other, None, None), False),
+        (_call(aten.var_mean.correction, None, [1]), True),
+        # Gathers, constants and views have no Tag.pointwise but are not reductions.
+        (_call(aten.embedding.default, None, None), False),
+        (_call(aten.index.Tensor, None, [None]), False),
+        (_call(aten.full.default, [4], 1.0), False),
+        (_call(prims.iota.default, 4, start=0, step=1, dtype=torch.int64,
+               device=torch.device("cpu"), requires_grad=False), False),
+        (_call(aten.split.Tensor, None, 2), False),
+        (_call(aten._unsafe_view.default, None, [4]), False),
+        (_call(aten.mm.default, None, None), False),
+    ],
+    ids=lambda v: str(v.target) if isinstance(v, torch.fx.Node) else str(v),
+)
+def test_is_reduction_or_scan(node, expected):
+    assert is_reduction_or_scan(node) is expected
 
 
 def test_epilogue_keeps_the_whole_reduction_partition():
