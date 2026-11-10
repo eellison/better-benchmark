@@ -20,7 +20,7 @@ Extracts fused kernel regions from real model compilations as lightweight, self-
 
 ## Corpus
 
-**1727 unique kernel patterns** deduplicated across 158 full models (torchbench, HuggingFace, timm; training + inference) plus 8 genai microbenchmarks. **358 full model graphs** retained.
+**1727 unique kernel patterns** deduplicated across 158 full models (torchbench, HuggingFace, timm; training + inference) plus 8 genai microbenchmarks. **364 full model graphs** retained.
 
 A full all-shapes sweep runs in ~36 min across ~5K points (1727 patterns) on 4x B200.
 
@@ -256,6 +256,8 @@ The same runner (workers, GPU lock, recovery) drives three workloads:
 | `--full-graphs` | whole captured model graphs (latency + input constraints) |
 
 Timing uses exclusive `flock` on a per-GPU lock file — multiple processes can compile in parallel, but only one times on a given GPU at once.
+
+Workers are started as `sys.executable -u -c ...`, with `-S` added when the parent runs with `-S` (no `site` import). Set `BETTER_BENCH_PYTHON_LAUNCHER` to start them with a different executable, e.g. a packaged launcher; unset or empty means `sys.executable`.
 
 </details>
 

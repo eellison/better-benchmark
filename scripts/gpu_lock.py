@@ -11,6 +11,7 @@ import contextlib
 import fcntl
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Iterator
@@ -20,14 +21,12 @@ DEFAULT_LOCK_DIR = Path(os.environ.get("COMPILE_UTILS_GPU_LOCK_DIR", "/tmp/compi
 STALE_LOCK_GRACE_S = float(os.environ.get("COMPILE_UTILS_GPU_LOCK_STALE_GRACE_S", "5"))
 
 
-KNOWN_DEVICE_KINDS = ("B200", "H200", "H100", "A100", "V100")
-
-
-def device_kind_from_name(name: str) -> str:
-    for token in KNOWN_DEVICE_KINDS:
-        if token.lower() in name.lower():
-            return token
-    return name.strip().replace(" ", "_") or "UNKNOWN"
+try:
+    from gpu_kind import KNOWN_DEVICE_KINDS, device_kind_from_name
+except ImportError:
+    # Run as a script from scripts/ without the package installed.
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+    from gpu_kind import KNOWN_DEVICE_KINDS, device_kind_from_name
 
 
 def discover_gpus() -> list[dict[str, str]]:
@@ -59,6 +58,9 @@ def matching_gpus(device_kind: str | None = None) -> list[dict[str, str]]:
     if not device_kind:
         return devices
     wanted = device_kind.lower()
+    if wanted in {kind.lower() for kind in KNOWN_DEVICE_KINDS}:
+        # Exact kind only: "b300" is a substring of "NVIDIA GB300".
+        return [device for device in devices if device["kind"].lower() == wanted]
     return [
         device
         for device in devices

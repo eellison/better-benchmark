@@ -21,6 +21,8 @@ from typing import Any
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 
+from gpu_kind import device_kind_from_name
+
 
 UNVERSIONED_REPRO_VERSION = 0
 # v3: default inputs load from the sibling shapes.json; the inline
@@ -975,19 +977,12 @@ def _save_perf(repro_file: str, hardware: str, shape_label: str, result: dict):
 
 
 def _detect_hardware() -> str:
-    """Auto-detect GPU hardware kind from nvidia-smi."""
+    """Auto-detect the process-visible CUDA hardware kind."""
     try:
-        import subprocess
-        out = subprocess.check_output(
-            ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
-            text=True, timeout=5
-        ).strip().split("\n")[0]
-        for kind in ("B200", "H200", "H100", "A100", "V100"):
-            if kind in out:
-                return kind
-        return out.replace(" ", "_")[:20]
+        name = torch.cuda.get_device_name(torch.cuda.current_device())
     except Exception:
         return "unknown"
+    return device_kind_from_name(name)
 
 
 def _bench_cudagraph_min_us(call_fn, inputs, n_warmup: int, n_rep: int) -> float:
