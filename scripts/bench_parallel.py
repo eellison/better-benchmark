@@ -247,6 +247,22 @@ def _expand_repro_shape_tasks(repros: list[Path]) -> list[str]:
     return tasks
 
 
+def _repro_shape_tasks_to_oracle_tasks(tasks: list[str]) -> list[str]:
+    """Convert exact repro.py shape tasks to the oracle worker's dir tasks."""
+    converted = []
+    for task in tasks:
+        repro_path_text, shape_label = _split_shape_task_key(task)
+        repro_path = Path(repro_path_text)
+        if repro_path.name != "repro.py":
+            raise ValueError(
+                f"benchmark-set task must resolve to repro.py, got {repro_path}"
+            )
+        if shape_label is None:
+            raise ValueError(f"benchmark-set task is not shape-qualified: {task}")
+        converted.append(_make_shape_task_key(str(repro_path.parent), shape_label))
+    return converted
+
+
 def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
     """Order sharded (path, shape) tasks so the biggest dirs drain first.
 
@@ -2761,8 +2777,6 @@ def main():
         parser.error("--oracles and --full-graphs are mutually exclusive")
     if args.oracles and args.update_perf:
         parser.error("--update-perf writes repro perf.json files and is not supported with --oracles")
-    if args.oracles and args.benchmark_set:
-        parser.error("--benchmark-set is not supported with --oracles")
 
     # Load benchmark set if specified
     benchmark_entries = None
@@ -2776,18 +2790,32 @@ def main():
         workload_kind = "repro"
     oracle_n_dirs = None
     if args.oracles:
-        oracle_paths = args.paths or [Path("repros/canonical")]
-        oracle_dirs = find_oracle_dirs(oracle_paths)
-        oracle_n_dirs = len(oracle_dirs)
         # Oracle bench is per shape point internally; --all-shapes is implied.
         args.all_shapes = True
-        # SHARDING: make the task unit a (dir, shape) point rather than a whole
-        # dir, so a big multi-shape dir (e.g. 469 shapes) spreads across all
-        # GPUs instead of pinning ONE worker that compiles them serially while
-        # peers idle. Order biggest-dirs-first so any residual tail is small.
-        # Each task still runs the numerics gate + fresh static compile per
-        # shape (commit 4ca6d532b); sharding is purely a scheduling change.
-        repros = _expand_oracle_shape_tasks(oracle_dirs)
+        if args.benchmark_set:
+            # The manifest's exact points, timed through their oracles.
+            benchmark_selection = load_benchmark_set_selection(args.benchmark_set)
+            benchmark_entries = benchmark_selection.n_entries
+            oracle_n_dirs = benchmark_selection.n_repros
+            repros = _repro_shape_tasks_to_oracle_tasks(list(benchmark_selection.tasks))
+            print(
+                f"Benchmark set: {args.benchmark_set.name} "
+                f"({benchmark_selection.n_points} oracle points, "
+                f"{benchmark_selection.n_repros} unique repros, "
+                f"{benchmark_entries} manifest entries)"
+            )
+        else:
+            oracle_paths = args.paths or [Path("repros/canonical")]
+            oracle_dirs = find_oracle_dirs(oracle_paths)
+            oracle_n_dirs = len(oracle_dirs)
+            # SHARDING: make the task unit a (dir, shape) point rather than a
+            # whole dir, so a big multi-shape dir (e.g. 469 shapes) spreads
+            # across all GPUs instead of pinning ONE worker that compiles them
+            # serially while peers idle. Order biggest-dirs-first so any
+            # residual tail is small. Each task still runs the numerics gate +
+            # fresh static compile per shape (commit 4ca6d532b); sharding is
+            # purely a scheduling change.
+            repros = _expand_oracle_shape_tasks(oracle_dirs)
         # Group a dir's shape tasks contiguously, but place dirs with the most
         # shapes first. The worker pool pulls round-robin, so emitting the big
         # dirs' points up front lets all workers chew them in parallel from the
