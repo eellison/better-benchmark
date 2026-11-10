@@ -462,6 +462,9 @@ def _generation_expr(spec: dict) -> str | None:
                 f"unique={int(gen['n_unique'])}, runs={int(gen['n_runs'])}, "
                 f"sorted={bool(gen['sorted'])})")
 
+    if gen.get("kind") == "sorted":
+        return "Sorted()"
+
     return None
 
 
