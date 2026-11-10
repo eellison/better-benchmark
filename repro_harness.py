@@ -663,6 +663,10 @@ def _positive_minimum(gen: dict) -> float:
     return minimum
 
 
+# Alias-group dtypes filled like unaliased inputs of the same dtype.
+_RANGED_ALIAS_DTYPES = (torch.int64, torch.int32, torch.int16, torch.int8, torch.bool)
+
+
 def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
     """Create a tensor containing random permutations of [0, size).
 
@@ -717,6 +721,12 @@ def make_inputs_from_config(config: dict) -> list:
             if dtype is not None and dtype.is_floating_point and nbytes % dtype.itemsize == 0:
                 # Raw byte noise viewed as a float dtype includes NaN/Inf bit patterns.
                 buf.view(dtype).normal_()
+            elif dtype in _RANGED_ALIAS_DTYPES and nbytes % dtype.itemsize == 0:
+                # The values an unaliased input of the dtype gets: [0, 100) or
+                # {0, 1}. Byte noise read as int64 spans ±9.2e18: out of range
+                # for e.g. LayoutLM's bbox columns (four int64 views of one
+                # [32, 512, 4] buffer) that index 1024-row position tables.
+                buf.view(dtype).random_(0, 2 if dtype == torch.bool else 100)
             else:
                 buf.random_(0, 255)  # bit-pattern noise; views reinterpret dtype
             group_storage[g] = buf

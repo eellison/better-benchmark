@@ -52,8 +52,8 @@ class GraphModule(torch.nn.Module):
     assert not list(tmp_path.glob(".mm_repro_build_*"))
     assert {p.name for p in output.iterdir()} == {"canonical", "report.json", "README.md"}
     calls = []
-    import mm_replay
-    monkeypatch.setattr(mm_replay, "benchmark_repro_safe", lambda *args: calls.append(args))
+    import repro_harness
+    monkeypatch.setattr(repro_harness, "benchmark_repro", lambda *args: calls.append(args))
     runpy.run_path(str(epilogue), run_name="__main__")
     assert len(calls) == 1 and calls[0][0] == str(epilogue)
     assert isinstance(calls[0][1], type)

@@ -51,7 +51,7 @@ from matmul_partitioner import (
     structure_key,
 )
 from mm_input_constraints import annotate_external_sqrt_inputs
-from mm_replay import execution_hash, make_inputs_from_config as make_normal_inputs
+from mm_replay import execution_hash
 from repro_harness import load_shape_configs, make_inputs_from_config
 from roundtrip_validation import fake_tensor_ctx
 
@@ -129,8 +129,7 @@ def validate_candidate(group, candidate, mapping, config):
     replay = {"inputs": [spec_from_compact(e) for e in entries]}
     if sizes:
         replay["alias_group_nbytes"] = sizes
-    factory = make_normal_inputs if group.get("normal") else make_inputs_from_config
-    vals = reference(*factory(replay))
+    vals = reference(*make_inputs_from_config(replay))
     result = list(tree_leaves(vals))
     source_nodes = [mapping[n] for n in outputs(reference)]
     expected = [n.meta["val"] for n in source_nodes]
@@ -149,8 +148,7 @@ def validate_candidate(group, candidate, mapping, config):
     return entries, sizes
 
 
-def write_repro(gm, path, pattern, *, normal=False):
-    adapter = "from mm_replay import make_inputs_from_config, benchmark_repro_safe as benchmark_repro\n" if normal else ""
+def write_repro(gm, path, pattern):
     code = torch.fx.GraphModule(
         gm, copy.deepcopy(gm.graph), class_name="Repro"
     ).print_readable(print_output=False)
@@ -163,7 +161,7 @@ import torch._inductor.inductor_prims
 from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
-{adapter}_repro_version = 3
+_repro_version = 3
 
 '''
     tail = """
@@ -228,7 +226,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
         directory = output / "canonical" / group["pattern_category"] / (prefix + "_" + group["hash"])
         directory.mkdir(parents=True)
         normal = group["pattern_category"] in {"prologue", "epilogue"}
-        write_repro(group["gm"], directory / "repro.py", group["hash"], normal=normal)
+        write_repro(group["gm"], directory / "repro.py", group["hash"])
         points = list(group["points"].values())
         write_json(directory / "shapes.json", {"points": points})
         meta = {

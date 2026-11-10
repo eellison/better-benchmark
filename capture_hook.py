@@ -1654,7 +1654,6 @@ class _CaptureState:
         shapes_config_line = render_signature(compact_inputs)
         if dry_run:
             return None, shapes_config_line, compact_inputs, alias_group_nbytes
-        adapter = "from mm_replay import make_inputs_from_config" if meta.get("normal_partition") else ""
 
         script = f'''"""
 Standalone repro captured via capture_hook.
@@ -1672,7 +1671,6 @@ from torch import device
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, make_inputs_from_config, load_shape_configs
-{adapter}
 
 _repro_version = {CURRENT_REPRO_VERSION}
 # Input shapes/strides/dtypes live in the sibling shapes.json (structured,

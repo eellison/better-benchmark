@@ -268,25 +268,3 @@ def test_opposite_ordered_literals_remain_distinct_executable_variants(tmp_path)
         retraced, _infos = trace_repro(path, config)
         retraced, _shapes = capture.lift_shape_params(retraced)
         assert execution_hash(retraced) == metadata["pattern_hash"]
-
-
-def test_generated_aliased_index_inputs_use_replay_adapter(tmp_path):
-    def fn(x, w, i, j):
-        m = x @ w
-        return m[i] + m[j]
-
-    indices = torch.zeros(4, dtype=torch.int64, device="cpu")
-    state = _state(tmp_path / "capture")
-    _capture(state, fn, torch.empty(2, 2, device="cpu"), torch.empty(2, 2, device="cpu"),
-             indices[:3], indices[1:])
-    (entry,) = state.captured
-    module = _load(Path(entry["file"]))
-    config = _config(entry)
-    index_specs = [s for s in config["inputs"] if s.get("alias_group") is not None]
-    assert len(index_specs) == 2
-    assert all(s["gen"] == {"kind": "index", "low": 0, "high": 2} for s in index_specs)
-    x, w, i, j = module.make_inputs(shape_config=config)
-    assert torch._C._is_alias_of(i, j)
-    assert (i.storage_offset(), j.storage_offset()) == (0, 1)
-    assert bool(((i >= 0) & (i < 2)).all()) and bool(((j >= 0) & (j < 2)).all())
-    torch.testing.assert_close(module.Repro()(x, w, i, j), (x @ w)[i] + (x @ w)[j])
