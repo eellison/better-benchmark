@@ -754,30 +754,19 @@ def canonicalize_for_hash(gm):
 _SCALAR_PATTERN_HASH_MODE = "scalar_literals_v1"
 
 
-def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
-    """Compute a DAG-structure signature for the graph.
+def canonical_node_order(gm, *, scalar_sensitive: bool = False) -> list:
+    """The nodes compute_dag_signature encodes, in its canonical order.
 
-    Encodes: for each node in topological order, its op name, which
-    predecessor nodes feed each argument (by index), and structural
-    literal args (list/tuple values like reduction dims, permute orders).
-
-    The legacy default omits scalar int/float constants. Matmul captures
-    opt into ``scalar_sensitive`` because their canonical repros retain
-    these literals: changing a scale or normalization epsilon changes the
-    function even when the tensor shapes and operator DAG stay the same.
-    This mode also preserves tuple getitem indices and numeric kwargs.
-
-    Op spellings are canonicalized via canonicalize_for_hash so that
-    trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
-    retrace view-spelling) hash identically.
-
-    Node ORDER is canonicalized too: nodes are renumbered by a
-    deterministic topological order (Kahn's algorithm, ready set
-    tie-broken by each node's structural encoding), so the textual
-    interleaving of INDEPENDENT ops (relu defined before vs after a
-    sibling sigmoid) never forks the hash. Placeholders keep their
-    original order — input position is semantics, not spelling.
+    Graphs with equal signatures correspond node by node in this order: the
+    i-th nodes have the same op and literals and read the same canonical
+    positions. Placeholders keep their original order, so this maps one
+    graph's inputs and outputs onto the other's even when their FX node
+    order or output order differs.
     """
+    return _canonical_hash_nodes(gm, scalar_sensitive)[0]
+
+
+def _canonical_hash_nodes(gm, scalar_sensitive):
     nodes, _resolve, _op_name = canonicalize_for_hash(gm)
     if scalar_sensitive:
         # Fake retracing creates projections for every result of tuple ops,
@@ -838,8 +827,36 @@ def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
         node_to_idx[chosen] = len(order)
         order.append(chosen)
         remaining.remove(chosen)
-    nodes = order
     # ---------------------------------------------------------------------
+    return order, _resolve, _op_name
+
+
+def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
+    """Compute a DAG-structure signature for the graph.
+
+    Encodes: for each node in topological order, its op name, which
+    predecessor nodes feed each argument (by index), and structural
+    literal args (list/tuple values like reduction dims, permute orders).
+
+    The legacy default omits scalar int/float constants. Matmul captures
+    opt into ``scalar_sensitive`` because their canonical repros retain
+    these literals: changing a scale or normalization epsilon changes the
+    function even when the tensor shapes and operator DAG stay the same.
+    This mode also preserves tuple getitem indices and numeric kwargs.
+
+    Op spellings are canonicalized via canonicalize_for_hash so that
+    trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
+    retrace view-spelling) hash identically.
+
+    Node ORDER is canonicalized too: nodes are renumbered by a
+    deterministic topological order (Kahn's algorithm, ready set
+    tie-broken by each node's structural encoding), so the textual
+    interleaving of INDEPENDENT ops (relu defined before vs after a
+    sibling sigmoid) never forks the hash. Placeholders keep their
+    original order — input position is semantics, not spelling.
+    """
+    nodes, _resolve, _op_name = _canonical_hash_nodes(gm, scalar_sensitive)
+    node_to_idx = {n: i for i, n in enumerate(nodes)}
 
     def _int_slots(target):
         """(positional indices, kwarg names) whose schema type is bare
@@ -1309,12 +1326,7 @@ def compute_partition_pattern(
         from mm_input_constraints import annotate_external_sqrt_inputs
 
         annotate_external_sqrt_inputs(sub_gm, placeholder_info)
-    normal = is_mm_region and comp.category in {"prologue", "epilogue"}
-    if normal:
-        from mm_replay import execution_hash
-        pattern_key = execution_hash(sub_gm)
-    else:
-        pattern_key = pattern_hash_for_subgraph(sub_gm, scalar_sensitive=is_mm_region)
+    pattern_key = pattern_hash_for_subgraph(sub_gm, scalar_sensitive=is_mm_region)
     return {
         "pattern_hash": pattern_key,
         "shape_hash": shape_hash_for_placeholders(placeholder_info),

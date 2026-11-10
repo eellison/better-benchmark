@@ -9,6 +9,7 @@ import torch
 from torch.fx.experimental.proxy_tensor import make_fx
 
 from capture_hook import (
+    canonical_node_order,
     compute_dag_signature,
     compute_partition_pattern,
     get_fusion_partitions,
@@ -93,8 +94,36 @@ def test_non_mm_pattern_hash_still_ignores_scalars():
 def test_mm_pattern_hash_survives_retracing():
     pattern = mm_pattern(trace(lambda x, w: ((x / 49.0) @ w).relu(), (4, 8), (8, 8)))
     retraced = trace(pattern["sub_gm"], (4, 8), (8, 8))
-    from mm_replay import execution_hash
-    assert execution_hash(retraced) == pattern["pattern_hash"]
+    assert pattern_hash_for_subgraph(retraced, scalar_sensitive=True) == pattern["pattern_hash"]
+
+
+def test_mm_pattern_hash_ignores_device_index_node_order_and_output_order():
+    def graph(*, device_index=0, swap=False, scale=3.0):
+        g = torch.fx.Graph()
+        x, w = g.placeholder("x"), g.placeholder("w")
+        mm = g.call_function(torch.ops.aten.mm.default, (x, w))
+        one = g.call_function(
+            torch.ops.aten.full.default, ([], 1.0),
+            {"dtype": torch.float32, "device": torch.device("cuda", device_index)},
+        )
+        if swap:
+            scaled = g.call_function(torch.ops.aten.mul.Tensor, (mm, scale))
+            shifted = g.call_function(torch.ops.aten.add.Tensor, (mm, one))
+            g.output((scaled, shifted))
+        else:
+            shifted = g.call_function(torch.ops.aten.add.Tensor, (mm, one))
+            scaled = g.call_function(torch.ops.aten.mul.Tensor, (mm, scale))
+            g.output((shifted, scaled))
+        return torch.fx.GraphModule({}, g)
+
+    key = pattern_hash_for_subgraph(graph(), scalar_sensitive=True)
+    assert pattern_hash_for_subgraph(graph(device_index=1), scalar_sensitive=True) == key
+    assert pattern_hash_for_subgraph(graph(swap=True), scalar_sensitive=True) == key
+    assert pattern_hash_for_subgraph(graph(scale=4.0), scalar_sensitive=True) != key
+    # The canonical order maps each node onto its counterpart, outputs included.
+    a, b = graph(), graph(swap=True)
+    pairs = zip(canonical_node_order(a, scalar_sensitive=True), canonical_node_order(b, scalar_sensitive=True))
+    assert all(x.name == y.name for x, y in pairs)
 
 
 def test_mm_pattern_hash_ignores_unused_tuple_projections():

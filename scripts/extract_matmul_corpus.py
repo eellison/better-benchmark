@@ -42,7 +42,6 @@ sys.path.insert(0, str(ROOT))
 POLICY_ID = hashlib.sha256(
     (ROOT / "matmul_partitioner.py").read_bytes()
     + (ROOT / "mm_partition_absorption.py").read_bytes()
-    + (ROOT / "mm_replay.py").read_bytes()
     + (ROOT / "capture_hook.py").read_bytes()
     + (ROOT / "mm_input_constraints.py").read_bytes()
     + (ROOT / "input_codec.py").read_bytes()

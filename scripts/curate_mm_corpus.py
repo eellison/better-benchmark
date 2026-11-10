@@ -42,7 +42,7 @@ from mm_corpus_io import (
 )
 from torch.utils._pytree import tree_leaves
 
-from capture_hook import lift_shape_params, pattern_hash_for_subgraph
+from capture_hook import canonical_node_order, lift_shape_params, pattern_hash_for_subgraph
 from input_codec import compact_from_spec, spec_from_compact
 from matmul_partitioner import (
     CATEGORIES,
@@ -51,7 +51,6 @@ from matmul_partitioner import (
     structure_key,
 )
 from mm_input_constraints import annotate_external_sqrt_inputs
-from mm_replay import execution_hash
 from repro_harness import load_shape_configs, make_inputs_from_config
 from roundtrip_validation import fake_tensor_ctx
 
@@ -225,13 +224,12 @@ def export_core(output, groups, rows, admitted_points, source_report):
         )
         directory = output / "canonical" / group["pattern_category"] / (prefix + "_" + group["hash"])
         directory.mkdir(parents=True)
-        normal = group["pattern_category"] in {"prologue", "epilogue"}
         write_repro(group["gm"], directory / "repro.py", group["hash"])
         points = list(group["points"].values())
         write_json(directory / "shapes.json", {"points": points})
         meta = {
             "pattern_hash": group["hash"],
-            "pattern_hash_mode": "ordered_fx_v1" if normal else "scalar_literals_v1",
+            "pattern_hash_mode": "scalar_literals_v1",
             "shape_hash_mode": "ordered_input_specs_v1",
             "kind": "matmul",
             "shape_points": len(points),
@@ -349,17 +347,27 @@ def curate_corpus(source: Path, output: Path):
                         (record["id"], "normalized region violates size/topology limits")
                     )
                 family = point["partition_metrics"]["normal_pattern_hash"] if normal else structure_key(gm)
-                # Find an equivalent group: same WL digest, an isomorphism of
-                # the DAGs, and the group's code replays this point exactly.
+                # Find an equivalent group whose code replays this point
+                # exactly: for horizontal windows, same WL digest and an
+                # isomorphism of the DAGs; for normal partitions, the same
+                # pattern hash, whose canonical node order maps the graphs
+                # onto each other whatever their FX node or output order.
                 graph = semantic_graph(gm)
                 digest = graph_digest(graph)
-                strict = execution_hash(gm) if normal else None
-                bucket = (category, family, strict) if normal else digest
+                pattern = pattern_hash_for_subgraph(gm, scalar_sensitive=True)
+                bucket = (category, family, pattern) if normal else digest
                 group = None
                 mapping = None
                 validation = None
                 for existing in buckets[bucket]:
-                    mapping = dict(zip(existing["gm"].graph.nodes, gm.graph.nodes)) if normal else match_graphs(existing["graph"], graph)
+                    mapping = (
+                        dict(zip(
+                            canonical_node_order(existing["gm"], scalar_sensitive=True),
+                            canonical_node_order(gm, scalar_sensitive=True),
+                        ))
+                        if normal
+                        else match_graphs(existing["graph"], graph)
+                    )
                     if mapping is None:
                         continue
                     validation = validate_candidate(
@@ -369,7 +377,6 @@ def curate_corpus(source: Path, output: Path):
                         group = existing
                         break
                 if group is None:
-                    pattern = strict if normal else pattern_hash_for_subgraph(gm, scalar_sensitive=True)
                     if any(g["hash"] == pattern and g["pattern_category"] == category for g in groups):
                         raise ValueError(("unmatched strict hash collision", category, pattern))
                     group = {

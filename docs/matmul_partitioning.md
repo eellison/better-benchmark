@@ -136,6 +136,12 @@ windows, not whole normal partitions.
 
 ## Curation and deduplication
 
+Every repro's pattern hash, its directory name, is the BB `compute_dag_signature`
+with scalar literals (`pattern_hash_for_subgraph(scalar_sensitive=True)`):
+device literals (`cuda:0` vs `cuda:1`), the order of independent nodes and the
+output order do not change it. Prologue/epilogue partitions with one pattern
+hash are matched node by node in its canonical order (`canonical_node_order`).
+
 For prologue/epilogue, a family is the normal BB structural pattern hash. These
 hashes intentionally ignore scalar literals. Curation keeps executable variants
 separate using scalar-sensitive graph matching, then selects the variant with

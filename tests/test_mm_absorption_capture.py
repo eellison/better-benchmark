@@ -22,7 +22,6 @@ import capture_hook as capture
 import full_graph_harness
 from input_codec import compact_from_spec, spec_from_compact
 from matmul_partitioner import MatmulLimits, get_matmul_regions, is_matmul
-from mm_replay import execution_hash
 from repro_harness import load_shape_configs
 from scripts.curate_mm_corpus import curate_corpus
 from scripts.extract_matmul_corpus import load_source_graph
@@ -224,7 +223,9 @@ class Source(torch.nn.Module):
     assert any(n.op == "get_attr" for n in gm.graph.nodes)
 
 
-def test_opposite_ordered_literals_remain_distinct_executable_variants(tmp_path):
+def test_output_order_variants_share_one_pattern(tmp_path):
+    # The same DAG with its outputs and independent nodes in the opposite
+    # order: one pattern hash, one capture, one curated repro.
     def first(x, w):
         t = (x @ w).relu()
         a, b = t + 1., t + 2.
@@ -239,11 +240,41 @@ def test_opposite_ordered_literals_remain_distinct_executable_variants(tmp_path)
     args = torch.empty(2, 2, device="cpu"), torch.empty(2, 2, device="cpu")
     selections = [_capture(state, fn, *args) for fn in (first, first, reversed_)]
     first_observed = selections[0][2][0]
-    reversed_observed = selections[2][2][0]
-    assert first_observed["normal_pattern_hash"] == reversed_observed["normal_pattern_hash"]
-    assert first_observed["pattern_hash"] != reversed_observed["pattern_hash"]
+    assert first_observed["pattern_hash"] == selections[2][2][0]["pattern_hash"]
+    assert len(state.captured) == 1
+
+    raw = _raw_stage(tmp_path / "raw", state, selections)
+    curated = tmp_path / "curated"
+    report = curate_corpus(raw, curated)
+    assert report["family_members"] == 1 and report["unique_repros"] == 1
+    (path,) = (curated / "canonical" / "epilogue").glob("*/repro.py")
+    (point,) = json.loads(path.with_name("shapes.json").read_text())["points"]
+    assert point["models"] == {"unit/infer/fixture": {"occurrences": 3}}
+    values = _load(path).Repro()(torch.zeros(2, 2, device="cpu"), torch.eye(2, device="cpu"))
+    for value, literal in zip(values, (1., 2.), strict=True):
+        torch.testing.assert_close(value, torch.full((2, 2), literal, device="cpu"))
+
+
+def test_literal_variants_remain_distinct_executable_variants(tmp_path):
+    def first(x, w):
+        t = (x @ w).relu()
+        a, b = t + 1., t + 2.
+        return a, b
+
+    def other(x, w):
+        t = (x @ w).relu()
+        a, b = t + 1., t + 3.
+        return a, b
+
+    state = _state(tmp_path / "capture")
+    args = torch.empty(2, 2, device="cpu"), torch.empty(2, 2, device="cpu")
+    selections = [_capture(state, fn, *args) for fn in (first, first, other)]
+    first_observed = selections[0][2][0]
+    other_observed = selections[2][2][0]
+    assert first_observed["normal_pattern_hash"] == other_observed["normal_pattern_hash"]
+    assert first_observed["pattern_hash"] != other_observed["pattern_hash"]
     assert len(state.captured) == 2
-    for entry, expected in zip(state.captured, ((1., 2.), (2., 1.)), strict=True):
+    for entry, expected in zip(state.captured, ((1., 2.), (1., 3.)), strict=True):
         module = _load(Path(entry["file"]))
         values = module.Repro()(torch.zeros(2, 2, device="cpu"), torch.eye(2, device="cpu"))
         assert isinstance(values, tuple) and len(values) == 2
@@ -261,10 +292,10 @@ def test_opposite_ordered_literals_remain_distinct_executable_variants(tmp_path)
     for value, literal in zip(values, (1., 2.), strict=True):
         torch.testing.assert_close(value, torch.full((2, 2), literal, device="cpu"))
     metadata = json.loads(path.with_name("meta.json").read_text())
-    assert metadata["pattern_hash_mode"] == "ordered_fx_v1"
+    assert metadata["pattern_hash_mode"] == "scalar_literals_v1"
     assert metadata["pattern_family"] == first_observed["normal_pattern_hash"]
     (config,) = load_shape_configs(str(path)).values()
     with FakeTensorMode(allow_non_fake_inputs=True):
         retraced, _infos = trace_repro(path, config)
         retraced, _shapes = capture.lift_shape_params(retraced)
-        assert execution_hash(retraced) == metadata["pattern_hash"]
+        assert capture.pattern_hash_for_subgraph(retraced, scalar_sensitive=True) == metadata["pattern_hash"]
