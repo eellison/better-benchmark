@@ -7,16 +7,16 @@
     "max_inputs": 12,
     "max_outputs": 4
   },
-  "policy_id": "f87829b30215d6a0",
+  "policy_id": "43db962a2ced2af7",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",
-    "dependency_id": "31c6df92dd7bff14",
+    "dependency_id": "e60da61c52dc988e",
     "raw_size_admitted_repros": 1387,
     "raw_shape_points": 2148
   },
   "unique_repros": 1179,
-  "shape_points": 1907,
+  "shape_points": 1904,
   "family_members": 1369,
   "deduplicated_repros": 190,
   "region_occurrences": 16802,
@@ -30,7 +30,7 @@
     },
     "epilogue": {
       "repros": 1102,
-      "shape_points": 1756,
+      "shape_points": 1753,
       "family_members": 1248
     },
     "horizontal": {

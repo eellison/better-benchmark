@@ -10,7 +10,7 @@ from matmul_partitioner import CATEGORIES, MatmulLimits
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
     "prologue": (16, 48),
-    "epilogue": (1102, 1756),
+    "epilogue": (1102, 1753),
     "horizontal": (56, 96),
     "horizontal_combine": (5, 7),
 }
@@ -33,7 +33,7 @@ def test_committed_snapshot_and_source_references():
         category = meta["pattern_category"]
         assert path.parent.parent.name == category and category in CATEGORIES
         normal = category in {"prologue", "epilogue"}
-        assert meta["pattern_hash_mode"] == ("ordered_fx_v1" if normal else "scalar_literals_v1")
+        assert meta["pattern_hash_mode"] == "scalar_literals_v1"
         assert path.parent.name.endswith("_" + meta["pattern_hash"])
         family = (category, meta["pattern_family"])
         assert family not in families
@@ -55,7 +55,7 @@ def test_committed_snapshot_and_source_references():
                 assert 2 <= metrics["mm"] <= limits.max_mm
                 assert metrics["contraction_depth"] == 1
     assert {category: tuple(counts) for category, counts in observed.items()} == EXPECTED
-    assert sum(len(p) for p in points.values()) == report["shape_points"] == 1907
+    assert sum(len(p) for p in points.values()) == report["shape_points"] == 1904
     assert len(families) == report["families"]
     assert report["family_members"] == sum(c["family_members"] for c in report["pattern_categories"].values())
     assert report["deduplicated_repros"] == report["family_members"] - len(families)
