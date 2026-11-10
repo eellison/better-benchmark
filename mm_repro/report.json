@@ -9,42 +9,35 @@
     "max_normal_compute": 31,
     "max_epilogue_extra_inputs": 4
   },
-  "policy_id": "8e3eb2e2449636a1",
+  "policy_id": "8baa075957599017",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",
-    "dependency_id": "47341d201dead5e8",
+    "dependency_id": "cf118e932474aed9",
     "raw_size_admitted_repros": 1038,
     "raw_shape_points": 1598
   },
-  "unique_repros": 498,
-  "shape_points": 945,
-  "family_members": 535,
-  "deduplicated_repros": 37,
+  "unique_repros": 535,
+  "shape_points": 1001,
   "region_occurrences": 9305,
   "sources": 364,
   "original_mm": 17575,
   "pattern_categories": {
     "prologue": {
       "repros": 25,
-      "shape_points": 36,
-      "family_members": 25
+      "shape_points": 36
     },
     "epilogue": {
       "repros": 412,
-      "shape_points": 801,
-      "family_members": 412
+      "shape_points": 801
     },
     "horizontal": {
-      "repros": 56,
-      "shape_points": 101,
-      "family_members": 93
+      "repros": 93,
+      "shape_points": 157
     },
     "horizontal_combine": {
       "repros": 5,
-      "shape_points": 7,
-      "family_members": 5
+      "shape_points": 7
     }
-  },
-  "families": 498
+  }
 }
