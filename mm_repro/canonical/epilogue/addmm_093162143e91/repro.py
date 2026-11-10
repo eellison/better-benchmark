@@ -7,7 +7,6 @@ import torch._inductor.inductor_prims
 from torch import device
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
-from mm_replay import make_inputs_from_config, benchmark_repro_safe as benchmark_repro
 _repro_version = 3
 
 class Repro(torch.nn.Module):

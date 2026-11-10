@@ -7,11 +7,11 @@
     "max_inputs": 12,
     "max_outputs": 4
   },
-  "policy_id": "130cb675d0514d95",
+  "policy_id": "f87829b30215d6a0",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",
-    "dependency_id": "edbc1b0ef6e21439",
+    "dependency_id": "31c6df92dd7bff14",
     "raw_size_admitted_repros": 1387,
     "raw_shape_points": 2148
   },
