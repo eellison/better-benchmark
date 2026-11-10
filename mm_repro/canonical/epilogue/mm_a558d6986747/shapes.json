@@ -1,0 +1,86 @@
+{
+  "points": [
+    {
+      "shape_hash": "b84634df",
+      "inputs": [
+        [
+          [
+            4096,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            84
+          ],
+          "i64"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 20,
+        "inputs": 4,
+        "outputs": 3,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

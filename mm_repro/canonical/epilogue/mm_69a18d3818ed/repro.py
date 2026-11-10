@@ -11,7 +11,7 @@ from mm_replay import make_inputs_from_config, benchmark_repro_safe as benchmark
 _repro_version = 3
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "bf16[1024, 8192]", arg1_1: "bf16[8192, 1024]", _shape_param_0):
+    def forward(self, arg0_1: "bf16[1024, 16384]", arg1_1: "bf16[16384, 1024]", _shape_param_0):
         # No stacktrace found for following nodes
         mm: "bf16[1024, 1024]" = torch.ops.aten.mm.default(arg0_1, arg1_1);  arg0_1 = arg1_1 = None
         unsqueeze: "bf16[1, 1024, 1024]" = torch.ops.aten.unsqueeze.default(mm, 0);  mm = None

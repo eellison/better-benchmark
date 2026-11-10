@@ -50,6 +50,9 @@
       "models": {
         "hf/infer/OPTForCausalLM": {
           "occurrences": 12
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
         }
       },
       "partition_metrics": {

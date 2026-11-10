@@ -1,0 +1,74 @@
+{
+  "points": [
+    {
+      "shape_hash": "5366a82b",
+      "inputs": [
+        [
+          [
+            50400
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            50400
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            1,
+            128
+          ],
+          "i64"
+        ],
+        [
+          [],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            50400
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            50400
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 16,
+        "nodes": 25,
+        "inputs": 5,
+        "outputs": 6,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

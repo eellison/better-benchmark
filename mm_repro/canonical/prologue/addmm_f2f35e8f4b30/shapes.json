@@ -1,31 +1,31 @@
 {
   "points": [
     {
-      "shape_hash": "c16c0295",
+      "shape_hash": "58de9720",
       "inputs": [
         [
           [
-            512,
-            197951
+            1,
+            16
           ],
           "f32"
         ],
         [
           [
-            512
+            1
           ],
           "bf16"
         ],
         [
           [
-            256,
-            197951
+            128,
+            16
           ],
           "bf16"
         ]
       ],
       "models": {
-        "torchbench/train/nvidia_deeprecommender": {
+        "torchbench/train/lennard_jones": {
           "occurrences": 1
         }
       },

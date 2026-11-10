@@ -3,7 +3,7 @@
   "pattern_hash_mode": "ordered_fx_v1",
   "shape_hash_mode": "ordered_input_specs_v1",
   "kind": "matmul",
-  "shape_points": 152,
+  "shape_points": 153,
   "pattern_category": "epilogue",
   "pattern_family": "565852d9913f"
 }

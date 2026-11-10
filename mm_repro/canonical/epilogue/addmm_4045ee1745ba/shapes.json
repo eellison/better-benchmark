@@ -146,7 +146,153 @@
       ],
       "models": {
         "hf/infer/BlenderbotForConditionalGeneration": {
-          "occurrences": 24
+          "occurrences": 50
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "352287b2",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/DistillGPT2": {
+          "occurrences": 5
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "2c2bb6fe",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            1024,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/GPT2ForSequenceClassification": {
+          "occurrences": 11
         }
       },
       "partition_metrics": {
@@ -225,7 +371,7 @@
       ],
       "models": {
         "hf/infer/M2M100ForConditionalGeneration": {
-          "occurrences": 12
+          "occurrences": 36
         }
       },
       "partition_metrics": {
@@ -396,6 +542,85 @@
       }
     },
     {
+      "shape_hash": "d23c7281",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/XGLMForCausalLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
       "shape_hash": "1cccf058",
       "inputs": [
         [
@@ -475,6 +700,164 @@
       }
     },
     {
+      "shape_hash": "ce4722d5",
+      "inputs": [
+        [
+          [
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            131072,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            144,
+            144
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              144
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            256,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            256,
+            144
+          ]
+        ],
+        [
+          "S",
+          [
+            131072,
+            144
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "192b4bd0",
+      "inputs": [
+        [
+          [
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            131072,
+            288
+          ],
+          "bf16"
+        ],
+        [
+          [
+            288,
+            144
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              288
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            256,
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            144
+          ],
+          "bf16"
+        ],
+        [
+          [
+            144
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            256,
+            144
+          ]
+        ],
+        [
+          "S",
+          [
+            131072,
+            144
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
       "shape_hash": "ab5daf2e",
       "inputs": [
         [
@@ -542,6 +925,243 @@
       "models": {
         "timm/infer/mobilevit_s": {
           "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "8395d7cd",
+      "inputs": [
+        [
+          [
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            64,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            64,
+            192
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            192
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "c30e00d2",
+      "inputs": [
+        [
+          [
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            240,
+            240
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              240
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            16,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            240
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            240
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 3
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "3876bd6c",
+      "inputs": [
+        [
+          [
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            480
+          ],
+          "bf16"
+        ],
+        [
+          [
+            480,
+            240
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              480
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            16,
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            240
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            240
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            240
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/mobilevit_s": {
+          "occurrences": 2
         }
       },
       "partition_metrics": {

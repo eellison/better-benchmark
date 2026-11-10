@@ -1,0 +1,180 @@
+{
+  "points": [
+    {
+      "shape_hash": "096e04f3",
+      "inputs": [
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            197951
+          ],
+          "bf16"
+        ],
+        [
+          [
+            197951,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              197951
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "f6db7b09",
+      "inputs": [
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "86b84a55",
+      "inputs": [
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "30313e37",
+      "inputs": [
+        [
+          [
+            197951
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            197951
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/train/nvidia_deeprecommender": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

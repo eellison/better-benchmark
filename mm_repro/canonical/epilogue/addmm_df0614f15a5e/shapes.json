@@ -72,6 +72,9 @@
       "models": {
         "timm/infer/mobilevit_s": {
           "occurrences": 2
+        },
+        "timm/train/mobilevit_s": {
+          "occurrences": 2
         }
       },
       "partition_metrics": {
@@ -154,6 +157,9 @@
       ],
       "models": {
         "timm/infer/mobilevit_s": {
+          "occurrences": 3
+        },
+        "timm/train/mobilevit_s": {
           "occurrences": 3
         }
       },

@@ -1,0 +1,138 @@
+{
+  "points": [
+    {
+      "shape_hash": "f3c93b7c",
+      "inputs": [
+        [
+          [
+            4096,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            8008
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            128
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              8008
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            8008
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            8008
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 26,
+        "inputs": 3,
+        "outputs": 5,
+        "contraction_depth": 4
+      }
+    },
+    {
+      "shape_hash": "a5fd399e",
+      "inputs": [
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            128112
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            128
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              128112
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            128112
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            128112
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 26,
+        "inputs": 3,
+        "outputs": 5,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

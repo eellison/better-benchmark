@@ -11,12 +11,12 @@ from mm_replay import make_inputs_from_config, benchmark_repro_safe as benchmark
 _repro_version = 3
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "f32[768, 768]", arg1_1: "bf16[8192, 768]"):
+    def forward(self, arg0_1: "f32[4096, 4096]", arg1_1: "bf16[128, 4096]"):
         # No stacktrace found for following nodes
-        convert_element_type: "bf16[768, 768]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.bfloat16);  arg0_1 = None
-        permute: "bf16[768, 768]" = torch.ops.aten.permute.default(convert_element_type, [1, 0]);  convert_element_type = None
-        mm: "bf16[8192, 768]" = torch.ops.aten.mm.default(arg1_1, permute);  arg1_1 = None
-        permute_1: "bf16[768, 768]" = torch.ops.aten.permute.default(permute, [1, 0]);  permute = None
+        convert_element_type: "bf16[4096, 4096]" = torch.ops.prims.convert_element_type.default(arg0_1, torch.bfloat16);  arg0_1 = None
+        permute: "bf16[4096, 4096]" = torch.ops.aten.permute.default(convert_element_type, [1, 0]);  convert_element_type = None
+        mm: "bf16[128, 4096]" = torch.ops.aten.mm.default(arg1_1, permute);  arg1_1 = None
+        permute_1: "bf16[4096, 4096]" = torch.ops.aten.permute.default(permute, [1, 0]);  permute = None
         return (mm, permute_1)
 
 def make_inputs(shape_config=None):

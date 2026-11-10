@@ -1,0 +1,226 @@
+{
+  "points": [
+    {
+      "shape_hash": "afaa25d2",
+      "inputs": [
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            10240
+          ],
+          "bf16"
+        ],
+        [
+          [
+            10240,
+            2560
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              10240
+            ]
+          }
+        ],
+        [
+          [
+            3
+          ],
+          "i64"
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 9,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "af01fa60",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            3
+          ],
+          "i64"
+        ],
+        [
+          [
+            64,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 9,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "130ec1ef",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            3
+          ],
+          "i64"
+        ],
+        [
+          [
+            32,
+            128,
+            1024
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 9,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

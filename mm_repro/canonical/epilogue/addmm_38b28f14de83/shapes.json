@@ -1,0 +1,320 @@
+{
+  "points": [
+    {
+      "shape_hash": "c036f856",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25344,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            198,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            25344,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 4,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "7dd2c632",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25344,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              3072
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            198,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            198,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            25344,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 11
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 4,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "3b23cbd1",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            256,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            256,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 4,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "ffaef58c",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              3072
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            256,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            256,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 11
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 10,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 4,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}
