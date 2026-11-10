@@ -1,0 +1,9 @@
+{
+  "pattern_hash": "c09bce41d20b",
+  "pattern_hash_mode": "dag_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "shape_points": 1,
+  "pattern_category": "horizontal",
+  "pattern_family": "ab6f32b254d5"
+}

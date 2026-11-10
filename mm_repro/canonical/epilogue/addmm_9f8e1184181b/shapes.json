@@ -1,0 +1,329 @@
+{
+  "points": [
+    {
+      "shape_hash": "9f823319",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/BertForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/LayoutLMForMaskedLM": {
+          "occurrences": 12
+        },
+        "hf/infer/RobertaForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/infer/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "34bd5e6f",
+      "inputs": [
+        [
+          [
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536,
+            1536
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1536
+            ]
+          }
+        ],
+        [
+          [
+            8,
+            512,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            1536
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            1536
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/DebertaV2ForMaskedLM": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "ed1660e6",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            256,
+            128,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/DistilBertForMaskedLM": {
+          "occurrences": 6
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "f523da1d",
+      "inputs": [
+        [
+          [
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              256
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            512,
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            512,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/ElectraForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

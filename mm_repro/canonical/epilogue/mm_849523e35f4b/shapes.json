@@ -1,0 +1,62 @@
+{
+  "points": [
+    {
+      "shape_hash": "a8cf4064",
+      "inputs": [
+        [
+          [
+            4096,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            50264
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            128
+          ],
+          "i64"
+        ],
+        [
+          [],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            50257
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            50257
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 16,
+        "nodes": 27,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

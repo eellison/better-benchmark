@@ -1,0 +1,150 @@
+{
+  "points": [
+    {
+      "shape_hash": "d2476573",
+      "inputs": [
+        [
+          [
+            30000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            30000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              128
+            ]
+          }
+        ],
+        [
+          [
+            8,
+            512
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              30000
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            30000
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            30000
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/AlbertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 26,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 4
+      }
+    },
+    {
+      "shape_hash": "9ffe7420",
+      "inputs": [
+        [
+          [
+            32000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            32000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            16,
+            512
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              32000
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            16,
+            512,
+            32000
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            32000
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 26,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

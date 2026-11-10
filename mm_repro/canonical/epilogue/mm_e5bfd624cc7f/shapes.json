@@ -1,0 +1,379 @@
+{
+  "points": [
+    {
+      "shape_hash": "383108ed",
+      "inputs": [
+        [
+          [
+            128,
+            50400
+          ],
+          "bf16"
+        ],
+        [
+          [
+            50400,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 14,
+        "nodes": 22,
+        "inputs": 5,
+        "outputs": 6,
+        "contraction_depth": 3
+      }
+    },
+    {
+      "shape_hash": "98ba6575",
+      "inputs": [
+        [
+          [
+            128,
+            8
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            4096
+          ],
+          "f32"
+        ],
+        [
+          [
+            1,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            1,
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTJForQuestionAnswering": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 14,
+        "nodes": 22,
+        "inputs": 5,
+        "outputs": 6,
+        "contraction_depth": 3
+      }
+    },
+    {
+      "shape_hash": "41054424",
+      "inputs": [
+        [
+          [
+            4096,
+            50264
+          ],
+          "bf16"
+        ],
+        [
+          [
+            50264,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 14,
+        "nodes": 22,
+        "inputs": 5,
+        "outputs": 6,
+        "contraction_depth": 3
+      }
+    },
+    {
+      "shape_hash": "0328bb48",
+      "inputs": [
+        [
+          [
+            4096,
+            2
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            2048
+          ],
+          "f32"
+        ],
+        [
+          [
+            32,
+            128,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            2048
+          ]
+        ],
+        [
+          "S",
+          [
+            2048
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/GPTNeoForSequenceClassification": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 14,
+        "nodes": 22,
+        "inputs": 5,
+        "outputs": 6,
+        "contraction_depth": 3
+      }
+    },
+    {
+      "shape_hash": "3d398335",
+      "inputs": [
+        [
+          [
+            32768,
+            1536
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1536,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            256,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            128,
+            256,
+            1
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            128,
+            256,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/vit_base_patch16_siglip_256": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 14,
+        "nodes": 22,
+        "inputs": 5,
+        "outputs": 6,
+        "contraction_depth": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,393 @@
+{
+  "points": [
+    {
+      "shape_hash": "181862b8",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            8,
+            512,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            512,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/AlbertForMaskedLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "5f8710c6",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            8,
+            1024,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/BartForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "3bb69871",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            3072,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            512,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/DistillGPT2": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "ddf15e55",
+      "inputs": [
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            16,
+            1024,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            16,
+            1024,
+            768
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            768
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/PLBartForCausalLM": {
+          "occurrences": 6
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "61255a0c",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            256,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            64,
+            256,
+            1024
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/TrOCRForCausalLM": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 15,
+        "inputs": 6,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

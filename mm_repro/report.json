@@ -5,38 +5,40 @@
     "max_nodes": 48,
     "max_compute": 32,
     "max_inputs": 12,
-    "max_outputs": 4
+    "max_outputs": 4,
+    "max_normal_compute": 31,
+    "max_epilogue_extra_inputs": 4
   },
-  "policy_id": "43db962a2ced2af7",
+  "policy_id": "8e3eb2e2449636a1",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",
-    "dependency_id": "e60da61c52dc988e",
-    "raw_size_admitted_repros": 1387,
-    "raw_shape_points": 2148
+    "dependency_id": "47341d201dead5e8",
+    "raw_size_admitted_repros": 1038,
+    "raw_shape_points": 1598
   },
-  "unique_repros": 1179,
-  "shape_points": 1904,
-  "family_members": 1369,
-  "deduplicated_repros": 190,
-  "region_occurrences": 16802,
+  "unique_repros": 498,
+  "shape_points": 945,
+  "family_members": 535,
+  "deduplicated_repros": 37,
+  "region_occurrences": 9305,
   "sources": 364,
   "original_mm": 17575,
   "pattern_categories": {
     "prologue": {
-      "repros": 16,
-      "shape_points": 48,
-      "family_members": 16
+      "repros": 25,
+      "shape_points": 36,
+      "family_members": 25
     },
     "epilogue": {
-      "repros": 1102,
-      "shape_points": 1753,
-      "family_members": 1248
+      "repros": 412,
+      "shape_points": 801,
+      "family_members": 412
     },
     "horizontal": {
       "repros": 56,
-      "shape_points": 96,
-      "family_members": 100
+      "shape_points": 101,
+      "family_members": 93
     },
     "horizontal_combine": {
       "repros": 5,
@@ -44,5 +46,5 @@
       "family_members": 5
     }
   },
-  "families": 1179
+  "families": 498
 }
