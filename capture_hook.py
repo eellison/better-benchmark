@@ -838,11 +838,10 @@ def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
     predecessor nodes feed each argument (by index), and structural
     literal args (list/tuple values like reduction dims, permute orders).
 
-    The legacy default omits scalar int/float constants. Matmul captures
-    opt into ``scalar_sensitive`` because their canonical repros retain
-    these literals: changing a scale or normalization epsilon changes the
-    function even when the tensor shapes and operator DAG stay the same.
-    This mode also preserves tuple getitem indices and numeric kwargs.
+    The default omits scalar int/float constants and numeric kwargs; every
+    corpus (BB and MM) hashes this way.
+    ``scalar_sensitive`` keeps them, for callers that must tell literal
+    variants apart.
 
     Op spellings are canonicalized via canonicalize_for_hash so that
     trace-equivalent graphs (saved post-grad reshape-spelling vs make_fx
@@ -993,9 +992,8 @@ def compute_dag_signature(gm, *, scalar_sensitive: bool = False) -> list:
 def pattern_hash_for_subgraph(sub_gm, *, scalar_sensitive: bool = False) -> str:
     """Content-addressed pattern hash: ops + wiring, ignoring tensor shapes.
 
-    ``scalar_sensitive=True`` preserves the numeric literals baked into MM
-    repros. The default keeps the legacy non-MM pattern identities.
-    This is the 12-hex hash in repros/canonical/<family>_<hash> dir names.
+    ``scalar_sensitive=True`` also encodes scalar literals; the corpora use the
+    default. This is the 12-hex hash in repros/canonical/<family>_<hash> dir names.
     """
     dag_signature = compute_dag_signature(sub_gm, scalar_sensitive=scalar_sensitive)
     return hashlib.md5(json.dumps(dag_signature).encode()).hexdigest()[:12]
@@ -1326,14 +1324,14 @@ def compute_partition_pattern(
         from mm_input_constraints import annotate_external_sqrt_inputs
 
         annotate_external_sqrt_inputs(sub_gm, placeholder_info)
-    pattern_key = pattern_hash_for_subgraph(sub_gm, scalar_sensitive=is_mm_region)
+    pattern_key = pattern_hash_for_subgraph(sub_gm)
     return {
         "pattern_hash": pattern_key,
         "shape_hash": shape_hash_for_placeholders(placeholder_info),
         "sub_gm": sub_gm,
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
-        **({"normal_pattern_hash": pattern_hash_for_subgraph(sub_gm)}
+        **({"normal_pattern_hash": pattern_key}
            if is_mm_region and comp.category in {"prologue", "epilogue"} else {}),
     }
 

@@ -62,7 +62,7 @@ def main():
                         assert classify_pattern_graph(gm, expected=category if normal else None) == category
                         if normal:
                             assert sum(is_matmul(n) for n in gm.graph.nodes) == 1
-                        assert pattern_hash_for_subgraph(gm, scalar_sensitive=True) == meta["pattern_hash"]
+                        assert pattern_hash_for_subgraph(gm) == meta["pattern_hash"]
                         if category == "prologue":
                             # Bias-only work is not a matmul-input prologue.
                             mm = next(n for n in gm.graph.nodes if is_matmul(n))

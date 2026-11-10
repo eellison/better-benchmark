@@ -33,14 +33,30 @@ window of individual operations around an MM.
 
 1. In original partition order, a partition absorbs one available **producer**
    `aten.mm`, `aten.addmm`, or `aten.bmm`.
-2. Then, a still-unused partition with **no reduction/scan op** absorbs one available
-   **consumer** MM of those same types, only through one of its **two
-   multiplied operands**. For `addmm(bias, mat1, mat2)`, a partition feeding
-   only `bias` does not qualify as a prologue.
+2. Then, a still-unused partition with **no scan and at most one reduction**
+   absorbs one available **consumer** MM of those same types, only through one
+   of its **two multiplied operands**. A reduction must normalize rows of the
+   MM's A operand along K (see below). For `addmm(bias, mat1, mat2)`, a
+   partition feeding only `bias` does not qualify as a prologue.
 3. An original MM and partition can each be used only once. An augmented
    partition cannot absorb another MM or partition.
 4. Extract only augmented partitions containing exactly one MM. Unabsorbed
    standalone MMs are not included in these categories.
+5. Trim each augmented partition to the outputs that depend on its MM (the MM
+   itself or its descendants) and the nodes they need. Values that do not
+   depend on the MM, such as a mask that is also a model output or an operand
+   intermediate saved for backward, are not MM fusion.
+6. Keep the partition only if `0 < non-MM compute <= max_normal_compute` (31)
+   after trimming, counting real computation (`is_computation`; views, casts
+   and other scaffolding are free). 0 is a bare MM; larger partitions are
+   mostly work around an incidental MM.
+7. Keep an epilogue only if it reads at most `max_epilogue_extra_inputs` (4)
+   extra tensors: inputs other than the MM operands (A, B and addmm's bias,
+   followed back through views/casts) and the dropout seed buffer. A residual
+   plus LayerNorm's weight and bias is 3. Prologues have no input bound: their
+   A operand is computed inside the partition, so embedding tables and ids
+   would count. These are the only size bounds on these two categories; the
+   other `MatmulLimits` fields bound horizontal windows.
 
 Available means not already absorbed. If a partition has multiple eligible MMs,
 try them in FX order and take the first safe candidate. Check the updated
@@ -48,7 +64,18 @@ partition quotient after each absorption so successive merges cannot introduce
 a cycle. Preserve all escaping outputs and reject interleaved external reads or
 writes that conflict with mutations in the candidate.
 
-No reduction/scan op means no node satisfies
+A prologue partition may contain one reduction, and only if it normalizes rows
+of A along K: it reduces the trailing dims of an operand-sized tensor in runs
+that tile K (the whole row, or per-head groups), and reaches A with no permute
+in between. That is RMSNorm/LayerNorm before a linear, per-head q/k norm, or a
+K-block quant amax. Kernels fuse it by reducing each loaded A row or head
+(when a tile holds the run) or by collecting the row statistics alongside the
+mainloop and applying the scale after the MM,
+`(x / rms) @ W = (x @ W) / rms` (DeepGEMM `tf32_hc_prenorm_gemm`). Column
+statistics (over M), B-operand norms, two reductions and scans are not
+prologues.
+
+Reductions and scans are the nodes satisfying
 `matmul_partitioner.is_reduction_or_scan`: no op where one output element
 combines a whole axis, window or segment of an input. That covers reductions
 and norms (`sum`, `var_mean`, `native_layer_norm`, `prims.sum`), softmax,
@@ -83,9 +110,8 @@ MMs goes to the producer. `relu(x @ w1) @ w2` yields `epilogue [mm, relu]`;
 - **`epilogue`**: the partition absorbed a producer MM in step 1.
 
 Epilogues may contain any computation admitted by normal BB, including multiple
-reductions. There is no reduction-count or window-size cap
-for these two categories. A `[reduction -> pointwise]` front partition is not
-cut into a pointwise suffix for a prologue.
+reductions; only the compute bound of step 6 applies. A front partition with
+another kind of reduction is not cut into a pointwise suffix for a prologue.
 
 Absorption direction is recorded from the source graph; the prologue/epilogue
 label is not inferred from standalone topology alone.
@@ -137,17 +163,21 @@ windows, not whole normal partitions.
 ## Curation and deduplication
 
 Every repro's pattern hash, its directory name, is the BB `compute_dag_signature`
-with scalar literals (`pattern_hash_for_subgraph(scalar_sensitive=True)`):
-device literals (`cuda:0` vs `cuda:1`), the order of independent nodes and the
-output order do not change it. Prologue/epilogue partitions with one pattern
-hash are matched node by node in its canonical order (`canonical_node_order`).
+without scalar literals (`pattern_hash_for_subgraph`, `dag_v1` in meta.json),
+exactly as for repros/: scalar literals (a scale or eps, numeric kwargs),
+device literals (`cuda:0` vs `cuda:1`), the order of
+independent nodes and the output order do not change it. Which result of a
+tuple op is read, and literals that change shapes such as slice bounds (SymInt
+arguments), still do.
 
-For prologue/epilogue, a family is the normal BB structural pattern hash. These
-hashes intentionally ignore scalar literals. Curation keeps executable variants
-separate using scalar-sensitive graph matching, then selects the variant with
-the most source occurrences to represent each family. Only that variant's
-compatible input points are exported; different literal values are not silently
-replayed with the representative's code. Whole-partition views/casts are kept.
+Partitions with one pattern hash are one repro: as in repros/, the first
+captured partition's code is kept and every input shape becomes a shape point
+of it, so literal variants run with that code's literals. Curation matches
+partitions with one pattern hash node by node in its canonical order
+(`canonical_node_order`). For prologue/epilogue, the family is the same pattern
+hash. Whole-partition views/casts are kept, but every category reads each
+`inductor_lookup_seed` from slot 0: the slot (which dropout of the graph) is a
+bare-int argument the hash keeps, yet it does not change the kernel.
 
 Horizontal categories use the existing metadata-proven normalization and
 compute-DAG-plus-dtypes `structure_key` families. Scalar-sensitive matching,
@@ -158,7 +188,7 @@ Each `canonical/<category>/<mm ops>_<hash>/` contains:
 
 - `repro.py`: executable `Repro` plus input and benchmark adapters.
 - `shapes.json`: input points, model occurrences and partition metrics.
-- `meta.json`: scalar-sensitive pattern hash, family and category.
+- `meta.json`: pattern hash, family and category.
 
 The validation command reloads generated files and generates every input point.
 Counts describe benchmark candidates, not proof that a backend can fuse all of

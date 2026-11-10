@@ -1,4 +1,4 @@
-"""MM pattern hashes include scalar literals; other pattern hashes do not."""
+"""MM pattern hashes ignore scalar literals, like every other pattern hash."""
 
 from __future__ import annotations
 
@@ -59,16 +59,18 @@ SCALAR_PAIRS = {
         lambda b, x, w: torch.addmm(b, x, w, beta=3.0).relu(),
         [(8,), (4, 8), (8, 8)],
     ),
-    "tuple_index": (scale_by_stat(0), scale_by_stat(1), [(4, 8), (8, 8)]),
 }
 
 
 @pytest.mark.parametrize("name", SCALAR_PAIRS)
-def test_mm_pattern_hash_changes_with_a_scalar_literal(name):
+def test_mm_pattern_hash_ignores_a_scalar_literal(name):
     first_fn, second_fn, shapes = SCALAR_PAIRS[name]
     first = mm_pattern(trace(first_fn, *shapes))
     second = mm_pattern(trace(second_fn, *shapes))
-    assert first["pattern_hash"] != second["pattern_hash"]
+    assert first["pattern_hash"] == second["pattern_hash"]
+    # The scalar-sensitive mode, which the corpora do not use, tells them apart.
+    assert pattern_hash_for_subgraph(first["sub_gm"], scalar_sensitive=True) != (
+        pattern_hash_for_subgraph(second["sub_gm"], scalar_sensitive=True))
     assert first["shape_hash"] == second["shape_hash"]
 
 
@@ -91,13 +93,20 @@ def test_non_mm_pattern_hash_still_ignores_scalars():
         assert pattern["pattern_hash"] == pattern_hash_for_subgraph(gm)
 
 
+def test_mm_pattern_hash_keeps_which_tuple_result_is_read():
+    # Edges record the producer's output index: var vs mean of one var_mean.
+    first = mm_pattern(trace(scale_by_stat(0), (4, 8), (8, 8)))
+    second = mm_pattern(trace(scale_by_stat(1), (4, 8), (8, 8)))
+    assert first["pattern_hash"] != second["pattern_hash"]
+
+
 def test_mm_pattern_hash_survives_retracing():
     pattern = mm_pattern(trace(lambda x, w: ((x / 49.0) @ w).relu(), (4, 8), (8, 8)))
     retraced = trace(pattern["sub_gm"], (4, 8), (8, 8))
-    assert pattern_hash_for_subgraph(retraced, scalar_sensitive=True) == pattern["pattern_hash"]
+    assert pattern_hash_for_subgraph(retraced) == pattern["pattern_hash"]
 
 
-def test_mm_pattern_hash_ignores_device_index_node_order_and_output_order():
+def test_mm_pattern_hash_ignores_device_index_node_order_output_order_and_literals():
     def graph(*, device_index=0, swap=False, scale=3.0):
         g = torch.fx.Graph()
         x, w = g.placeholder("x"), g.placeholder("w")
@@ -116,13 +125,13 @@ def test_mm_pattern_hash_ignores_device_index_node_order_and_output_order():
             g.output((shifted, scaled))
         return torch.fx.GraphModule({}, g)
 
-    key = pattern_hash_for_subgraph(graph(), scalar_sensitive=True)
-    assert pattern_hash_for_subgraph(graph(device_index=1), scalar_sensitive=True) == key
-    assert pattern_hash_for_subgraph(graph(swap=True), scalar_sensitive=True) == key
-    assert pattern_hash_for_subgraph(graph(scale=4.0), scalar_sensitive=True) != key
+    key = pattern_hash_for_subgraph(graph())
+    assert pattern_hash_for_subgraph(graph(device_index=1)) == key
+    assert pattern_hash_for_subgraph(graph(swap=True)) == key
+    assert pattern_hash_for_subgraph(graph(scale=4.0)) == key
     # The canonical order maps each node onto its counterpart, outputs included.
     a, b = graph(), graph(swap=True)
-    pairs = zip(canonical_node_order(a, scalar_sensitive=True), canonical_node_order(b, scalar_sensitive=True))
+    pairs = zip(canonical_node_order(a), canonical_node_order(b))
     assert all(x.name == y.name for x, y in pairs)
 
 

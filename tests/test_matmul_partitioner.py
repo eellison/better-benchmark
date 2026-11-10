@@ -127,7 +127,9 @@ def test_addmm_pointwise_on_either_multiplied_operand_remains_prologue(operand):
     mm = next(n for n in region if is_matmul(n))
     transformed = next(n for n in region if n.target is torch.ops.aten.tanh.default)
     assert mm.args[1 + operand] is transformed
-    assert len(region.outputs) == 2
+    # The transformed operand is also a model output, but it does not depend
+    # on the MM, so trimming returns only the MM's result.
+    assert list(region.outputs) == [mm]
 
 
 @pytest.mark.parametrize("packet", [torch.ops.aten.mm, torch.ops.aten.bmm, torch.ops.aten.addmm])
@@ -143,8 +145,34 @@ def test_multiplication_operand_binding_excludes_bias_and_supports_keywords(pack
     assert _matmul_inputs(node) == [left, right]
 
 
-def test_reduction_pointwise_partition_is_not_split_for_a_prologue():
-    assert normal_regions(lambda x, w: ln(x) @ w, R(M, 32), R(32, 48)) == []
+def test_k_row_norm_partition_is_a_prologue():
+    # One reduction normalizing rows of A along K: LayerNorm(x) @ w.
+    (region,) = normal_regions(lambda x, w: ln(x) @ w, R(M, 32), R(32, 48))
+    assert region.category == "prologue"
+    assert sum(n.target is torch.ops.aten.var_mean.correction for n in region) == 1
+
+
+def test_per_head_k_norm_partition_is_a_prologue():
+    # Per-head RMS norm: runs of 8 that tile K = 32.
+    def fn(x, w):
+        h = x.view(M, 4, 8)
+        h = h * torch.rsqrt(h.pow(2).mean(-1, keepdim=True) + 1e-6)
+        return h.view(M, 32) @ w
+
+    (region,) = normal_regions(fn, R(M, 32), R(32, 48))
+    assert region.category == "prologue"
+
+
+@pytest.mark.parametrize("name, fn", [
+    # Reduces over M (a column statistic), not along K.
+    ("column", lambda x, w: (x / x.sum(0, keepdim=True)) @ w),
+    # Two reductions in one partition.
+    ("two", lambda x, w: ((x - x.amax(-1, keepdim=True)) / x.sum(-1, keepdim=True)) @ w),
+    # Normalizes B along its last axis (N), not A along K.
+    ("weight", lambda x, w: x @ (w / w.sum(-1, keepdim=True))),
+])
+def test_other_reduction_partitions_are_not_prologues(name, fn):
+    assert normal_regions(fn, R(M, 32), R(32, 48)) == []
 
 
 # Ops without torch.Tag.pointwise that Inductor still lowers to Pointwise IR.
@@ -256,7 +284,9 @@ def test_absorbed_partitions_and_mms_are_not_reused():
     assert sorted(r.category for r in found) == ["epilogue", "prologue"]
     assert not set(found[0]) & set(found[1])
     assert all(sum(is_matmul(n) for n in r) == 1 for r in found)
-    assert any(len(r.outputs) == 2 for r in found)  # h also escapes to the other MM/output
+    # h escapes to the other MM and the model output, but it does not depend
+    # on the region's MM, so trimming returns only MM-dependent values.
+    assert all(len(r.outputs) == 1 for r in found)
 
 
 def test_single_mm_category_filter_does_not_change_absorption_order():
@@ -488,3 +518,61 @@ def test_epilogue_keeps_reduction_side_work_in_its_original_partition():
     assert any("rsqrt" in str(n.target) for n in found[0])
 
 
+
+
+def test_epilogue_outputs_that_do_not_depend_on_the_mm_are_trimmed():
+    # The mask is fused into the epilogue that reads it, and the model also
+    # returns it; storing the mask does not depend on the MM, so only the
+    # where() result stays an output (the mask stays as an internal value).
+    def fn(x, w, s):
+        mask = torch.sigmoid(s) > 0.5
+        return torch.where(mask, x @ w, 0.0), mask
+
+    gm = make_fx(fn, tracing_mode="fake")(R(M, 32), R(32, 48), R(M, 48))
+    (region,) = get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",))
+    assert any(n.target is torch.ops.aten.gt.Scalar for n in region)
+    assert [n.target for n in region.outputs] == [torch.ops.aten.where.self]
+
+
+def test_normal_region_compute_is_bounded():
+    from matmul_partitioner import MatmulLimits
+
+    def fn(x, w):
+        h = x @ w
+        for _ in range(MatmulLimits().max_normal_compute + 1):
+            h = torch.sin(h)
+        return h
+
+    assert normal_regions(fn, R(M, 32), R(32, 48)) == []
+
+
+@pytest.mark.parametrize("extra, kept", [(4, True), (5, False)])
+def test_epilogue_extra_inputs_are_bounded(extra, kept):
+    # Extra inputs exclude the MM operands (here x is viewed before the MM).
+    def fn(x, w, *side):
+        h = x.view(M, 32) @ w
+        for s in side:
+            h = h * s
+        return h
+
+    side = [R(M, 48) for _ in range(extra)]
+    gm = make_fx(fn, tracing_mode="fake")(R(M // 2, 2, 32), R(32, 48), *side)
+    regions = get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",))
+    assert bool(regions) is kept
+    if kept:
+        assert regions[0].metrics["extra_inputs"] == extra
+
+
+def test_dropout_seed_buffer_is_not_an_extra_input():
+    import torch._inductor.inductor_prims  # noqa: F401
+    from matmul_partitioner import extra_inputs
+
+    def fn(x, w, seeds):
+        seed = torch.ops.prims.inductor_lookup_seed.default(seeds, 0)
+        keep = torch.ops.prims.inductor_random.default([M, 48], seed, "rand") > 0.1
+        return (x @ w) * keep
+
+    gm = make_fx(fn, tracing_mode="fake")(R(M, 32), R(32, 48), torch.zeros(2, dtype=torch.int64))
+    (region,) = get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",))
+    mm = next(n for n in region if is_matmul(n))
+    assert extra_inputs(list(region), mm) == set()

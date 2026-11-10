@@ -56,7 +56,12 @@ def admits(metrics, limits):
 
 
 def filter_patterns(records, limits):
-    """Keep every record that fits; there is no count limit or sampling."""
+    """Keep every record that fits; there is no count limit or sampling.
+
+    ``admits`` bounds horizontal windows only. Prologue/epilogue partitions
+    were trimmed and bounded by ``limits.max_normal_compute`` at extraction
+    (matmul_partitioner._normal_mm_regions), so they pass through here.
+    """
     return [record for record in records
             if record.get("category") in {"prologue", "epilogue"}
             or admits(record["metrics"], limits)]

@@ -255,7 +255,9 @@ def test_output_order_variants_share_one_pattern(tmp_path):
         torch.testing.assert_close(value, torch.full((2, 2), literal, device="cpu"))
 
 
-def test_literal_variants_remain_distinct_executable_variants(tmp_path):
+def test_literal_variants_are_one_repro_with_the_first_captured_code(tmp_path):
+    # As in repros/: the pattern hash ignores literals, so the second variant
+    # is another occurrence of the first capture's pattern and shape point.
     def first(x, w):
         t = (x @ w).relu()
         a, b = t + 1., t + 2.
@@ -268,34 +270,70 @@ def test_literal_variants_remain_distinct_executable_variants(tmp_path):
 
     state = _state(tmp_path / "capture")
     args = torch.empty(2, 2, device="cpu"), torch.empty(2, 2, device="cpu")
-    selections = [_capture(state, fn, *args) for fn in (first, first, other)]
+    selections = [_capture(state, fn, *args) for fn in (first, other, other)]
     first_observed = selections[0][2][0]
-    other_observed = selections[2][2][0]
-    assert first_observed["normal_pattern_hash"] == other_observed["normal_pattern_hash"]
-    assert first_observed["pattern_hash"] != other_observed["pattern_hash"]
-    assert len(state.captured) == 2
-    for entry, expected in zip(state.captured, ((1., 2.), (1., 3.)), strict=True):
-        module = _load(Path(entry["file"]))
-        values = module.Repro()(torch.zeros(2, 2, device="cpu"), torch.eye(2, device="cpu"))
-        assert isinstance(values, tuple) and len(values) == 2
-        for value, literal in zip(values, expected, strict=True):
-            torch.testing.assert_close(value, torch.full((2, 2), literal, device="cpu"))
+    assert first_observed["pattern_hash"] == selections[2][2][0]["pattern_hash"]
+    assert len(state.captured) == 1
 
     raw = _raw_stage(tmp_path / "raw", state, selections)
     curated = tmp_path / "curated"
     report = curate_corpus(raw, curated)
-    assert report["family_members"] == 2 and report["unique_repros"] == 1
+    assert report["family_members"] == 1 and report["unique_repros"] == 1
     (path,) = (curated / "canonical" / "epilogue").glob("*/repro.py")
-    module = _load(path)
-    # Curation must choose the twice-observed variant, not mix the other code/points.
-    values = module.Repro()(torch.zeros(2, 2, device="cpu"), torch.eye(2, device="cpu"))
+    (point,) = json.loads(path.with_name("shapes.json").read_text())["points"]
+    assert point["models"] == {"unit/infer/fixture": {"occurrences": 3}}
+    # The first captured variant's code, though the other occurs twice.
+    values = _load(path).Repro()(torch.zeros(2, 2, device="cpu"), torch.eye(2, device="cpu"))
     for value, literal in zip(values, (1., 2.), strict=True):
         torch.testing.assert_close(value, torch.full((2, 2), literal, device="cpu"))
     metadata = json.loads(path.with_name("meta.json").read_text())
-    assert metadata["pattern_hash_mode"] == "scalar_literals_v1"
-    assert metadata["pattern_family"] == first_observed["normal_pattern_hash"]
+    assert metadata["pattern_hash_mode"] == "dag_v1"
+    assert metadata["pattern_family"] == first_observed["normal_pattern_hash"] == metadata["pattern_hash"]
     (config,) = load_shape_configs(str(path)).values()
     with FakeTensorMode(allow_non_fake_inputs=True):
         retraced, _infos = trace_repro(path, config)
         retraced, _shapes = capture.lift_shape_params(retraced)
-        assert capture.pattern_hash_for_subgraph(retraced, scalar_sensitive=True) == metadata["pattern_hash"]
+        assert capture.pattern_hash_for_subgraph(retraced) == metadata["pattern_hash"]
+
+
+def test_shape_changing_int_literals_are_distinct_patterns(tmp_path):
+    # Slice bounds are SymInt arguments, which the pattern hash keeps.
+    def wide(x, w):
+        return ((x @ w)[:, :2]).relu()
+
+    def narrow(x, w):
+        return ((x @ w)[:, :1]).relu()
+
+    state = _state(tmp_path / "capture")
+    args = torch.empty(4, 4, device="cpu"), torch.empty(4, 4, device="cpu")
+    selections = [_capture(state, fn, *args) for fn in (wide, narrow)]
+    assert len(state.captured) == 2
+    raw = _raw_stage(tmp_path / "raw", state, selections)
+    assert curate_corpus(raw, tmp_path / "curated")["unique_repros"] == 2
+
+
+def test_epilogues_differing_only_in_seed_slot_are_one_repro(tmp_path):
+    # The Nth dropout of a graph reads slot N of the seed buffer. The slot is
+    # a bare-int schema argument the pattern hash keeps, but it does not
+    # change the kernel: curation reads every slot as 0, as for horizontal.
+    import torch._inductor.inductor_prims  # noqa: F401
+
+    def dropout_epilogue(slot):
+        def fn(x, w):
+            seeds = torch.ops.prims.inductor_seeds.default(4, torch.device("cpu"))
+            seed = torch.ops.prims.inductor_lookup_seed.default(seeds, slot)
+            keep = torch.ops.prims.inductor_random.default([2, 2], seed, "rand") > 0.1
+            return (x @ w).relu() * keep
+        return fn
+
+    state = _state(tmp_path / "capture")
+    args = torch.empty(2, 2, device="cpu"), torch.empty(2, 2, device="cpu")
+    selections = [_capture(state, dropout_epilogue(slot), *args) for slot in (1, 2)]
+    assert len(state.captured) == 2  # Captures still differ by slot.
+    raw = _raw_stage(tmp_path / "raw", state, selections)
+    report = curate_corpus(raw, tmp_path / "curated")
+    assert report["unique_repros"] == 1
+    (path,) = (tmp_path / "curated" / "canonical" / "epilogue").glob("*/repro.py")
+    assert "inductor_lookup_seed.default(inductor_seeds, 0)" in path.read_text()
+    (point,) = json.loads(path.with_name("shapes.json").read_text())["points"]
+    assert point["models"] == {"unit/infer/fixture": {"occurrences": 2}}

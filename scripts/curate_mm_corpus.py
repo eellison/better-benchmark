@@ -5,11 +5,11 @@ window-size filter. Their families are the normal BB structural pattern hashes.
 For horizontal/horizontal_combine, the existing metadata-proven graph
 normalization, size limits and compute-DAG families remain unchanged.
 
-Scalar-sensitive graph matching keeps executable variants distinct. One member
-with the most source occurrences represents each family; only that member's
-compatible shape points are exported. Different literals are never replayed
-using the representative's code. The output is canonical/, report.json and
-README.md, with no benchmark/study or diagnostic artifact trees.
+Pattern hashes are the BB compute_dag_signature without scalar literals, as for
+repros/: partitions that differ only in literals (a scale or eps) are one repro,
+whose code is the first captured one, and each of their input shapes is a shape
+point of it. One member per family is exported. The output is canonical/,
+report.json and README.md, with no benchmark/study or diagnostic artifact trees.
 """
 
 from __future__ import annotations
@@ -25,14 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "scripts")]
 
 import torch
-from mm_corpus_dedup import (
-    graph_digest,
-    match_graphs,
-    normalize_graph,
-    semantic_graph,
-    tensor_metadata,
-    trace_repro,
-)
+from mm_corpus_dedup import normalize_graph, tensor_metadata, trace_repro
 from mm_corpus_io import (
     admits,
     filter_patterns,
@@ -229,7 +222,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
         write_json(directory / "shapes.json", {"points": points})
         meta = {
             "pattern_hash": group["hash"],
-            "pattern_hash_mode": "scalar_literals_v1",
+            "pattern_hash_mode": "dag_v1",
             "shape_hash_mode": "ordered_input_specs_v1",
             "kind": "matmul",
             "shape_points": len(points),
@@ -289,7 +282,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
         + "\n\n"
     )
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Prologue/epilogue use whole normal BB partitions with producer (epilogue) absorption first and one MM per augmented partition. Epilogues have no reduction-count limit. Horizontal windows retain their existing policy. Each family exports one scalar-preserving representative and only its compatible input points. There is no corpus-count cap.\n\n[Report](report.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Prologue/epilogue use whole normal BB partitions with producer (epilogue) absorption first and one MM per augmented partition. Epilogues have no reduction-count limit. Horizontal windows retain their existing policy. Pattern hashes ignore scalar literals, as in repros/: literal variants are one repro with the first captured code. Each family exports one representative. There is no corpus-count cap.\n\n[Report](report.json)\n"
     )
     return report
 
@@ -328,8 +321,7 @@ def curate_corpus(source: Path, output: Path):
                 else:
                     gm, infos, _shape_params = normalize_graph(gm, infos)
                 annotate_external_sqrt_inputs(gm, infos)
-                if not normal:
-                    canonicalize_seed_slots(gm)
+                canonicalize_seed_slots(gm)
                 candidate = {"gm": gm, "infos": infos}
                 contract = metadata_contract(gm)
                 if contract != original_contract:
@@ -347,29 +339,19 @@ def curate_corpus(source: Path, output: Path):
                         (record["id"], "normalized region violates size/topology limits")
                     )
                 family = point["partition_metrics"]["normal_pattern_hash"] if normal else structure_key(gm)
-                # Find an equivalent group whose code replays this point
-                # exactly: for horizontal windows, same WL digest and an
-                # isomorphism of the DAGs; for normal partitions, the same
-                # pattern hash, whose canonical node order maps the graphs
-                # onto each other whatever their FX node or output order.
-                graph = semantic_graph(gm)
-                digest = graph_digest(graph)
-                pattern = pattern_hash_for_subgraph(gm, scalar_sensitive=True)
-                bucket = (category, family, pattern) if normal else digest
+                # The group with this pattern hash, whose canonical node order
+                # maps the graphs onto each other whatever their FX node or
+                # output order, and whose code replays this point.
+                pattern = pattern_hash_for_subgraph(gm)
+                bucket = (category, pattern)
                 group = None
                 mapping = None
                 validation = None
                 for existing in buckets[bucket]:
-                    mapping = (
-                        dict(zip(
-                            canonical_node_order(existing["gm"], scalar_sensitive=True),
-                            canonical_node_order(gm, scalar_sensitive=True),
-                        ))
-                        if normal
-                        else match_graphs(existing["graph"], graph)
-                    )
-                    if mapping is None:
-                        continue
+                    mapping = dict(zip(
+                        canonical_node_order(existing["gm"]),
+                        canonical_node_order(gm),
+                    ))
                     validation = validate_candidate(
                         existing, candidate, mapping, config
                     )
@@ -382,7 +364,6 @@ def curate_corpus(source: Path, output: Path):
                     group = {
                         "hash": pattern,
                         "gm": gm,
-                        "graph": graph,
                         "points": {},
                         "pattern_category": category,
                         "family": family,
@@ -390,7 +371,7 @@ def curate_corpus(source: Path, output: Path):
                     }
                     groups.append(group)
                     buckets[bucket].append(group)
-                    mapping = {node: node for node in (gm.graph.nodes if normal else graph)}
+                    mapping = {node: node for node in gm.graph.nodes}
                     validation = validate_candidate(group, candidate, mapping, config)
                     if validation is None:
                         raise ValueError(

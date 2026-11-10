@@ -672,7 +672,13 @@ def _operand_path(value, root):
 
 @dataclass(frozen=True)
 class MatmulLimits:
-    """Size limits of one extracted region (also applied by curation)."""
+    """Size limits of extracted regions (also applied by curation).
+
+    max_horizontal..max_outputs bound horizontal/horizontal_combine windows.
+    Prologue/epilogue partitions are whole BB partitions, trimmed to the
+    outputs that depend on their MM; max_normal_compute bounds both and
+    max_epilogue_extra_inputs bounds epilogues.
+    """
 
     max_horizontal: int = 3  # MMs in a horizontal group; growth stops at 3
     max_mm: int = 3
@@ -680,6 +686,12 @@ class MatmulLimits:
     max_compute: int = 32  # MMs plus real computation
     max_inputs: int = 12
     max_outputs: int = 4
+    # Prologue/epilogue keep 0 < non-MM compute <= this, after trimming:
+    # 0 is a bare MM (views/casts only), larger is mostly unrelated work.
+    max_normal_compute: int = 31
+    # Epilogues read at most this many extra tensors: inputs other than the
+    # MM operands (A, B, addmm bias) and the dropout seed buffer.
+    max_epilogue_extra_inputs: int = 4
 
 
 class MatmulRegion(list):
@@ -1010,8 +1022,53 @@ def supported_nodes(gm, is_supported, excluded=()):
     return supported
 
 
-def _normal_mm_regions(gm, excluded, categories):
-    """Augmented whole normal partitions; no window pruning or size cap."""
+def trim_to_matmul(nodes, outputs, mm):
+    """Keep the outputs that depend on ``mm`` and the nodes they need.
+
+    A BB partition can carry work that never touches its absorbed MM (an
+    unrelated store fused by the BB partitioner); that is not MM fusion.
+    """
+    core = set(nodes)
+    after = {mm}
+    for node in nodes:  # graph order
+        if any(a in after for a in node.all_input_nodes):
+            after.add(node)
+    kept = [n for n in outputs if n in after]
+    needed, stack = set(kept), list(kept)
+    while stack:
+        for arg in stack.pop().all_input_nodes:
+            if arg in core and arg not in needed:
+                needed.add(arg)
+                stack.append(arg)
+    return [n for n in nodes if n in needed], kept
+
+
+def extra_inputs(nodes, mm):
+    """Tensors a region reads besides the MM operands and dropout seeds.
+
+    Operands and seeds are followed back through views/casts inside the
+    region, so ``x.view(...) @ w`` still counts x as an operand.
+    """
+    core = set(nodes)
+
+    def source(node):
+        while node in core and op_name(node) in SCAFFOLD_NAMES and node.all_input_nodes:
+            node = node.args[0] if isinstance(node.args[0], Node) else node.all_input_nodes[0]
+        return node
+
+    skipped = {source(a) for a in mm.all_input_nodes}
+    skipped |= {
+        source(n.args[0]) for n in nodes
+        if op_name(n) == "prims::inductor_lookup_seed" and isinstance(n.args[0], Node)
+    }
+    return {
+        a for n in nodes for a in n.all_input_nodes
+        if a not in core and a not in skipped and isinstance(a.meta.get("val"), torch.Tensor)
+    }
+
+
+def _normal_mm_regions(gm, excluded, categories, limits):
+    """Augmented normal partitions, trimmed to their MM and bounded in size."""
     from mm_partition_absorption import absorb_matmuls
 
     regions = []
@@ -1020,6 +1077,14 @@ def _normal_mm_regions(gm, excluded, categories):
             continue
         core = set(nodes)
         outputs = [n for n in nodes if is_mutating(n) or any(u not in core for u in n.users)]
+        (mm,) = [n for n in nodes if is_matmul(n)]
+        nodes, outputs = trim_to_matmul(nodes, outputs, mm)
+        if not 0 < sum(map(is_computation, nodes)) <= limits.max_normal_compute:
+            continue
+        extra = len(extra_inputs(nodes, mm))
+        if category == "epilogue" and extra > limits.max_epilogue_extra_inputs:
+            continue
+        core = set(nodes)
         depth = {}
         for node in nodes:
             depth[node] = max((depth[a] for a in value_inputs(node) if a in core), default=0) + int(is_reduction(node))
@@ -1028,6 +1093,7 @@ def _normal_mm_regions(gm, excluded, categories):
             "compute": sum(is_matmul(n) or is_computation(n) for n in nodes),
             "non_mm_compute": sum(is_computation(n) for n in nodes),
             "inputs": len({a for n in nodes for a in n.all_input_nodes if a not in core}),
+            "extra_inputs": extra,
             "outputs": len(outputs), "contraction_depth": max(depth.values(), default=0),
             "selection": "normal_absorption_v1",
         }
@@ -1043,7 +1109,7 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), categories
 
     mms = [n for n in ex.nodes if is_matmul(n) and n in supported]
     regions = (
-        _normal_mm_regions(gm, excluded, set(categories))
+        _normal_mm_regions(gm, excluded, set(categories), limits)
         if {"prologue", "epilogue"} & set(categories) else []
     )
     if {"horizontal", "horizontal_combine"} & set(categories):
@@ -1075,7 +1141,10 @@ def classify_pattern_graph(gm, *, expected=None):
     if expected in {"prologue", "epilogue"}:
         if len(mms) != 1 or op_name(mms[0]) not in {"aten::mm", "aten::addmm", "aten::bmm"}:
             return None
-        if expected == "prologue" and any(map(is_reduction_or_scan, nodes)):
+        # A prologue may hold one reduction (a K-row norm; absorption checks
+        # the axis) and no scan.
+        found = [n for n in nodes if is_reduction_or_scan(n)]
+        if expected == "prologue" and (len(found) > 1 or not all(map(is_reduction, found))):
             return None
         if not any(n.op == "call_function" and n not in mms for n in nodes):
             return None

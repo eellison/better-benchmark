@@ -1,8 +1,9 @@
 """Absorb one unassigned mm/addmm/bmm into each unchanged normal BB partition.
 
 Partitions take a producer MM first (epilogue). Then still-unused partitions
-without reduction/scan ops take a consumer MM through a multiplied operand
-(prologue); addmm bias-only preparation is excluded. Each original
+without scans and with at most one reduction take a consumer MM through a
+multiplied operand (prologue); a reduction must normalize rows of the MM's A
+operand along K. addmm bias-only preparation is excluded. Each original
 partition/MM is used once; augmented partitions do not grow. This is a disjoint
 assignment inside these two categories, not a size-limited window search.
 Horizontal benchmark windows are separate.
@@ -14,7 +15,7 @@ from collections import defaultdict, deque
 
 import torch
 
-from matmul_partitioner import is_reduction_or_scan
+from matmul_partitioner import is_reduction, is_reduction_or_scan
 
 
 _MM = {torch.ops.aten.mm, torch.ops.aten.addmm, torch.ops.aten.bmm}
@@ -99,6 +100,71 @@ def _matmul_inputs(node):
     return [
         bindings[name] for name in names if isinstance(bindings[name], torch.fx.Node)
     ]
+
+
+_PERMUTES = {torch.ops.aten.permute, torch.ops.aten.transpose, torch.ops.aten.t}
+
+
+def _reduced_run(node):
+    """Size of the trailing run ``node`` reduces, or None if it is not trailing."""
+    source = node.args[0] if node.args else None
+    value = source.meta.get("val") if isinstance(source, torch.fx.Node) else None
+    if not isinstance(value, torch.Tensor) or value.dim() == 0:
+        return None, None
+    dims = node.args[1] if len(node.args) > 1 else node.kwargs.get("dim")
+    if isinstance(dims, int):
+        dims = [dims]
+    if not isinstance(dims, (list, tuple)) or not dims or not all(
+        isinstance(d, int) for d in dims
+    ):
+        return None, value
+    rank = value.dim()
+    dims = sorted(d % rank for d in dims)
+    if dims != list(range(rank - len(dims), rank)):
+        return None, value
+    run = 1
+    for d in dims:
+        run *= value.shape[d]
+    return run, value
+
+
+def _k_row_reduction(reduction, mm, partition):
+    """``reduction`` normalizes rows of the MM's A operand along K.
+
+    It reduces trailing dims of an operand-sized tensor in runs that tile K
+    (a whole row, or per-head groups), feeds A without a permute in between,
+    as in RMSNorm/LayerNorm(x) @ W. The kernel can reduce each A row (or
+    head) it loads, or fold the scale past the MM: (x / rms) @ W = (x @ W) / rms.
+    """
+    a = mm.args[1] if mm.target.overloadpacket is torch.ops.aten.addmm else mm.args[0]
+    if not isinstance(a, torch.fx.Node) or a not in partition:
+        return False
+    operand = a.meta.get("val")
+    run, value = _reduced_run(reduction)
+    if run is None or not isinstance(operand, torch.Tensor) or operand.dim() < 2:
+        return False
+    k = operand.shape[-1]
+    if not run or k % run or value.numel() != operand.numel():
+        return False
+    # Nodes between the reduction and A: reachable from both directions.
+    downstream, stack = set(), [reduction]
+    while stack:
+        for user in stack.pop().users:
+            if user in partition and user not in downstream:
+                downstream.add(user)
+                stack.append(user)
+    if a is not reduction and a not in downstream:
+        return False
+    upstream, stack = {a}, [a]
+    while stack:
+        for arg in stack.pop().all_input_nodes:
+            if arg in downstream and arg not in upstream:
+                upstream.add(arg)
+                stack.append(arg)
+    return not any(
+        isinstance(n.target, torch._ops.OpOverload) and n.target.overloadpacket in _PERMUTES
+        for n in upstream
+    )
 
 
 def _storage_keys(value):
@@ -186,20 +252,26 @@ def absorb_matmuls(gm, *, excluded=()):
     graph = _PartitionGraph(edges)
     excluded = set(excluded)
     matmuls = [n for n in nodes if _is_mm(n) and n not in excluded]
-    # A prologue is computed while the MM loads its operand, so each operand
-    # element may read only a few computable input positions:
-    #   eligible:   a[i,k] = table[ids[i], k] * 2           (gather + pointwise)
-    #   ineligible: a[i,k] = x[i,k] / (x[i,0] + ... + x[i,K-1])  (needs the whole row)
-    # The test is "no reduction/scan op", not "every op has Tag.pointwise": the
-    # tag rejects gathers, constants and views that Inductor lowers to Pointwise.
-    prologue_eligible = []
+    # A prologue is computed while the MM loads its operand. Pointwise work and
+    # gathers qualify, and so does ONE reduction that normalizes rows of A
+    # along K (RMSNorm/LayerNorm before a linear):
+    #   eligible:   a[i,k] = table[ids[i], k] * 2                (gather + pointwise)
+    #   eligible:   a[i,k] = x[i,k] * rsqrt(mean_k(x[i,:]^2))    (one K-row reduction)
+    #   ineligible: two reductions, a scan, or a reduction over M (a column sum)
+    # The test is not "every op has Tag.pointwise": the tag rejects gathers,
+    # constants and views that Inductor lowers to Pointwise.
+    reductions, prologue_eligible = [], []
     for partition in partitions:
         real = [
             n
             for n in partition
             if n.op == "call_function" and n.target not in TRANSPARENT_OPS
         ]
-        prologue_eligible.append(bool(real) and not any(map(is_reduction_or_scan, real)))
+        found = [n for n in real if is_reduction_or_scan(n)]
+        reductions.append(found)
+        prologue_eligible.append(
+            bool(real) and len(found) <= 1 and all(map(is_reduction, found))
+        )
     candidates = {"prologue": defaultdict(list), "epilogue": defaultdict(list)}
     for mm in matmuls:
         if mm in membership:
@@ -207,7 +279,9 @@ def absorb_matmuls(gm, *, excluded=()):
         front = {membership[n] for n in _matmul_inputs(mm) if n in membership}
         back = {membership[n] for n in mm.users if n in membership}
         for pid in front:
-            if prologue_eligible[pid]:
+            if prologue_eligible[pid] and all(
+                _k_row_reduction(r, mm, set(partitions[pid])) for r in reductions[pid]
+            ):
                 candidates["prologue"][pid].append(mm)
         for pid in back:
             candidates["epilogue"][pid].append(mm)
