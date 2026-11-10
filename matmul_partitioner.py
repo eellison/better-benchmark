@@ -2,23 +2,20 @@
 
 Prologue/epilogue use unchanged normal BB partitions (mm_partition_absorption):
 1. A partition absorbs one available producer mm/addmm/bmm (epilogue).
-2. A still-unused partition with no reduction/scan op (is_reduction_or_scan)
-   absorbs one available consumer mm/addmm/bmm through a multiplied operand
-   (prologue).
+2. A still-unused partition with no scan and at most one reduction, which must
+   normalize rows of the MM's A operand along K, absorbs one available
+   consumer mm/addmm/bmm through a multiplied operand (prologue).
 3. Every original partition/MM is used once; augmented partitions do not grow.
 4. Only augmented partitions containing exactly one MM are extracted.
-
-Whole partitions and all escaping outputs are retained. Prologues contain no
-reduction, scan, sort, pooling or scatter-accumulation; epilogues may contain
-any normal-BB-supported computation, without a reduction-count or region-size
-cap. No pointwise suffix is cut from a reduction partition. Their category is
-the source absorption direction.
+Each is then trimmed to the outputs that depend on its MM and kept only if
+0 < non-MM compute <= MatmulLimits.max_normal_compute; epilogues also read at
+most max_epilogue_extra_inputs extra tensors. Their category is the source
+absorption direction.
 
 Horizontal/horizontal_combine keep the independent 2..3-MM window search:
 a shared operand (same slot and values, operand_keys), equal output shapes,
-and optional surrounding local work.
-These windows may overlap the normal-partition examples; the model graph is
-never rewritten.
+and optional surrounding local work within MatmulLimits. These windows may
+overlap the normal-partition examples; the model graph is never rewritten.
 """
 
 from __future__ import annotations
@@ -1178,53 +1175,3 @@ def combines(nodes, mms):
         if len(reached[n]) >= 2:
             return True
     return False
-
-
-_COMMUTATIVE = {
-    "aten::add", "aten::mul", "aten::maximum", "aten::minimum", "aten::eq",
-    "aten::ne", "aten::logical_and", "aten::logical_or", "prims::add", "prims::mul",
-}
-
-
-def structure_key(gm):
-    """Hash of a repro's compute DAG and its input/output dtypes.
-
-    Transparent ops (views, casts, copies) and scalar literals are ignored, so
-    repros with the same key differ only in layouts, internal casts or literal
-    values; curation keeps one representative per key (pattern family).
-    """
-    import hashlib
-
-    nodes = list(gm.graph.nodes)
-    source, label, inputs = {}, {}, {}
-    for n in nodes:
-        if n.op != "call_function":
-            continue
-        tensor_args = [source.get(a, a) for a in n.all_input_nodes]
-        if n.target is operator.getitem or op_name(n) in SCAFFOLD_NAMES:
-            source[n] = tensor_args[0] if tensor_args else n
-            if tensor_args:
-                continue
-        label[n] = op_name(n) or str(n.target)
-        inputs[n] = tensor_args
-    # Weisfeiler-Lehman refinement over producers; regions are small.
-    for _ in range(len(label)):
-        new = {}
-        for n, args in inputs.items():
-            parts = [label.get(a, "input") for a in args]
-            if op_name(n) in _COMMUTATIVE:
-                parts.sort()
-            new[n] = hashlib.sha256(f"{label[n]}({','.join(parts)})".encode()).hexdigest()[:16]
-        label = new
-    def dtypes(values):
-        return ",".join(
-            sorted({str(v.meta["val"].dtype) for v in values if isinstance(v.meta.get("val"), torch.Tensor)})
-        )
-
-    output = next(n for n in nodes if n.op == "output")
-    signature = (
-        ",".join(sorted(label.values()))
-        + "|in:" + dtypes(n for n in nodes if n.op == "placeholder")
-        + "|out:" + dtypes(output.all_input_nodes)
-    )
-    return hashlib.sha256(signature.encode()).hexdigest()[:12]

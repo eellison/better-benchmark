@@ -596,7 +596,8 @@ def load_repro_module(repro_dir: str | Path):
     """Load repro.py from a canonical repro directory."""
     repro_dir = Path(repro_dir)
     repro_path = repro_dir / "repro.py"
-    repo_root = repro_dir.parents[2] if repro_dir.match("repros/canonical/*") else repro_dir.parent
+    # repros/canonical/<id> and mm_repro/canonical/<id> sit two levels below the root.
+    repo_root = repro_dir.parents[2] if repro_dir.match("*/canonical/*") else repro_dir.parent
     sys.path.insert(0, str(repo_root))
 
     repro_id = repro_dir.name

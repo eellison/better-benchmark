@@ -2281,6 +2281,9 @@ def main():
                         help="Default graph search root for --full-graphs")
     parser.add_argument("--benchmark-set", type=Path, default=None,
                         help="Path to a frozen benchmark set JSON (e.g. benchmarks/v1.json)")
+    parser.add_argument("--canonical-dir", type=Path, default=Path("repros/canonical"),
+                        help="Canonical repro directory that --benchmark-set names resolve "
+                             "against and that runs without paths sweep (e.g. mm_repro/canonical)")
     parser.add_argument("--device-kind", default=None,
                         help="GPU kind to use (e.g. H100, B200). Default: all GPUs")
     parser.add_argument("--gpus", default=None,
@@ -2477,7 +2480,9 @@ def main():
         graph_paths = args.paths or [args.models_root]
         repros = find_full_graphs(graph_paths)
     elif args.benchmark_set:
-        benchmark_selection = load_benchmark_set_selection(args.benchmark_set)
+        benchmark_selection = load_benchmark_set_selection(
+            args.benchmark_set, canonical_dir=args.canonical_dir
+        )
         repros = list(benchmark_selection.tasks)
         partial_repros = set(benchmark_selection.partial_repros)
         benchmark_entries = benchmark_selection.n_entries
@@ -2491,7 +2496,7 @@ def main():
     elif args.paths:
         repros = find_repros(args.paths)
     else:
-        repros = find_repros([Path("repros/canonical")])
+        repros = find_repros([args.canonical_dir])
 
     if not repros:
         if args.oracles:

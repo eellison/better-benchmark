@@ -1,29 +1,75 @@
 # Matmul pattern corpus (`mm_repro/`)
 
-The corpus contains four categories: `prologue`, `epilogue`, `horizontal`, and
-`horizontal_combine`. Each repro is extracted from a saved
-post-grad FX model graph and includes its input configurations.
+`mm_repro/` holds benchmark repros of matmul fusion patterns in four
+categories: `prologue`, `epilogue`, `horizontal` and `horizontal_combine`. Each
+repro is a region of a saved post-grad FX model graph (`repros/models/**/
+full_graph_*.py`) with every input configuration (shape point) it was seen
+with. The layout and input generation are those of `repros/`, so the repro
+tooling runs on it unchanged.
 
 ## Regenerate and validate
 
-From the repository root, with a compatible CUDA-enabled PyTorch environment:
+From the repository root:
 
 ```bash
-python scripts/extract_matmul_corpus.py --workers 8
-python scripts/validate_matmul_repros.py
+python scripts/extract_matmul_corpus.py --workers 32              # regenerate mm_repro/
+CUDA_VISIBLE_DEVICES=0 python scripts/validate_matmul_repros.py   # eager GPU run of every point
 pytest tests/test_matmul_partitioner.py tests/test_mm_*.py
 ```
 
-Extraction and validation use CPU workers with FakeTensors. They do not compile
-or benchmark GPU kernels. The extractor enumerates tracked
-`repros/models/**/full_graph_*.py` files, loads their Python modules and structured
-sidecars, and walks the real FX graphs; graph renderings are not parsed.
+Extraction runs on CPU workers with FakeTensors and needs no GPU. It
+enumerates the tracked `repros/models/**/full_graph_*.py` files, loads their
+Python modules and structured input sidecars, and walks the real FX graphs;
+graph renderings are not parsed. The finished corpus atomically replaces
+`mm_repro/`, whose only top-level outputs are `canonical/`, `report.json` and
+`README.md`. Re-running with the same sources and policy is deterministic.
+`--output DIR`, `--workers N` and repeated `--source FILE` make smaller runs.
+`report.json` records the counts, the size limits and policy fingerprints.
 
-The finished corpus atomically replaces `mm_repro/`. Its only top-level outputs
-are `canonical/`, `report.json`, and `README.md`. Temporary captures are removed
-when generation finishes. Re-running with the same sources and policy is
-deterministic. Use `--output DIR`, `--workers N`, or repeat `--source FILE` for a
-smaller run. `report.json` records the counts and policy fingerprints.
+Validation runs every repro eagerly on a GPU, each in its own subprocess so a
+device assert cannot poison the sweep. For every shape point it generates the
+inputs with `repro_harness`, runs `Repro` on them, then traces a second run
+with fresh inputs in `make_fx` real mode (also on the GPU, no FakeTensor) and
+checks that the graph keeps its category, its single MM (prologue/epilogue)
+and its pattern hash. Non-finite outputs are reported but do not fail the run
+(see Known limitations).
+
+## Existing repro tooling
+
+`mm_repro/canonical/<category>_<mm ops>_<hash>/` is flat like
+`repros/canonical/<id>/`, and every `repro.py` uses `repro_harness` for inputs
+and benchmarking, so the standard tools take the MM corpus as their corpus
+root or canonical directory:
+
+```bash
+python scripts/validate_corpus_invariants.py --corpus-root mm_repro
+python scripts/validate_eager.py mm_repro/canonical --all-shapes --gpus 0,1 --max-workers 4
+python scripts/bench_parallel.py mm_repro/canonical --all-shapes --gpus 0,1 --output mm_results.json
+python mm_repro/canonical/<id>/repro.py --all-shapes
+```
+
+A benchmark set (`benchmarks/*.json`) names repro directories relative to
+`--canonical-dir`, so `scripts/select_benchmark_set.py --canonical-dir
+mm_repro/canonical` builds one for this corpus and `--benchmark-set ...
+--canonical-dir mm_repro/canonical` runs it. MM repros have no `oracle.py`, so
+oracle sweeps skip them; `oracle_harness.load_repro_module` loads them like
+any canonical repro.
+
+## How a region becomes a repro
+
+1. **Load**: run a source graph's module under FakeTensors and retrace it.
+2. **Select regions** (`matmul_partitioner.get_matmul_regions`):
+   prologue/epilogue from whole normal BB partitions, horizontal windows around
+   MMs that share an operand. Both are described below.
+3. **Capture** (`capture_hook`): copy each region into a standalone
+   GraphModule. Values from outside become inputs whose shape, stride, storage
+   offset, dtype, device and aliasing are recorded; shape literals become
+   `_shape_param` inputs. The pattern hash ignores shapes and the shape hash
+   identifies the input specs; a repeated (pattern, shape) pair only adds an
+   occurrence.
+4. **Curate** (`scripts/curate_mm_corpus.py`): merge captures by pattern hash
+   and export one repro per hash with all of its shape points.
+5. **Validate**: the eager GPU run above.
 
 ## Prologue and epilogue: whole normal BB partitions
 
@@ -76,7 +122,7 @@ statistics (over M), B-operand norms, two reductions and scans are not
 prologues.
 
 Reductions and scans are the nodes satisfying
-`matmul_partitioner.is_reduction_or_scan`: no op where one output element
+`matmul_partitioner.is_reduction_or_scan`: ops where one output element
 combines a whole axis, window or segment of an input. That covers reductions
 and norms (`sum`, `var_mean`, `native_layer_norm`, `prims.sum`), softmax,
 scans and prefix-sum compaction (`cumsum`, `nonzero`, `unique`), sorts
@@ -101,20 +147,21 @@ Inductor lowers to Pointwise IR, so `embedding -> mm` is a prologue.
 # prologue for another consumer MM.
 ```
 
-Epilogue fusion is the more common case, so a partition between two
-MMs goes to the producer. `relu(x @ w1) @ w2` yields `epilogue [mm, relu]`;
-`mm_1` gets a prologue only from another unused eligible partition, e.g.
-`relu(x @ w1) @ sin(w2)` also yields `prologue [sin, mm_1]`.
+Epilogue fusion is the more common case, so a partition between two MMs goes
+to the producer. `relu(x @ w1) @ w2` yields `epilogue [mm, relu]`; `mm_1` gets a
+prologue only from another unused eligible partition, e.g.
+`relu(x @ w1) @ sin(w2)` also yields `prologue [sin, mm_1]`. Mid-layer
+pre-norms therefore usually stay in epilogues: the residual + norm partition
+takes the previous layer's output projection first.
 
 - **`prologue`**: the partition absorbed a consumer MM in step 2.
 - **`epilogue`**: the partition absorbed a producer MM in step 1.
 
 Epilogues may contain any computation admitted by normal BB, including multiple
-reductions; only the compute bound of step 6 applies. A front partition with
+reductions; only the bounds of steps 6 and 7 apply. A front partition with
 another kind of reduction is not cut into a pointwise suffix for a prologue.
-
-Absorption direction is recorded from the source graph; the prologue/epilogue
-label is not inferred from standalone topology alone.
+The prologue/epilogue label is the absorption direction in the source graph,
+not inferred from standalone topology.
 
 ## Horizontal categories: shared-operand windows
 
@@ -144,6 +191,12 @@ have an equal key:
 | `x @ a`, `x.t() @ b` | `(0, x, ())`, `(0, x, (permute (1, 0),))` | no |
 | `x.half() @ a`, `x.bfloat16() @ b` | `(0, x, (cast f16,))`, `(0, x, (cast bf16,))` | no |
 
+The multiplied dimensions may differ; output shapes must match. A group stops
+at three MMs. Its window starts from the MMs and the work that prepares their
+operands, grows forward to consumers and backward to side inputs, and keeps the
+largest window within `MatmulLimits`: at most three MMs, 48 nodes, 32 compute
+operations, 12 inputs and four outputs.
+
 The window contains the operand paths up to where they meet, even when they
 are computed from an earlier MM, which local producer growth otherwise leaves
 out. Without them, `x -> view_1 -> mm_1` and `x -> view_2 -> mm_2` would
@@ -152,44 +205,58 @@ feeding both MMs is already a single input and stays out. A window that cannot
 keep the paths within its limits is dropped, and validation checks that every
 horizontal repro's MMs share an operand by the same key.
 
-The existing group selection, local producer/consumer growth, and metadata
-normalization are retained. The multiplied dimensions may differ; output shapes
-must match. A group stops at three MMs.
-
-Window limits remain in `MatmulLimits`: at most three MMs, 48 nodes, 32
-compute operations, 12 inputs and four outputs. These limits apply to horizontal
-windows, not whole normal partitions.
-
-## Curation and deduplication
+## Curation
 
 Every repro's pattern hash, its directory name, is the BB `compute_dag_signature`
 without scalar literals (`pattern_hash_for_subgraph`, `dag_v1` in meta.json),
-exactly as for repros/: scalar literals (a scale or eps, numeric kwargs),
-device literals (`cuda:0` vs `cuda:1`), the order of
+exactly as for `repros/`, in every category. Scalar literals (a scale or eps,
+numeric kwargs), device literals (`cuda:0` vs `cuda:1`), the order of
 independent nodes and the output order do not change it. Which result of a
 tuple op is read, and literals that change shapes such as slice bounds (SymInt
 arguments), still do.
 
-Partitions with one pattern hash are one repro: as in repros/, the first
-captured partition's code is kept and every input shape becomes a shape point
-of it, so literal variants run with that code's literals. Curation matches
-partitions with one pattern hash node by node in its canonical order
-(`canonical_node_order`). For prologue/epilogue, the family is the same pattern
-hash. Whole-partition views/casts are kept, but every category reads each
-`inductor_lookup_seed` from slot 0: the slot (which dropout of the graph) is a
-bare-int argument the hash keeps, yet it does not change the kernel.
+Captures with one pattern hash are one repro: as in `repros/`, the first
+captured region's code is kept and every input shape becomes a shape point of
+it, so literal variants run with that code's literals. Curation maps a capture
+onto the repro node by node in the hash's canonical order
+(`canonical_node_order`) and checks that the repro's code, replayed with the
+capture's inputs, reproduces the capture's output metadata, devices and
+aliases; it stops with an error otherwise. There is no further family
+deduplication, and no cap on repros or shape points.
 
-Horizontal categories use the existing metadata-proven normalization and
-compute-DAG-plus-dtypes `structure_key` families. Scalar-sensitive matching,
-input-spec remapping and output-alias checks preserve each chosen representative.
-No count cap is applied.
+Before hashing, curation reads every `inductor_lookup_seed` from slot 0: the
+slot (which dropout of the graph) is a bare-int argument the hash keeps, yet it
+does not change the kernel. Prologue/epilogue partitions keep their views and
+casts. Horizontal windows first get metadata-proven normalization
+(`mm_corpus_dedup.normalize_graph`: views removed only when their metadata
+proves them identity, input permutations folded into strided input specs) and
+must still fit `MatmulLimits`.
 
-Each `canonical/<category>/<mm ops>_<hash>/` contains:
+Each `canonical/<category>_<mm ops>_<hash>/` contains:
 
-- `repro.py`: executable `Repro` plus input and benchmark adapters.
-- `shapes.json`: input points, model occurrences and partition metrics.
-- `meta.json`: pattern hash, family and category.
+- `repro.py`: the `Repro` module, `make_inputs`, and `repro_harness.benchmark_repro`
+  as its entry point.
+- `shapes.json`: shape points (compact input specs), their model occurrences
+  and partition metrics.
+- `meta.json`: pattern hash and hash modes, `kind: matmul`, category and the
+  number of shape points.
 
-The validation command reloads generated files and generates every input point.
-Counts describe benchmark candidates, not proof that a backend can fuse all of
-them or that fusion is faster; GPU compilation and measurement are separate.
+## Input generation
+
+`make_inputs` calls `repro_harness.make_inputs_from_config`, the generator of
+every repro in `repros/`. Each shape point records each tensor's shape,
+dtype, stride, storage offset and device; inputs that share storage in the
+model are one alias group, allocated once at the recorded size. Floats are
+random normal, integers and bools come from `[0, 100)` and `{0, 1}` unless the
+capture recorded a generator such as index bounds, and inputs that only feed
+`sqrt`/`rsqrt` (an external variance) are generated positive
+(`mm_input_constraints`).
+
+## Known limitations
+
+- A pattern can read statistics as independent random inputs, e.g. a softmax
+  backward's max and sum, and then produce non-finite outputs from finite
+  inputs. Validation reports such points; the current corpus has none.
+- Counts describe benchmark candidates, not proof that a backend can fuse all
+  of them or that fusion is faster; compilation and measurement are separate
+  (`bench_parallel.py`).

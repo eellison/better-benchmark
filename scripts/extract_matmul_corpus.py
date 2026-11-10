@@ -1,17 +1,16 @@
 """Regenerate the MM pattern corpus (mm_repro/) from the saved model graphs.
 
     python scripts/extract_matmul_corpus.py --workers 32
-    python scripts/validate_matmul_repros.py     # FakeTensor-run every shape
+    CUDA_VISIBLE_DEVICES=0 python scripts/validate_matmul_repros.py   # eager GPU run
 
-Everything runs on CPU with FakeTensors; nothing is compiled.
+Extraction runs on CPU with FakeTensors; nothing is compiled.
 
 1. Capture: trace every repros/models/**/full_graph_*.py, select its MM
-   pattern regions (matmul_partitioner.get_matmul_regions, one region per
-   category) and capture them with the regular capture/merge code into a
-   temporary "raw" corpus.
-2. Curate: scripts/curate_mm_corpus.py normalizes the raw repros, applies the
-   size limits, merges equivalent DAGs, keeps one repro per pattern family
-   and writes canonical/<category>/<mm ops>_<hash>/.
+   pattern regions (matmul_partitioner.get_matmul_regions) and capture them
+   with the regular capture/merge code into a temporary "raw" corpus.
+2. Curate: scripts/curate_mm_corpus.py normalizes horizontal windows, applies
+   their size limits, merges captures by pattern hash and writes one repro per
+   hash to canonical/<category>_<mm ops>_<hash>/.
 3. Publish: the finished tree atomically replaces mm_repro/, so files from an
    older run can never mix with the new ones.
 """

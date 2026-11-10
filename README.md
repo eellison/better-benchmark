@@ -327,6 +327,8 @@ scripts/
   validate_oracles.py    # oracle correctness/scope validation
   validate_eager.py      # subprocess-isolated eager validation
   validate_corpus_invariants.py  # hard/soft corpus invariants (CI / pre-commit)
+  extract_matmul_corpus.py   # regenerate mm_repro/ from repros/models (docs/matmul_partitioning.md)
+  validate_matmul_repros.py  # eager GPU run + category/hash checks of every mm_repro point
   model_graph_accounting.py  # aggregate per-kernel times to a model-level estimate
   model_attribution.py   # reconcile the aggregate against measured e2e (launch-corrected)
   gc_corpus.py           # corpus reference-counting / migration transaction tool
@@ -343,6 +345,9 @@ repros/
   canonical/             # 1727 flat, content-addressed repro dirs (each with oracle.py)
   models/                # <suite>/<mode>/<model>/: manifest.json + full_graph_*.py (+ .meta.json)
 
+mm_repro/
+  canonical/             # matmul fusion-pattern repros: <category>_<mm ops>_<hash>/ (no oracles)
+
 benchmarks/              # frozen benchmark set definitions
 ```
 
@@ -352,16 +357,20 @@ benchmarks/              # frozen benchmark set definitions
 ## Matmul pattern corpus
 
 ```bash
-python scripts/extract_matmul_corpus.py --workers 8    # regenerates mm_repro/
-python scripts/validate_matmul_repros.py                # reloads every repro/config
+python scripts/extract_matmul_corpus.py --workers 32             # regenerate mm_repro/ (CPU)
+CUDA_VISIBLE_DEVICES=0 python scripts/validate_matmul_repros.py  # eager GPU run of every shape point
+python scripts/validate_eager.py mm_repro/canonical --all-shapes --gpus 0,1 --max-workers 4
+python scripts/bench_parallel.py mm_repro/canonical --all-shapes --gpus 0,1 --output mm_results.json
 ```
 
-`mm_repro/` holds **529 repros / 1177 shapes** in four categories:
-prologue (105), epilogue (345), horizontal (74), and horizontal_combine (5).
-The new single-MM pass starts with normal BB partitions,
-absorbs one consumer MM into pure-pointwise partitions first, through an
-actual multiplied input (not addmm's bias), then absorbs one available producer
-MM into remaining MM-free partitions. Augmented
-partitions are never reused; epilogues have no reduction-count limit.
-Horizontal grouping is unchanged. Regeneration and validation use CPU/FakeTensors.
+`mm_repro/` holds **535 repros / 1001 shape points** of matmul fusion patterns
+from the saved model graphs, in four categories: prologue (25), epilogue (412),
+horizontal (93) and horizontal_combine (5). Prologue/epilogue repros are normal
+BB partitions that absorbed one producer MM (epilogue, tried first) or one
+consumer MM (prologue), trimmed to the work that depends on the MM. Horizontal
+repros group 2–3 independent MMs that share an operand. Pattern hashes and
+input generation are those of `repros/`, and `mm_repro/canonical/` is flat like
+`repros/canonical/`, so the repro tools take it as their canonical directory
+(`--corpus-root mm_repro` for `validate_corpus_invariants.py`,
+`--canonical-dir mm_repro/canonical` with `--benchmark-set`).
 See [docs/matmul_partitioning.md](docs/matmul_partitioning.md).

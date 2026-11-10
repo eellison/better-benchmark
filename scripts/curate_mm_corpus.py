@@ -1,15 +1,15 @@
 """Curate captured MM regions into the four-category mm_repro corpus.
 
-Normal-partition prologues/epilogues retain their whole views/casts and have no
-window-size filter. Their families are the normal BB structural pattern hashes.
-For horizontal/horizontal_combine, the existing metadata-proven graph
-normalization, size limits and compute-DAG families remain unchanged.
+Prologue/epilogue partitions were trimmed and bounded at extraction and keep
+their views/casts. Horizontal/horizontal_combine windows get metadata-proven
+graph normalization and must fit MatmulLimits.
 
 Pattern hashes are the BB compute_dag_signature without scalar literals, as for
-repros/: partitions that differ only in literals (a scale or eps) are one repro,
-whose code is the first captured one, and each of their input shapes is a shape
-point of it. One member per family is exported. The output is canonical/,
-report.json and README.md, with no benchmark/study or diagnostic artifact trees.
+repros/, in every category: captures that differ only in literals (a scale or
+eps) are one repro, whose code is the first captured one, and each of their
+input shapes is a shape point of it. Every pattern hash is exported, with no
+family deduplication or count cap, to a flat canonical/<category>_<mm ops>_<hash>/
+like repros/canonical/. The output is canonical/, report.json and README.md.
 """
 
 from __future__ import annotations
@@ -41,7 +41,6 @@ from matmul_partitioner import (
     CATEGORIES,
     MatmulLimits,
     classify_pattern_graph,
-    structure_key,
 )
 from mm_input_constraints import annotate_external_sqrt_inputs
 from repro_harness import load_shape_configs, make_inputs_from_config
@@ -151,7 +150,7 @@ from math import inf, nan
 import torch
 import torch._inductor.inductor_prims
 from torch import device
-sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
 _repro_version = 3
 
@@ -168,30 +167,8 @@ if __name__ == "__main__":
     path.write_text(header + code + tail)
 
 
-def family_representatives(groups):
-    """Group repros by (category, structure_key); pick one representative.
-
-    structure_key includes the input/output dtypes. The representative is the
-    member with the most source occurrences; only it is exported.
-    """
-    occurrences = lambda g: sum(
-        m["occurrences"] for p in g["points"].values() for m in p["models"].values()
-    )
-    families = defaultdict(list)
-    for group in groups:
-        families[(group["pattern_category"], group["family"])].append(group)
-    return {
-        (g["pattern_category"], g["hash"])
-        for members in families.values()
-        for g in [min(members, key=lambda g: (-occurrences(g), g["hash"]))]
-    }
-
-
 def export_core(output, groups, rows, admitted_points, source_report):
     output.mkdir(parents=True)
-    members = groups
-    representatives = family_representatives(groups)
-    groups = [g for g in groups if (g["pattern_category"], g["hash"]) in representatives]
     for group in groups:
         prefix = "_".join(
             sorted(
@@ -215,7 +192,8 @@ def export_core(output, groups, rows, admitted_points, source_report):
                 }
             )
         )
-        directory = output / "canonical" / group["pattern_category"] / (prefix + "_" + group["hash"])
+        # Flat canonical/<id>/ like repros/, so the repro tooling reads it.
+        directory = output / "canonical" / f"{group['pattern_category']}_{prefix}_{group['hash']}"
         directory.mkdir(parents=True)
         write_repro(group["gm"], directory / "repro.py", group["hash"])
         points = list(group["points"].values())
@@ -228,7 +206,6 @@ def export_core(output, groups, rows, admitted_points, source_report):
             "shape_points": len(points),
         }
         meta["pattern_category"] = group["pattern_category"]
-        meta["pattern_family"] = group["family"]
         write_json(directory / "meta.json", meta)
     report = {
         "policy": source_report["policy"],
@@ -253,8 +230,6 @@ def export_core(output, groups, rows, admitted_points, source_report):
         },
         "unique_repros": len(groups),
         "shape_points": sum(len(g["points"]) for g in groups),
-        "family_members": len(members),
-        "deduplicated_repros": len(members) - len(groups),
         "region_occurrences": sum(
             (region["pattern_hash"], region["shape_hash"]) in admitted_points
             for row in rows for region in row["regions"]
@@ -268,21 +243,20 @@ def export_core(output, groups, rows, admitted_points, source_report):
             "shape_points": sum(
                 len(g["points"]) for g in groups if g["pattern_category"] == category
             ),
-            "family_members": sum(g["pattern_category"] == category for g in members),
         }
         for category in CATEGORIES
     }
-    report["families"] = len(groups)
     write_json(output / "report.json", report)
     per_category = (
         "\n".join(
-            f"- `{c}`: {v['repros']} repros (one per family; {v['family_members']} before dedup) / {v['shape_points']} shape points"
+            f"- `{c}`: {v['repros']} repros / {v['shape_points']} shape points"
             for c, v in report["pattern_categories"].items()
         )
         + "\n\n"
     )
+    policy = source_report["policy"]
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`. Prologue/epilogue use whole normal BB partitions with producer (epilogue) absorption first and one MM per augmented partition. Epilogues have no reduction-count limit. Horizontal windows retain their existing policy. Pattern hashes ignore scalar literals, as in repros/: literal variants are one repro with the first captured code. Each family exports one representative. There is no corpus-count cap.\n\n[Report](report.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`; `python scripts/validate_matmul_repros.py` runs every shape point eagerly on a GPU. Prologue/epilogue repros are normal BB partitions that absorbed one producer MM (epilogue, tried first) or one consumer MM (prologue), trimmed to the work that depends on the MM, with 1 to {policy['max_normal_compute']} non-MM compute ops and, for epilogues, at most {policy['max_epilogue_extra_inputs']} extra input tensors. Horizontal windows group 2-3 independent MMs that share an operand. Every repro is one pattern hash, which ignores scalar literals as in repros/: literal variants are one repro with the first captured code. There is no repro or shape-point cap. `canonical/<category>_<mm ops>_<hash>/` is flat like `repros/canonical/`, so the repro tools (`validate_eager.py`, `bench_parallel.py`, `validate_corpus_invariants.py --corpus-root mm_repro`) run on it. See [docs/matmul_partitioning.md](../docs/matmul_partitioning.md).\n\n[Report](report.json)\n"
     )
     return report
 
@@ -338,7 +312,6 @@ def curate_corpus(source: Path, output: Path):
                     raise ValueError(
                         (record["id"], "normalized region violates size/topology limits")
                     )
-                family = point["partition_metrics"]["normal_pattern_hash"] if normal else structure_key(gm)
                 # The group with this pattern hash, whose canonical node order
                 # maps the graphs onto each other whatever their FX node or
                 # output order, and whose code replays this point.
@@ -366,7 +339,6 @@ def curate_corpus(source: Path, output: Path):
                         "gm": gm,
                         "points": {},
                         "pattern_category": category,
-                        "family": family,
                         "normal": normal,
                     }
                     groups.append(group)

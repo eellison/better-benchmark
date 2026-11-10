@@ -151,7 +151,7 @@ def test_same_shape_offset_contexts_survive_raw_capture_and_curation(tmp_path):
     curated = tmp_path / "curated"
     report = curate_corpus(raw, curated)
     assert report["unique_repros"] == 1 and report["shape_points"] == 2
-    (path,) = (curated / "canonical" / "prologue").glob("*/repro.py")
+    (path,) = (curated / "canonical").glob("prologue_*/repro.py")
     module = _load(path)
     configs = load_shape_configs(str(path))
     assert len(configs) == 2
@@ -246,8 +246,8 @@ def test_output_order_variants_share_one_pattern(tmp_path):
     raw = _raw_stage(tmp_path / "raw", state, selections)
     curated = tmp_path / "curated"
     report = curate_corpus(raw, curated)
-    assert report["family_members"] == 1 and report["unique_repros"] == 1
-    (path,) = (curated / "canonical" / "epilogue").glob("*/repro.py")
+    assert report["unique_repros"] == 1
+    (path,) = (curated / "canonical").glob("epilogue_*/repro.py")
     (point,) = json.loads(path.with_name("shapes.json").read_text())["points"]
     assert point["models"] == {"unit/infer/fixture": {"occurrences": 3}}
     values = _load(path).Repro()(torch.zeros(2, 2, device="cpu"), torch.eye(2, device="cpu"))
@@ -278,8 +278,8 @@ def test_literal_variants_are_one_repro_with_the_first_captured_code(tmp_path):
     raw = _raw_stage(tmp_path / "raw", state, selections)
     curated = tmp_path / "curated"
     report = curate_corpus(raw, curated)
-    assert report["family_members"] == 1 and report["unique_repros"] == 1
-    (path,) = (curated / "canonical" / "epilogue").glob("*/repro.py")
+    assert report["unique_repros"] == 1
+    (path,) = (curated / "canonical").glob("epilogue_*/repro.py")
     (point,) = json.loads(path.with_name("shapes.json").read_text())["points"]
     assert point["models"] == {"unit/infer/fixture": {"occurrences": 3}}
     # The first captured variant's code, though the other occurs twice.
@@ -288,7 +288,8 @@ def test_literal_variants_are_one_repro_with_the_first_captured_code(tmp_path):
         torch.testing.assert_close(value, torch.full((2, 2), literal, device="cpu"))
     metadata = json.loads(path.with_name("meta.json").read_text())
     assert metadata["pattern_hash_mode"] == "dag_v1"
-    assert metadata["pattern_family"] == first_observed["normal_pattern_hash"] == metadata["pattern_hash"]
+    assert metadata["pattern_hash"] == first_observed["normal_pattern_hash"]
+    assert path.parent.name.startswith("epilogue_") and "pattern_family" not in metadata
     (config,) = load_shape_configs(str(path)).values()
     with FakeTensorMode(allow_non_fake_inputs=True):
         retraced, _infos = trace_repro(path, config)
@@ -333,7 +334,7 @@ def test_epilogues_differing_only_in_seed_slot_are_one_repro(tmp_path):
     raw = _raw_stage(tmp_path / "raw", state, selections)
     report = curate_corpus(raw, tmp_path / "curated")
     assert report["unique_repros"] == 1
-    (path,) = (tmp_path / "curated" / "canonical" / "epilogue").glob("*/repro.py")
+    (path,) = (tmp_path / "curated" / "canonical").glob("epilogue_*/repro.py")
     assert "inductor_lookup_seed.default(inductor_seeds, 0)" in path.read_text()
     (point,) = json.loads(path.with_name("shapes.json").read_text())["points"]
     assert point["models"] == {"unit/infer/fixture": {"occurrences": 2}}

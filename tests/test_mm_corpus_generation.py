@@ -37,8 +37,12 @@ class GraphModule(torch.nn.Module):
     # reduction/scan either, so padded feeding mm_1 is a prologue.
     assert result["unique_repros"] == 2 and result["shape_points"] == 2
     assert not stale.exists()
-    repros = {p.parent.parent.name: p for p in (output / "canonical").glob("*/*/repro.py")}
+    repros = {
+        json.loads(p.with_name("meta.json").read_text())["pattern_category"]: p
+        for p in (output / "canonical").glob("*/repro.py")
+    }
     assert sorted(repros) == ["epilogue", "prologue"]
+    assert all(p.parent.name.startswith(category + "_") for category, p in repros.items())
     epilogue = repros["epilogue"]
     namespace = runpy.run_path(str(epilogue))
     with fake_tensor_ctx():
