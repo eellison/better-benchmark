@@ -1,8 +1,8 @@
 # MM pattern corpus
 
-1192 repros / 1918 shape points / 16956 source occurrences.
+1197 repros / 1923 shape points / 16960 source occurrences.
 
-- `prologue`: 11 repros (one per family; 11 before dedup) / 43 shape points
+- `prologue`: 16 repros (one per family; 16 before dedup) / 48 shape points
 - `epilogue`: 1102 repros (one per family; 1248 before dedup) / 1756 shape points
 - `horizontal`: 74 repros (one per family; 118 before dedup) / 112 shape points
 - `horizontal_combine`: 5 repros (one per family; 5 before dedup) / 7 shape points

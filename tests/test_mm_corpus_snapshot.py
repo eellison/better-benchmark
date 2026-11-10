@@ -9,7 +9,7 @@ from matmul_partitioner import CATEGORIES, MatmulLimits
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
-    "prologue": (11, 43),
+    "prologue": (16, 48),
     "epilogue": (1102, 1756),
     "horizontal": (74, 112),
     "horizontal_combine": (5, 7),
@@ -20,7 +20,7 @@ def test_committed_snapshot_and_source_references():
     corpus = ROOT / "mm_repro"
     report = json.loads((corpus / "report.json").read_text())
     files = sorted((corpus / "canonical").glob("*/*/repro.py"))
-    assert len(files) == report["unique_repros"] == 1192
+    assert len(files) == report["unique_repros"] == 1197
     assert tuple(EXPECTED) == CATEGORIES
     assert {p.name for p in (corpus / "canonical").iterdir()} == set(CATEGORIES)
     assert set(report["pattern_categories"]) == set(CATEGORIES)
@@ -55,7 +55,7 @@ def test_committed_snapshot_and_source_references():
                 assert 2 <= metrics["mm"] <= limits.max_mm
                 assert metrics["contraction_depth"] == 1
     assert {category: tuple(counts) for category, counts in observed.items()} == EXPECTED
-    assert sum(len(p) for p in points.values()) == report["shape_points"] == 1918
+    assert sum(len(p) for p in points.values()) == report["shape_points"] == 1923
     assert len(families) == report["families"]
     assert report["family_members"] == sum(c["family_members"] for c in report["pattern_categories"].values())
     assert report["deduplicated_repros"] == report["family_members"] - len(families)
