@@ -94,14 +94,10 @@ window of individual operations around an MM.
    (see Outputs), and the nodes they need. Values that do not depend on the
    MM, such as a mask that is also a model output or an operand intermediate
    saved for backward, are not MM fusion.
-6. Keep the partition only if, after trimming, it does some non-MM work
-   besides views: real computation (`is_computation`), or a cast or copy
-   (`moves_data`: `convert_element_type`, `_to_copy`, `clone`, `contiguous`,
-   `copy`), which writes the MM result, or reads an operand, in another dtype
-   or layout. A view only changes indexing, so a region with nothing else is a
-   bare MM. Real computation is bounded by `max_normal_compute` (31; views,
-   casts and copies are free): larger partitions are mostly work around an
-   incidental MM.
+6. Keep the partition only if `0 < non-MM compute <= max_normal_compute` (31)
+   after trimming, counting real computation (`is_computation`; views, casts
+   and other scaffolding are free). 0 is a bare MM; larger partitions are
+   mostly work around an incidental MM.
 7. Keep an epilogue only if it reads at most `max_epilogue_extra_inputs` (4)
    extra tensors: inputs other than the MM operands (A, B and addmm's bias,
    followed back through views/casts) and the dropout seed buffer. A residual

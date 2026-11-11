@@ -654,20 +654,23 @@ def test_horizontal_view_outputs_are_the_mm_results():
     assert not any(op_name(n) == "aten::view" for n in found[0])
 
 
-# --- casts and copies are work; CPU inputs are left out ----------------------
+# --- casts, copies and views alone are bare MMs; CPU inputs are left out ------
 
 
-def test_cast_or_copy_epilogue_is_kept_but_views_alone_are_not():
+def test_cast_copy_or_view_only_epilogues_are_bare_mms():
+    # 0 < non-MM compute: casts, copies and views are not computation.
     cast = lambda x, w: torch.ops.prims.convert_element_type.default(x @ w, torch.float32)
     copy = lambda x, w: (x @ w).view(2, M // 2, 4, 12).permute(0, 2, 1, 3).contiguous()
     view = lambda x, w: (x @ w).view(2, M // 2, 4, 12).permute(0, 2, 1, 3)
     args = (R(M, 32).bfloat16(), R(32, 48).bfloat16())
-    for fn, target in ((cast, torch.ops.prims.convert_element_type.default),
-                       (copy, aten.clone.default)):
-        (region,) = normal_regions(fn, *args)
-        assert region.category == "epilogue"
-        assert [n.target for n in region.outputs] == [target]
-    assert normal_regions(view, *args) == []
+    for fn in (cast, copy, view):
+        assert normal_regions(fn, *args) == []
+    # With real computation the cast stays in the epilogue.
+    (region,) = normal_regions(
+        lambda x, w: torch.ops.prims.convert_element_type.default(torch.relu(x @ w), torch.float32),
+        *args,
+    )
+    assert region.category == "epilogue"
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="needs a GPU device")
