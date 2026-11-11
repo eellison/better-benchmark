@@ -9,11 +9,11 @@
     "max_normal_compute": 31,
     "max_epilogue_extra_inputs": 4
   },
-  "policy_id": "06c488dee520f3d7",
+  "policy_id": "26aad27d06358cfb",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",
-    "dependency_id": "b903917ee9c60e5d",
+    "dependency_id": "bcdb2159ea91784b",
     "raw_size_admitted_repros": 991,
     "raw_shape_points": 1561
   },
