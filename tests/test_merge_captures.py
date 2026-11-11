@@ -24,29 +24,50 @@ def _write_capture(
     *,
     pattern_hash: str,
     reduction_types: list[str],
+    masked_reason: str | None = None,
 ) -> Path:
     capture_dir = root / name
     capture_dir.mkdir(parents=True, exist_ok=True)
-    (capture_dir / "index.json").write_text(
-        json.dumps(
-            [
-                {
-                    "pattern_hash": pattern_hash,
-                    "shape_hash": name,
-                    "kind": "reduction",
-                    "reduction_types": reduction_types,
-                    "n_ops": 1,
-                    "origin_ops": ["aten.sum.default"],
-                    "file": str(root / f"missing_{name}.py"),
-                }
-            ]
-        )
-        + "\n"
-    )
+    entry = {
+        "pattern_hash": pattern_hash,
+        "shape_hash": name,
+        "kind": "reduction",
+        "reduction_types": reduction_types,
+        "n_ops": 1,
+        "origin_ops": ["aten.sum.default"],
+        "file": str(root / f"missing_{name}.py"),
+    }
+    if masked_reason is not None:
+        entry["masked_reason"] = masked_reason
+    (capture_dir / "index.json").write_text(json.dumps([entry]) + "\n")
     return capture_dir
 
 
 class MergeCapturesTests(unittest.TestCase):
+    def test_repro_is_masked_if_any_model_masks_it(self):
+        for masked_first in (True, False):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                output = root / "repros"
+                masked = _write_capture(
+                    root, "masked", pattern_hash="abcdef123456",
+                    reduction_types=["sum"], masked_reason="approx_index",
+                )
+                unmasked = _write_capture(
+                    root, "unmasked", pattern_hash="abcdef123456",
+                    reduction_types=["sum"],
+                )
+                order = [(masked, "ModelA"), (unmasked, "ModelB")]
+                if not masked_first:
+                    order.reverse()
+                for capture, model in order:
+                    merge_one_capture(capture, output, model, suite="hf", mode="train")
+
+                meta = json.loads(
+                    (output / "canonical" / "sum_abcdef123456" / "meta.json").read_text()
+                )
+                self.assertEqual(meta["masked_reason"], "approx_index", masked_first)
+
     def test_same_pattern_hash_reuses_existing_canonical_dir(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
