@@ -94,10 +94,14 @@ window of individual operations around an MM.
    (see Outputs), and the nodes they need. Values that do not depend on the
    MM, such as a mask that is also a model output or an operand intermediate
    saved for backward, are not MM fusion.
-6. Keep the partition only if `0 < non-MM compute <= max_normal_compute` (31)
-   after trimming, counting real computation (`is_computation`; views, casts
-   and other scaffolding are free). 0 is a bare MM; larger partitions are
-   mostly work around an incidental MM.
+6. Keep the partition only if, after trimming, it does some non-MM work
+   besides views: real computation (`is_computation`), or a cast or copy
+   (`moves_data`: `convert_element_type`, `_to_copy`, `clone`, `contiguous`,
+   `copy`), which writes the MM result, or reads an operand, in another dtype
+   or layout. A view only changes indexing, so a region with nothing else is a
+   bare MM. Real computation is bounded by `max_normal_compute` (31; views,
+   casts and copies are free): larger partitions are mostly work around an
+   incidental MM.
 7. Keep an epilogue only if it reads at most `max_epilogue_extra_inputs` (4)
    extra tensors: inputs other than the MM operands (A, B and addmm's bias,
    followed back through views/casts) and the dropout seed buffer. A residual
@@ -105,6 +109,13 @@ window of individual operations around an MM.
    A operand is computed inside the partition, so embedding tables and ids
    would count. These are the only size bounds on these two categories; the
    other `MatmulLimits` fields bound horizontal windows.
+8. Drop a region that reads a CPU tensor while its MM runs on the GPU
+   (`cpu_inputs`). DeBERTa-v2 divides attention scores by a 0-d CPU tensor,
+   `div(permute_1, arg3_1)` with `arg3_1: bf16[]` on the CPU; a GPU benchmark
+   of that region also measures getting a host value into the kernel.
+   Constants a region builds itself, such as `full([], 8.0, device=cpu)`, are
+   not inputs and stay. A horizontal window with a CPU input falls back to a
+   smaller window without it.
 
 Available means not already absorbed. If a partition has multiple eligible MMs,
 try them in FX order and take the first safe candidate. Check the updated

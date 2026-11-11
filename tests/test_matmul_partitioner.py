@@ -652,3 +652,37 @@ def test_horizontal_view_outputs_are_the_mm_results():
     assert [r.category for r in found] == ["horizontal"]
     assert len(found[0].outputs) == 3 and all(map(is_matmul, found[0].outputs))
     assert not any(op_name(n) == "aten::view" for n in found[0])
+
+
+# --- casts and copies are work; CPU inputs are left out ----------------------
+
+
+def test_cast_or_copy_epilogue_is_kept_but_views_alone_are_not():
+    cast = lambda x, w: torch.ops.prims.convert_element_type.default(x @ w, torch.float32)
+    copy = lambda x, w: (x @ w).view(2, M // 2, 4, 12).permute(0, 2, 1, 3).contiguous()
+    view = lambda x, w: (x @ w).view(2, M // 2, 4, 12).permute(0, 2, 1, 3)
+    args = (R(M, 32).bfloat16(), R(32, 48).bfloat16())
+    for fn, target in ((cast, torch.ops.prims.convert_element_type.default),
+                       (copy, aten.clone.default)):
+        (region,) = normal_regions(fn, *args)
+        assert region.category == "epilogue"
+        assert [n.target for n in region.outputs] == [target]
+    assert normal_regions(view, *args) == []
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="needs a GPU device")
+def test_regions_that_read_a_cpu_tensor_are_left_out():
+    from matmul_partitioner import cpu_inputs
+
+    # DeBERTa-v2 divides attention scores by a 0-d CPU tensor.
+    epilogue = lambda x, w, scale: (x @ w) / scale
+    x, a, b = R(M, 32, device="cuda"), R(32, 48, device="cuda"), R(32, 48, device="cuda")
+    assert normal_regions(epilogue, x, a, torch.tensor(8.0, device="cuda"))
+    assert normal_regions(epilogue, x, a, torch.tensor(8.0)) == []
+
+    # A horizontal window falls back to the window without the division.
+    pair = lambda x, a, b, scale: ((x @ a) / scale, (x @ b) / scale)
+    _, found = horizontal_regions(pair, x, a, b, torch.tensor(8.0))
+    assert [r.category for r in found] == ["horizontal"]
+    assert not cpu_inputs(found[0])
+    assert not any(n.target is aten.div.Tensor for n in found[0])

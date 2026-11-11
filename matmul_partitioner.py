@@ -7,10 +7,11 @@ Prologue/epilogue use unchanged normal BB partitions (mm_partition_absorption):
    consumer mm/addmm/bmm through a multiplied operand (prologue).
 3. Every original partition/MM is used once; augmented partitions do not grow.
 4. Only augmented partitions containing exactly one MM are extracted.
-Each is then trimmed to the outputs that depend on its MM and kept only if
-0 < non-MM compute <= MatmulLimits.max_normal_compute; epilogues also read at
-most max_epilogue_extra_inputs extra tensors. Their category is the source
-absorption direction.
+Each is then trimmed to the outputs that depend on its MM and kept only if it
+does non-MM work besides views (computation, or a cast or copy: moves_data),
+with at most MatmulLimits.max_normal_compute computation ops, and reads no CPU
+tensor; epilogues also read at most max_epilogue_extra_inputs extra tensors.
+Their category is the source absorption direction.
 
 Horizontal/horizontal_combine keep the independent 2..3-MM window search:
 a shared operand (same slot and values, operand_keys), equal output shapes,
@@ -426,6 +427,49 @@ def is_computation(node):
     )
 
 
+# Casts and copies are scaffolding for the size bound, but unlike a view they
+# write a new tensor: an epilogue that only casts or copies still stores the
+# MM result differently.
+#   mm -> cast:   convert_element_type = convert_element_type(mm, torch.float32)
+#                 return convert_element_type       # the MM writes f32, not bf16
+#   mm -> clone:  clone = clone(permute(view(mm, _shape_param_0), [0, 2, 1, 3]),
+#                               memory_format=torch.contiguous_format)
+#                 return clone                      # the MM writes head-major
+#   mm -> view:   return mm                          # output_values: a bare MM
+_DATA_MOVES = frozenset(
+    {"aten::_to_copy", "prims::convert_element_type", "aten::clone", "aten::contiguous",
+     "aten::copy", "aten::copy_"}
+)
+
+
+def moves_data(node):
+    """A cast or copy: a new tensor without real computation."""
+    return node.op == "call_function" and op_name(node) in _DATA_MOVES
+
+
+def cpu_inputs(nodes):
+    """CPU tensors from outside ``nodes`` that a region with GPU MMs reads.
+
+    DeBERTa-v2 scales attention scores by a 0-d CPU tensor, so the epilogue of
+    its key projection reads
+
+        div = torch.ops.aten.div.Tensor(permute_1, arg3_1)   # arg3_1: bf16[] on cpu
+
+    A GPU benchmark of such a region also measures getting a host value into
+    the kernel, which is not MM fusion, so regions with CPU inputs are left out.
+    Constants a region builds itself, such as full([], 8.0, device=cpu), are
+    not inputs and stay.
+    """
+    def on_cpu(node):
+        value = node.meta.get("val")
+        return isinstance(value, torch.Tensor) and value.device.type == "cpu"
+
+    if all(on_cpu(n) for n in nodes if is_matmul(n)):
+        return set()  # a CPU graph (unit tests) has nothing to mix
+    core = set(nodes)
+    return {a for n in nodes for a in n.all_input_nodes if a not in core and on_cpu(a)}
+
+
 _MM_WITH_BIAS = {"aten::addmm", "aten::baddbmm", "aten::addmv"}
 
 
@@ -686,8 +730,9 @@ class MatmulLimits:
     max_compute: int = 32  # MMs plus real computation
     max_inputs: int = 12
     max_outputs: int = 4
-    # Prologue/epilogue keep 0 < non-MM compute <= this, after trimming:
-    # 0 is a bare MM (views/casts only), larger is mostly unrelated work.
+    # Prologue/epilogue keep at most this much non-MM computation after
+    # trimming (casts/copies are free); larger is mostly unrelated work. One
+    # with nothing but views is a bare MM and is dropped (moves_data).
     max_normal_compute: int = 31
     # Epilogues read at most this many extra tensors: inputs other than the
     # MM operands (A, B, addmm bias) and the dropout seed buffer.
@@ -879,6 +924,9 @@ class _Extractor:
         metrics["non_mm_compute"] = sum(is_computation(n) for n in needed)
         if len(outputs) > self.limits.max_outputs or not self.fits(needed):
             self.reject("limits")
+            return None
+        if cpu_inputs(needed):
+            self.reject("cpu_input")
             return None
         if not self.collector.safe(needed):
             self.reject("cycle_or_alias")
@@ -1144,10 +1192,16 @@ def _normal_mm_regions(gm, excluded, categories, limits):
         outputs = [n for n in nodes if is_mutating(n) or any(u not in core for u in n.users)]
         (mm,) = [n for n in nodes if is_matmul(n)]
         nodes, outputs = trim_to_matmul(nodes, outputs, mm)
-        if not 0 < sum(map(is_computation, nodes)) <= limits.max_normal_compute:
+        # Some non-MM work besides views (moves_data: a cast or copy counts),
+        # and at most max_normal_compute real computation (casts/copies free).
+        if not any(is_computation(n) or moves_data(n) for n in nodes):
+            continue
+        if sum(map(is_computation, nodes)) > limits.max_normal_compute:
             continue
         extra = len(extra_inputs(nodes, mm))
         if category == "epilogue" and extra > limits.max_epilogue_extra_inputs:
+            continue
+        if cpu_inputs(nodes):
             continue
         core = set(nodes)
         depth = {}
