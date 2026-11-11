@@ -79,7 +79,7 @@ for _import_root in (_REPO_ROOT, _SCRIPT_DIR):
     if str(_import_root) not in sys.path:
         sys.path.insert(0, str(_import_root))
 
-from gpu_lock import discover_gpus, matching_gpus  # noqa: E402
+from gpu_lock import matching_gpus  # noqa: E402
 from benchmark_provenance import semantic_benchmark_config  # noqa: E402
 
 
@@ -1371,8 +1371,9 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
     per-dir number badly mis-prices the roll-up.
 
     Emits per dir:
-      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us, status,
-        ratio, fallback}} — the authoritative per-shape data the roll-up uses.
+      - ``points_by_shape``: {shape_hash -> {oracle_us, compile_us,
+        compile_fullgraph, status, ratio, fallback}} — the authoritative
+        per-shape data the roll-up uses.
       - ``points``: the original {label -> {...}} dict (back-compat).
       - ``oracle_us`` / ``compile_us``: representative MEDIAN across valid
         points (fallback only, used when an occurrence's shape_hash has no
@@ -1437,6 +1438,7 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
             points[label] = {
                 "oracle_us": us,
                 "compile_us": compile_us,
+                "compile_fullgraph": point.get("compile_fullgraph"),
                 "ratio": ratio,
                 "status": status,
             }
@@ -1447,6 +1449,7 @@ def _aggregate_oracle_timings(all_results: dict) -> dict:
             shape_entry = {
                 "oracle_us": us,
                 "compile_us": compile_us,
+                "compile_fullgraph": point.get("compile_fullgraph"),
                 "ratio": ratio,
                 "status": status,
                 "fallback": fallback,
@@ -2867,7 +2870,7 @@ def main():
 
     # Save perf.json per repro
     if args.update_perf and all_results:
-        hardware = args.hardware or _detect_hw()
+        hardware = args.hardware or gpus[0]["kind"]
         tag = args.tag or "latest"
         for repro_path, results in all_results.items():
             perf_path = Path(repro_path).parent / "perf.json"
@@ -2962,8 +2965,22 @@ def main():
         )
 
 
+def _worker_python_command(script: str, *, no_site: bool | None = None) -> list[str]:
+    """Build a worker command that preserves the parent's site-import mode.
+
+    A packaged launcher that runs Python with -S must start workers the same
+    way, and may name a different launcher in BETTER_BENCH_PYTHON_LAUNCHER
+    (unset or empty: sys.executable).
+    """
+    if no_site is None:
+        no_site = bool(sys.flags.no_site)
+    flags = ["-S"] if no_site else []
+    executable = os.environ.get("BETTER_BENCH_PYTHON_LAUNCHER") or sys.executable
+    return [executable, *flags, "-u", "-c", script]
+
+
 def _worker_env() -> dict[str, str]:
-    """Environment for a worker interpreter launched with sys.executable.
+    """Environment for a worker interpreter (see _worker_python_command).
 
     A packaged binary (e.g. a buck .par) sets sys.path and the runtime library
     path in its launcher and then clears PYTHONPATH/LD_LIBRARY_PATH, so a bare
@@ -3018,7 +3035,7 @@ def _locked_worker(gpu: dict, task_queue, result_queue, args_dict):
             else:
                 script = script_factory(gpu["index"], args_dict)
             p = subprocess.Popen(
-                [sys.executable, "-u", "-c", script],
+                _worker_python_command(script),
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, text=True, bufsize=1,
                 env=env, cwd=args_dict["root"],
@@ -4374,11 +4391,6 @@ for shape_name, shape_config in shape_items:
 _result_file.write(json.dumps(all_results) + "\\n")
 _result_file.flush()
 '''
-
-
-def _detect_hw() -> str:
-    gpus = discover_gpus()
-    return gpus[0]["kind"] if gpus else "unknown"
 
 
 def _run_compare(paths: list[Path], tag_a: str, tag_b: str):

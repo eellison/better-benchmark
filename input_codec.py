@@ -271,6 +271,8 @@ def render_T(entry_or_spec) -> str:
         elif g[0] == "runs":
             kwargs.append(f"gen=Runs({g[2]}, low={g[1]}, unique={g[3]}, "
                           f"runs={g[4]}, sorted={bool(g[5])})")
+        elif g[0] == "sorted":
+            kwargs.append("gen=Sorted()")
     suffix = f", {', '.join(kwargs)}" if kwargs else ""
     return f"T({shape}, {dtype}{suffix})"
 

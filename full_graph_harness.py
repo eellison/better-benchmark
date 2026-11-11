@@ -9,6 +9,7 @@ those annotations so the benchmark runner can time the whole graph directly.
 from __future__ import annotations
 
 import math
+import operator
 import re
 from dataclasses import dataclass
 import json
@@ -646,6 +647,16 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.index_select.default: (0, 1),
         torch.ops.aten.embedding.default: (0, None),
     }
+    # Only the INDEX argument is bounded: a scatter_add's src (a float value
+    # converted from a bf16 input) reaching the consumer must stay random.
+    index_arg_pos = {
+        torch.ops.aten.scatter.src: 2,
+        torch.ops.aten.scatter.value: 2,
+        torch.ops.aten.scatter_add.default: 2,
+        torch.ops.aten.gather.default: 2,
+        torch.ops.aten.index_select.default: 2,
+        torch.ops.aten.embedding.default: 1,
+    }
     passthrough_ops = {
         torch.ops.aten.clone.default,
         torch.ops.aten.reshape.default,
@@ -661,6 +672,23 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.t.default,
         torch.ops.aten.transpose.int,
         torch.ops.aten.where.self,
+        # A lifted tensor constant (e.g. a small table of row ids) reaches
+        # index() through lift_fresh_copy.
+        torch.ops.aten.lift_fresh_copy.default,
+        torch.ops.aten.alias.default,
+        torch.ops.aten.detach.default,
+        # cat/stack keep each input's values: an index built as
+        # cat(x[:, 0], x[:, 1] + 100, ...) must bound x by the tightest
+        # branch (rows - 100), or the offset columns index out of bounds.
+        torch.ops.aten.cat.default,
+        torch.ops.aten.stack.default,
+        # unbind/split + getitem hand each column to its own consumer: a
+        # feature tensor whose columns index tables of different sizes must
+        # be bounded by the smallest table, or the small lookup asserts OOB.
+        torch.ops.aten.unbind.int,
+        torch.ops.aten.split.Tensor,
+        torch.ops.aten.split_with_sizes.default,
+        operator.getitem,
     }
 
     bounds = {}
@@ -746,7 +774,9 @@ def infer_index_bounds_from_gm(
                 constants[name] = 0
             continue
 
-        def _find_bound(start_node, max_hops=8):
+        def _find_bound(start_node, max_hops=16):
+            # A cross-entropy label (f64 -> nan_to_num where-chain -> int64 ->
+            # ignore_index where -> unsqueeze -> gather) is 9 hops deep.
             # Collect EVERY bound the value reaches and return the MIN: a
             # value consumed by several index ops must satisfy all of them
             # (Electra: ids flow through gather into the 2-row token-type
@@ -790,6 +820,51 @@ def infer_index_bounds_from_gm(
             _VALUE_PRESERVING = {
                 torch.ops.prims.convert_element_type.default,
             }
+            _STATIC_PASSTHROUGH = {
+                torch.ops.aten.view.default,
+                torch.ops.aten.reshape.default,
+                torch.ops.aten.expand.default,
+                torch.ops.aten.unsqueeze.default,
+                torch.ops.aten.clone.default,
+                torch.ops.prims.convert_element_type.default,
+            }
+
+            def _static_max(m, depth=0):
+                # Max value of an operand computed only from iota and
+                # constants, else None. Inductor's split scatter indexes
+                # P*N rows with idx + (iota & (P-1)) * N: idx is bounded by
+                # N = rows - (P-1)*N, not rows // 2.
+                if not hasattr(m, "op"):
+                    return int(m) if isinstance(m, int) and m >= 0 else None
+                if m.op != "call_function" or depth > 8:
+                    return None
+                t = m.target
+                if t == torch.ops.prims.iota.default:
+                    length = m.args[0]
+                    start = m.kwargs.get("start", 0)
+                    step = m.kwargs.get("step", 1)
+                    if (isinstance(length, int) and isinstance(start, int)
+                            and isinstance(step, int) and start >= 0 and step >= 0):
+                        return start + max(length - 1, 0) * step
+                    return None
+                if t == torch.ops.aten.full.default and len(m.args) > 1:
+                    v = m.args[1]
+                    return int(v) if isinstance(v, int) and v >= 0 else None
+                if t == torch.ops.aten.bitwise_and.Scalar:
+                    mask = m.args[1]
+                    if isinstance(mask, int) and mask >= 0:
+                        inner = _static_max(m.args[0], depth + 1)
+                        return mask if inner is None else min(mask, inner)
+                    return None
+                if t in (torch.ops.aten.mul.Tensor, torch.ops.aten.add.Tensor):
+                    a = _static_max(m.args[0], depth + 1)
+                    b = _static_max(m.args[1], depth + 1)
+                    if a is None or b is None:
+                        return None
+                    return a * b if t == torch.ops.aten.mul.Tensor else a + b
+                if t in _STATIC_PASSTHROUGH and m.args:
+                    return _static_max(m.args[0], depth + 1)
+                return None
 
             frontier = [(start_node, ())]
             for _hop in range(max_hops):
@@ -835,7 +910,8 @@ def infer_index_bounds_from_gm(
 
                         if target in index_consumers:
                             target_arg_idx, dim_arg_idx = index_consumers[target]
-                            if len(user.args) > target_arg_idx:
+                            pos = index_arg_pos[target]
+                            if len(user.args) > max(target_arg_idx, pos) and user.args[pos] is n:
                                 target_node = user.args[target_arg_idx]
                                 target_shape = _node_shape(target_node)
                                 if target_shape and target_node is not n:
@@ -854,13 +930,21 @@ def infer_index_bounds_from_gm(
                             for a in user.args[:2]:
                                 if a is not n:
                                     other = a
+                            static = (_static_max(other)
+                                      if kind == "add" and not isinstance(other, (int, float))
+                                      else None)
                             if isinstance(other, (int, float)):
                                 next_frontier.append(
                                     (user, chain + ((kind + "c", other),)))
+                            elif static is not None:
+                                next_frontier.append(
+                                    (user, chain + (("addc", static),)))
                             else:
                                 next_frontier.append(
                                     (user, chain + ((kind + "t", None),)))
-                frontier = next_frontier
+                # unbind/split -> getitem -> cat/stack fan-out and fan-in reach a node along many paths;
+                # identical (node, chain) entries give identical bounds.
+                frontier = list(dict.fromkeys(next_frontier))
                 if not frontier:
                     break
             if found:
@@ -880,6 +964,45 @@ def infer_index_bounds_from_gm(
             bounds[name] = bound
 
     return bounds
+
+
+def infer_sorted_inputs_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> None:
+    """Attach a sorted generator to float placeholders used as bucketize
+    boundaries or searchsorted's sorted sequence. Unsorted random boundaries
+    send most values to a few buckets, so a downstream index_put(accumulate)
+    serializes on atomics the model never contends on."""
+    import torch
+
+    sorted_arg = {
+        torch.ops.aten.bucketize.Tensor: 1,
+        torch.ops.aten.searchsorted.Tensor: 0,
+        torch.ops.aten.searchsorted.Scalar: 0,
+    }
+    views = {
+        torch.ops.aten.view.default,
+        torch.ops.aten.reshape.default,
+        torch.ops.aten.slice.Tensor,
+        torch.ops.aten.contiguous.default,
+        torch.ops.aten.clone.default,
+        torch.ops.prims.convert_element_type.default,
+    }
+    for node in gm.graph.nodes:
+        if node.op != "placeholder":
+            continue
+        info = placeholder_info.get(node.name)
+        dtype = (info or {}).get("dtype", "")
+        if info is None or not ("float" in dtype or "bfloat" in dtype):
+            continue
+        frontier = [node]
+        for n in frontier:
+            for user in n.users:
+                if user.op != "call_function":
+                    continue
+                pos = sorted_arg.get(user.target)
+                if pos is not None and len(user.args) > pos and user.args[pos] is n:
+                    info.setdefault("gen", {"kind": "sorted"})
+                elif user.target in views and user.args and user.args[0] is n:
+                    frontier.append(user)
 
 
 def infer_permutation_indices_from_gm(

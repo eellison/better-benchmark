@@ -83,6 +83,14 @@ def _read_json_safe(path: Path) -> tuple[dict | None, str | None]:
         return None, str(exc)
 
 
+def _display_path(path: Path) -> str:
+    """Use a repo-relative path when possible, otherwise keep it absolute."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 # ---------------------------------------------------------------------------
 # Hard invariants
 # ---------------------------------------------------------------------------
@@ -251,7 +259,7 @@ def check_manifest_consistency() -> list[str]:
         for pat in patterns:
             if isinstance(pat, str) and pat not in canonical_hashes:
                 missing_refs.append(
-                    f"{manifest_path.relative_to(ROOT)}: {pat}"
+                    f"{_display_path(manifest_path)}: {pat}"
                 )
 
     if missing_refs:
@@ -313,7 +321,7 @@ def check_shapes_eager_validation() -> list[str]:
         if result.returncode != 0:
             # Extract failure count from output
             output_lines = result.stdout.strip().split("\n")
-            fail_summary = [l for l in output_lines if "FAIL" in l.upper()]
+            fail_summary = [line for line in output_lines if "FAIL" in line.upper()]
             sample = "\n".join(fail_summary[:5]) if fail_summary else result.stdout[-500:]
             errors.append(
                 f"Eager validation of sampled shapes failed (exit {result.returncode}):\n"
@@ -462,7 +470,7 @@ def validate_model_roundtrip(
     from full_graph_harness import load_full_graph_definition
 
     result = {
-        "model_dir": str(model_dir.relative_to(ROOT)),
+        "model_dir": _display_path(model_dir),
         "suite": model_dir.relative_to(MODELS_DIR).parts[0],
         "graphs": [],
         "a_failures": [],      # invariant A: input round-trip

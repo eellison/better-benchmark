@@ -14,7 +14,11 @@ import os
 import sys
 from pathlib import Path
 
-from gpu_lock import gpu_lock, gpu_lock_for_kind
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from gpu_lock import device_kind_from_name, gpu_lock, gpu_lock_for_kind  # noqa: E402
 
 
 def _resolve_input_path(path_arg):
@@ -36,11 +40,7 @@ def current_hardware_label():
     import torch
     if not torch.cuda.is_available():
         return "CPU"
-    name = torch.cuda.get_device_name()
-    for token in ("B200", "H200", "H100", "A100", "V100"):
-        if token in name:
-            return token
-    return name.replace(" ", "_")
+    return device_kind_from_name(torch.cuda.get_device_name())
 
 
 def _randn_with_bool(old_randn):

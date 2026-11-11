@@ -21,6 +21,8 @@ from typing import Any
 import torch
 import torch._inductor.inductor_prims  # noqa: F401
 
+from gpu_kind import device_kind_from_name
+
 
 UNVERSIONED_REPRO_VERSION = 0
 # v3: default inputs load from the sibling shapes.json; the inline
@@ -339,6 +341,9 @@ def _make_shape_eval_ns():
                 "n_unique": int(unique), "n_runs": int(runs),
                 "sorted": bool(sorted)}
 
+    def Sorted():
+        return {"kind": "sorted"}
+
     def T(shape, dtype, stride=None, max=None, gen=None, constraint=None, index=None):
         spec = {
             "kind": "tensor",
@@ -365,6 +370,7 @@ def _make_shape_eval_ns():
         return {"kind": "shape", "dims": dims}
 
     return {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm, "Runs": Runs,
+            "Sorted": Sorted,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
             "b8": "b8", "u8": "u8"}
@@ -498,6 +504,9 @@ def parse_shapes_config(config_str: str) -> list:
                 "n_unique": int(unique), "n_runs": int(runs),
                 "sorted": bool(sorted)}
 
+    def Sorted():
+        return {"kind": "sorted"}
+
     def T(shape, dtype, stride=None, max=None, gen=None, constraint=None, index=None):
         spec = {
             "kind": "tensor",
@@ -524,6 +533,7 @@ def parse_shapes_config(config_str: str) -> list:
         return {"kind": "shape", "dims": dims}
 
     _ns = {"__builtins__": {}, "T": T, "S": S, "Index": Index, "Perm": Perm, "Runs": Runs,
+            "Sorted": Sorted,
             "torch": torch,
             "f32": "f32", "f16": "f16", "bf16": "bf16", "f64": "f64",
             "i64": "i64", "i32": "i32", "i16": "i16", "i8": "i8",
@@ -696,6 +706,14 @@ def _make_permutation_tensor(shape, dtype, device, stride=None, size=None):
     return values
 
 
+def _randn(size, dtype, device) -> torch.Tensor:
+    # randn has no fp8 kernels; draw in fp32 and round (normal values sit well
+    # inside every fp8 format's range).
+    if dtype.is_floating_point and dtype.itemsize == 1:
+        return torch.randn(size, dtype=torch.float32, device=device).to(dtype)
+    return torch.randn(size, dtype=dtype, device=device)
+
+
 def make_inputs_from_config(config: dict) -> list:
     """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
 
@@ -720,7 +738,8 @@ def make_inputs_from_config(config: dict) -> list:
             buf = torch.empty(nbytes, dtype=torch.uint8, device=device)
             if dtype is not None and dtype.is_floating_point and nbytes % dtype.itemsize == 0:
                 # Raw byte noise viewed as a float dtype includes NaN/Inf bit patterns.
-                buf.view(dtype).normal_()
+                typed = buf.view(dtype)
+                typed.copy_(_randn(typed.shape, dtype, device))
             elif dtype in _RANGED_ALIAS_DTYPES and nbytes % dtype.itemsize == 0:
                 # The values an unaliased input of the dtype gets: [0, 100) or
                 # {0, 1}. Byte noise read as int64 spans ±9.2e18: out of range
@@ -876,14 +895,20 @@ def make_inputs_from_config(config: dict) -> list:
                     result.append(storage.to(dtype).as_strided(shape, stride))
                 else:
                     result.append(torch.randint(low, hi, shape, dtype=torch.int64, device=device).to(dtype))
+            elif gen and gen.get("kind") == "sorted":
+                # Sort the flat storage: the input may be reshaped before bucketize, and a
+                # non-decreasing storage stays non-decreasing along every dim with stride >= 0.
+                numel = _storage_size_for_strided(shape, stride) if stride else _numel(shape)
+                storage = _randn(numel, torch.float32, device).sort().values.to(dtype)
+                result.append(storage.as_strided(shape, stride) if stride else storage.view(shape))
             elif stride or spec.get("storage_offset"):
                 stride = stride or _contiguous_stride_local(shape)
                 offset = int(spec.get("storage_offset", 0))
                 numel = _storage_size_for_strided(shape, stride) + offset
-                storage = torch.randn(numel, dtype=dtype, device=device)
+                storage = _randn(numel, dtype, device)
                 result.append(storage.as_strided(shape, stride, offset))
             else:
-                result.append(torch.randn(shape, dtype=dtype, device=device))
+                result.append(_randn(shape, dtype, device))
     # Read every constrained alias view before changing any shared storage.
     # This preserves unconstrained disjoint members and avoids adding the
     # floor repeatedly to overlapping views. Larger minimums win overlaps.
@@ -916,9 +941,13 @@ def _merge_default_shape_params(inputs: list, default_inputs: list) -> list:
 
 
 def _randn_with_bool(old_randn):
-    """Wrapper around torch.randn that handles bool dtype (legacy repro compat)."""
+    """Wrapper around torch.randn that handles bool and fp8 dtypes (legacy repro compat)."""
     def randn(*args, **kwargs):
-        if kwargs.get("dtype") is torch.bool:
+        dtype = kwargs.get("dtype")
+        if dtype is not None and dtype.is_floating_point and dtype.itemsize == 1:
+            kwargs = dict(kwargs, dtype=torch.float32)
+            return old_randn(*args, **kwargs).to(dtype)
+        if dtype is torch.bool:
             kwargs = dict(kwargs)
             kwargs.pop("dtype")
             if "size" in kwargs:
@@ -1032,19 +1061,12 @@ def _save_perf(repro_file: str, hardware: str, shape_label: str, result: dict):
 
 
 def _detect_hardware() -> str:
-    """Auto-detect GPU hardware kind from nvidia-smi."""
+    """Auto-detect the process-visible CUDA hardware kind."""
     try:
-        import subprocess
-        out = subprocess.check_output(
-            ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
-            text=True, timeout=5
-        ).strip().split("\n")[0]
-        for kind in ("B200", "H200", "H100", "A100", "V100"):
-            if kind in out:
-                return kind
-        return out.replace(" ", "_")[:20]
+        name = torch.cuda.get_device_name(torch.cuda.current_device())
     except Exception:
         return "unknown"
+    return device_kind_from_name(name)
 
 
 def _bench_cudagraph_min_us(call_fn, inputs, n_warmup: int, n_rep: int) -> float:

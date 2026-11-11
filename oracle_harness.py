@@ -35,6 +35,7 @@ from pathlib import Path
 
 import torch
 
+from gpu_kind import device_kind_from_name
 from numerics import anchored_gate
 from repro_harness import preserve_compile_environment
 
@@ -80,19 +81,14 @@ def get_gpu_kind() -> str:
     """
     if not hasattr(get_gpu_kind, "_cached"):
         try:
-            import subprocess
-            out = subprocess.check_output(
-                ["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"],
-                text=True, timeout=5
-            ).strip().split("\n")[0]
-            for kind in ("B200", "H200", "H100", "A100", "V100"):
-                if kind in out:
-                    get_gpu_kind._cached = kind
-                    break
-            else:
-                get_gpu_kind._cached = out.replace(" ", "_")[:20]
+            # Query the process-visible CUDA device. Unlike nvidia-smi line 0,
+            # this stays correct inside a CUDA_VISIBLE_DEVICES worker on a
+            # mixed B200/GB300 host.
+            name = torch.cuda.get_device_name(torch.cuda.current_device())
         except Exception:
             get_gpu_kind._cached = "unknown"
+        else:
+            get_gpu_kind._cached = device_kind_from_name(name)
     return get_gpu_kind._cached
 
 
@@ -1157,6 +1153,7 @@ def bench_oracle(
     compiled = compile_repro(
         instance,
         compile_policy=compile_policy,
+        fullgraph=True,
         options={"coordinate_descent_tuning": True},
     )
     with torch.no_grad():
@@ -1276,6 +1273,7 @@ def bench_oracle(
         "compile_policy": compile_policy,
         "oracle_us": round(best_oracle_us, 2),
         "compile_us": round(best_compile_us, 2),
+        "compile_fullgraph": True,
         "ratio": round(ratio, 3),
         "status": status,
     }
@@ -1321,7 +1319,7 @@ def _bench_oracle_cpu(
     with torch.no_grad():
         oracle_us = _do_bench(lambda: oracle_forward(inputs), torch.device("cpu"),
                               warmup=warmup, rep=rep)
-    compiled = compile_repro(instance, compile_policy=compile_policy)
+    compiled = compile_repro(instance, compile_policy=compile_policy, fullgraph=True)
     with torch.no_grad():
         for _ in range(5):
             compiled(*inputs)
@@ -1334,6 +1332,7 @@ def _bench_oracle_cpu(
         "compile_policy": compile_policy,
         "oracle_us": round(oracle_us, 2),
         "compile_us": round(compile_us, 2),
+        "compile_fullgraph": True,
         "ratio": round(ratio, 3),
         "status": status,
     }

@@ -1662,3 +1662,57 @@ def test_bind_parsing_and_symbol_binding_threading():
         with pytest.raises(ValueError, match="shapes.txt"):
             load_shape_configs(str(d / "repro.py"),
                                symbol_bindings={"s16": 24})
+
+
+def test_index_bound_follows_cat_of_offset_columns():
+    """An index built as cat(x[:, 0], x[:, 1] + 100, x[:, 2] + 200) into a
+    300-row table: every column of x shares one generator, so x must be
+    bounded by the tightest branch (300 - 200), not by the table or by
+    observed values (otherwise the region indexes out of bounds and the
+    device assert poisons the CUDA context for every later region)."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(x, table):
+        idx = torch.cat([x[:, 0], x[:, 1] + 100, x[:, 2] + 200])
+        return table[idx] + 1
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        x = m.from_tensor(torch.zeros(1000, 3, dtype=torch.int64))
+        table = m.from_tensor(torch.zeros(300, 64))
+        gm = make_fx(f, tracing_mode="fake")(x, table)
+
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    x_ph = next(n.name for n in gm.graph.nodes
+                if n.op == "placeholder" and "int64" in info[n.name]["dtype"])
+    assert bounds.get(x_ph) == 300 - 200, bounds
+
+
+def test_index_bound_follows_unbind_columns():
+    """Columns of one int tensor, split by unbind, index tables of 16, 2 and
+    700 rows: they share one generator, so the tensor must be bounded by the
+    smallest table, or the lookup into the 2-row table goes out of bounds."""
+    import torch
+    from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import (infer_index_bounds_from_gm,
+                                    placeholder_info_from_gm)
+
+    def f(x, t0, t1, t2):
+        a, b, c = torch.unbind(x, -1)
+        return t0[a], t1[b], t2[c]
+
+    with FakeTensorMode(allow_non_fake_inputs=True) as m:
+        x = m.from_tensor(torch.zeros(4096, 3, dtype=torch.int64))
+        tables = [m.from_tensor(torch.zeros(rows, 32)) for rows in (16, 2, 700)]
+        gm = make_fx(f, tracing_mode="fake")(x, *tables)
+
+    info = placeholder_info_from_gm(gm)
+    bounds = infer_index_bounds_from_gm(gm, info)
+    x_ph = next(n.name for n in gm.graph.nodes
+                if n.op == "placeholder" and "int64" in info[n.name]["dtype"])
+    assert bounds.get(x_ph) == 2, bounds
