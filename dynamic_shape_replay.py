@@ -206,7 +206,18 @@ def _eval_shape_env_expr(text: str, values: dict[str, Any]):
 
 def _shape_env_spec_for_repro(repro_file: str,
                               frozen: dict | None = None):
-    """Build the native ``ShapesSpec`` for a captured dynamic family.
+    """Build the native ``ShapesSpec`` from a repro's family contract."""
+    shapes_path = Path(repro_file).parent / "shapes.json"
+    if not shapes_path.exists():
+        raise ValueError(
+            f"dynamic ShapeEnv replay needs {shapes_path}")
+    data = json.loads(shapes_path.read_text())
+    return _shape_env_spec_from_contract(data, frozen=frozen)
+
+
+def _shape_env_spec_from_contract(data: dict,
+                                  frozen: dict | None = None):
+    """Build the native ``ShapesSpec`` for a captured dynamic contract.
 
     Every family symbol is represented by one shared ``IntVar``.  The same
     value is used in tensor dims, lifted SymInt arguments, derived expressions,
@@ -228,11 +239,6 @@ def _shape_env_spec_for_repro(repro_file: str,
             "torch.fx.experimental.dynamic_spec.ShapesSpec so captured "
             "ranges/guards can be restored into ShapeEnv") from exc
 
-    shapes_path = Path(repro_file).parent / "shapes.json"
-    if not shapes_path.exists():
-        raise ValueError(
-            f"dynamic ShapeEnv replay needs {shapes_path}")
-    data = json.loads(shapes_path.read_text())
     symbols = data.get("symbols") or {}
     frozen = dict(frozen or {})
     live_names = tuple(sorted(set(symbols) - set(frozen)))
@@ -530,6 +536,16 @@ def _symint_expr_evaluator(expr):
 
 def _backed_replay_plan_for_repro(repro_file: str,
                                    frozen: dict | None = None):
+    """Build a backed replay plan from a repro's family contract."""
+    shapes_path = Path(repro_file).parent / "shapes.json"
+    if not shapes_path.exists():
+        return None
+    data = json.loads(shapes_path.read_text())
+    return _backed_replay_plan_from_contract(data, frozen=frozen)
+
+
+def _backed_replay_plan_from_contract(data: dict,
+                                      frozen: dict | None = None):
     """Build a kernel-faithful plan when every live symbol is tensor-backed.
 
     ``ShapesSpec`` is required for genuinely unbacked symbols, but it models
@@ -546,10 +562,6 @@ def _backed_replay_plan_for_repro(repro_file: str,
     """
     from input_codec import _sympify_expr
 
-    shapes_path = Path(repro_file).parent / "shapes.json"
-    if not shapes_path.exists():
-        return None
-    data = json.loads(shapes_path.read_text())
     symbols = data.get("symbols") or {}
     frozen = dict(frozen or {})
     live_names = tuple(sorted(set(symbols) - set(frozen)))
@@ -741,6 +753,23 @@ def _symbols_and_guards_for_repro(repro_file: str) -> tuple[dict, list]:
 
 def _distinct_dynamic_bindings(repro_file, rows, n=2,
                                frozen: dict | None = None):
+    """Pick guard-valid warm bindings from a repro's saved family points."""
+    symbols, guards = _symbols_and_guards_for_repro(repro_file)
+    row_bindings = [
+        (binding if binding is not None else config.get("bindings")) or {}
+        for _label, binding, config in rows
+    ]
+    return _distinct_dynamic_bindings_for_contract(
+        symbols, guards, row_bindings, n=n, frozen=frozen)
+
+
+def _distinct_dynamic_bindings_for_contract(
+    symbols: dict,
+    guards: list,
+    seed_bindings: list[dict] | None = None,
+    n: int = 2,
+    frozen: dict | None = None,
+):
     """Pick up to `n` GUARD-VALID warmup bindings that force inductor past
     0/1/many specialization into the GENERAL dynamic kernel — the one the
     model runs. These are WARMUP shapes (the artifact is timed later at the
@@ -763,7 +792,6 @@ def _distinct_dynamic_bindings(repro_file, rows, n=2,
     constrained a single shape is the only reachable one)."""
     from input_codec import bindings_satisfy
 
-    symbols, guards = _symbols_and_guards_for_repro(repro_file)
     hint = {
         name: value
         for name, definition in (symbols or {}).items()
@@ -771,10 +799,7 @@ def _distinct_dynamic_bindings(repro_file, rows, n=2,
             (value := _symbol_point_value(definition)), int)
         and not isinstance(value, bool)
     }
-    row_bindings = [
-        (binding if binding is not None else config.get("bindings")) or {}
-        for _label, binding, config in rows
-    ]
+    row_bindings = list(seed_bindings or [])
     for name in symbols:
         if name not in hint:
             value = next(
@@ -803,9 +828,9 @@ def _distinct_dynamic_bindings(repro_file, rows, n=2,
             "dynamic warmup needs an explicit binding for symbols without "
             f"an observed point: {missing_seed}")
     if not hint:
-        # No symbol table (hand-written dynamic shapes.json) — fall back to
-        # the --bind rows' bindings, distinct ones first.
-        bs = [b for _l, b, _c in rows if b]
+        # No observed symbol values: use explicit seed bindings, distinct
+        # ones first.
+        bs = [b for b in row_bindings if b]
         return bs[:n] if bs else [None]
 
     names = sorted(hint)
