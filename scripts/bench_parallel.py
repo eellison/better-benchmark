@@ -4255,7 +4255,9 @@ def bench_full_graph_one(repro_path):
     instance = execution.module
 
     def make_numerics_inputs():
-        return make_inputs_from_full_graph_specs(_definition.input_specs, default_device="cuda")
+        # The execution's own argument adapter: a dynamic replay module takes
+        # mark_dynamic'd inputs or extra live-symbol arguments.
+        return list(execution.args())
 
     if not CHECK_NUMERICS:
         with gpu_setup_lock():
@@ -4274,13 +4276,13 @@ def bench_full_graph_one(repro_path):
     if {args_dict.get("compile_time", False)}:
         with fresh_cache():
             _t0 = time.perf_counter()
-            compiled = torch.compile(instance, fullgraph=CHECK_NUMERICS)
+            compiled = execution.compile(fullgraph=CHECK_NUMERICS)
             with torch.no_grad():
                 compiled(*inputs)
             torch.cuda.synchronize()
             compile_time_s = time.perf_counter() - _t0
     else:
-        compiled = torch.compile(instance, fullgraph=CHECK_NUMERICS)
+        compiled = execution.compile(fullgraph=CHECK_NUMERICS)
     numerics = None
     if CHECK_NUMERICS:
         # Checking requires fullgraph: graph breaks would leave eager code in the
@@ -4339,8 +4341,7 @@ def bench_full_graph_one(repro_path):
     cd_numerics = None
     if do_cd:
         torch._dynamo.reset()
-        compiled_cd = torch.compile(
-            instance,
+        compiled_cd = execution.compile(
             fullgraph=CHECK_NUMERICS,
             options={{"coordinate_descent_tuning": True}},
         )
