@@ -1012,6 +1012,33 @@ def test_alias_group_float_buffer_is_finite():
         assert torch.isfinite(a).all() and torch.isfinite(b).all(), dtype
 
 
+def test_alias_group_integer_buffer_is_in_range():
+    """An integer/bool alias group gets the values of an unaliased input of
+    its dtype ([0, 100) / {0, 1}), not byte noise, which read as int64 is an
+    out-of-range index (LayoutLM bbox columns are int64 views of one buffer)."""
+    import torch
+    from repro_harness import make_inputs_from_config
+
+    N, D = 64, 4
+    for dtype, high in (("int64", 100), ("int32", 100), ("int8", 100), ("bool", 2)):
+        itemsize = torch.empty(0, dtype=getattr(torch, dtype)).element_size()
+        config = {
+            "alias_group_nbytes": [N * D * itemsize],
+            "inputs": [
+                {"kind": "tensor", "shape": [N], "dtype": dtype,
+                 "stride": [D], "storage_offset": off, "alias_group": 0,
+                 "device": "cpu"}
+                for off in range(D)
+            ],
+        }
+        views = make_inputs_from_config(config)
+        assert len({v.untyped_storage().data_ptr() for v in views}) == 1
+        assert [v.storage_offset() for v in views] == list(range(D))
+        for v in views:
+            v = v.long()
+            assert bool(((v >= 0) & (v < high)).all()), dtype
+
+
 def test_alias_group_only_for_multiply_referenced():
     """A storage referenced by exactly ONE partition placeholder gets NO
     alias tag (single view == private buffer, grouping is noise). Pins the

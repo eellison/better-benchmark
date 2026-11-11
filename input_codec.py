@@ -101,6 +101,8 @@ def _gen_to_compact(gen: dict) -> list | None:
     kind = gen.get("kind")
     if kind in (None, "randn"):
         return None  # default for floats — omitted
+    if kind == "positive":
+        return ["positive", float(gen.get("minimum", 0.1))]
     if kind == "index":
         return ["index", int(gen.get("low", 0)), int(gen.get("high", 100))]
     if kind == "randint":
@@ -111,7 +113,10 @@ def _gen_to_compact(gen: dict) -> list | None:
             out.append(int(gen["size"]))
         return out
     if kind == "offsets":
-        return ["offsets", int(gen.get("high", 1))]
+        out = ["offsets", int(gen.get("high", 1))]
+        if gen.get("end") is not None:
+            out.append(int(gen["end"]))
+        return out
     if kind == "constant":
         return ["const", gen.get("value", 0)]
     if kind == "runs":
@@ -122,6 +127,8 @@ def _gen_to_compact(gen: dict) -> list | None:
 
 def _gen_from_compact(c: list) -> dict:
     kind = c[0]
+    if kind == "positive":
+        return {"kind": "positive", "minimum": c[1] if len(c) > 1 else 0.1}
     if kind == "index":
         return {"kind": "index", "low": c[1], "high": c[2]}
     if kind == "randint":
@@ -130,7 +137,10 @@ def _gen_from_compact(c: list) -> dict:
         return {"kind": "permutation",
                 "size": c[1] if len(c) > 1 else None}
     if kind == "offsets":
-        return {"kind": "offsets", "high": c[1]}
+        gen = {"kind": "offsets", "high": c[1]}
+        if len(c) > 2:
+            gen["end"] = c[2]
+        return gen
     if kind == "const":
         return {"kind": "constant", "value": c[1]}
     if kind == "runs":
@@ -250,12 +260,14 @@ def render_T(entry_or_spec) -> str:
         kwargs.append(f"stride={tuple(opts['st'])}")
     if "gen" in opts:
         g = opts["gen"]
-        if g[0] == "index":
+        if g[0] == "positive":
+            kwargs.append(f"gen=Positive({g[1] if len(g) > 1 else 0.1})")
+        elif g[0] == "index":
             kwargs.append(f"gen=Index({g[2]})")
         elif g[0] == "perm":
             kwargs.append(f"gen=Perm({g[1] if len(g) > 1 else ''})")
         elif g[0] == "offsets":
-            kwargs.append(f"gen=Offsets({g[1]})")
+            kwargs.append(f"gen=Offsets({g[1]}" + (f", end={g[2]})" if len(g) > 2 else ")"))
         elif g[0] == "runs":
             kwargs.append(f"gen=Runs({g[2]}, low={g[1]}, unique={g[3]}, "
                           f"runs={g[4]}, sorted={bool(g[5])})")

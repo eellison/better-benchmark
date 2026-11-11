@@ -1,0 +1,45 @@
+{
+  "points": [
+    {
+      "shape_hash": "88687291",
+      "inputs": [
+        [
+          [
+            50257,
+            768
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            0,
+            7,
+            0,
+            0
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DistillGPT2": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 4,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

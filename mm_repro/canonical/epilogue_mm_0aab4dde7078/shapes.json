@@ -1,0 +1,64 @@
+{
+  "points": [
+    {
+      "shape_hash": "7629a4f8",
+      "inputs": [
+        [
+          [
+            54
+          ],
+          "f32"
+        ],
+        [
+          [
+            16384,
+            384
+          ],
+          "bf16"
+        ],
+        [
+          [
+            384,
+            54
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              384
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            54
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            9,
+            1
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/YituTechConvBert": {
+          "occurrences": 12
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 12,
+        "inputs": 3,
+        "outputs": 4,
+        "contraction_depth": 3
+      }
+    }
+  ]
+}

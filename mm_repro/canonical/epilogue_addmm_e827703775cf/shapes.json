@@ -1,0 +1,112 @@
+{
+  "points": [
+    {
+      "shape_hash": "d24cff76",
+      "inputs": [
+        [
+          [
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            768
+          ],
+          "bf16",
+          {
+            "st": [
+              152064,
+              1
+            ]
+          }
+        ],
+        [
+          [
+            768,
+            1000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "timm/infer/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 3,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "30b503d0",
+      "inputs": [
+        [
+          [
+            1000
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            1000
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            1000
+          ],
+          "bf16"
+        ]
+      ],
+      "models": {
+        "timm/train/deit_base_distilled_patch16_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 3,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

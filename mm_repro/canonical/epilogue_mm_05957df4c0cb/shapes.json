@@ -1,0 +1,124 @@
+{
+  "points": [
+    {
+      "shape_hash": "e58337e9",
+      "inputs": [
+        [
+          [
+            4,
+            2048
+          ],
+          "i64"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            50272
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            4,
+            2048,
+            50272
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            50272
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 18,
+        "nodes": 29,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 4
+      }
+    },
+    {
+      "shape_hash": "4499040d",
+      "inputs": [
+        [
+          [
+            32,
+            128
+          ],
+          "i64"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            256008
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            256008
+          ]
+        ],
+        [
+          "S",
+          [
+            -1,
+            256008
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/XGLMForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 18,
+        "nodes": 29,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

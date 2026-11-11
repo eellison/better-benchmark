@@ -1,0 +1,230 @@
+{
+  "points": [
+    {
+      "shape_hash": "8acd84ec",
+      "inputs": [
+        [
+          [
+            3072
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            3072
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "hf/infer/OPTForCausalLM": {
+          "occurrences": 12
+        },
+        "hf/train/OPTForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 2,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "22cd45d6",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            9216
+          ],
+          "bf16"
+        ],
+        [
+          [
+            9216,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              9216
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/infer/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 2,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "7c2b57fc",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/infer/alexnet": {
+          "occurrences": 1
+        },
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 2,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "6b5c6eb4",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4,
+            25088
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25088,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              25088
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 2,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "11bda8e3",
+      "inputs": [
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "torchbench/infer/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 2,
+        "nodes": 2,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

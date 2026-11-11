@@ -1,0 +1,48 @@
+{
+  "points": [
+    {
+      "shape_hash": "866c59c5",
+      "inputs": [
+        [
+          [
+            32
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1000,
+            2880
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2880,
+            32
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2880
+            ]
+          }
+        ]
+      ],
+      "models": {
+        "hf/infer/openai/gpt-oss-20b": {
+          "occurrences": 24
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 15,
+        "inputs": 3,
+        "outputs": 6,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

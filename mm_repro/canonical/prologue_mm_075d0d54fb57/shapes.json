@@ -1,0 +1,134 @@
+{
+  "points": [
+    {
+      "shape_hash": "7185c105",
+      "inputs": [
+        [
+          [
+            151936,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              151936
+            ]
+          }
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1000,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/Qwen/Qwen3-0.6B": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "e8217a2f",
+      "inputs": [
+        [
+          [
+            32768,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              32768
+            ]
+          }
+        ],
+        [
+          [
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            1000,
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/mistralai/Mistral-7B-Instruct-v0.3": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

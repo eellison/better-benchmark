@@ -1,0 +1,26 @@
+"""Curated MM repro. Pattern hash: 5b4e89f5f29d."""
+import sys
+from pathlib import Path
+from math import inf, nan
+import torch
+import torch._inductor.inductor_prims
+from torch import device
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_config
+_repro_version = 3
+
+class Repro(torch.nn.Module):
+    def forward(self, arg0_1: "bf16[8192, 512]", arg1_1: "bf16[512, 2048]", _shape_param_0):
+        # No stacktrace found for following nodes
+        mm: "bf16[8192, 2048]" = torch.ops.aten.mm.default(arg0_1, arg1_1);  arg0_1 = arg1_1 = None
+        view: "bf16[8, 1024, 2048]" = torch.ops.aten.view.default(mm, _shape_param_0);  mm = _shape_param_0 = None
+        relu: "bf16[8, 1024, 2048]" = torch.ops.aten.relu.default(view);  view = None
+        return relu
+
+def make_inputs(shape_config=None):
+    if shape_config is None:
+        shape_config = next(iter(load_shape_configs(__file__).values()))
+    return make_inputs_from_config(shape_config)
+
+if __name__ == "__main__":
+    benchmark_repro(__file__, Repro, make_inputs)

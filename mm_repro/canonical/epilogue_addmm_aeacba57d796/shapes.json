@@ -1,0 +1,144 @@
+{
+  "points": [
+    {
+      "shape_hash": "9be7042c",
+      "inputs": [
+        [
+          [
+            30528
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            30528
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            512
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              30522
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            32,
+            512,
+            30522
+          ]
+        ],
+        [
+          "S",
+          [
+            16384,
+            30522
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BertForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/LayoutLMForMaskedLM": {
+          "occurrences": 1
+        },
+        "hf/train/YituTechConvBert": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 27,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 4
+      }
+    },
+    {
+      "shape_hash": "736c4f04",
+      "inputs": [
+        [
+          [
+            30528
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            30528
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256,
+            128
+          ],
+          "i64",
+          {
+            "gen": [
+              "index",
+              0,
+              30522
+            ]
+          }
+        ],
+        [
+          "S",
+          [
+            256,
+            128,
+            30522
+          ]
+        ],
+        [
+          "S",
+          [
+            32768,
+            30522
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/DistilBertForMaskedLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 27,
+        "inputs": 4,
+        "outputs": 4,
+        "contraction_depth": 4
+      }
+    }
+  ]
+}

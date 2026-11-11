@@ -329,6 +329,8 @@ scripts/
   validate_oracles.py    # oracle correctness/scope validation
   validate_eager.py      # subprocess-isolated eager validation
   validate_corpus_invariants.py  # hard/soft corpus invariants (CI / pre-commit)
+  extract_matmul_corpus.py   # regenerate mm_repro/ from repros/models (docs/matmul_partitioning.md)
+  validate_matmul_repros.py  # eager GPU run + category/hash checks of every mm_repro point
   model_graph_accounting.py  # aggregate per-kernel times to a model-level estimate
   model_attribution.py   # reconcile the aggregate against measured e2e (launch-corrected)
   gc_corpus.py           # corpus reference-counting / migration transaction tool
@@ -345,7 +347,71 @@ repros/
   canonical/             # 1727 flat, content-addressed repro dirs (each with oracle.py)
   models/                # <suite>/<mode>/<model>/: manifest.json + full_graph_*.py (+ .meta.json)
 
+mm_repro/
+  canonical/             # matmul fusion-pattern repros: <category>_<mm ops>_<hash>/ (no oracles)
+
 benchmarks/              # frozen benchmark set definitions
 ```
 
 </details>
+
+
+## Matmul pattern corpus
+
+`mm_repro/canonical/` holds 502 MM fusion repros (965 shape points) cut from
+`repros/models/`. Layout, pattern hashing and input generation match
+`repros/`, so the usual tools take `mm_repro/canonical` as their path.
+Details: [docs/matmul_partitioning.md](docs/matmul_partitioning.md).
+
+| category | region | repros |
+|---|---|---:|
+| `epilogue` | MM + the BB partition that consumes it | 378 |
+| `prologue` | BB partition that feeds the MM's A or B + MM | 25 |
+| `grouped` | `_grouped_mm` + its producer and consumer partitions | 3 |
+| `horizontal` / `horizontal_combine` | 2–3 MMs sharing an operand, results separate / combined | 91 / 5 |
+
+```bash
+python scripts/extract_matmul_corpus.py --workers 32              # regenerate (CPU)
+CUDA_VISIBLE_DEVICES=0 python scripts/validate_matmul_repros.py   # run every point on a GPU
+python scripts/validate_corpus_invariants.py --corpus-root mm_repro
+```
+
+### cuBLAS vs fused Triton template
+
+```bash
+# baseline: cuBLAS + a separate epilogue kernel
+TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cublas python scripts/bench_parallel.py \
+    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics --output mm_cublas.json
+
+# head: Triton GEMM templates only, epilogue fused into the GEMM
+TORCHINDUCTOR_CACHE_DIR=/tmp/mm_triton python scripts/bench_parallel.py \
+    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics --output mm_triton.json \
+    --inductor-config max_autotune_gemm=True --inductor-config max_autotune_gemm_backends=TRITON
+
+python scripts/bench_report.py --compare mm_cublas.json mm_triton.json
+```
+
+### Part of the corpus
+
+Add the head flags above to any of these for the Triton side.
+
+```bash
+# one category
+python scripts/bench_parallel.py mm_repro/canonical/epilogue_* --all-shapes --gpus 0
+
+# two repros: addmm + relu, addmm + residual + LayerNorm
+python scripts/bench_parallel.py mm_repro/canonical/epilogue_addmm_d6fd90850200 \
+    mm_repro/canonical/epilogue_addmm_ba3723ee6650 --all-shapes --gpus 0
+
+# every repro with a LayerNorm (var_mean)
+python scripts/bench_parallel.py $(grep -l var_mean mm_repro/canonical/*/repro.py) --all-shapes --gpus 0
+
+# chosen shape points (shape_hash from the repro's shapes.json)
+echo '[{"name": "epilogue_addmm_ba3723ee6650", "shape_hashes": ["9dff0455", "d729e8bf"]}]' > mm_set.json
+python scripts/bench_parallel.py --benchmark-set mm_set.json --canonical-dir mm_repro/canonical --gpus 0
+
+# one repro on its own: default compile, then Triton templates only
+python mm_repro/canonical/epilogue_addmm_d6fd90850200/repro.py --all-shapes
+TORCHINDUCTOR_MAX_AUTOTUNE_GEMM=1 TORCHINDUCTOR_MAX_AUTOTUNE_GEMM_BACKENDS=TRITON \
+    python mm_repro/canonical/epilogue_addmm_d6fd90850200/repro.py --shape OPTForCausalLM_8acd84ec
+```

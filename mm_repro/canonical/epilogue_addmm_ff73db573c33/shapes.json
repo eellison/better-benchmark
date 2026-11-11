@@ -1,0 +1,76 @@
+{
+  "points": [
+    {
+      "shape_hash": "8d1f0569",
+      "inputs": [
+        [
+          [
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            25216,
+            768
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            192
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              768
+            ]
+          }
+        ],
+        [
+          [
+            128,
+            197,
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            197,
+            192
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/deit_tiny_patch16_224.fb_in1k": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 16,
+        "inputs": 6,
+        "outputs": 1,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

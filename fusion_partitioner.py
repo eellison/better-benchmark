@@ -208,7 +208,7 @@ class PrunedCapabilityBasedPartitioner(CapabilityBasedPartitioner):
             #
             # When skip_horizontal_fusion is True, only merge the newly-created
             # partition for this supported node with partitions for its direct users.
-            # This preserves data-dependent vertical fusion while avoiding fusion of
+            # This preserves data-dependent fusion while avoiding fusion of
             # independent consumer partitions around an unsupported node.
             if self._is_node_supported(node) and node not in assignment:
                 partition_id = next(new_partition_id)

@@ -1,0 +1,116 @@
+{
+  "points": [
+    {
+      "shape_hash": "13a2dcd2",
+      "inputs": [
+        [
+          [
+            128,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "b8"
+        ],
+        [
+          [
+            128,
+            4096
+          ],
+          "b8"
+        ],
+        [
+          [],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/alexnet": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 9,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "421a7c79",
+      "inputs": [
+        [
+          [
+            64,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            4096
+          ],
+          "b8"
+        ],
+        [
+          [
+            64,
+            4096
+          ],
+          "b8"
+        ],
+        [
+          [],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "torchbench/train/vgg16": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 5,
+        "nodes": 9,
+        "inputs": 5,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

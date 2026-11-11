@@ -1,0 +1,75 @@
+{
+  "points": [
+    {
+      "shape_hash": "a154d3e4",
+      "inputs": [
+        [
+          [
+            1000,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            4096
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            1,
+            1000,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1,
+            1000,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            1,
+            1000,
+            -1,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/mistralai/Mistral-7B-Instruct-v0.3": {
+          "occurrences": 31
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 6,
+        "nodes": 13,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}

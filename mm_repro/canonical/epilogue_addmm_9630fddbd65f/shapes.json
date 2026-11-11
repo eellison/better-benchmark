@@ -1,0 +1,84 @@
+{
+  "points": [
+    {
+      "shape_hash": "c82a81de",
+      "inputs": [
+        [
+          [
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            2560
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2560,
+            2560
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2560
+            ]
+          }
+        ],
+        [
+          [
+            16,
+            128,
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          [
+            2560
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ],
+        [
+          "S",
+          [
+            16,
+            128,
+            2560
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/BlenderbotForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 15,
+        "nodes": 20,
+        "inputs": 6,
+        "outputs": 5,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

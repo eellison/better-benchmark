@@ -1,0 +1,144 @@
+{
+  "points": [
+    {
+      "shape_hash": "47ed5f7a",
+      "inputs": [
+        [
+          [
+            100352,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              512
+            ]
+          }
+        ],
+        [
+          [
+            256
+          ],
+          "bf16"
+        ],
+        [
+          [
+            256
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            28,
+            28,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            4,
+            7,
+            4,
+            7,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 16,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "2fe31a57",
+      "inputs": [
+        [
+          [
+            25088,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            14,
+            14,
+            512
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            2,
+            7,
+            2,
+            7,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 16,
+        "inputs": 4,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}
