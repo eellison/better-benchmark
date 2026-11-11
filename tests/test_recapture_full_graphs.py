@@ -515,6 +515,183 @@ class GraphModule(torch.nn.Module):
                 ):
                     load_graph_class_from_source(source, "test_graph.py")
 
+    def test_graph_loader_allows_dunder_operator_overloads(self):
+        source = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "i64[4]cpu"):
+        return (torch.ops.aten.__rshift__.Scalar(x, 1),)
+"""
+        graph_cls = load_graph_class_from_source(source, "test_graph.py")
+
+        (out,) = graph_cls()(torch.tensor([8, 4, 2, 1]))
+        self.assertEqual([4, 2, 1, 0], out.tolist())
+
+    def test_graph_loader_rejects_dunder_escapes(self):
+        escapes = (
+            "torch.ops.aten.__class__",
+            "torch.ops.aten.__dict__",
+            "torch.ops.aten.__getattribute__('add')",
+            "torch.ops.aten.__rshift__.__globals__",
+            "torch.ops.aten.__rshift__.Scalar.__class__",
+            "torch.ops.unapproved.__rshift__.Scalar(x, 1)",
+            "x.__class__.__subclasses__()",
+            "torch.__builtins__",
+            "self.__init__.__globals__",
+        )
+        for escape in escapes:
+            source = f"""
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "i64[4]cpu"):
+        y = {escape}
+        return (x,)
+"""
+            with self.subTest(escape=escape):
+                with self.assertRaisesRegex(
+                    ValueError, "unsafe|unsupported call|unsupported torch"
+                ):
+                    load_graph_class_from_source(source, "test_graph.py")
+
+        shadowed = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "i64[4]cpu"):
+        torch = x
+        return (torch.ops.aten.__rshift__.Scalar(x, 1),)
+"""
+        with self.assertRaisesRegex(ValueError, "unsafe"):
+            load_graph_class_from_source(shadowed, "test_graph.py")
+
+    def test_loader_traces_random_constant_buffers_registered_in_init(self):
+        # fx_graph_runnable's form for buffers too large to print.
+        source = """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('_tensor_constant0', torch.randint(1, size=[3], dtype=torch.int64))
+        self.register_buffer('_tensor_constant1', torch.randn([3], dtype=torch.float32))
+
+    def forward(self, x: "f32[4, 3]"):
+        _tensor_constant0: "i64[3][1]cpu" = self._tensor_constant0
+        _tensor_constant1: "f32[3][1]cpu" = self._tensor_constant1
+        index = torch.ops.aten.index.Tensor(x, [None, _tensor_constant0])
+        return (index, torch.ops.aten.mul.Tensor(_tensor_constant1, 2))
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            graphs = [load_graph_module(path, tracing_mode=mode) for mode in ("fake", "symbolic")]
+
+        for gm in graphs:
+            self.assertIsNotNone(gm)
+            constants = [getattr(gm, n.target) for n in gm.graph.nodes if n.op == "get_attr"]
+            self.assertEqual([torch.int64, torch.float32], [c.dtype for c in constants])
+            self.assertEqual([0, 0, 0], constants[0].tolist())
+
+    @unittest.skipUnless(torch.cuda.is_available(), "needs CUDA")
+    def test_loader_loads_random_cuda_constant_buffers_before_cuda_init(self):
+        source = """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('_tensor_constant0', torch.randint(1, size=[3], dtype=torch.int64).to("cuda:0"))
+
+    def forward(self, x: "f32[4, 3]"):
+        _tensor_constant0: "i64[3][1]cuda:0" = self._tensor_constant0
+        return (torch.ops.aten.index.Tensor(x, [None, _tensor_constant0]),)
+"""
+        script = (
+            "import sys; from pathlib import Path\n"
+            f"sys.path[:0] = [{str(ROOT)!r}, {str(ROOT / 'scripts')!r}]\n"
+            "import torch; from ingest_tlparse import load_graph_module\n"
+            "assert not torch.cuda.is_initialized()\n"
+            "gm = load_graph_module(Path(sys.argv[1]), tracing_mode='symbolic')\n"
+            "print([str(getattr(gm, n.target).device) for n in gm.graph.nodes if n.op == 'get_attr'])\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            result = subprocess.run(
+                [sys.executable, "-c", script, str(path)],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
+
+        self.assertEqual(0, result.returncode, result.stderr[-2000:])
+        self.assertEqual("['cuda:0']", result.stdout.strip().splitlines()[-1])
+
+    def test_graph_loader_limits_tensor_factories_to_buffer_constants(self):
+        sources = (
+            # Outside register_buffer.
+            """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[3]cpu"):
+        return (torch.randn([3]),)
+""",
+            # Outside __init__.
+            """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[3]cpu"):
+        self.register_buffer('b', torch.randn([3]))
+        return (x,)
+""",
+            # Not one of the factories fx_graph_runnable writes.
+            """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.load('weights.pt'))
+""",
+            # A method other than .to on the factory result.
+            """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.randn([3]).numpy())
+""",
+            # .to with a non-constant argument.
+            """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.randn([3]).to(torch.serialization.os.getcwd()))
+""",
+            # Keywords fx_graph_runnable does not write.
+            """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.randn([3], device='cuda'))
+""",
+            """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.randn(*[3]))
+""",
+            # A factory argument that escapes.
+            """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.randn([3], dtype=torch.serialization.os.system('true')))
+""",
+        )
+        for source in sources:
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(
+                    ValueError, "unsupported call|unsupported torch"
+                ):
+                    load_graph_class_from_source(source, "test_graph.py")
+
+        for device, error in (("nowhere", "invalid device"), ("meta", "unsupported device")):
+            source = f"""
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer('b', torch.randn([3]).to("{device}"))
+"""
+            with self.subTest(device=device):
+                with self.assertRaisesRegex(ValueError, error):
+                    load_graph_class_from_source(source, "test_graph.py")
+
 
 if __name__ == "__main__":
     unittest.main()
