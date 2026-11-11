@@ -14,6 +14,7 @@ from capture_hook import (
     graph_node_accounting,
     mask_reason,
     mask_reasons,
+    node_mask_counts,
 )
 
 
@@ -230,6 +231,12 @@ def test_nodes_with_unbacked_sizes_or_values_are_masked():
     assert "aten.relu.default" not in masked
     assert "aten.sum.default" not in masked
     assert graph_mask(gm) == {"reasons": ["unbacked_shape"], "scope": "graph"}
+    counts = node_mask_counts(gm)
+    assert set(counts) == {"unbacked_shape"}
+    assert counts["unbacked_shape"] == sum(
+        1 for n in gm.graph.nodes if "unbacked_shape" in mask_reasons(n)
+    )
+    assert counts["unbacked_shape"] >= 4
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="validates the repro on CUDA")
@@ -255,6 +262,7 @@ def test_unbacked_regions_are_masked_not_dropped(tmp_path):
     ]
     sidecar = json.loads((tmp_path / "graphs" / "full_graph_000.meta.json").read_text())
     assert sidecar["masked"] == {"reasons": ["unbacked_shape"], "scope": "graph"}
+    assert sidecar["node_mask_counts"]["unbacked_shape"] >= 4
     assert sidecar["roundtrip"] == "ok"
     merge_one_capture(tmp_path / "capture", tmp_path / "corpus", "hf/infer/bbtest_model")
     assert len(list((tmp_path / "corpus" / "canonical").glob("*/repro.py"))) == 2
