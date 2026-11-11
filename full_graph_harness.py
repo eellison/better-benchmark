@@ -72,6 +72,28 @@ def _float64_inputs(inputs: Any) -> Any:
     return tree_map(upcast, inputs)
 
 
+def _upcast_inputs(inputs: Any, target: Any) -> Any:
+    """Copies of the float tensors in ``inputs`` narrower than ``target``, as
+    ``target``; repeated tensors stay shared."""
+    import torch
+    from torch.utils._pytree import tree_map
+
+    copies: dict[int, Any] = {}
+
+    def upcast(value: Any) -> Any:
+        if not (
+            isinstance(value, torch.Tensor)
+            and value.is_floating_point()
+            and value.itemsize < target.itemsize
+        ):
+            return value
+        if id(value) not in copies:
+            copies[id(value)] = value.to(target, copy=True)
+        return copies[id(value)]
+
+    return tree_map(upcast, inputs)
+
+
 def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -> Any:
     """Run ``fn`` on fresh inputs from ``make_inputs`` and return a copy of its outputs.
 
@@ -112,6 +134,44 @@ def rng_dependent_output_leaves(
     inputs = make_inputs()
     torch.manual_seed(seed)
     return scan_rng_dependence(fn, inputs)
+
+
+def upcast_reference(
+    fn: Any,
+    make_inputs: Any,
+    seed: int,
+    target: Any,
+    errors: list[str] | None = None,
+) -> Any | None:
+    """Run a copy of ``fn`` with float inputs, parameters, casts and factory
+    dtypes narrower than ``target`` upcast to ``target``.
+
+    Casts to float8 keep their quantization. Returns ``None`` when the run
+    fails (unsupported dtype, OOM, ...), appending the error to ``errors``.
+    """
+    import copy
+
+    import torch
+
+    from numerics import upcast_casts_mode, upcast_factory_dtypes_mode
+
+    def upcast(t: Any) -> Any:
+        if t.is_floating_point() and t.itemsize < target.itemsize:
+            return t.to(target)
+        return t
+
+    try:
+        fn_up = copy.deepcopy(fn)
+        if isinstance(fn_up, torch.nn.Module):
+            fn_up = fn_up._apply(upcast)
+        torch.manual_seed(seed)
+        inputs = _upcast_inputs(make_inputs(), target)
+        with upcast_casts_mode(target), upcast_factory_dtypes_mode(target):
+            return _run_seeded(fn_up, lambda: inputs, seed)
+    except Exception as error:  # noqa: BLE001 - no reference; callers fall back
+        if errors is not None:
+            errors.append(f"{type(error).__name__}: {error}"[:300])
+        return None
 
 
 def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> Any | None:
