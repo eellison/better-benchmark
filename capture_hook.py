@@ -1499,6 +1499,14 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
 
     _ph_order = [n for n in sub_gm.graph.nodes if n.op == "placeholder"]
 
+    # A size computed inside the partition (sym_size, s0*128) would be baked
+    # to its hint by the concrete retrace below.
+    for _n in sub_gm.graph.nodes:
+        _nv = (_n.meta or {}).get("val")
+        if isinstance(_nv, (torch.SymInt, torch.SymFloat)) and _n.op != "placeholder":
+            print(f"[canonicalize] symbolic scalar {_n.name!r}: retrace skipped", file=sys.stderr)
+            return sub_gm, placeholder_info, shape_params
+
     fake_inputs = []
 
     for name, info in placeholder_info.items():

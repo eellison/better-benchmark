@@ -173,6 +173,34 @@ def test_symint_scalar_and_symbolic_view_inputs(tmp_path):
         assert not any(r["recompiled"] for r in rows)
 
 
+def test_view_input_replays_at_its_symbolic_offset(tmp_path):
+    def f(x):
+        return x.relu().sum(-1)
+
+    _capture(f, [(torch.randn(36, 64)[12:24],)], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    (entry,) = shapes["points"][0]["inputs"]
+    offset = entry[2]["off"]
+    assert offset in shapes["symbols"], entry
+    base = shapes["points"][0]["bindings"]
+    rows = _check(tmp_path, name, [base, {**base, "s0": 5, offset: 100}])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
+def test_aliased_views_replay_at_a_larger_binding(tmp_path):
+    def f(q, k):
+        return (q * k).sum(-1)
+
+    packed = torch.randn(12, 128)
+    _capture(f, [(packed[:, :64], packed[:, 64:])], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    point = shapes["points"][0]
+    assert point.get("alias_group_nbytes"), point
+    batch = point["inputs"][0][0][0]
+    rows = _check(tmp_path, name, [point["bindings"], {**point["bindings"], batch: 40}])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
 def test_size_one_dims_are_specialized(tmp_path):
     def f(x, y):
         return (x * y).sum(-1)
@@ -306,6 +334,47 @@ def test_legacy_symbolic_graph_retraces_at_its_recorded_sizes(tmp_path, loader):
     assert isinstance(vals[0], torch.SymInt)
     assert vals[1].shape[1].node.expr == vals[0].node.expr
     assert vals[0].node.hint == 24
+
+
+SIZE_READ_GRAPH = """
+class GraphModule(torch.nn.Module):
+    def forward(self, arg0_1: "f32[s16, 64][64, 1]cpu", arg1_1: "f32[s16, 64][64, 1]cpu"):
+        sym_size_int: "Sym(s16)" = torch.ops.aten.sym_size.int(arg0_1, 0)
+        view: "f32[1, s16, 64][64*s16, 64, 1]cpu" = torch.ops.aten.view.default(arg0_1, [1, sym_size_int, 64])
+        relu: "f32[1, s16, 64][64*s16, 64, 1]cpu" = torch.ops.aten.relu.default(view)
+        cat: "f32[2*s16, 64][64, 1]cpu" = torch.ops.aten.cat.default([arg1_1, arg1_1])
+        view_1: "f32[2, s16, 64][64*s16, 64, 1]cpu" = torch.ops.aten.view.default(cat, [2, sym_size_int, 64])
+        sigmoid: "f32[2, s16, 64][64*s16, 64, 1]cpu" = torch.ops.aten.sigmoid.default(view_1)
+        return (relu, sigmoid)
+"""
+
+
+def test_sizes_read_inside_a_region_stay_symbolic(tmp_path):
+    """Export-style graphs read sizes off tensors inside the region; the
+    canonicalizing retrace must not bake them to the hint."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import recapture_full_graphs
+
+    models = tmp_path / "models"
+    graph = models / "toy/infer/m/full_graph_000.py"
+    graph.parent.mkdir(parents=True)
+    graph.write_text(SIZE_READ_GRAPH)
+    graph.with_suffix(".meta.json").write_text(json.dumps({
+        "schema_version": 2,
+        "inputs": [[[12, 64], "f32", {"n": "arg0_1", "dev": "cpu"}],
+                   [[12, 64], "f32", {"n": "arg1_1", "dev": "cpu"}]],
+    }))
+    out = tmp_path / "out"
+    assert recapture_full_graphs.main([
+        str(models), "--models-root", str(models), "--canonical-root",
+        str(out), "--no-validate", "--no-isolate"]) == 0
+    regions = _regions(out)
+    assert regions
+    for name, shapes in regions.items():
+        assert shapes["points"][0]["bindings"] == {"s0": 12}, (name, shapes["symbols"])
+        rows = _check(out, name, [{"s0": 12}, {"s0": 5}])
+        outcomes = [(r["numerics"], r["recompiled"]) for r in rows]
+        assert outcomes == [("pass", False)] * 2, (name, rows)
 
 
 def test_tlparse_ingest_takes_hints_from_the_runnable(tmp_path):

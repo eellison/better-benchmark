@@ -171,7 +171,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     dynamic_policy = _harness.compile_policy_from_config(rows[0][2])
 
     def inputs_for(binding, config):
-        inputs = _harness.make_inputs_from_config(config)
+        inputs = _harness.make_inputs_from_config(config, storage_offsets=mode == "dynamic")
         if binding is None:
             inputs = _harness._merge_default_shape_params(
                 inputs, _harness.make_inputs_safely(make_inputs_fn))
@@ -435,7 +435,7 @@ def check_family(repro_file, repro_cls, bindings=None, device: str = "cuda") -> 
             dict(spec, device=device) if spec.get("kind", "tensor") == "tensor"
             else spec
             for spec in config["inputs"]])
-        inputs = _harness.make_inputs_from_config(config)
+        inputs = _harness.make_inputs_from_config(config, storage_offsets=True)
         return _dynamic_replay_args(
             inputs, _effective_binding_for_row(binding, config), prepared)
 

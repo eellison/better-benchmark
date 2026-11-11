@@ -663,8 +663,12 @@ def _randn(size, dtype, device) -> torch.Tensor:
     return torch.randn(size, dtype=dtype, device=device)
 
 
-def make_inputs_from_config(config: dict) -> list:
+def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list:
     """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
+
+    ``storage_offsets`` places each standalone view at its recorded storage
+    offset (the dynamic replay checks a symbolic offset's relation); static
+    replay keeps every non-aliased input at offset 0.
 
     Alias groups: specs carrying "alias_group" are views of ONE storage
     (packed-qkv saved views). One buffer is allocated per group — sized by
@@ -674,6 +678,19 @@ def make_inputs_from_config(config: dict) -> list:
     view a private storage.
     """
     group_nbytes = config.get("alias_group_nbytes")
+    if group_nbytes and config.get("bindings"):
+        # The recorded capacity is the allocation at the captured sizes; at
+        # another binding the members' extent is the size that must fit.
+        from full_graph_harness import _dense_storage_size
+        group_nbytes = list(group_nbytes)
+        for spec in config["inputs"]:
+            g = spec.get("alias_group") if isinstance(spec, dict) else None
+            if isinstance(g, int) and not isinstance(g, bool) and 0 <= g < len(group_nbytes):
+                itemsize = getattr(torch, spec["dtype"].replace("torch.", "")).itemsize
+                offset = int(spec.get("storage_offset", 0))
+                extent = _dense_storage_size(
+                    tuple(spec["shape"]), spec.get("stride") or None, storage_offset=offset)
+                group_nbytes[g] = max(group_nbytes[g], extent * itemsize)
     group_storage: dict[int, tuple[torch.Tensor, torch.device]] = {}
 
     def _group_buffer(g: int, device, dtype=None) -> tuple[torch.Tensor, int]:
@@ -848,6 +865,15 @@ def make_inputs_from_config(config: dict) -> list:
                 result.append(storage.as_strided(shape, stride))
             else:
                 result.append(_randn(shape, dtype, device))
+    if storage_offsets:
+        for i, spec in enumerate(config["inputs"]):
+            offset = spec.get("storage_offset", 0) if isinstance(spec, dict) else 0
+            t = result[i]
+            if not offset or spec.get("alias_group") is not None or t.storage_offset() == offset:
+                continue
+            padded = t.new_empty(offset + _storage_size_for_strided(list(t.shape), list(t.stride())))
+            result[i] = padded.as_strided(t.shape, t.stride(), offset)
+            result[i].copy_(t)
     return result
 
 
