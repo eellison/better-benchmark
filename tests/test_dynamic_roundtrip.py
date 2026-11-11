@@ -2,7 +2,8 @@
 merge its regions into families, and replay them at the recorded and at new
 bindings against eager.
 
-Capture and replay run on CPU (Inductor's C++ backend).
+Capture and replay run on CPU (Inductor's C++ backend); the benchmark test
+at the end needs a GPU.
 """
 import importlib.util
 import json
@@ -10,6 +11,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import torch
@@ -534,6 +536,35 @@ def test_tautological_guards_do_not_keep_stale_symbol_names():
     assert guards == ["Eq(Mod(s0 + s1, 9), 0)"]
 
 
+def test_a_failing_dynamic_half_keeps_the_static_rows(tmp_path):
+    import repro_harness
+
+    _capture(lambda x: x.relu().sum(-1), [(torch.randn(12, 64),)], tmp_path)
+    (name,) = _regions(tmp_path)
+    repro = str(tmp_path / "canonical" / name / "repro.py")
+    real = repro_harness.make_inputs_from_config
+
+    def on_cpu(config, storage_offsets=None):
+        return real(dict(config, inputs=[dict(spec, device="cpu") for spec in config["inputs"]]), storage_offsets)
+
+    def specialized(*args, **kwargs):
+        raise RuntimeError("the replay compile specialized s0")
+
+    (config,) = repro_harness.load_shape_configs(repro).values()
+    with mock.patch.object(repro_harness, "_run_bound_benchmark", specialized), \
+            mock.patch.object(repro_harness, "make_inputs_from_config", on_cpu), \
+            mock.patch.object(repro_harness, "count_kernels", lambda *a, **k: (1, ["k"])):
+        def bench(*flags):
+            return repro_harness.benchmark_repro(
+                repro, _repro_cls(repro), lambda: on_cpu(config), args=["--count-kernels-only", "--no-gpu-lock", *flags])
+
+        rows = bench()
+        assert rows.pop("::dynamic") == {"mode": "dynamic", "error": "RuntimeError: the replay compile specialized s0"}
+        assert [row["n_kernels"] for row in rows.values()] == [1], rows
+        with pytest.raises(RuntimeError, match="specialized"):
+            bench("--dynamic-only")
+
+
 def test_padded_view_input_with_a_stride_zero_dim():
     from repro_harness import make_inputs_from_config
 
@@ -859,3 +890,27 @@ def test_tlparse_ingest_takes_hints_from_the_runnable(tmp_path):
     assert symint.node.hint == 1811
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="needs a GPU")
+def test_repro_default_bench_times_static_points_and_dynamic_artifact(tmp_path):
+    from repro_harness import benchmark_repro
+
+    root = tmp_path / "root"
+    torch.manual_seed(0)
+    model = MLP().eval()
+    _capture(model, [_mlp_args(8)], root, name="mlp")
+    _capture(model, [_mlp_args(16)], root, name="mlp")
+    name = next(n for n in _regions(root) if n.startswith("var_mean"))
+    repro = str(root / "canonical" / name / "repro.py")
+    module = _repro_module(repro)
+    results = benchmark_repro(repro, module.Repro, module.make_inputs, args=[
+        "--no-gpu-lock", "--no-cd", "--n-warmup", "2", "--n-rep", "5"])
+    static = {k: v for k, v in results.items() if v.get("mode") == "static"}
+    dynamic = {k: v for k, v in results.items() if v.get("mode") == "dynamic"}
+    assert sorted(v["binding"]["s0"] for v in static.values()) == [8, 16]
+    assert sorted(v["binding"]["s0"] for v in dynamic.values()) == [8, 16]
+    assert all("::" not in k for k in static)  # keyed like a static repro
+    assert all(k.endswith("::dynamic") for k in dynamic)
+    for row in dynamic.values():
+        assert row["numerics"]["status"] == "pass", row["numerics"]
+        assert row["recompiled"] is False
+        assert row["compiled_us"] > 0

@@ -7,6 +7,7 @@ alias-aware byte accounting, Triton kernel counting, and adjusted byte counting
 via dispatch-mode tracing.
 """
 import argparse
+import copy
 import glob
 import json
 import os
@@ -1161,9 +1162,10 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                              "a frozen value errors loudly; freezing every "
                              "symbol errors (use --static).")
     parser.add_argument("--dynamic", action="store_true",
-                        help="Force the dynamic artifact (compat: this is "
-                             "already the DEFAULT for a repro with a symbols "
-                             "table; on a static repro it forces blanket "
+                        help="Measure only the dynamic artifact (on a "
+                             "dynamic repro, like --dynamic-only but also "
+                             "combinable with --run-at/--compile-at/--freeze; "
+                             "on a static repro it forces blanket "
                              "dynamic=True).")
     parser.add_argument("--static", action="store_true",
                         help="Fully specialized (never mark_dynamic) static "
@@ -1178,6 +1180,16 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                              "at ITS saved bindings) and the default dynamic "
                              "replay; conflicts loudly with --dynamic, "
                              "--compile-at, --freeze, and --all-shapes.")
+    family_mode = parser.add_mutually_exclusive_group()
+    family_mode.add_argument(
+        "--static-only", action="store_true",
+        help="Dynamic repro: only the static rows (the captured graph "
+             "compiled specialized at each recorded point's bindings; this can "
+             "differ from a static capture's region, see capture_diff.py).")
+    family_mode.add_argument(
+        "--dynamic-only", action="store_true",
+        help="Dynamic repro: only the rows of the one dynamic artifact timed "
+             "at every recorded point.")
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
@@ -1201,8 +1213,9 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     parsed.prewarm = parsed.compile_at
 
     # Whether THIS repro is a dynamic family decides the default execution
-    # mode: dynamic families run dynamically with no flags;
-    # static repros keep the historical per-shape static path byte-identical.
+    # mode: dynamic families run both static points and the dynamic artifact
+    # with no flags; static repros keep the historical per-shape static path
+    # byte-identical.
     _repro_is_dynamic = bool(_symbols_and_guards_for_repro(repro_file)[0])
 
     if parsed.prewarm and not (parsed.dynamic or _repro_is_dynamic):
@@ -1236,18 +1249,76 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             "at --run-at bindings; --all-shapes statically benches EVERY "
             "recorded point at its saved bindings. Pick one.")
 
+    family_flags = (parsed.bind or parsed.dynamic or parsed.static
+                    or parsed.prewarm or parsed.freeze)
+    if (parsed.static_only or parsed.dynamic_only) and (
+            not _repro_is_dynamic or family_flags or parsed.all_shapes
+            or parsed.shape):
+        parser.error(
+            "--static-only/--dynamic-only select the default rows of a "
+            "dynamic repro (one with a symbols table) and take no other "
+            "selection flags")
+
+    def _quiet(**overrides):
+        sub = copy.copy(parsed)
+        sub.output, sub.update_perf = None, False
+        for key, value in overrides.items():
+            setattr(sub, key, value)
+        return sub
+
     def _run_benchmark():
-        if (parsed.bind or parsed.dynamic or parsed.static or parsed.prewarm
-                or parsed.freeze
+        if _repro_is_dynamic and not (family_flags or parsed.all_shapes
+                                      or parsed.shape):
+            # A dynamic repro by default measures both: every recorded point
+            # compiled statically at its own bindings (the rows a static
+            # repro of each point gives, keyed the same way) and one dynamic
+            # artifact timed at each of those points (keys end ::dynamic).
+            all_results = {}
+            if not parsed.dynamic_only:
+                all_results.update(_run_static_points(_quiet(all_shapes=True)))
+            if not parsed.static_only:
+                try:
+                    all_results.update(_run_bound_benchmark(
+                        repro_file, repro_cls, make_inputs_fn,
+                        _quiet(dynamic=True)))
+                except Exception as e:
+                    if parsed.dynamic_only:
+                        raise
+                    # The static rows stand on their own (e.g. the replay
+                    # compile specializes a size); record why there is no
+                    # dynamic row instead of dropping them.
+                    error = f"{type(e).__name__}: {e}"
+                    print(f"\n[dynamic] no dynamic rows: {error}", file=sys.stderr)
+                    all_results["::dynamic"] = {"mode": "dynamic", "error": error}
+            _write_results(all_results)
+            return all_results
+        if (family_flags
                 or (_repro_is_dynamic and not parsed.all_shapes)):
-            # Family benchmarking. A DYNAMIC repro routes here by DEFAULT
-            # (no flags -> the native ShapeEnv artifact over its recorded
-            # points); --all-shapes keeps the
-            # legacy per-point static sweep; static repros keep the legacy
-            # flow below byte-identical when flags are absent.
+            # Family benchmarking with explicit flags (or --shape on a dynamic
+            # repro); --all-shapes keeps the legacy per-point static sweep;
+            # static repros keep the legacy flow byte-identical when flags
+            # are absent.
             return _run_bound_benchmark(
                 repro_file, repro_cls, make_inputs_fn, parsed)
+        return _run_static_points(parsed)
 
+    def _write_results(all_results):
+        _write_results_for(parsed, all_results)
+
+    def _write_results_for(parsed, all_results):
+        if parsed.output:
+            with open(parsed.output, "w") as f:
+                json.dump(all_results, f, indent=2)
+
+        if parsed.update_perf:
+            hardware = parsed.hardware or _detect_hardware()
+            for shape_label, result in all_results.items():
+                perf_entry = {k: v for k, v in result.items() if k != "kernel_names"}
+                perf_entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+                _save_perf(repro_file, hardware, shape_label, perf_entry)
+            print(f"\n[perf] Saved to perf.json under hardware={hardware}")
+
+    def _run_static_points(parsed):
         configs = load_shape_configs(repro_file)
 
         if parsed.all_shapes and configs:
@@ -1391,19 +1462,12 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                     sol_us=sol_us,
                 ),
             }
+            if shape_config and shape_config.get("bindings"):
+                all_results[label]["mode"] = "static"
+                all_results[label]["binding"] = shape_config["bindings"]
 
-        if parsed.output:
-            with open(parsed.output, "w") as f:
-                json.dump(all_results, f, indent=2)
-
-        if parsed.update_perf:
-            hardware = parsed.hardware or _detect_hardware()
-            for shape_label, result in all_results.items():
-                perf_entry = {k: v for k, v in result.items() if k != "kernel_names"}
-                perf_entry["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-                _save_perf(repro_file, hardware, shape_label, perf_entry)
-            print(f"\n[perf] Saved to perf.json under hardware={hardware}")
-
+        if parsed.output or parsed.update_perf:
+            _write_results_for(parsed, all_results)
         return all_results
 
     # Acquire GPU lock before any CUDA work. Since `import torch` doesn't
