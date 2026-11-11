@@ -356,103 +356,60 @@ benchmarks/              # frozen benchmark set definitions
 
 ## Matmul pattern corpus
 
+`mm_repro/canonical/` holds 502 MM fusion repros (965 shape points) cut from
+`repros/models/`. Layout, pattern hashing and input generation match
+`repros/`, so the usual tools take `mm_repro/canonical` as their path.
+Details: [docs/matmul_partitioning.md](docs/matmul_partitioning.md).
+
+| category | region | repros |
+|---|---|---:|
+| `epilogue` | MM + the BB partition that consumes it | 378 |
+| `prologue` | BB partition that feeds the MM's A or B + MM | 25 |
+| `grouped` | `_grouped_mm` + its producer and consumer partitions | 3 |
+| `horizontal` / `horizontal_combine` | 2–3 MMs sharing an operand, results separate / combined | 91 / 5 |
+
 ```bash
-python scripts/extract_matmul_corpus.py --workers 32             # regenerate mm_repro/ (CPU)
-CUDA_VISIBLE_DEVICES=0 python scripts/validate_matmul_repros.py  # eager GPU run of every shape point
-python scripts/validate_eager.py mm_repro/canonical --all-shapes --gpus 0,1 --max-workers 4
-python scripts/bench_parallel.py mm_repro/canonical --all-shapes --gpus 0,1 --output mm_results.json
+python scripts/extract_matmul_corpus.py --workers 32              # regenerate (CPU)
+CUDA_VISIBLE_DEVICES=0 python scripts/validate_matmul_repros.py   # run every point on a GPU
+python scripts/validate_corpus_invariants.py --corpus-root mm_repro
 ```
 
-`mm_repro/` holds **502 repros / 965 shape points** of matmul fusion patterns
-from the saved model graphs, in five categories: prologue (25), epilogue (378),
-grouped (3), horizontal (91) and horizontal_combine (5). Prologue/epilogue
-repros are normal BB partitions that absorbed one producer MM (epilogue, tried
-first) or one consumer MM (prologue), trimmed to the work that depends on the
-MM, with 1 to 31 non-MM compute ops (views and casts are free). Grouped repros
-are an `aten._grouped_mm` (MoE experts) with the whole partitions producing its
-multiplied operands and consuming its result, with no size bound; back-to-back
-grouped MMs share the partition between them, and `offs` is an input generated
-as sorted group ends. Regions that read a CPU tensor are left out. Horizontal
-repros group 2–3 independent MMs that share an operand. Repros return values,
-not views of them: an output that only reshapes another value is that value, so
-trailing views do not split pattern hashes. Pattern hashes and input generation
-are those of `repros/`, and `mm_repro/canonical/` is flat like
-`repros/canonical/`, so the repro tools take it as their canonical directory
-(`--corpus-root mm_repro` for `validate_corpus_invariants.py`, `--canonical-dir
-mm_repro/canonical` with `--benchmark-set`).
-See [docs/matmul_partitioning.md](docs/matmul_partitioning.md).
-
-### Inductor's fused Triton template vs cuBLAS
-
-Two `bench_parallel.py` sweeps compare the two ways Inductor compiles an MM
-region. The baseline is plain `torch.compile`, which calls cuBLAS
-(`extern_kernels.addmm`) and runs the epilogue as a separate Triton kernel. The
-head run allows only Triton GEMM templates, so Inductor can fuse the epilogue
-into the template (`triton_tem_fused_*`). Give each run its own
-`TORCHINDUCTOR_CACHE_DIR`, so neither reuses the other's compiled or autotuned
-kernels. `--check-numerics` makes every compiled artifact match eager (an fp64
-reference where one can be built) before it is timed.
+### cuBLAS vs fused Triton template
 
 ```bash
-# Baseline: cuBLAS addmm + a separate epilogue kernel
-TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cache_cublas python scripts/bench_parallel.py \
-    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics \
-    --tag cublas --output mm_cublas.json
+# baseline: cuBLAS + a separate epilogue kernel
+TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cublas python scripts/bench_parallel.py \
+    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics --output mm_cublas.json
 
-# Head: Triton GEMM templates, with the epilogue fused into the template
-TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cache_triton python scripts/bench_parallel.py \
-    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics \
-    --inductor-config max_autotune_gemm=True \
-    --inductor-config max_autotune_gemm_backends=TRITON \
-    --tag triton --output mm_triton.json
+# head: Triton GEMM templates only, epilogue fused into the GEMM
+TORCHINDUCTOR_CACHE_DIR=/tmp/mm_triton python scripts/bench_parallel.py \
+    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics --output mm_triton.json \
+    --inductor-config max_autotune_gemm=True --inductor-config max_autotune_gemm_backends=TRITON
 
 python scripts/bench_report.py --compare mm_cublas.json mm_triton.json
 ```
 
-### Benchmarking part of the corpus
+### Part of the corpus
 
-To time only some repros, replace `mm_repro/canonical` in both sweeps above
-with them; the other flags stay. `bench_parallel.py` takes repro directories
-and `repro.py` files, and without `--all-shapes` it times each repro at its
-first shape point only. `<id>` below is a directory name under
-`mm_repro/canonical/`, e.g. `epilogue_addmm_d6fd90850200`.
+Add the head flags above to any of these for the Triton side.
 
 ```bash
-# One category: canonical/ is flat, so a glob selects it
-# (horizontal_* also matches horizontal_combine_*)
-python scripts/bench_parallel.py mm_repro/canonical/epilogue_* --all-shapes --gpus 0,1 --output mm_epilogue.json
-python scripts/bench_parallel.py mm_repro/canonical/grouped_* --all-shapes --gpus 0 --output mm_grouped.json
+# one category
+python scripts/bench_parallel.py mm_repro/canonical/epilogue_* --all-shapes --gpus 0
 
-# Named repros
-python scripts/bench_parallel.py mm_repro/canonical/<id> mm_repro/canonical/<id> \
-    --all-shapes --gpus 0 --output mm_named.json
+# two repros: addmm + relu, addmm + residual + LayerNorm
+python scripts/bench_parallel.py mm_repro/canonical/epilogue_addmm_d6fd90850200 \
+    mm_repro/canonical/epilogue_addmm_ba3723ee6650 --all-shapes --gpus 0
 
-# Repros that contain an op, e.g. every epilogue with a LayerNorm/RMSNorm
-python scripts/bench_parallel.py $(grep -l 'var_mean\|rsqrt' mm_repro/canonical/epilogue_*/repro.py) \
-    --all-shapes --gpus 0,1 --output mm_norm_epilogues.json
-```
+# every repro with a LayerNorm (var_mean)
+python scripts/bench_parallel.py $(grep -l var_mean mm_repro/canonical/*/repro.py) --all-shapes --gpus 0
 
-Particular shape points go in a benchmark set: a JSON list naming repros under
-`--canonical-dir`. An entry without a selector runs every shape point of its
-repro; `shape_hashes` takes `shape_hash` values from the repro's `shapes.json`.
+# chosen shape points (shape_hash from the repro's shapes.json)
+echo '[{"name": "epilogue_addmm_ba3723ee6650", "shape_hashes": ["9dff0455", "d729e8bf"]}]' > mm_set.json
+python scripts/bench_parallel.py --benchmark-set mm_set.json --canonical-dir mm_repro/canonical --gpus 0
 
-```bash
-cat > mm_subset.json <<'EOF'
-[
-  {"name": "<id>"},
-  {"name": "<id>", "shape_hashes": ["<shape_hash>", "<shape_hash>"]}
-]
-EOF
-python scripts/bench_parallel.py --benchmark-set mm_subset.json --canonical-dir mm_repro/canonical \
-    --gpus 0 --output mm_subset_results.json
-```
-
-One repro also runs on its own, at every shape point (`--all-shapes`) or at
-one (`--shape <model>_<shape_hash>`, the label it prints). The head run's
-settings go in as environment variables:
-
-```bash
-python mm_repro/canonical/<id>/repro.py --all-shapes
+# one repro on its own: default compile, then Triton templates only
+python mm_repro/canonical/epilogue_addmm_d6fd90850200/repro.py --all-shapes
 TORCHINDUCTOR_MAX_AUTOTUNE_GEMM=1 TORCHINDUCTOR_MAX_AUTOTUNE_GEMM_BACKENDS=TRITON \
-    python mm_repro/canonical/<id>/repro.py --shape <model>_<shape_hash>
+    python mm_repro/canonical/epilogue_addmm_d6fd90850200/repro.py --shape OPTForCausalLM_8acd84ec
 ```
