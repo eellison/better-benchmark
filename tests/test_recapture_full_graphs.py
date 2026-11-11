@@ -17,7 +17,12 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import recapture_full_graphs as recapture
-from ingest_tlparse import load_graph_module
+from full_graph_harness import load_graph_class_from_source
+from ingest_tlparse import (
+    _evaluate_int_expression,
+    _parse_input_shapes_from_reader,
+    load_graph_module,
+)
 
 
 FAKE_FULL_GRAPH = """
@@ -77,6 +82,21 @@ def _write(path: Path, source: str = FAKE_FULL_GRAPH) -> Path:
 
 
 class RecaptureFullGraphsTests(unittest.TestCase):
+    def test_int_true_div_requires_an_integral_result(self):
+        self.assertEqual(_evaluate_int_expression("IntTrueDiv(8, 2)", {}), 4)
+        with self.assertRaisesRegex(ValueError, "not integral"):
+            _evaluate_int_expression("IntTrueDiv(7, 2)", {})
+
+    def test_reader_const_preserves_literal_value(self):
+        specs = _parse_input_shapes_from_reader(
+            """
+def load_args(reader):
+    reader.const(("mode", 3, True))  # config
+"""
+        )
+
+        self.assertEqual(specs[0]["value"], ("mode", 3, True))
+
     def test_infer_target_preserves_suite_mode_and_model(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "repros" / "models"
@@ -319,6 +339,75 @@ class RecaptureFullGraphsTests(unittest.TestCase):
 
             self.assertIsNotNone(gm)
             self.assertTrue(hasattr(gm, "graph"))
+
+    def test_graph_loader_ignores_module_level_code(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            marker = Path(tmp) / "executed"
+            source = f'''open({str(marker)!r}, "w").write("bad")
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        return (torch.ops.aten.relu.default(x),)
+'''
+
+            graph_cls = load_graph_class_from_source(source, "test_graph.py")
+
+            self.assertFalse(marker.exists())
+            self.assertEqual(graph_cls.__name__, "GraphModule")
+
+    def test_graph_loader_rejects_unsafe_method_calls(self):
+        source = '''
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        open("executed", "w").write("bad")
+        return (x,)
+'''
+
+        with self.assertRaisesRegex(ValueError, "unsafe|unsupported call"):
+            load_graph_class_from_source(source, "test_graph.py")
+
+    def test_graph_loader_rejects_mutation_and_unknown_operator_namespaces(self):
+        sources = (
+            '''
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        self.value = x
+        return (x,)
+''',
+            '''
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        return (torch.ops.unapproved.execute.default(x),)
+''',
+            '''
+class GraphModule(
+    torch.nn.Module,
+    torch.serialization.os.system("touch should-not-exist") or object,
+):
+    def forward(self, x: "f32[2, 2]cpu"):
+        return (x,)
+''',
+            '''
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        leaked = torch.serialization.os.environ["BB_REVIEW_SECRET"]
+        return (torch.ops.aten.scalar_tensor.default(leaked == "secret"),)
+''',
+            '''
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]cpu"):
+        alias = torch
+        leaked = alias.serialization.os.environ["BB_REVIEW_SECRET"]
+        return (torch.ops.aten.scalar_tensor.default(leaked == "secret"),)
+''',
+        )
+
+        for source in sources:
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(
+                    ValueError,
+                    "mutate|unsupported call|unsupported torch|one Module base",
+                ):
+                    load_graph_class_from_source(source, "test_graph.py")
 
 
 if __name__ == "__main__":
