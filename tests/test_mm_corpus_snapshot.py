@@ -9,8 +9,8 @@ from matmul_partitioner import CATEGORIES, MatmulLimits
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
-    "prologue": (25, 36),
-    "epilogue": (380, 765),
+    "prologue": (30, 73),
+    "epilogue": (415, 1029),
     "horizontal": (91, 156),
     "horizontal_combine": (5, 7),
 }

@@ -1,0 +1,188 @@
+{
+  "points": [
+    {
+      "shape_hash": "d7c06271",
+      "inputs": [
+        [
+          [
+            32768,
+            56,
+            56
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32768,
+            56,
+            32
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8192,
+            4,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        },
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 5,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "3f6d9ad1",
+      "inputs": [
+        [
+          [
+            16384,
+            56,
+            56
+          ],
+          "bf16"
+        ],
+        [
+          [
+            16384,
+            56,
+            32
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            2048,
+            8,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        },
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 5,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "c2cd7082",
+      "inputs": [
+        [
+          [
+            8192,
+            56,
+            56
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            56,
+            32
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        },
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 18
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 5,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    },
+    {
+      "shape_hash": "ed5302a7",
+      "inputs": [
+        [
+          [
+            4096,
+            56,
+            56
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            56,
+            32
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            32,
+            49,
+            32
+          ]
+        ]
+      ],
+      "models": {
+        "timm/infer/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        },
+        "timm/train/swin_base_patch4_window7_224": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 1,
+        "nodes": 5,
+        "inputs": 2,
+        "outputs": 1,
+        "contraction_depth": 1
+      }
+    }
+  ]
+}
