@@ -26,6 +26,18 @@ NUMERICS_TOLERANCE = 1e-2
 _MAX_NUMERICS_DETAILS = 8
 
 
+class UserTritonKernelReplayError(RuntimeError):
+    """A saved full graph calls user-defined Triton kernels it cannot resolve."""
+
+
+def full_graph_calls_user_triton(definition: "FullGraphDefinition") -> bool:
+    from replay_dependencies import full_graph_calls_user_triton as _calls
+
+    return _calls(
+        definition.graph_cls, (definition.metadata or {}).get("sidecar") or {}
+    )
+
+
 class FullGraphNumericsError(RuntimeError):
     """Raised when compiled outputs do not match eager outputs."""
 
@@ -2905,7 +2917,13 @@ def load_full_graph(
     graph_path_or_definition: str | Path | FullGraphDefinition,
     *,
     default_device: str = "cuda",
+    allow_user_triton: bool = False,
 ):
+    """Instantiate a saved full graph with inputs built from its specs.
+
+    A graph that launches user-defined Triton kernels is refused unless
+    ``allow_user_triton`` is set; set it only to trace the graph in fake mode,
+    which never resolves the kernels."""
     definition = (
         graph_path_or_definition
         if isinstance(graph_path_or_definition, FullGraphDefinition)
@@ -2913,6 +2931,12 @@ def load_full_graph(
     )
     if not definition.input_specs and not definition.forward_takes_no_inputs:
         raise RuntimeError(f"{definition.path} has no parseable forward inputs")
+    if not allow_user_triton and full_graph_calls_user_triton(definition):
+        raise UserTritonKernelReplayError(
+            f"{definition.path} launches user-defined Triton kernels by "
+            "kernel_side_table index, which only the capturing process can "
+            "resolve; replaying it here would fail or run other kernels"
+        )
     instance = instantiate_full_graph(definition, default_device=default_device)
     inputs = make_inputs_from_full_graph_specs(
         definition.input_specs,
