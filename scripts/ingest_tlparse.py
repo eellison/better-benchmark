@@ -1094,12 +1094,45 @@ def load_graph_module(
                 )
             )
 
+        # A post-grad graph can view a tensor that only Inductor's IR can
+        # view, e.g. a padded matmul's sliced output; eager rejects it. Such
+        # a view is traced as a reshape (a copy), only when the view would
+        # raise. The graph is rejected if anything could observe the lost
+        # aliasing (see _check_copied_views).
+        copied_views = []
+
+        def view_or_reshape(a, size):
+            from torch._prims_common import infer_size
+            from torch._subclasses.fake_impls import (
+                _compute_stride,
+                _view_has_unbacked_input,
+            )
+
+            if _view_has_unbacked_input(a, size):
+                return NotImplemented
+            try:
+                shape = infer_size(size, a.numel())
+            except (RuntimeError, ValueError):
+                return NotImplemented
+            if _compute_stride(a.shape, a.stride(), shape) is not None:
+                return NotImplemented
+            copied_views.append((tuple(a.shape), tuple(a.stride()), tuple(size)))
+            return torch.ops.aten.reshape.default(a, size)
+
+        decompositions = {
+            torch.ops.aten.view.default: view_or_reshape,
+            # What make_fx installs when it is given no table.
+            torch.ops.aten.detach.default: (
+                torch._decomp.decompositions.nop_decomposition
+            ),
+        }
         if tracing_mode == "symbolic":
             dynamic_shapes, captured_dynamic = _dynamic_shapes_from_specs(input_shapes)
             # Constant buffers a graph's __init__ registers are real tensors;
             # they are traced as constants with their values.
             gm = make_fx(
                 instance,
+                decomposition_table=decompositions,
                 tracing_mode="fake",
                 dynamic_shapes=dynamic_shapes,
                 _allow_non_fake_inputs=True,
@@ -1107,8 +1140,13 @@ def load_graph_module(
         else:
             captured_dynamic = False
             gm = make_fx(
-                instance, tracing_mode=tracing_mode, _allow_non_fake_inputs=True
+                instance,
+                decomposition_table=decompositions,
+                tracing_mode=tracing_mode,
+                _allow_non_fake_inputs=True,
             )(*inputs)
+        if copied_views:
+            _check_copied_views(gm, copied_views)
         gm.meta["better_benchmark_input_specs"] = input_shapes
         gm.meta["better_benchmark_captured_dynamic"] = captured_dynamic
         gm.meta["better_benchmark_side_effects"] = side_effects
@@ -1121,6 +1159,61 @@ def load_graph_module(
     except Exception as e:
         print(f"  Failed to load {graph_path.name}: {e}")
         return None
+
+
+def _check_copied_views(gm, copied_views) -> None:
+    """Reject a graph in which a view traced as a copy could change results.
+
+    A copy loses the view's aliasing, which matters if anything writes to
+    memory (an in-place op or a mutating higher-order op anywhere in the
+    graph) or reads the copy's storage directly (as_strided on the copy or
+    on a view of it).
+    """
+    import torch
+
+    aten = torch.ops.aten
+    functional_hops = {
+        "auto_functionalized",
+        "auto_functionalized_v2",
+        "triton_kernel_wrapper_functional",
+    }
+    storage_ops = {
+        aten.as_strided.default,
+        aten.as_strided_.default,
+        aten.as_strided_scatter.default,
+    }
+    copies = {
+        node
+        for node in gm.graph.nodes
+        if node.target is aten._unsafe_view.default
+        and getattr(node.args[0], "target", None) is aten.clone.default
+    }
+    aliases = set(copies)
+    for node in gm.graph.nodes:
+        target = node.target
+        if isinstance(target, torch._ops.HigherOrderOperator):
+            if target.name() not in functional_hops:
+                raise ValueError(
+                    f"graph views a tensor eager cannot view {copied_views[0]} "
+                    f"and calls {target.name()}"
+                )
+            continue
+        if not isinstance(target, torch._ops.OpOverload):
+            continue
+        if target._schema.is_mutable:
+            raise ValueError(
+                f"graph views a tensor eager cannot view {copied_views[0]} "
+                "and has in-place ops"
+            )
+        reads_copy = any(arg in aliases for arg in node.all_input_nodes)
+        if reads_copy and target in storage_ops:
+            raise ValueError(
+                f"graph views a tensor eager cannot view {copied_views[0]} "
+                "and reads its storage with as_strided"
+            )
+        returns = target._schema.returns
+        if reads_copy and returns and returns[0].alias_info is not None:
+            aliases.add(node)
 
 
 def process_graph_with_hook(gm, label: str, output_dir: Path, suite: str):
