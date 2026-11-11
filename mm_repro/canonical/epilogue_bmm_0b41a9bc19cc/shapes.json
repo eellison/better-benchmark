@@ -1,0 +1,70 @@
+{
+  "points": [
+    {
+      "shape_hash": "95f14e1b",
+      "inputs": [
+        [
+          [
+            192,
+            128,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            192,
+            64,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            32,
+            6
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            6,
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            128
+          ]
+        ],
+        [
+          "S",
+          [
+            32,
+            1,
+            128,
+            128
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 24,
+        "nodes": 38,
+        "inputs": 3,
+        "outputs": 1,
+        "contraction_depth": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "pattern_hash": "e69b2dba3c26",
+  "pattern_hash_mode": "dag_v1",
+  "shape_hash_mode": "ordered_input_specs_v1",
+  "kind": "matmul",
+  "shape_points": 23,
+  "pattern_category": "epilogue"
+}

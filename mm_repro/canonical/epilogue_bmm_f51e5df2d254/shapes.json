@@ -1,0 +1,47 @@
+{
+  "points": [
+    {
+      "shape_hash": "fe04933f",
+      "inputs": [
+        [
+          [
+            768,
+            56,
+            128
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            128,
+            56
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            6,
+            49,
+            49
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 18,
+        "nodes": 25,
+        "inputs": 2,
+        "outputs": 6,
+        "contraction_depth": 3
+      }
+    }
+  ]
+}

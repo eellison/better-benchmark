@@ -1,0 +1,65 @@
+{
+  "points": [
+    {
+      "shape_hash": "4babdb72",
+      "inputs": [
+        [
+          [
+            8192,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            64,
+            128,
+            4096
+          ],
+          "b8"
+        ],
+        [
+          "S",
+          [
+            64,
+            128,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            8192,
+            4096
+          ]
+        ],
+        [
+          "S",
+          [
+            4096
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/M2M100ForConditionalGeneration": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 3,
+        "nodes": 9,
+        "inputs": 3,
+        "outputs": 2,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

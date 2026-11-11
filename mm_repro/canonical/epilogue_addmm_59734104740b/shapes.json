@@ -1,0 +1,76 @@
+{
+  "points": [
+    {
+      "shape_hash": "1fb7f038",
+      "inputs": [
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            8192,
+            4096
+          ],
+          "bf16"
+        ],
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              4096
+            ]
+          }
+        ],
+        [
+          [
+            512,
+            16,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            512,
+            16,
+            1024
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/XLNetLMHeadModel": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 9,
+        "nodes": 16,
+        "inputs": 6,
+        "outputs": 1,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "points": [
+    {
+      "shape_hash": "cb4282cc",
+      "inputs": [
+        [
+          [
+            768,
+            200,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            768,
+            64,
+            200
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            128,
+            6,
+            196,
+            196
+          ]
+        ],
+        [
+          "S",
+          [
+            128,
+            6,
+            196,
+            196
+          ]
+        ],
+        [
+          "S",
+          [
+            768,
+            196,
+            196
+          ]
+        ],
+        [
+          "S",
+          [
+            0,
+            4,
+            0,
+            4,
+            0,
+            0
+          ]
+        ]
+      ],
+      "models": {
+        "timm/train/visformer_small": {
+          "occurrences": 4
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 19,
+        "nodes": 28,
+        "inputs": 2,
+        "outputs": 7,
+        "contraction_depth": 3
+      }
+    }
+  ]
+}

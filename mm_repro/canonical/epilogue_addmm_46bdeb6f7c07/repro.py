@@ -10,22 +10,22 @@ from repro_harness import benchmark_repro, load_shape_configs, make_inputs_from_
 _repro_version = 3
 
 class Repro(torch.nn.Module):
-    def forward(self, arg0_1: "bf16[768]", arg1_1: "bf16[8192, 3072]", arg2_1: "bf16[3072, 768]", arg3_1: "bf16[8, 1024, 768]", arg4_1: "bf16[768]", arg5_1: "bf16[768]", _shape_param_0):
+    def forward(self, arg0_1: "bf16[4096]", arg1_1: "bf16[4096, 16384]", arg2_1: "bf16[16384, 4096]", arg3_1: "bf16[8, 512, 4096]", arg4_1: "bf16[4096]", arg5_1: "bf16[4096]", _shape_param_0):
         # No stacktrace found for following nodes
-        addmm: "bf16[8192, 768]" = torch.ops.aten.addmm.default(arg0_1, arg1_1, arg2_1);  arg0_1 = arg1_1 = arg2_1 = None
-        view: "bf16[8, 1024, 768]" = torch.ops.aten.view.default(addmm, _shape_param_0);  addmm = _shape_param_0 = None
-        add: "bf16[8, 1024, 768]" = torch.ops.aten.add.Tensor(view, arg3_1);  view = arg3_1 = None
-        convert_element_type: "f32[8, 1024, 768]" = torch.ops.prims.convert_element_type.default(add, torch.float32);  add = None
+        addmm: "bf16[4096, 4096]" = torch.ops.aten.addmm.default(arg0_1, arg1_1, arg2_1);  arg0_1 = arg1_1 = arg2_1 = None
+        view: "bf16[8, 512, 4096]" = torch.ops.aten.view.default(addmm, _shape_param_0);  addmm = _shape_param_0 = None
+        add: "bf16[8, 512, 4096]" = torch.ops.aten.add.Tensor(view, arg3_1);  view = arg3_1 = None
+        convert_element_type: "f32[8, 512, 4096]" = torch.ops.prims.convert_element_type.default(add, torch.float32);  add = None
         var_mean = torch.ops.aten.var_mean.correction(convert_element_type, [2], correction = 0, keepdim = True)
-        getitem: "f32[8, 1024, 1]" = var_mean[0]
-        getitem_1: "f32[8, 1024, 1]" = var_mean[1];  var_mean = None
-        sub: "f32[8, 1024, 768]" = torch.ops.aten.sub.Tensor(convert_element_type, getitem_1);  convert_element_type = getitem_1 = None
-        add_1: "f32[8, 1024, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-05);  getitem = None
-        rsqrt: "f32[8, 1024, 1]" = torch.ops.aten.rsqrt.default(add_1);  add_1 = None
-        mul: "f32[8, 1024, 768]" = torch.ops.aten.mul.Tensor(sub, rsqrt);  sub = rsqrt = None
-        mul_1: "f32[8, 1024, 768]" = torch.ops.aten.mul.Tensor(mul, arg4_1);  mul = arg4_1 = None
-        add_2: "f32[8, 1024, 768]" = torch.ops.aten.add.Tensor(mul_1, arg5_1);  mul_1 = arg5_1 = None
-        convert_element_type_1: "bf16[8, 1024, 768]" = torch.ops.prims.convert_element_type.default(add_2, torch.bfloat16);  add_2 = None
+        getitem: "f32[8, 512, 1]" = var_mean[0]
+        getitem_1: "f32[8, 512, 1]" = var_mean[1];  var_mean = None
+        sub: "f32[8, 512, 4096]" = torch.ops.aten.sub.Tensor(convert_element_type, getitem_1);  convert_element_type = getitem_1 = None
+        add_1: "f32[8, 512, 1]" = torch.ops.aten.add.Tensor(getitem, 1e-12);  getitem = None
+        rsqrt: "f32[8, 512, 1]" = torch.ops.aten.rsqrt.default(add_1);  add_1 = None
+        mul: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(sub, rsqrt);  sub = rsqrt = None
+        mul_1: "f32[8, 512, 4096]" = torch.ops.aten.mul.Tensor(mul, arg4_1);  mul = arg4_1 = None
+        add_2: "f32[8, 512, 4096]" = torch.ops.aten.add.Tensor(mul_1, arg5_1);  mul_1 = arg5_1 = None
+        convert_element_type_1: "bf16[8, 512, 4096]" = torch.ops.prims.convert_element_type.default(add_2, torch.bfloat16);  add_2 = None
         return convert_element_type_1
 
 def make_inputs(shape_config=None):

@@ -1,0 +1,71 @@
+{
+  "points": [
+    {
+      "shape_hash": "489608e4",
+      "inputs": [
+        [
+          [
+            1024,
+            256,
+            64
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            64,
+            256
+          ],
+          "bf16",
+          {
+            "st": [
+              16384,
+              1,
+              64
+            ]
+          }
+        ],
+        [
+          [
+            64,
+            1,
+            256,
+            256
+          ],
+          "f32"
+        ],
+        [
+          "S",
+          [
+            64,
+            16,
+            256,
+            256
+          ]
+        ],
+        [
+          "S",
+          [
+            1024,
+            256,
+            256
+          ]
+        ]
+      ],
+      "models": {
+        "hf/train/TrOCRForCausalLM": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 7,
+        "nodes": 10,
+        "inputs": 3,
+        "outputs": 4,
+        "contraction_depth": 3
+      }
+    }
+  ]
+}

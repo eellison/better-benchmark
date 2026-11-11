@@ -58,6 +58,9 @@
       "models": {
         "hf/infer/DebertaV2ForMaskedLM": {
           "occurrences": 24
+        },
+        "hf/train/DebertaV2ForMaskedLM": {
+          "occurrences": 1
         }
       },
       "partition_metrics": {

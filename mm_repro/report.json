@@ -9,16 +9,16 @@
     "max_normal_compute": 31,
     "max_epilogue_extra_inputs": 4
   },
-  "policy_id": "8baa075957599017",
+  "policy_id": "b27815b0635d0fe7",
   "curation": {
     "input_source": "repros/models/**/full_graph_*.py",
     "version": "normal_absorption_and_metadata_windows_v2",
-    "dependency_id": "cf118e932474aed9",
-    "raw_size_admitted_repros": 1038,
-    "raw_shape_points": 1598
+    "dependency_id": "a45cde3ddd112ada",
+    "raw_size_admitted_repros": 990,
+    "raw_shape_points": 1560
   },
-  "unique_repros": 535,
-  "shape_points": 1001,
+  "unique_repros": 501,
+  "shape_points": 964,
   "region_occurrences": 9305,
   "sources": 364,
   "original_mm": 17575,
@@ -28,12 +28,12 @@
       "shape_points": 36
     },
     "epilogue": {
-      "repros": 412,
-      "shape_points": 801
+      "repros": 380,
+      "shape_points": 765
     },
     "horizontal": {
-      "repros": 93,
-      "shape_points": 157
+      "repros": 91,
+      "shape_points": 156
     },
     "horizontal_combine": {
       "repros": 5,

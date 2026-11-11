@@ -1,0 +1,127 @@
+{
+  "points": [
+    {
+      "shape_hash": "c208be79",
+      "inputs": [
+        [
+          [
+            4096,
+            1024
+          ],
+          "bf16"
+        ],
+        [
+          [
+            1024,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              1024
+            ]
+          }
+        ],
+        [
+          [
+            32,
+            128,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            32,
+            128,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/MT5ForConditionalGeneration": {
+          "occurrences": 2
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 2
+      }
+    },
+    {
+      "shape_hash": "517c4596",
+      "inputs": [
+        [
+          [
+            8192,
+            2048
+          ],
+          "bf16"
+        ],
+        [
+          [
+            2048,
+            512
+          ],
+          "bf16",
+          {
+            "st": [
+              1,
+              2048
+            ]
+          }
+        ],
+        [
+          [
+            8,
+            1024,
+            512
+          ],
+          "bf16"
+        ],
+        [
+          [
+            512
+          ],
+          "bf16"
+        ],
+        [
+          "S",
+          [
+            8,
+            1024,
+            512
+          ]
+        ]
+      ],
+      "models": {
+        "hf/infer/T5ForConditionalGeneration": {
+          "occurrences": 1
+        },
+        "hf/infer/T5Small": {
+          "occurrences": 1
+        }
+      },
+      "partition_metrics": {
+        "mm": 1,
+        "compute": 8,
+        "nodes": 11,
+        "inputs": 4,
+        "outputs": 1,
+        "contraction_depth": 2
+      }
+    }
+  ]
+}

@@ -10,8 +10,8 @@ from matmul_partitioner import CATEGORIES, MatmulLimits
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
     "prologue": (25, 36),
-    "epilogue": (412, 801),
-    "horizontal": (93, 157),
+    "epilogue": (380, 765),
+    "horizontal": (91, 156),
     "horizontal_combine": (5, 7),
 }
 TOTAL = tuple(map(sum, zip(*EXPECTED.values())))
