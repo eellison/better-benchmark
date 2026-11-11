@@ -117,14 +117,19 @@ def trace_full_graph(graph_path: Path, device: str = "cuda"):
     """Load a full_graph_*.py via full_graph_harness and trace it with make_fx.
 
     Returns a GraphModule with shape metadata (node.meta['val']) on all nodes.
-    Tries fake-mode tracing first (no real compute), then real mode.
+    Tries fake-mode tracing first (no real compute), then real mode. A graph
+    that launches user-defined Triton kernels is traced in fake mode only: a
+    real trace would resolve its kernels through this process's side table.
     """
     import torch
     from torch.fx.experimental.proxy_tensor import make_fx
 
-    from full_graph_harness import load_full_graph
+    from full_graph_harness import full_graph_calls_user_triton, load_full_graph
 
-    instance, inputs, _definition = load_full_graph(graph_path, default_device=device)
+    instance, inputs, definition = load_full_graph(
+        graph_path, default_device=device, allow_user_triton=True
+    )
+    fake_only = full_graph_calls_user_triton(definition)
 
     # Fake mode first: shape propagation without executing convolutions etc.
     try:
@@ -138,7 +143,8 @@ def trace_full_graph(graph_path: Path, device: str = "cuda"):
             with torch.no_grad():
                 return make_fx(instance, tracing_mode="fake")(*fake_inputs)
     except Exception:
-        pass
+        if fake_only:
+            raise
 
     # Fallback: real-mode tracing (executes the graph once).
     with torch.no_grad():
