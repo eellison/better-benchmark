@@ -60,7 +60,8 @@ any canonical repro.
 1. **Load**: run a source graph's module under FakeTensors and retrace it.
 2. **Select regions** (`matmul_partitioner.get_matmul_regions`):
    prologue/epilogue from whole normal BB partitions, horizontal windows around
-   MMs that share an operand. Both are described below.
+   MMs that share an operand. Both are described below. A region returns
+   values, not views of them (see Outputs).
 3. **Capture** (`capture_hook`): copy each region into a standalone
    GraphModule. Values from outside become inputs whose shape, stride, storage
    offset, dtype, device and aliasing are recorded; shape literals become
@@ -89,9 +90,10 @@ window of individual operations around an MM.
 4. Extract only augmented partitions containing exactly one MM. Unabsorbed
    standalone MMs are not included in these categories.
 5. Trim each augmented partition to the outputs that depend on its MM (the MM
-   itself or its descendants) and the nodes they need. Values that do not
-   depend on the MM, such as a mask that is also a model output or an operand
-   intermediate saved for backward, are not MM fusion.
+   itself or its descendants), returned as values rather than views of them
+   (see Outputs), and the nodes they need. Values that do not depend on the
+   MM, such as a mask that is also a model output or an operand intermediate
+   saved for backward, are not MM fusion.
 6. Keep the partition only if `0 < non-MM compute <= max_normal_compute` (31)
    after trimming, counting real computation (`is_computation`; views, casts
    and other scaffolding are free). 0 is a bare MM; larger partitions are
@@ -195,7 +197,8 @@ The multiplied dimensions may differ; output shapes must match. A group stops
 at three MMs. Its window starts from the MMs and the work that prepares their
 operands, grows forward to consumers and backward to side inputs, and keeps the
 largest window within `MatmulLimits`: at most three MMs, 48 nodes, 32 compute
-operations, 12 inputs and four outputs.
+operations, 12 inputs and four outputs, counted after outputs become values
+(see Outputs).
 
 The window contains the operand paths up to where they meet, even when they
 are computed from an earlier MM, which local producer growth otherwise leaves
@@ -204,6 +207,54 @@ extract as two MMs reading separate inputs `view_1` and `view_2`; one view
 feeding both MMs is already a single input and stays out. A window that cannot
 keep the paths within its limits is dropped, and validation checks that every
 horizontal repro's MMs share an operand by the same key.
+
+## Outputs: values, not views
+
+A view returns its input's storage, so a region that returns a view of a value
+returns that value. In every category, extraction replaces each output before
+capture, and the pattern hash, the inputs and the code never see the views:
+
+1. An output that views a value whole is that value. Views that keep every
+   element of their input are dropped from its end: `view`, `reshape`,
+   `_unsafe_view`, `squeeze`, `unsqueeze`, `permute`, `t`, `transpose`,
+   `expand`, `alias`, `detach`, and a `slice` or `select` that covers its whole
+   input. Outputs that become one value are one output.
+2. A view that drops elements, such as a `slice` or `select` of part of a
+   tensor, stays an output unless it views another output.
+3. Casts and clones write a new tensor and stay outputs.
+
+M2M100's addmm + residual + LayerNorm epilogue, read by 24 consumers through
+their own view, returned the norm and 24 views of it, each view with its own
+`_shape_param` input:
+
+```python
+convert_element_type_1 = torch.ops.prims.convert_element_type.default(add_2, torch.bfloat16)
+view_1 = torch.ops.aten.view.default(convert_element_type_1, _shape_param_1)
+...
+view_24 = torch.ops.aten.view.default(convert_element_type_1, _shape_param_24)
+return (convert_element_type_1, view_1, ..., view_24)
+```
+
+It now ends in `return convert_element_type_1`, and the same epilogue read
+through any number of views has the same pattern hash. A QKV window's
+`return (addmm_2, view_3, view_4, view_5)`, where `view_3`, `view_4` and
+`view_5` reshape `addmm_2`, `addmm` and `addmm_1`, returns
+`(addmm, addmm_1, addmm_2)`.
+
+Views that drop elements keep the outputs a model reads. DeiT's
+`return (select, select_1)` keeps its two class tokens of a
+`[128, 198, 768]` norm; returning the norm would claim all 198 tokens. When the
+viewed value is an output anyway, the view adds nothing:
+
+```python
+add = torch.ops.aten.add.Tensor(arg3_1, view)        # [16, 128, 768], BERT_pytorch
+select = torch.ops.aten.select.int(add, 1, 0)        # [16, 768]
+view_1 = torch.ops.aten.view.default(add, _shape_param_1)
+return (select, view_1)                              # now: return add
+```
+
+A clone such as `clone(permute, memory_format=torch.contiguous_format)` stores
+a transposed copy, so an epilogue that returns it keeps that store.
 
 ## Curation
 
@@ -226,11 +277,11 @@ deduplication, and no cap on repros or shape points.
 
 Before hashing, curation reads every `inductor_lookup_seed` from slot 0: the
 slot (which dropout of the graph) is a bare-int argument the hash keeps, yet it
-does not change the kernel. Prologue/epilogue partitions keep their views and
-casts. Horizontal windows first get metadata-proven normalization
-(`mm_corpus_dedup.normalize_graph`: views removed only when their metadata
-proves them identity, input permutations folded into strided input specs) and
-must still fit `MatmulLimits`.
+does not change the kernel. Prologue/epilogue partitions keep their inner
+views and casts (output views are already gone). Horizontal windows first get
+metadata-proven normalization (`mm_corpus_dedup.normalize_graph`: views
+removed only when their metadata proves them identity, input permutations
+folded into strided input specs) and must still fit `MatmulLimits`.
 
 Each `canonical/<category>_<mm ops>_<hash>/` contains:
 

@@ -1,8 +1,10 @@
 """Curate captured MM regions into the four-category mm_repro corpus.
 
 Prologue/epilogue partitions were trimmed and bounded at extraction and keep
-their views/casts. Horizontal/horizontal_combine windows get metadata-proven
-graph normalization and must fit MatmulLimits.
+their inner views/casts. Horizontal/horizontal_combine windows get
+metadata-proven graph normalization and must fit MatmulLimits. In every
+category, extraction already returns values rather than views of them
+(matmul_partitioner.output_values).
 
 Pattern hashes are the BB compute_dag_signature without scalar literals, as for
 repros/, in every category: captures that differ only in literals (a scale or
@@ -256,7 +258,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
     )
     policy = source_report["policy"]
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`; `python scripts/validate_matmul_repros.py` runs every shape point eagerly on a GPU. Prologue/epilogue repros are normal BB partitions that absorbed one producer MM (epilogue, tried first) or one consumer MM (prologue), trimmed to the work that depends on the MM, with 1 to {policy['max_normal_compute']} non-MM compute ops and, for epilogues, at most {policy['max_epilogue_extra_inputs']} extra input tensors. Horizontal windows group 2-3 independent MMs that share an operand. Every repro is one pattern hash, which ignores scalar literals as in repros/: literal variants are one repro with the first captured code. There is no repro or shape-point cap. `canonical/<category>_<mm ops>_<hash>/` is flat like `repros/canonical/`, so the repro tools (`validate_eager.py`, `bench_parallel.py`, `validate_corpus_invariants.py --corpus-root mm_repro`) run on it. See [docs/matmul_partitioning.md](../docs/matmul_partitioning.md).\n\n[Report](report.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`; `python scripts/validate_matmul_repros.py` runs every shape point eagerly on a GPU. Prologue/epilogue repros are normal BB partitions that absorbed one producer MM (epilogue, tried first) or one consumer MM (prologue), trimmed to the work that depends on the MM, with 1 to {policy['max_normal_compute']} non-MM compute ops and, for epilogues, at most {policy['max_epilogue_extra_inputs']} extra input tensors. Horizontal windows group 2-3 independent MMs that share an operand. Repros return values, not views of them. Every repro is one pattern hash, which ignores scalar literals as in repros/: literal variants are one repro with the first captured code. There is no repro or shape-point cap. `canonical/<category>_<mm ops>_<hash>/` is flat like `repros/canonical/`, so the repro tools (`validate_eager.py`, `bench_parallel.py`, `validate_corpus_invariants.py --corpus-root mm_repro`) run on it. See [docs/matmul_partitioning.md](../docs/matmul_partitioning.md).\n\n[Report](report.json)\n"
     )
     return report
 

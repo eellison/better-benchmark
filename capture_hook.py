@@ -451,8 +451,9 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     """
     from matmul_partitioner import MatmulRegion
 
-    # MM regions choose their benchmark outputs themselves (values that only
-    # feed views/casts outside the region are not returned).
+    # MM regions choose their benchmark outputs themselves: values, not views
+    # of them (matmul_partitioner.output_values), so an output view is
+    # returned as the value it views and has no _shape_param input.
     requested_outputs = (set(origin_nodes.outputs)
                          if isinstance(origin_nodes, MatmulRegion) else None)
     seen = set()

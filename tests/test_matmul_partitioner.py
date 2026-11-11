@@ -576,3 +576,79 @@ def test_dropout_seed_buffer_is_not_an_extra_input():
     (region,) = get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",))
     mm = next(n for n in region if is_matmul(n))
     assert extra_inputs(list(region), mm) == set()
+
+
+# --- outputs: values, not views of them -------------------------------------
+
+
+def epilogue_outputs(fn, *inputs):
+    """Targets of the extracted epilogue's outputs, and its shape params."""
+    from capture_hook import extract_partition_subgraph
+
+    gm = make_fx(fn, tracing_mode="fake")(*inputs)
+    (region,) = get_matmul_regions(gm, partition_node_is_supported, categories=("epilogue",))
+    subset, _, shape_params = extract_partition_subgraph(region, gm)
+    output = next(n for n in subset.graph.nodes if n.op == "output")
+    returned = output.args[0] if isinstance(output.args[0], tuple) else (output.args[0],)
+    return [n.target for n in returned], shape_params
+
+
+aten = torch.ops.aten
+
+
+def test_views_of_one_value_are_returned_as_that_value_once():
+    # Returned as (relu, view, t, expand) before; the views also added
+    # _shape_param inputs.
+    def fn(x, w):
+        h = torch.relu(x @ w)
+        return h, h.view(2, M // 2, 48), h.t(), h.unsqueeze(0).expand(3, M, 48)
+
+    assert epilogue_outputs(fn, R(M, 32), R(32, 48)) == ([aten.relu.default], {})
+
+
+def test_views_that_keep_every_element_include_full_slices_and_size_1_selects():
+    def fn(x, w):
+        h = torch.relu(x @ w).view(1, M, 48)
+        return aten.select.int(h, 0, 0), aten.slice.Tensor(h, 1, 0, M)
+
+    assert epilogue_outputs(fn, R(M, 32), R(32, 48))[0] == [aten.relu.default]
+
+
+def test_views_that_drop_elements_stay_unless_they_view_another_output():
+    # DeiT's two class tokens: returning the whole relu would claim every token.
+    def tokens(x, w):
+        h = torch.relu(x @ w).view(2, M // 2, 48)
+        return h.select(1, 0), h.select(1, 1)
+
+    assert epilogue_outputs(tokens, R(M, 32), R(32, 48))[0] == [aten.select.int] * 2
+
+    # BERT_pytorch also returns the whole value, so its token 0 adds nothing.
+    def token_and_value(x, w):
+        h = torch.relu(x @ w).view(2, M // 2, 48)
+        return h.select(1, 0), h.view(M, 48)
+
+    assert epilogue_outputs(token_and_value, R(M, 32), R(32, 48))[0] == [aten.relu.default]
+
+
+def test_casts_and_clones_are_outputs_of_their_own():
+    def fn(x, w):
+        h = torch.relu(x @ w)
+        cast = torch.ops.prims.convert_element_type.default(h, torch.bfloat16)
+        transposed = h.view(2, M // 2, 4, 12).permute(0, 2, 1, 3).contiguous()
+        return cast.view(2, M // 2, 48), transposed
+
+    assert epilogue_outputs(fn, R(M, 32), R(32, 48))[0] == [
+        torch.ops.prims.convert_element_type.default, aten.clone.default,
+    ]
+
+
+def test_horizontal_view_outputs_are_the_mm_results():
+    # A ConvBert QKV window returned (addmm_2, view_3, view_4, view_5).
+    def fn(x, a, b, c):
+        q, k, v = x @ a, x @ b, x @ c
+        return v, v.view(2, M // 2, 48), q.view(2, M // 2, 4, 12), k.view(2, M // 2, 4, 12)
+
+    gm, found = horizontal_regions(fn, R(M, 32), *[R(32, 48)] * 3)
+    assert [r.category for r in found] == ["horizontal"]
+    assert len(found[0].outputs) == 3 and all(map(is_matmul, found[0].outputs))
+    assert not any(op_name(n) == "aten::view" for n in found[0])

@@ -16,6 +16,9 @@ Horizontal/horizontal_combine keep the independent 2..3-MM window search:
 a shared operand (same slot and values, operand_keys), equal output shapes,
 and optional surrounding local work within MatmulLimits. These windows may
 overlap the normal-partition examples; the model graph is never rewritten.
+
+Every region returns values, not views of them (output_values): an output that
+views a value whole is that value, and outputs of one value are one output.
 """
 
 from __future__ import annotations
@@ -694,7 +697,7 @@ class MatmulLimits:
 class MatmulRegion(list):
     """The FX nodes of one region, in graph order.
 
-    outputs: nodes whose values the benchmark returns.
+    outputs: nodes whose values the benchmark returns (output_values).
     metrics: sizes of the region.
     category: one of CATEGORIES.
     mm_types: sorted MM op names such as ("addmm", "bmm"), used for naming.
@@ -852,12 +855,12 @@ class _Extractor:
         }
 
     def finish(self, core, internal, required=()):
-        """Choose outputs, prune to what they need and check every limit."""
-        outputs = self.sort(
+        """Choose outputs (output_values), prune to what they need and check every limit."""
+        outputs = output_values(self.sort(
             n
             for n in core
             if internal(n) and (is_mutating(n) or any(u not in core for u in n.users))
-        )
+        ))
         if not outputs:
             self.reject("no_output")
             return None
@@ -1019,18 +1022,83 @@ def supported_nodes(gm, is_supported, excluded=()):
     return supported
 
 
+# Views whose result shows every element of their input, unless it is smaller:
+# a slice or select only when it covers its whole input (a full slice, a select
+# of a size-1 dim).
+_WHOLE_VIEWS = _RESHAPES | _PERMUTES | {
+    "aten::expand", "aten::alias", "aten::detach", "aten::slice", "aten::select",
+}
+
+
+def view_root(node):
+    """``node`` without its trailing views that keep every element of their input."""
+    while (
+        op_name(node) in _WHOLE_VIEWS
+        and node.meta["val"].numel() >= node.args[0].meta["val"].numel()
+    ):
+        node = node.args[0]
+    return node
+
+
+def output_values(outputs):
+    """The values a region returns for its escaping ``outputs``.
+
+    A view returns its input's storage, so an output that views a value whole
+    (view_root) returns that value, and outputs that view one value are one
+    output. M2M100's addmm + residual + LayerNorm epilogue, which 24 consumers
+    read through their own view, was captured as
+
+        convert_element_type_1 = convert_element_type(add_2, torch.bfloat16)
+        view_1 = view(convert_element_type_1, _shape_param_1)
+        ...
+        view_24 = view(convert_element_type_1, _shape_param_24)
+        return (convert_element_type_1, view_1, ..., view_24)
+
+    and now ends in ``return convert_element_type_1``, the pattern of the same
+    epilogue read through any number of views. A view that drops elements stays
+    an output unless it views another output:
+
+        add = add(arg3_1, view)            # [16, 128, 768], BERT_pytorch
+        select = select(add, 1, 0)         # [16, 768]
+        view_1 = view(add, _shape_param_1)
+        return (select, view_1)            # now: return add
+
+    DeiT's ``return (select, select_1)``, its two class tokens of a
+    [128, 198, 768] norm, keeps both: returning the norm would claim all 198
+    tokens. Casts and clones write a new tensor and are outputs of their own;
+    ``return clone(permute, memory_format=torch.contiguous_format)`` is an
+    epilogue that stores a transposed copy.
+
+    Callers pass outputs that depend on an MM of the region, so the walks stay
+    inside it.
+    """
+    roots = list(dict.fromkeys(map(view_root, outputs)))
+    returned = set(roots)
+
+    def views_another_output(node):
+        while op_name(node) in VIEW_NAMES:
+            node = node.args[0]
+            if node in returned:
+                return True
+        return False
+
+    return [n for n in roots if not views_another_output(n)]
+
+
 def trim_to_matmul(nodes, outputs, mm):
-    """Keep the outputs that depend on ``mm`` and the nodes they need.
+    """Keep the outputs that depend on ``mm``, as output_values, and the nodes they need.
 
     A BB partition can carry work that never touches its absorbed MM (an
     unrelated store fused by the BB partitioner); that is not MM fusion.
+    Output views that output_values replaces are dropped unless a kept node
+    reads them.
     """
     core = set(nodes)
     after = {mm}
     for node in nodes:  # graph order
         if any(a in after for a in node.all_input_nodes):
             after.add(node)
-    kept = [n for n in outputs if n in after]
+    kept = output_values([n for n in outputs if n in after])
     needed, stack = set(kept), list(kept)
     while stack:
         for arg in stack.pop().all_input_nodes:
