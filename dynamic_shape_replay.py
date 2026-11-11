@@ -209,7 +209,7 @@ def _eval_shape_env_expr(text: str, values: dict[str, Any]):
     from torch.utils._sympy.interp import sympy_interp
     from torch.utils._sympy.reference import PythonReferenceAnalysis
 
-    expr = _sympify_expr(text)
+    expr = _exact_floors(_sympify_expr(text))
     env = {symbol: values[symbol.name] for symbol in expr.free_symbols}
     return sympy_interp(PythonReferenceAnalysis, env, expr)
 
@@ -334,7 +334,7 @@ def _shape_env_spec_from_contract(data: dict,
                         "ShapesSpec cannot make stride/offset metadata dynamic "
                         "for a fully-static-size tensor")
                 evaluator = _symint_expr_evaluator(
-                    _sympify_expr(expression))
+                    _exact_floors(_sympify_expr(expression)))
                 if evaluator is None:
                     raise ValueError(
                         f"input {pos} {kind} expression {expression!r} uses "
@@ -433,6 +433,29 @@ def _effective_binding_for_row(binding: dict | None, cfg: dict) -> dict:
         f"{cfg.get('shape_hash')!r}")
 
 
+def _exact_floors(expr):
+    """Rewrite floor/ceiling of a polynomial over an integer denominator
+    (floor(s1/3 + s2/3)) as integer FloorDiv: evaluated in floats it can land
+    just below an integer, and spec-time IntVars can't take sympy floor."""
+    import sympy
+    from torch.utils._sympy.functions import FloorDiv
+
+    def rewrite(node):
+        name = type(node).__name__
+        if name not in {"floor", "FloorToInt", "ceiling", "CeilToInt"}:
+            return None
+        num, den = sympy.fraction(sympy.together(node.args[0]))
+        if not (den.is_Integer and den > 1 and num.free_symbols and num.is_polynomial()):
+            return None
+        if not all(c.is_Integer for c in sympy.Poly(num, *num.free_symbols).coeffs()):
+            return None
+        if name in {"floor", "FloorToInt"}:
+            return FloorDiv(num, den)
+        return -FloorDiv(-num, den)
+
+    return expr.replace(lambda n: rewrite(n) is not None, rewrite)
+
+
 def _symint_expr_evaluator(expr):
     """Compile a captured expression into direct Python/SymInt operations.
 
@@ -508,14 +531,14 @@ def _symint_expr_evaluator(expr):
         return _or
     if isinstance(expr, sympy.Not):
         return lambda env: ~parts[0](env)
-    if isinstance(expr, sympy.Max):
+    if isinstance(expr, sympy.Max) or type(expr).__name__ == "Max":
         def _max(env):
             result = parts[0](env)
             for part in parts[1:]:
                 result = torch.sym_max(result, part(env))
             return result
         return _max
-    if isinstance(expr, sympy.Min):
+    if isinstance(expr, sympy.Min) or type(expr).__name__ == "Min":
         def _min(env):
             result = parts[0](env)
             for part in parts[1:]:
@@ -629,7 +652,7 @@ def _backed_replay_plan_from_contract(data: dict,
             })
         if any(s.name not in symbols for s in expr.free_symbols):
             return None
-        return _symint_expr_evaluator(expr)
+        return _symint_expr_evaluator(_exact_floors(expr))
 
     def occurrence_mark_bounds(text):
         """Bounds suitable for a non-canonical symbolic tensor dimension.

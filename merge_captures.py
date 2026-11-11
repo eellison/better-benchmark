@@ -150,6 +150,12 @@ def _canonicalize_symbols(symbols, inputs, guards, bindings=None):
     (symbols table, inputs exprs, guards, bindings) consistently via the
     sympy-based renamers (substring-safe, simultaneous). Returns the rewritten
     (symbols, inputs, guards, bindings). A no-op when already canonical."""
+    if guards:
+        # A guard sympy proves true (Eq(x//9, floor(x/9))) has no free symbols
+        # left to rename and would keep stale names that replay can't bind.
+        from input_codec import _sympify_expr
+        import sympy
+        guards = [g for g in guards if _sympify_expr(g) is not sympy.true]
     rename = _canonical_symbol_rename(inputs, guards,
                                       extra_names=(symbols or {}).keys())
     if not rename:

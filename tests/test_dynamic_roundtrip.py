@@ -67,11 +67,15 @@ def _regions(root):
     }
 
 
-def _repro_cls(repro_file):
+def _repro_module(repro_file):
     spec = importlib.util.spec_from_file_location("repro_under_test", repro_file)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.Repro
+    return module
+
+
+def _repro_cls(repro_file):
+    return _repro_module(repro_file).Repro
 
 
 def _check(root, name, bindings):
@@ -199,6 +203,26 @@ def test_aliased_views_replay_at_a_larger_binding(tmp_path):
     batch = point["inputs"][0][0][0]
     rows = _check(tmp_path, name, [point["bindings"], {**point["bindings"], batch: 40}])
     assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
+def test_guard_floor_of_rational_sum_is_exact():
+    from dynamic_shape_replay import _exact_floors, _symint_expr_evaluator
+    from input_codec import _sympify_expr
+
+    # 200/3 + 200/3 + 200/3 is 199.99999999999997 in floats.
+    text = "Eq(floor(s1/3 + s2/3 + s3/3), 200)"
+    guard = _symint_expr_evaluator(_exact_floors(_sympify_expr(text)))
+    assert guard({"s1": 200, "s2": 200, "s3": 200})
+    assert _symint_expr_evaluator(_exact_floors(_sympify_expr("ceiling(s1/3)")))({"s1": 200}) == 67
+
+
+def test_tautological_guards_do_not_keep_stale_symbol_names():
+    from merge_captures import _canonicalize_symbols
+
+    _symbols, _inputs, guards, _ = _canonicalize_symbols(
+        {"s13": {}, "s7": {}}, [[["s13", "s7"], "f32"]],
+        ["Eq(((s13 + s7)//9), floor(s13/9 + s7/9))", "Eq(Mod(s13 + s7, 9), 0)"])
+    assert guards == ["Eq(Mod(s0 + s1, 9), 0)"]
 
 
 def test_size_one_dims_are_specialized(tmp_path):
