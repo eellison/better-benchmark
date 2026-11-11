@@ -9,11 +9,11 @@ from matmul_partitioner import CATEGORIES, MatmulLimits
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED = {
-    "prologue": (30, 73),
-    "epilogue": (415, 1029),
+    "prologue": (25, 36),
+    "epilogue": (378, 763),
     "horizontal": (91, 156),
     "horizontal_combine": (5, 7),
-    "grouped": (0, 0),  # the committed corpus predates grouped regions
+    "grouped": (3, 3),
 }
 TOTAL = tuple(map(sum, zip(*EXPECTED.values())))
 
@@ -26,7 +26,7 @@ def test_committed_snapshot_and_source_references():
     assert len(files) == report["unique_repros"] == TOTAL[0]
     assert all(p.is_dir() for p in (corpus / "canonical").iterdir())
     assert tuple(EXPECTED) == CATEGORIES
-    assert set(report["pattern_categories"]) == set(CATEGORIES) - {"grouped"}
+    assert set(report["pattern_categories"]) == set(CATEGORIES)
     limits = MatmulLimits()
     assert report["policy"] == asdict(limits)
     points, hashes = {}, set()
@@ -35,7 +35,7 @@ def test_committed_snapshot_and_source_references():
         meta = json.loads(path.with_name("meta.json").read_text())
         category = meta["pattern_category"]
         assert category in CATEGORIES and path.parent.name.startswith(category + "_")
-        normal = category in {"prologue", "epilogue"}
+        normal = category in {"prologue", "epilogue", "grouped"}
         assert meta["pattern_hash_mode"] == "dag_v1"
         assert path.parent.name.endswith("_" + meta["pattern_hash"])
         # One repro per pattern hash, in every category.

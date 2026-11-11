@@ -363,13 +363,16 @@ python scripts/validate_eager.py mm_repro/canonical --all-shapes --gpus 0,1 --ma
 python scripts/bench_parallel.py mm_repro/canonical --all-shapes --gpus 0,1 --output mm_results.json
 ```
 
-`mm_repro/` holds **541 repros / 1265 shape points** of matmul fusion patterns
-from the saved model graphs, in four categories: prologue (30), epilogue (415),
-horizontal (91) and horizontal_combine (5). Prologue/epilogue repros are normal
-BB partitions that absorbed one producer MM (epilogue, tried first) or one
-consumer MM (prologue), trimmed to the work that depends on the MM, with 1 to
-31 non-MM compute ops (views and casts are free). Regions that read a CPU
-tensor are left out. Horizontal
+`mm_repro/` holds **502 repros / 965 shape points** of matmul fusion patterns
+from the saved model graphs, in five categories: prologue (25), epilogue (378),
+grouped (3), horizontal (91) and horizontal_combine (5). Prologue/epilogue
+repros are normal BB partitions that absorbed one producer MM (epilogue, tried
+first) or one consumer MM (prologue), trimmed to the work that depends on the
+MM, with 1 to 31 non-MM compute ops (views and casts are free). Grouped repros
+are an `aten._grouped_mm` (MoE experts) with the whole partitions producing its
+multiplied operands and consuming its result, with no size bound; back-to-back
+grouped MMs share the partition between them, and `offs` is an input generated
+as sorted group ends. Regions that read a CPU tensor are left out. Horizontal
 repros group 2–3 independent MMs that share an operand. Repros return values,
 not views of them: an output that only reshapes another value is that value, so
 trailing views do not split pattern hashes. Pattern hashes and input generation
