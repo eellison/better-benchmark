@@ -119,6 +119,11 @@ def _canonical_symbol_rename(inputs, guards, extra_names=None) -> dict:
                 for s in e[2].get("st", []):
                     note(s)
                 note(e[2].get("off"))
+                gen = e[2].get("gen")
+                if isinstance(gen, list):
+                    for g in gen[1:]:
+                        if isinstance(g, str):
+                            note(g)
         elif e[0] in {"I", "F"}:                   # typed scalar expr
             if len(e) > 2:
                 note(e[2])
@@ -209,6 +214,10 @@ def _rename_symbols_in_inputs(inputs, rename: dict):
                 opts = dict(e[2])
                 if "st" in opts:
                     opts["st"] = [_slot(s) for s in opts["st"]]
+                gen = opts.get("gen")
+                if isinstance(gen, list) and gen and gen[0] in {"index", "runs"}:
+                    opts["gen"] = [_slot(g) if isinstance(g, str) and i > 0 else g
+                                   for i, g in enumerate(gen)]
                 if "off" in opts:
                     # A symbolic storage offset ('off') is part of the coupled
                     # set — _canonical_symbol_rename reads it for ordering, so
@@ -815,6 +824,12 @@ def _hintfree_inputs_signature(inputs) -> str:
                 e[2] if len(e) > 2 else None,
                 e[3] if len(e) > 3 else "float32",
             ])
+        elif (isinstance(e, list) and len(e) > 2 and isinstance(e[2], dict)
+              and ("gen" in e[2] or "x" in e[2])):
+            # Generated input values (index bounds, observed runs) describe
+            # the data at one point, not the kernel.
+            entries.append([e[0], e[1], {k: v for k, v in e[2].items()
+                                         if k not in ("gen", "x")}])
         else:
             entries.append(e)
     return json.dumps(entries, sort_keys=True)

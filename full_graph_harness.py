@@ -10,6 +10,7 @@ planner used by partition repros—rather than maintaining a second replay path.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import operator
 import re
@@ -805,6 +806,33 @@ def _shape_env_of(x: Any) -> Any:
     return getattr(node, "shape_env", None)
 
 
+@contextlib.contextmanager
+def graph_guards_suppressed(gm: Any):
+    """Suppress guard recording on the ShapeEnv behind gm's placeholders.
+
+    Capture-side analyses read symbolic sizes as ints (int(SymInt) records an
+    Eq guard): unsuppressed, that specializes the symbol in the model's own
+    compile and drops it from the captured region."""
+    import torch
+
+    se = None
+    for node in gm.graph.find_nodes(op="placeholder"):
+        val = (node.meta or {}).get("val")
+        dims = []
+        if torch.is_tensor(val):
+            dims = [*val.shape, *val.stride(), val.storage_offset()]
+        elif isinstance(val, (torch.SymInt, torch.SymFloat)):
+            dims = [val]
+        se = next((e for e in map(_shape_env_of, dims) if e is not None), None)
+        if se is not None:
+            break
+    if se is None:
+        yield
+    else:
+        with se.suppress_guards():
+            yield
+
+
 def _symbolic_block_from_value(value: Any) -> dict | None:
     """Per-tensor {shape_exprs?, stride_exprs?} from a live tensor's SymNodes,
     or None if fully static. Each list is per-slot: the exact expr string
@@ -1018,11 +1046,24 @@ def placeholder_info_from_gm(gm: Any) -> dict[str, dict]:
 
 
 def infer_index_bounds_from_gm(
+    gm: Any, placeholder_info: dict[str, dict], **kwargs
+) -> dict[str, int]:
+    with graph_guards_suppressed(gm):
+        return _infer_index_bounds_from_gm(gm, placeholder_info, **kwargs)
+
+
+def _infer_index_bounds_from_gm(
     gm: Any,
     placeholder_info: dict[str, dict],
     constants_out: dict[str, int] | None = None,
+    exprs_out: dict[str, str] | None = None,
 ) -> dict[str, int]:
     """Infer valid index bounds for integer placeholders by inspecting consumers.
+
+    `exprs_out` (optional dict, filled in place) receives the bound as an
+    expression over the graph's size symbols when some consumer's bound is a
+    symbolic dim (an index into a batch-sized tensor): the integer bound only
+    holds at the captured sizes.
 
     `constants_out` (optional dict, filled in place) receives placeholders
     whose only safe generation is a CONSTANT value rather than a range —
@@ -1190,6 +1231,28 @@ def infer_index_bounds_from_gm(
             import math as _math
 
             found: list[int] = []
+            found_exprs: list[str] = []
+            symbolic = [False]
+
+            def _found(size, chain):
+                b = _invert(int(size), chain)
+                found.append(b)
+                expr = _sym_expr_str(size)
+                if expr is None:
+                    found_exprs.append(str(b))
+                    return
+                symbolic[0] = True
+                for kind, arg in reversed(chain):
+                    if kind == "addc":
+                        expr = f"{expr} - {abs(int(arg))}"
+                    elif kind == "mulc" and abs(int(arg)) > 1:
+                        expr = f"floor(({expr})/{abs(int(arg))})"
+                    elif kind == "mult":
+                        expr = f"floor(sqrt(Max({expr} - 1, 1)))"
+                    elif kind == "addt":
+                        expr = f"floor(({expr})/2)"
+                    expr = f"Max({expr}, 1)"
+                found_exprs.append(_canonical_expr_str(expr))
 
             def _invert(bound: int, chain) -> int:
                 b = bound
@@ -1276,7 +1339,7 @@ def infer_index_bounds_from_gm(
                                 if weight_arg and hasattr(weight_arg, "meta"):
                                     val = weight_arg.meta.get("val")
                                     if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                        found.append(_invert(int(val.shape[0]), chain))
+                                        _found(val.shape[0], chain)
                                         continue
 
                         if (target in (torch.ops.aten.index.Tensor,
@@ -1294,7 +1357,7 @@ def infer_index_bounds_from_gm(
                             if target_shape and isinstance(indices, (list, tuple)):
                                 for dim, index_node in enumerate(indices):
                                     if index_node is n and dim < len(target_shape):
-                                        found.append(_invert(int(target_shape[dim]), chain))
+                                        _found(target_shape[dim], chain)
 
                         if target == torch.ops.aten.gather.default:
                             if user.args and user.args[0] is n:
@@ -1312,9 +1375,9 @@ def infer_index_bounds_from_gm(
                                     if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
                                         dim = user.args[dim_arg_idx]
                                         if isinstance(dim, int) and dim < len(target_shape):
-                                            found.append(_invert(int(target_shape[dim]), chain))
+                                            _found(target_shape[dim], chain)
                                     else:
-                                        found.append(_invert(int(target_shape[0]), chain))
+                                        _found(target_shape[0], chain)
 
                         if target in passthrough_ops or target in _VALUE_PRESERVING:
                             next_frontier.append((user, chain))
@@ -1341,11 +1404,17 @@ def infer_index_bounds_from_gm(
                 frontier = list(dict.fromkeys(next_frontier))
                 if not frontier:
                     break
-            if found:
-                return min(found)
-            return None
+            if not found:
+                return None, None
+            if not symbolic[0]:
+                return min(found), None
+            exprs = sorted(set(found_exprs))
+            return min(found), (exprs[0] if len(exprs) == 1
+                                else f"Min({', '.join(exprs)})")
 
-        bound = _find_bound(node)
+        bound, bound_expr = _find_bound(node)
+        if bound_expr is not None and exprs_out is not None:
+            exprs_out[name] = bound_expr
         if bound is not None:
             if is_float:
                 # FLOAT placeholder whose VALUES flow (via convert chains)
@@ -1637,6 +1706,7 @@ def graph_constraints_from_gm(
     gm: Any,
     *,
     index_bounds: dict[str, int] | None = None,
+    index_bound_exprs: dict[str, str] | None = None,
     permutation_indices: dict[str, int] | None = None,
     observed_stats: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
@@ -1677,6 +1747,8 @@ def graph_constraints_from_gm(
                     gen_override = _index_gen_for_placeholder(
                         int(index_bounds[node.name]), value,
                         observed_stats.get(node.name))
+                    if (index_bound_exprs or {}).get(node.name):
+                        gen_override["high_expr"] = index_bound_exprs[node.name]
                     constraint_source = "graph_inference"
                 elif node.name in observed_stats:
                     # Observed-value fallback: use observed max + 1 as bound
@@ -1827,6 +1899,7 @@ def write_full_graph_metadata(
     *,
     extra: dict[str, Any] | None = None,
     index_bounds: dict[str, int] | None = None,
+    index_bound_exprs: dict[str, str] | None = None,
     permutation_indices: dict[str, int] | None = None,
     observed_stats: dict[str, dict] | None = None,
 ) -> Path:
@@ -1834,6 +1907,7 @@ def write_full_graph_metadata(
     payload = graph_constraints_from_gm(
         gm,
         index_bounds=index_bounds,
+        index_bound_exprs=index_bound_exprs,
         permutation_indices=permutation_indices,
         observed_stats=observed_stats,
     )

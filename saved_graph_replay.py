@@ -343,10 +343,12 @@ def symbolic_retrace(instance, content: str, graph_path: Path, dev,
     one shared ShapeEnv symbol per name, at the symbols' recorded values
     (``symbol_hints`` overrides them, e.g. a TORCH_TRACE's hints).
 
-    Returns None when the annotations are static (the caller traces
-    concretely). Raises when the graph is symbolic but cannot be rebuilt: a
+    ``instance`` is the module, or a zero-argument factory called under the
+    re-trace's fake mode. Returns None when the annotations are static (the
+    caller traces concretely). Raises when the graph is symbolic but cannot be rebuilt: a
     dynamic graph recaptured as static would silently change its regions.
     """
+    import torch
     from torch.fx.experimental.proxy_tensor import make_fx
     from full_graph_harness import parse_full_graph_inputs
 
@@ -365,4 +367,8 @@ def symbolic_retrace(instance, content: str, graph_path: Path, dev,
             "rebuild failed (unresolved symbol or expression)")
     fake_mode, inputs = sym_inputs
     with fake_mode:
+        if callable(instance) and not isinstance(instance, torch.nn.Module):
+            # A factory: module state the graph creates itself becomes fake
+            # tensors of this mode (no device memory, any device).
+            instance = instance()
         return make_fx(instance, tracing_mode="symbolic")(*inputs)

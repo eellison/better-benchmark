@@ -401,8 +401,9 @@ def test_dynamic_capture_region_and_full_graph_share_runs_gen(tmp_path):
     captured, sidecars = _capture(f, (
         torch.randn(100, 32), torch.arange(64).repeat_interleave(16),
         torch.randn(1024, 32)), tmp_path, dynamic=True)
+    # The bound is the table's (symbolic) row count.
     want = {"kind": "runs", "low": 0, "high": 64, "n_unique": 64,
-            "n_runs": 64, "sorted": True}
+            "n_runs": 64, "sorted": True, "high_expr": "s70"}
     (entry,) = captured
     assert _int_gens(_tensor_specs(entry["inputs"])) == [want]
     (sidecar,) = sidecars

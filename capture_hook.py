@@ -44,6 +44,7 @@ from full_graph_harness import (
     placeholder_info_from_gm,
     _sym_expr_str as _sym_expr_str,
     _shape_env_of as _shape_env_of,
+    graph_guards_suppressed as graph_guards_suppressed,
     _symbolic_block_from_value as _symbolic_block_from_value,
     _harvest_shape_env as _harvest_shape_env,
     _raise_unsupported_symfloat as _raise_unsupported_symfloat,
@@ -1651,6 +1652,13 @@ def compute_partition_pattern(
         if observed_stats and name in observed_stats and (
                 "int" in dtype or "bool" in dtype):
             info["observed"] = observed_stats[name]
+    if shape_env_block is not None:
+        # Canonicalization bakes sizes to the hint, so an index bound that is
+        # a symbolic dim (rows of a batch-sized table) is only visible here.
+        bound_exprs: dict[str, str] = {}
+        infer_index_bounds_from_gm(sub_gm, placeholder_info, exprs_out=bound_exprs)
+        for name, expr in bound_exprs.items():
+            placeholder_info[name]["index_bound_expr"] = expr
     cast_index_put_values(sub_gm)
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
@@ -1928,10 +1936,6 @@ class _CaptureState:
         return compute_dag_signature(gm)
 
     @staticmethod
-    def _infer_index_bounds(gm, placeholder_info) -> dict[str, int]:
-        return infer_index_bounds_from_gm(gm, placeholder_info)
-
-    @staticmethod
     def _infer_permutation_indices(gm, placeholder_info) -> dict[str, int]:
         return infer_permutation_indices_from_gm(gm, placeholder_info)
 
@@ -1967,8 +1971,9 @@ class _CaptureState:
         constant_values: dict[str, int] = {}
         index_bounds = infer_index_bounds_from_gm(
             gm, placeholder_info, constants_out=constant_values)
-        permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
-        infer_sorted_inputs_from_gm(gm, placeholder_info)
+        with graph_guards_suppressed(gm):
+            permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+            infer_sorted_inputs_from_gm(gm, placeholder_info)
 
         # Apply bound hierarchy: observed fallback for integer inputs without
         # graph-inferred bounds. This eliminates the high=512 guess class.
@@ -2168,6 +2173,8 @@ class _CaptureState:
                     elif "int" in info["dtype"] and bound:
                         spec["gen"] = index_gen_from_observed(
                             bound, info.get("observed"))
+                        if info.get("index_bound_expr"):
+                            spec["gen"]["high_expr"] = info["index_bound_expr"]
                     elif info.get("gen"):
                         # Inference attached a gen directly (float->index
                         # chains: OPT position ids derive from a float
@@ -2418,7 +2425,9 @@ if __name__ == "__main__":
                     )
 
                     placeholder_info = placeholder_info_from_gm(gm)
-                    index_bounds = self._infer_index_bounds(gm, placeholder_info)
+                    index_bound_exprs: dict[str, str] = {}
+                    index_bounds = infer_index_bounds_from_gm(
+                        gm, placeholder_info, exprs_out=index_bound_exprs)
                     permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
                     write_full_graph_metadata(
                         full_graph_path,
@@ -2433,6 +2442,7 @@ if __name__ == "__main__":
                                if constant_inputs is not None else {}),
                         },
                         index_bounds=index_bounds,
+                        index_bound_exprs=index_bound_exprs,
                         permutation_indices=permutation_indices,
                         observed_stats=self._current_observed_stats or {},
                     )

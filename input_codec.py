@@ -115,7 +115,10 @@ def _gen_to_compact(gen: dict) -> list | None:
     if kind in (None, "randn"):
         return None  # default for floats — omitted
     if kind == "index":
-        return ["index", int(gen.get("low", 0)), int(gen.get("high", 100))]
+        out = ["index", int(gen.get("low", 0)), int(gen.get("high", 100))]
+        if gen.get("high_expr") is not None:
+            out.append(gen["high_expr"])
+        return out
     if kind == "randint":
         return ["randint", int(gen.get("low", 0)), int(gen.get("high", 2))]
     if kind == "permutation":
@@ -128,15 +131,21 @@ def _gen_to_compact(gen: dict) -> list | None:
     if kind == "constant":
         return ["const", gen.get("value", 0)]
     if kind == "runs":
-        return ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
-                int(gen["n_runs"]), int(bool(gen["sorted"]))]
+        out = ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
+               int(gen["n_runs"]), int(bool(gen["sorted"]))]
+        if gen.get("high_expr") is not None:
+            out.append(gen["high_expr"])
+        return out
     return [kind] + [v for k, v in sorted(gen.items()) if k != "kind"]
 
 
 def _gen_from_compact(c: list) -> dict:
     kind = c[0]
     if kind == "index":
-        return {"kind": "index", "low": c[1], "high": c[2]}
+        gen = {"kind": "index", "low": c[1], "high": c[2]}
+        if len(c) > 3:
+            gen["high_expr"] = c[3]
+        return gen
     if kind == "randint":
         return {"kind": "randint", "low": c[1], "high": c[2]}
     if kind == "perm":
@@ -147,9 +156,41 @@ def _gen_from_compact(c: list) -> dict:
     if kind == "const":
         return {"kind": "constant", "value": c[1]}
     if kind == "runs":
-        return {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
-                "n_runs": c[4], "sorted": bool(c[5])}
+        gen = {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
+               "n_runs": c[4], "sorted": bool(c[5])}
+        if len(c) > 6:
+            gen["high_expr"] = c[6]
+        return gen
     return {"kind": kind}
+
+
+# An index generator's bound can be an expression over the size symbols (the
+# rows of a batch-sized table): compact ["index", low, high, expr] and
+# ["runs", ..., sorted, expr], where high is the bound at the captured sizes.
+_GEN_EXPR_SLOT = {"index": 3, "runs": 6}
+
+
+def _gen_bound_expr(gen) -> str | None:
+    """The symbolic bound of a compact generator, or None."""
+    slot = _GEN_EXPR_SLOT.get(gen[0]) if isinstance(gen, list) and gen else None
+    if slot is None or len(gen) <= slot or not isinstance(gen[slot], str):
+        return None
+    return gen[slot]
+
+
+def _bind_gen(gen: list, bindings: dict) -> list:
+    """A compact generator with its symbolic bound evaluated (and dropped)."""
+    expr = _gen_bound_expr(gen)
+    if expr is None:
+        return gen
+    bound = max(_eval_dim(expr, bindings), 1)
+    if gen[0] == "index":
+        return ["index", gen[1], bound]
+    # runs: the observed range, clipped to the bound at this binding.
+    low, high = gen[1], min(gen[2], bound)
+    if high <= low:
+        low = 0
+    return ["runs", low, high, *gen[3:6]]
 
 
 # Keys the codec encodes structurally; anything ELSE on a spec passes
@@ -722,6 +763,8 @@ def is_symbolic_entry(entry) -> bool:
                 return True
             if isinstance(opts.get("off"), str):   # symbolic storage_offset
                 return True
+            if _gen_bound_expr(opts.get("gen")) is not None:
+                return True
     return False
 
 
@@ -882,6 +925,8 @@ def evaluate_symbolic_entry(entry: list, bindings: dict,
     # tensor is as_strided at the wrong offset.
     if isinstance(opts.get("off"), str):
         opts["off"] = _eval_dim(opts["off"], bindings)
+    if "gen" in opts:
+        opts["gen"] = _bind_gen(opts["gen"], bindings)
     if opts:
         out.append(opts)
     return out
@@ -906,10 +951,15 @@ def evaluate_spec(spec: dict, bindings: dict,
         return out
     symbolic = spec.get("symbolic") or {}
     storage_nbytes_expr = spec.get("storage_nbytes_expr")
-    if not symbolic and storage_nbytes_expr is None:
+    gen = spec.get("gen") or spec.get("generator")
+    gen_expr = gen.get("high_expr") if isinstance(gen, dict) else None
+    if not symbolic and storage_nbytes_expr is None and gen_expr is None:
         return spec
     out = dict(spec)
     out.pop("symbolic", None)
+    if gen_expr is not None:
+        bound = _gen_from_compact(_bind_gen(_gen_to_compact(gen), bindings))
+        out["gen"] = out["generator"] = bound
     if symbolic.get("shape_exprs"):
         out["shape"] = [_eval_dim(d, bindings)
                         for d in _overlay_exprs(list(spec["shape"]),

@@ -216,6 +216,29 @@ def test_unbacked_symbol_needs_an_explicit_binding(tmp_path):
     assert [r["numerics"] for r in rows] == ["pass", "pass"]
 
 
+def test_index_bound_follows_a_symbolic_table(tmp_path):
+    from full_graph_harness import prepare_full_graph_execution
+
+    def f(table, idx, w):
+        return (table[idx] * w).relu().sum(-1)
+
+    args = (torch.randn(280, 32), torch.randint(0, 280, (20,)), torch.randn(20, 32))
+    _capture(f, [args], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    table, idx, _ = shapes["points"][0]["inputs"]
+    # Reading the table's rows must not specialize them.
+    assert table[0] == ["s0", "s1"], table
+    assert idx[2]["gen"] == ["index", 0, 280, "s0"], idx
+    rows = _check(tmp_path, name, [{"s0": 7, "s1": 32, "s2": 50}])
+    assert [r["numerics"] for r in rows] == ["pass"], rows
+
+    (graph,) = (tmp_path / "models/toy/infer/m").glob("full_graph_*.py")
+    execution = prepare_full_graph_execution(graph, default_device="cpu")
+    small = {s: 7 for s in json.loads(graph.with_suffix(".meta.json").read_text())["symbols"]}
+    with torch.no_grad():
+        execution.module(*execution.args(small))
+
+
 def test_full_graph_replays_one_artifact_at_two_bindings(mlp_root):
     from full_graph_harness import prepare_full_graph_execution
 
