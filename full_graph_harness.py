@@ -8,6 +8,7 @@ those annotations so the benchmark runner can time the whole graph directly.
 
 from __future__ import annotations
 
+import ast
 import math
 import operator
 import re
@@ -18,11 +19,22 @@ from typing import Any
 
 
 FULL_GRAPH_NUMERICS_SEED = 0
-NUMERICS_METHOD = "torch._dynamo.utils.same"
-# One graph-wide ``tol`` (dynamo's higher-tolerance tier): output dtype does not
-# reveal internal low-precision casts, and the check targets flagrant errors.
-NUMERICS_TOLERANCE = 1e-2
+NUMERICS_METHOD = "numerics.judge_float_leaf"
+# Per output dtype (numerics.precision_tolerance), as in the repro checker.
+NUMERICS_TOLERANCE = "numerics.precision_tolerance"
 _MAX_NUMERICS_DETAILS = 8
+
+
+class UserTritonKernelReplayError(RuntimeError):
+    """A saved full graph calls user-defined Triton kernels it cannot resolve."""
+
+
+def full_graph_calls_user_triton(definition: "FullGraphDefinition") -> bool:
+    from replay_dependencies import full_graph_calls_user_triton as _calls
+
+    return _calls(
+        definition.graph_cls, (definition.metadata or {}).get("sidecar") or {}
+    )
 
 
 class FullGraphNumericsError(RuntimeError):
@@ -42,24 +54,29 @@ class FullGraphNumericsError(RuntimeError):
         self.failed_variant: str | None = None
 
 
-def _float64_inputs(inputs: Any) -> Any:
-    """Float64 copies of the float tensors in ``inputs``; repeated tensors stay shared."""
+def _upcast_inputs(inputs: Any, target: Any) -> Any:
+    """Copies of the float tensors in ``inputs`` narrower than ``target``, as
+    ``target``; repeated tensors stay shared."""
     import torch
     from torch.utils._pytree import tree_map
 
     copies: dict[int, Any] = {}
 
     def upcast(value: Any) -> Any:
-        if not (isinstance(value, torch.Tensor) and value.is_floating_point()):
+        if not (
+            isinstance(value, torch.Tensor)
+            and value.is_floating_point()
+            and value.itemsize < target.itemsize
+        ):
             return value
         if id(value) not in copies:
-            copies[id(value)] = value.to(torch.float64, copy=True)
+            copies[id(value)] = value.to(target, copy=True)
         return copies[id(value)]
 
     return tree_map(upcast, inputs)
 
 
-def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -> Any:
+def _run_seeded(fn: Any, make_inputs: Any, seed: int) -> Any:
     """Run ``fn`` on fresh inputs from ``make_inputs`` and return a copy of its outputs.
 
     Inputs and the run are both seeded with ``seed``. Outputs are cloned so a
@@ -70,8 +87,6 @@ def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -
 
     torch.manual_seed(seed)
     inputs = make_inputs()
-    if upcast:
-        inputs = _float64_inputs(inputs)
     torch.manual_seed(seed)
     with torch.no_grad():
         out = fn(*inputs)
@@ -101,135 +116,87 @@ def rng_dependent_output_leaves(
     return scan_rng_dependence(fn, inputs)
 
 
-def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> Any | None:
-    """Run a float64 copy of ``fn`` on float64 copies of the float inputs.
+def upcast_reference(
+    fn: Any,
+    make_inputs: Any,
+    seed: int,
+    target: Any,
+    errors: list[str] | None = None,
+) -> Any | None:
+    """Run a copy of ``fn`` with float inputs, parameters, casts and factory
+    dtypes narrower than ``target`` upcast to ``target``.
 
-    Float-to-float casts inside ``fn`` also produce float64. Returns ``None``
-    when the float64 run fails (unsupported dtype, OOM, ...).
+    Casts to float8 keep their quantization. Returns ``None`` when the run
+    fails (unsupported dtype, OOM, ...), appending the error to ``errors``.
     """
     import copy
 
     import torch
 
-    from numerics import float64_casts_mode
+    from numerics import upcast_casts_mode, upcast_factory_dtypes_mode
+
+    def upcast(t: Any) -> Any:
+        if t.is_floating_point() and t.itemsize < target.itemsize:
+            return t.to(target)
+        return t
 
     try:
-        fn64 = copy.deepcopy(fn)
-        if isinstance(fn64, torch.nn.Module):
-            fn64 = fn64.double()
-        with float64_casts_mode():
-            return _run_seeded(fn64, make_inputs, seed, upcast=True)
-    except Exception:
+        fn_up = copy.deepcopy(fn)
+        if isinstance(fn_up, torch.nn.Module):
+            fn_up = fn_up._apply(upcast)
+        torch.manual_seed(seed)
+        inputs = _upcast_inputs(make_inputs(), target)
+        with upcast_casts_mode(target), upcast_factory_dtypes_mode(target):
+            return _run_seeded(fn_up, lambda: inputs, seed)
+    except Exception as error:  # noqa: BLE001 - no reference; callers fall back
+        if errors is not None:
+            errors.append(f"{type(error).__name__}: {error}"[:300])
         return None
 
 
-def _comparable(value: Any) -> Any:
-    """``value`` as a real float tensor that supports isfinite/isinf: complex
-    becomes its real view and float8 becomes float32."""
-    import torch
-
-    if value.is_complex():
-        return torch.view_as_real(value.resolve_conj())
-    if value.element_size() == 1:
-        return value.float()
-    return value
-
-
-def _reference_covers_eager(
-    reference: Any, baseline: Any, skip_leaves: set[int] | frozenset[int]
-) -> bool:
-    """True unless the fp64 run cannot anchor eager's float outputs.
-
-    That is when a float output's shape differs (e.g. a bitcast view of an
-    upcast input) or a value finite in eager is nonfinite in the fp64 run
-    (e.g. fp64 NaN from cancellation that eager rounds away).
-    """
+def _reference_lookup(reference: Any, baseline_spec: Any):
+    """``lookup(index, dtype)``: the reference leaf for output ``index`` of
+    ``dtype``, from ``reference`` (a tree, or a callable taking the reference
+    dtype, called at most once per dtype), or ``None``."""
     import torch
     from torch.utils._pytree import tree_flatten
 
-    reference_leaves, reference_spec = tree_flatten(reference)
-    baseline_leaves, baseline_spec = tree_flatten(baseline)
-    if reference_spec != baseline_spec:
-        return False
-    for index, (ref, expected) in enumerate(zip(reference_leaves, baseline_leaves)):
-        if index in skip_leaves or not (
-            isinstance(expected, torch.Tensor)
-            and (expected.is_floating_point() or expected.is_complex())
-        ):
-            continue
-        if not isinstance(ref, torch.Tensor) or ref.shape != expected.shape:
-            return False
-        if (_comparable(expected).isfinite() & ~_comparable(ref).isfinite()).any():
-            return False
-    return True
+    from numerics import reference_dtype
+
+    cache: dict[Any, list[Any] | None] = {}
+
+    def leaves(target: Any) -> list[Any] | None:
+        if target not in cache:
+            tree = reference(target) if callable(reference) else reference
+            flat, spec = tree_flatten(tree) if tree is not None else (None, None)
+            cache[target] = flat if spec == baseline_spec else None
+        return cache[target]
+
+    def lookup(index: int, dtype: Any) -> Any | None:
+        if reference is None:
+            return None
+        target = reference_dtype(dtype)
+        flat = leaves(target)
+        if flat is None and target == torch.float64 and callable(reference):
+            # No float64 run (e.g. user Triton kernels have no float64 MMA):
+            # the float32 run still removes the graph's low-precision casts.
+            flat = leaves(torch.float32)
+        ref = flat[index] if flat is not None else None
+        return ref if isinstance(ref, torch.Tensor) else None
+
+    return lookup
 
 
-def _float_leaf_mismatch(
-    reference: Any | None, baseline: Any, candidate: Any
-) -> tuple[str | None, dict[str, float]]:
-    """Return ``(mismatch, errors)`` for one float leaf; ``mismatch`` is None on pass."""
-    import torch
-    from torch._dynamo.utils import rmse, same
-
-    baseline, candidate = _comparable(baseline), _comparable(candidate)
-    if reference is not None:
-        reference = _comparable(reference)
-        if (baseline.isfinite() & ~reference.isfinite()).any():
-            return "fp64 reference is nonfinite where eager is finite", {}
-        # Where eager overflows but fp64 is finite, eager is the inaccurate one
-        # (e.g. fp16 intermediates that compiled code keeps in fp32).
-        keep = baseline.isfinite() | ~reference.isfinite()
-        if not keep.all():
-            baseline, candidate, reference = (
-                baseline[keep], candidate[keep], reference[keep]
-            )
-
-    if not (
-        torch.equal(candidate.isnan(), baseline.isnan())
-        and torch.equal(candidate.isinf(), baseline.isinf())
-        and torch.equal(candidate[candidate.isinf()], baseline[baseline.isinf()])
-    ):
-        return "nonfinite values differ from eager", {}
-    # Nonfinite positions already match eager exactly; ``same`` fails any leaf
-    # whose RMSE is NaN, so it only sees the finite positions.
-    finite = baseline.isfinite()
-    if not finite.any():
-        return None, {}
-    if not finite.all():
-        baseline = baseline[finite]
-        candidate = candidate[finite]
-        if reference is not None:
-            reference = reference[finite]
-    if reference is None:
-        if same(baseline, candidate, tol=NUMERICS_TOLERANCE):
-            return None, {}
-        diff = (candidate.double() - baseline.double()).abs().max().item()
-        return (
-            f"max_abs_diff_vs_eager={diff:.3e} (tol={NUMERICS_TOLERANCE:g})",
-            {"max_abs_diff_vs_eager": diff},
-        )
-    reference = reference.double()
-    if same(baseline, candidate, fp64_ref=reference, tol=NUMERICS_TOLERANCE):
-        return None, {}
-    err_compiled = rmse(reference, candidate.double()).item()
-    err_eager = rmse(reference, baseline.double()).item()
-    return (
-        f"rmse_vs_fp64={err_compiled:.3e} "
-        f"(eager_rmse_vs_fp64={err_eager:.3e}, tol={NUMERICS_TOLERANCE:g})",
-        {"err_compiled": err_compiled, "err_eager": err_eager},
-    )
-
-
-def _full_graph_leaf_check(
-    skip_leaves: set[int] | frozenset[int], has_reference: bool
-):
+def _full_graph_leaf_check(skip_leaves: set[int] | frozenset[int], lookup: Any):
     """Per-leaf rule for :func:`numerics.anchored_gate` (candidate = compiled)."""
     import torch
 
-    def fail(detail: str, errors: dict[str, float] | None = None, ratio=math.inf):
-        return {**(errors or {}), "pass": False, "detail": detail}, ratio
+    from numerics import judge_float_leaf
 
-    def check(index: int, got: Any, expected: Any, ref: Any):
+    def fail(detail: str, fields: dict[str, Any] | None = None, ratio=math.inf):
+        return {**(fields or {}), "pass": False, "detail": detail}, ratio
+
+    def check(index: int, got: Any, expected: Any, _ref: Any):
         if isinstance(expected, torch.Tensor) != isinstance(got, torch.Tensor):
             return fail("tensor/non-tensor mismatch")
         if not isinstance(expected, torch.Tensor):
@@ -252,24 +219,36 @@ def _full_graph_leaf_check(
             if not torch.equal(expected, got):
                 return fail(f"{expected.dtype} values differ")
             return {"pass": True}, None
-        if has_reference and (
-            not isinstance(ref, torch.Tensor) or ref.shape != expected.shape
-        ):
-            return fail("fp64 reference shape differs from eager")
-        mismatch, errors = _float_leaf_mismatch(ref, expected, got)
-        if mismatch is None:
-            return {"pass": True}, None
-        if "err_compiled" in errors:
-            ratio = errors["err_compiled"] / max(errors["err_eager"], 1e-30)
-        else:
-            ratio = errors.get("max_abs_diff_vs_eager", math.inf) / NUMERICS_TOLERANCE
+        def reference() -> Any | None:
+            ref = lookup(index, expected.dtype)
+            # A same-precision fallback run identical to eager (nothing was
+            # upcast) carries no information: judge against eager alone.
+            if ref is not None and ref.dtype == expected.dtype and torch.equal(ref, expected):
+                return None
+            return ref
+
+        record = judge_float_leaf(expected, got, reference)
+        if record["label"] != "fail":
+            return {**record, "pass": True}, None
         return fail(
-            f"{mismatch} shape={list(expected.shape)} dtype={expected.dtype}",
-            errors,
-            ratio,
+            f"{record.get('detail', 'outside tolerance')} vs {record['reference']} "
+            f"(max_ratio={record['max_ratio']:.3g}) shape={list(expected.shape)} "
+            f"dtype={expected.dtype}",
+            record,
+            record["max_ratio"],
         )
 
     return check
+
+
+def _reference_kind(per_output: list[dict[str, Any]]) -> str:
+    """``"eager"`` when an output that missed eager had no reference to judge
+    it against, ``"none"`` when no output needed one, else the reference runs
+    used (``"fp32"``, ``"fp64"`` or ``"fp32+fp64"``)."""
+    if any(e.get("needs_reference") for e in per_output):
+        return "eager"
+    kinds = sorted({e["reference"] for e in per_output if e.get("reference") not in (None, "eager")})
+    return "+".join(kinds) or "none"
 
 
 def compare_output_records(
@@ -282,44 +261,41 @@ def compare_output_records(
     """Per-leaf records for :func:`compare_outputs`, in the oracle gate's format.
 
     Returns :func:`numerics.anchored_gate`'s dict (``pass``, ``per_output``,
-    ``worst_output_idx``, ``ref_precision``: ``"f64"`` or ``"eager"``). Failing
-    records carry a ``detail`` message, plus ``err_compiled``/``err_eager``
-    (RMSE vs fp64) or ``max_abs_diff_vs_eager``. A structure mismatch has no
-    per-leaf records and a top-level ``detail``.
+    ``worst_output_idx``, ``ref_precision``) plus ``reference``
+    (:func:`_reference_kind`). Float records carry
+    :func:`numerics.judge_float_leaf`'s fields (``label``, ``reference``,
+    ``max_ratio``, RMSEs); failing records also a ``detail`` message. A
+    structure mismatch has no per-leaf records and a top-level ``detail``.
     """
     from torch.utils._pytree import tree_flatten
 
     from numerics import anchored_gate
 
-    ref_precision = "eager" if reference is None else "f64"
-
-    def structure_failure(detail: str) -> dict[str, Any]:
+    baseline_leaves, baseline_spec = tree_flatten(baseline)
+    candidate_leaves, candidate_spec = tree_flatten(candidate)
+    if candidate_spec != baseline_spec:
         return {
             "pass": False,
             "per_output": [],
             "worst_output_idx": None,
-            "ref_precision": ref_precision,
-            "detail": detail,
+            "ref_precision": "none",
+            "reference": "none",
+            "detail": f"output structure differs: {str(candidate_spec)[:500]}",
         }
-
-    baseline_leaves, baseline_spec = tree_flatten(baseline)
-    candidate_leaves, candidate_spec = tree_flatten(candidate)
-    if candidate_spec != baseline_spec:
-        return structure_failure(f"output structure differs: {str(candidate_spec)[:500]}")
-    if reference is None:
-        reference_leaves = [None] * len(baseline_leaves)
-    else:
-        reference_leaves, reference_spec = tree_flatten(reference)
-        if reference_spec != baseline_spec:
-            return structure_failure("fp64 reference output structure differs from eager")
-    return anchored_gate(
+    records = anchored_gate(
         candidate_leaves,
         baseline_leaves,
-        reference_leaves,
+        [None] * len(baseline_leaves),
         frozenset(),
-        leaf_check=_full_graph_leaf_check(skip_leaves, reference is not None),
-        ref_precision=ref_precision,
+        leaf_check=_full_graph_leaf_check(
+            skip_leaves, _reference_lookup(reference, baseline_spec)
+        ),
+        ref_precision="eager",
     )
+    records["reference"] = records["ref_precision"] = _reference_kind(
+        records["per_output"]
+    )
+    return records
 
 
 def _details(records: dict[str, Any]) -> list[str]:
@@ -347,17 +323,16 @@ def compare_outputs(
     *,
     skip_leaves: set[int] | frozenset[int] = frozenset(),
 ) -> tuple[bool, list[str]]:
-    """Compare nested outputs the way ``torch._dynamo.utils.same`` does.
+    """Compare nested outputs with the repro checker's rule.
 
-    ``reference`` is a float64 eager run, ``baseline`` the native-precision
-    eager run and ``candidate`` the compiled run. Float leaves pass
-    ``same(baseline, candidate, fp64_ref=reference, tol=NUMERICS_TOLERANCE)``
-    or, with ``reference=None``, ``same(baseline, candidate,
-    tol=NUMERICS_TOLERANCE)``. A nonfinite fp64 value where eager is finite is
-    a mismatch, nonfinite values must match eager exactly, and ``same`` only
-    sees positions finite in eager. Non-float leaves must equal eager exactly.
-    Structure, shape and dtype must match eager. Leaf indices in
-    ``skip_leaves`` are only checked for shape and dtype.
+    ``baseline`` is the eager run and ``candidate`` the compiled run. Float
+    leaves pass unless :func:`numerics.judge_float_leaf` labels them
+    ``fail`` (``pass_precision`` passes). ``reference`` is the upcast eager
+    run: a tree, ``None`` (eager only), or a callable taking the reference
+    dtype (``numerics.reference_dtype``) and returning that run or ``None``.
+    Non-float leaves must equal eager exactly. Structure, shape and dtype must
+    match eager. Leaf indices in ``skip_leaves`` are only checked for shape
+    and dtype.
 
     Returns ``(matches, details)`` where ``details`` is bounded to a few
     messages so failure records stay small for large graphs.
@@ -376,28 +351,48 @@ def validate_full_graph_numerics(
     label: str = "compiled",
     seed: int = FULL_GRAPH_NUMERICS_SEED,
     skip_output_leaves: set[int] | frozenset[int] = frozenset(),
+    info: dict[str, Any] | None = None,
 ) -> tuple[Any, str]:
     """Compare the outputs of one seeded eager/compiled sample.
 
-    Every run (eager, float64 reference, compiled, eager rerun) gets fresh
-    inputs from ``make_inputs`` under ``seed``. Outputs are compared against
-    the float64 eager run; when no usable float64 reference exists (the
-    float64 run fails, or is nonfinite where eager is finite) the comparison
-    falls back to eager alone. On mismatch, eager is rerun to distinguish
+    Every run (eager, compiled, upcast references, eager rerun) gets fresh
+    inputs from ``make_inputs`` under ``seed``. Outputs are judged with
+    :func:`compare_outputs`; the float32 / float64 reference runs happen only
+    when an output misses eager. On mismatch, eager is rerun to distinguish
     eager nondeterminism from a stable compiled mismatch. ``skip_output_leaves``
     indexes the flattened outputs, e.g. from RNG detection.
 
-    Returns ``(eager_output, reference)`` where ``reference`` is ``"fp64"`` or
-    ``"eager"``.
+    Returns ``(eager_output, reference)`` where ``reference`` is
+    :func:`_reference_kind`'s. ``info`` gets ``label``, the worst
+    float-output label of a passing sample (``pass`` or ``pass_precision``),
+    and ``ref_num_stages`` = 1 when a replayed user-Triton kernel ran the
+    upcast reference with one pipeline stage (its captured configs did not
+    fit in shared memory at the reference precision).
     """
+    import functools
+
     eager = _run_seeded(eager_fn, make_inputs, seed)
     skip = frozenset(skip_output_leaves)
-    reference = _fp64_reference(eager_fn, make_inputs, seed)
-    if reference is not None and not _reference_covers_eager(reference, eager, skip):
-        reference = None
-    reference_kind = "eager" if reference is None else "fp64"
+
+    from user_triton import SINGLE_STAGE_RETRIES
+
+    @functools.cache
+    def reference(target: Any) -> Any | None:
+        retries = len(SINGLE_STAGE_RETRIES)
+        ref = upcast_reference(eager_fn, make_inputs, seed, target)
+        if info is not None and len(SINGLE_STAGE_RETRIES) > retries:
+            info["ref_num_stages"] = 1
+        return ref
+
     compiled = _run_seeded(compiled_fn, make_inputs, seed)
     records = compare_output_records(reference, eager, compiled, skip_leaves=skip)
+    reference_kind = records["reference"]
+    if info is not None and records["pass"]:
+        info["label"] = (
+            "pass_precision"
+            if any(e.get("label") == "pass_precision" for e in records["per_output"])
+            else "pass"
+        )
     if not records["pass"]:
         eager_repeat = _run_seeded(eager_fn, make_inputs, seed)
         eager_stable, _ = compare_outputs(
@@ -410,7 +405,7 @@ def validate_full_graph_numerics(
         )
         details = _details(records)
         raise FullGraphNumericsError(
-            f"{label} output mismatch (seed={seed}, dynamo same vs "
+            f"{label} output mismatch (seed={seed}, reference "
             f"{reference_kind}, {classification}): {'; '.join(details)}",
             classification=classification,
             seed_record={
@@ -437,7 +432,7 @@ def run_numerics_gate(
     seeds: int,
     non_semantic_output_leaves: set[int] | frozenset[int] = frozenset(),
 ) -> tuple[dict[str, Any], Any]:
-    """Validate ``compiled_fn`` against eager (``torch._dynamo.utils.same``) for seeds ``0..seeds-1``.
+    """Validate ``compiled_fn`` against eager (:func:`compare_outputs`) for seeds ``0..seeds-1``.
 
     ``make_inputs`` is called, after seeding the global RNG, for every run.
     Every seed runs even after a failure so the summary always holds one
@@ -445,8 +440,15 @@ def run_numerics_gate(
     raises the first ``FullGraphNumericsError`` with ``numerics`` and
     ``failed_variant`` attached.
 
-    Seeds without a usable float64 reference are compared against eager
-    alone; ``reference`` in the summary records which anchor was used.
+    ``reference`` in the summary records which reference runs were used
+    (:func:`_reference_kind`; ``eager`` when an output needed the upcast
+    reference and that run failed, so it was judged against eager alone) and
+    ``label`` the worst of ``pass`` / ``pass_precision`` / ``fail``. Graphs
+    with user-defined Triton kernels get the same rule: the kernels run in
+    the float32 reference too. Status is ``unanchored_user_kernel`` rather
+    than ``fail`` only when such a graph has no usable reference at all: no
+    upcast run, and eager does not reproduce itself.
+
     Status is ``numerics_unavailable`` rather than ``pass`` when RNG-dependent
     output leaves are not listed in ``non_semantic_output_leaves`` (an
     explicit output contract) or RNG detection failed.
@@ -456,7 +458,10 @@ def run_numerics_gate(
     first_eager_out = None
     rng_leaves = rng_dependent_output_leaves(eager_fn, make_inputs)
     reference_kinds: set[str] = set()
+    labels: list[str] = []
+    ref_num_stages = None
     for seed in range(seeds):
+        info: dict[str, Any] = {}
         try:
             eager_out, reference_kind = validate_full_graph_numerics(
                 eager_fn,
@@ -465,12 +470,16 @@ def run_numerics_gate(
                 label=label,
                 seed=seed,
                 skip_output_leaves=rng_leaves or frozenset(),
+                info=info,
             )
         except FullGraphNumericsError as exc:
+            ref_num_stages = ref_num_stages or info.get("ref_num_stages")
             records.append(exc.seed_record)
             reference_kinds.add(exc.seed_record["reference"])
             first_error = first_error or exc
             continue
+        ref_num_stages = ref_num_stages or info.get("ref_num_stages")
+        labels.append(info["label"])
         reference_kinds.add(reference_kind)
         if first_eager_out is None:
             first_eager_out = eager_out
@@ -489,7 +498,22 @@ def run_numerics_gate(
         )
     skipped = sorted(rng_leaves or ())
     unjustified = [leaf for leaf in skipped if leaf not in non_semantic_output_leaves]
-    if first_error:
+    from user_triton import launches_user_triton
+
+    unanchored = (
+        first_error is not None
+        and launches_user_triton(eager_fn)
+        and all(
+            r["reference"] == "eager" and not r["eager_self_check"]["pass"]
+            for r in records
+            if not r["pass"]
+        )
+    )
+    if unanchored:
+        status = "unanchored_user_kernel"
+        if first_eager_out is None:
+            first_eager_out = _run_seeded(eager_fn, make_inputs, 0)
+    elif first_error:
         status = "fail"
     elif unjustified or rng_leaves is None:
         status = "numerics_unavailable"
@@ -503,11 +527,20 @@ def run_numerics_gate(
         "reference": (
             next(iter(reference_kinds)) if len(reference_kinds) == 1 else "mixed"
         ),
-        "fp64_reference_available": reference_kinds == {"fp64"},
+        "reference_available": "eager" not in reference_kinds,
+        "label": (
+            "fail"
+            if first_error is not None
+            else "pass_precision" if "pass_precision" in labels else "pass"
+        ),
+        **({"ref_num_stages": ref_num_stages} if ref_num_stages else {}),
         "rng_detection_ok": rng_leaves is not None,
         "skipped_rng_output_leaves": skipped,
         "unjustified_skipped_output_leaves": unjustified,
     }
+    if unanchored:
+        summary["label"] = None
+        return summary, first_eager_out
     if first_error is not None:
         first_error.numerics = summary
         first_error.failed_variant = variant
@@ -542,14 +575,21 @@ _DTYPE_SHORT_NAMES = {
     "c64": "complex64",
     "c128": "complex128",
     "f8e4m3fn": "float8_e4m3fn",
+    "f8e4m3fnuz": "float8_e4m3fnuz",
+    "f8e4m3b11fnuz": "float8_e4m3b11fnuz",
     "f8e5m2": "float8_e5m2",
+    "f8e5m2fnuz": "float8_e5m2fnuz",
+    "f8e8m0fnu": "float8_e8m0fnu",
 }
 
 
 def _torch_dtype(dtype_name: str):
     import torch
 
-    return getattr(torch, dtype_name, torch.float32)
+    dtype = getattr(torch, dtype_name, None)
+    if not isinstance(dtype, torch.dtype):
+        raise ValueError(f"unsupported torch dtype: {dtype_name}")
+    return dtype
 
 
 def _dtype_name(dtype: Any) -> str:
@@ -623,6 +663,154 @@ def placeholder_info_from_gm(gm: Any) -> dict[str, dict]:
     return placeholder_info
 
 
+# Bound for an int64 input that any value is safe for; values over the whole
+# range keep every bit field of a hashed id uniform.
+_ANY_INDEX = 2**62
+
+
+def _masked_to_index_range(node: Any, passthrough_ops: set) -> bool:
+    """True when every use of an integer input reaches indexing only through
+    a non-negative constant mask (``bitwise_and``) that fits the indexed dim.
+
+    ``x & m`` lies in [0, m] for every int64 ``x``, negative or not, so such
+    an input (e.g. a hashed id split into bit fields that each index a table)
+    is safe for any value. Before the mask only constant shifts and offsets
+    are followed (comparisons and graph outputs are harmless uses); after it
+    only value-preserving ops, ``cat`` (paired with the ``select`` that reads
+    the value's slice back) and index consumers.
+    Any other use, or a path not fully explored, gives False.
+    """
+    import torch
+
+    aten = torch.ops.aten
+    pre_mask_ops = {
+        aten.add.Tensor,
+        aten.sub.Tensor,
+        aten.__rshift__.Scalar,
+        aten.bitwise_right_shift.Tensor_Scalar,
+    }
+    masks = {aten.bitwise_and.Scalar, aten.__and__.Scalar}
+    # A comparison yields booleans whatever the input's range.
+    comparisons = {
+        aten.eq.Scalar, aten.ne.Scalar, aten.lt.Scalar,
+        aten.le.Scalar, aten.gt.Scalar, aten.ge.Scalar,
+    }
+    value_ops = passthrough_ops - {aten.where.self, aten._to_copy.default}
+
+    def dim_size(value, dim):
+        if not isinstance(value, torch.Tensor) or not -value.dim() <= dim < value.dim():
+            return None
+        size = value.shape[dim]
+        return int(size) if isinstance(size, int) else None
+
+    def cat_slot(cat, n):
+        tensors = cat.args[0]
+        dim = cat.args[1] if len(cat.args) > 1 else cat.kwargs.get("dim", 0)
+        if not isinstance(dim, int) or sum(t is n for t in tensors) != 1:
+            return None
+        start = 0
+        for t in tensors:
+            size = dim_size(getattr(t, "meta", {}).get("val"), dim)
+            if size is None:
+                return None
+            if t is n:
+                return dim, start, start + size
+            start += size
+        return None
+
+    def index_fits(user, n, high):
+        """n (values in [0, high]) is an index operand of user that fits."""
+        if user.target == aten.embedding.default:
+            return (
+                len(user.args) > 1 and user.args[1] is n
+                and user.args[0] is not n
+                and (dim_size(user.args[0].meta.get("val"), 0) or 0) > high
+            )
+        if user.target in (aten.index.Tensor, aten._unsafe_index.Tensor):
+            indices = user.args[1] if len(user.args) > 1 else None
+            if user.args[0] is n or not isinstance(indices, (list, tuple)):
+                return False
+            # A bool/uint8 mask index spans several dims, so list positions
+            # no longer map to dims.
+            if any(
+                index is not None
+                and getattr(getattr(index, "meta", {}).get("val"), "dtype", None)
+                in (torch.bool, torch.uint8)
+                for index in indices
+            ):
+                return False
+            value = user.args[0].meta.get("val")
+            return all(
+                (dim_size(value, dim) or 0) > high
+                for dim, index in enumerate(indices)
+                if index is n
+            ) and sum(index is n for index in indices) > 0
+        return False
+
+    budget = [256]
+    indexed = [False]
+
+    def after_mask(n, high, slot=None) -> bool:
+        budget[0] -= 1
+        if budget[0] < 0:
+            return False
+        for user in n.users:
+            if user.op == "output":
+                continue
+            if user.op != "call_function":
+                return False
+            target = user.target
+            if slot is not None and target == aten.select.int and len(user.args) > 2:
+                dim, index = user.args[1], user.args[2]
+                size = dim_size(n.meta.get("val"), slot[0])
+                if not isinstance(dim, int) or not isinstance(index, int) or size is None:
+                    return False
+                value = n.meta["val"]
+                if dim % value.dim() == slot[0] % value.dim():
+                    if not slot[1] <= index % size < slot[2]:
+                        continue  # reads another input's slice
+            if target in value_ops and user.args and user.args[0] is n:
+                if not after_mask(user, high):
+                    return False
+            elif target == aten.cat.default:
+                slot_of_n = cat_slot(user, n)
+                if slot_of_n is None or not after_mask(user, high, slot_of_n):
+                    return False
+            elif index_fits(user, n, high):
+                indexed[0] = True
+            else:
+                return False
+        return True
+
+    def before_mask(n) -> bool:
+        budget[0] -= 1
+        if budget[0] < 0:
+            return False
+        for user in n.users:
+            if user.op == "output":
+                continue
+            if user.op != "call_function" or not user.args or user.args[0] is not n:
+                return False
+            if user.target in comparisons:
+                continue
+            other = user.args[1] if len(user.args) > 1 else None
+            target = user.target
+            if target in masks and type(other) is int and other >= 0:
+                if not after_mask(user, other):
+                    return False
+            elif target in pre_mask_ops and type(other) is int:
+                if not before_mask(user):
+                    return False
+            elif target in value_ops:
+                if not before_mask(user):
+                    return False
+            else:
+                return False
+        return True
+
+    return before_mask(node) and indexed[0]
+
+
 def infer_index_bounds_from_gm(
     gm: Any,
     placeholder_info: dict[str, dict],
@@ -642,6 +830,13 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.scatter.src: (0, 1),
         torch.ops.aten.scatter.value: (0, 1),
         torch.ops.aten.scatter_add.default: (0, 1),
+        torch.ops.aten.scatter.reduce: (0, 1),
+        torch.ops.aten.scatter.value_reduce: (0, 1),
+        torch.ops.aten.scatter_reduce.two: (0, 1),
+        torch.ops.aten.index_add.default: (0, 1),
+        torch.ops.aten.index_copy.default: (0, 1),
+        torch.ops.aten.index_fill.int_Scalar: (0, 1),
+        torch.ops.aten.index_fill.int_Tensor: (0, 1),
         torch.ops.aten.gather.default: (0, 1),
 
         torch.ops.aten.index_select.default: (0, 1),
@@ -653,6 +848,13 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.scatter.src: 2,
         torch.ops.aten.scatter.value: 2,
         torch.ops.aten.scatter_add.default: 2,
+        torch.ops.aten.scatter.reduce: 2,
+        torch.ops.aten.scatter.value_reduce: 2,
+        torch.ops.aten.scatter_reduce.two: 2,
+        torch.ops.aten.index_add.default: 2,
+        torch.ops.aten.index_copy.default: 2,
+        torch.ops.aten.index_fill.int_Scalar: 2,
+        torch.ops.aten.index_fill.int_Tensor: 2,
         torch.ops.aten.gather.default: 2,
         torch.ops.aten.index_select.default: 2,
         torch.ops.aten.embedding.default: 1,
@@ -689,6 +891,8 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.split.Tensor,
         torch.ops.aten.split_with_sizes.default,
         operator.getitem,
+        # An index cast to another integer dtype keeps its values.
+        torch.ops.aten._to_copy.default,
     }
 
     bounds = {}
@@ -797,6 +1001,23 @@ def infer_index_bounds_from_gm(
 
             found: list[int] = []
 
+            def _dim(v):
+                """A dim's concrete size, or None for a data-dependent
+                (unbacked) size: that index is left unbounded."""
+                if isinstance(v, torch.SymInt):
+                    hint = getattr(v.node, "hint", None)
+                    if hint is not None:
+                        return int(hint)
+                    try:
+                        return int(v)
+                    except Exception:
+                        return None
+                return int(v)
+
+            def _add(size, chain) -> None:
+                if size is not None:
+                    found.append(_invert(size, chain))
+
             def _invert(bound: int, chain) -> int:
                 b = bound
                 for kind, arg in reversed(chain):
@@ -882,13 +1103,30 @@ def infer_index_bounds_from_gm(
                                 if weight_arg and hasattr(weight_arg, "meta"):
                                     val = weight_arg.meta.get("val")
                                     if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                        found.append(_invert(int(val.shape[0]), chain))
+                                        _add(_dim(val.shape[0]), chain)
                                         continue
 
+                        if (target == torch.ops.aten.embedding_dense_backward.default
+                                and len(user.args) > 2 and user.args[1] is n
+                                and isinstance(user.args[2], int)):
+                            found.append(_invert(int(user.args[2]), chain))
+                            continue
+
+                        # The masked variants take (self, mask, indices, ...).
+                        indices_pos = (
+                            2 if target in (
+                                torch.ops.aten._unsafe_masked_index.default,
+                                torch.ops.aten._unsafe_masked_index_put_accumulate.default,
+                            ) else 1
+                        )
                         if (target in (torch.ops.aten.index.Tensor,
                                        torch.ops.aten.index_put.default,
-                                       torch.ops.aten.index_put_.default)
-                                and len(user.args) >= 2):
+                                       torch.ops.aten.index_put_.default,
+                                       torch.ops.aten._unsafe_index.Tensor,
+                                       torch.ops.aten._unsafe_index_put.default,
+                                       torch.ops.aten._unsafe_masked_index.default,
+                                       torch.ops.aten._unsafe_masked_index_put_accumulate.default)
+                                and len(user.args) > indices_pos):
                             # indices list position maps to DIM, INCLUDING
                             # None slots (index_put([None, None, i, j]):
                             # i indexes dim 2, j dim 3 — Yitu: bounding j
@@ -896,11 +1134,11 @@ def infer_index_bounds_from_gm(
                             # index_put_ (in-place) shares the schema; both
                             # take (self, indices_list, values, ...).
                             target_shape = _node_shape(user.args[0])
-                            indices = user.args[1]
+                            indices = user.args[indices_pos]
                             if target_shape and isinstance(indices, (list, tuple)):
                                 for dim, index_node in enumerate(indices):
                                     if index_node is n and dim < len(target_shape):
-                                        found.append(_invert(int(target_shape[dim]), chain))
+                                        _add(_dim(target_shape[dim]), chain)
 
                         if target == torch.ops.aten.gather.default:
                             if user.args and user.args[0] is n:
@@ -918,10 +1156,17 @@ def infer_index_bounds_from_gm(
                                     if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
                                         dim = user.args[dim_arg_idx]
                                         if isinstance(dim, int) and dim < len(target_shape):
-                                            found.append(_invert(int(target_shape[dim]), chain))
+                                            _add(_dim(target_shape[dim]), chain)
                                     else:
-                                        found.append(_invert(int(target_shape[0]), chain))
+                                        _add(_dim(target_shape[0]), chain)
 
+                        if (target == torch.ops.aten._to_copy.default
+                                and isinstance(user.kwargs.get("dtype"), torch.dtype)
+                                and user.kwargs["dtype"].is_floating_point
+                                and user.kwargs["dtype"].itemsize < 4):
+                            # fp16/bf16 round large ints up (4099 -> 4100 in
+                            # fp16), so a value below the bound can land on it.
+                            continue
                         if target in passthrough_ops or target in _VALUE_PRESERVING:
                             next_frontier.append((user, chain))
                         elif target in _INT_ARITH:
@@ -951,6 +1196,9 @@ def infer_index_bounds_from_gm(
                 return min(found)
             return None
 
+        if dtype == "torch.int64" and _masked_to_index_range(node, passthrough_ops):
+            bounds[name] = _ANY_INDEX
+            continue
         bound = _find_bound(node)
         if bound is not None:
             if is_float:
@@ -1174,6 +1422,14 @@ def _exact_tensor_payload(value: Any, *, max_numel: int = 4096) -> dict[str, Any
 def _scalar_spec_from_value(name: str, value: Any) -> dict[str, Any]:
     import torch
 
+    if isinstance(value, torch.Generator):
+        device = value.device
+        return {
+            "kind": "generator",
+            "name": name,
+            "device_type": device.type,
+            "device_index": device.index or 0,
+        }
     if isinstance(value, (torch.SymInt, torch.SymFloat)):
         return {"kind": "symint", "name": name, "value": _concrete_int(value)}
     if isinstance(value, (int, float, bool)):
@@ -1312,6 +1568,52 @@ def graph_constraints_from_gm(
     return payload
 
 
+def _merge_source_input_constraints(
+    generated: list[dict[str, Any]],
+    source: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], bool]:
+    if len(generated) != len(source):
+        raise ValueError(
+            "source input count does not match captured graph placeholders: "
+            f"{len(source)} != {len(generated)}"
+        )
+
+    merged = []
+    captured_dynamic = False
+    for index, (generated_spec, source_spec) in enumerate(zip(generated, source)):
+        fake_generator = (
+            generated_spec.get("kind") == "scalar"
+            and source_spec.get("kind") == "generator"
+        )
+        if generated_spec.get("kind") != source_spec.get("kind") and not fake_generator:
+            raise ValueError(
+                f"source input kind does not match captured placeholder {index}"
+            )
+        spec = dict(generated_spec)
+        if fake_generator:
+            spec.pop("value", None)
+            spec["kind"] = "generator"
+        if spec.get("kind") in {"scalar", "symint"} and "value" in source_spec:
+            spec["value"] = source_spec["value"]
+        if spec.get("kind") == "generator":
+            spec["device_type"] = source_spec.get("device_type", "cpu")
+            spec["device_index"] = int(source_spec.get("device_index", 0))
+        for key in ("shape", "stride", "device", "storage_offset", "alias_group"):
+            if source_spec.get(key) is not None:
+                spec[key] = source_spec[key]
+        for key in (
+            "symbolic_expr",
+            "symbolic_dims",
+            "symbolic_stride_dims",
+            "symbolic_storage_offset",
+        ):
+            if key in source_spec:
+                spec[key] = source_spec[key]
+                captured_dynamic = True
+        merged.append(spec)
+    return merged, captured_dynamic
+
+
 def _placeholder_storage_groups(gm: Any) -> list[list[str]]:
     """Group placeholder names whose meta vals share one untyped storage."""
     import torch
@@ -1357,6 +1659,7 @@ def write_full_graph_metadata(
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
     observed_stats: dict[str, dict] | None = None,
+    source_input_specs: list[dict[str, Any]] | None = None,
 ) -> Path:
     graph_path = Path(graph_path)
     payload = graph_constraints_from_gm(
@@ -1365,6 +1668,22 @@ def write_full_graph_metadata(
         permutation_indices=permutation_indices,
         observed_stats=observed_stats,
     )
+    if source_input_specs is not None:
+        payload["inputs"], captured_dynamic = _merge_source_input_constraints(
+            payload["inputs"], source_input_specs
+        )
+        payload["captured_dynamic"] = captured_dynamic
+        if (gm.meta or {}).get("better_benchmark_source_code") is not None:
+            renamed = {}
+            for spec, source_spec in zip(payload["inputs"], source_input_specs):
+                if source_spec.get("name"):
+                    renamed[spec["name"]] = source_spec["name"]
+                    spec["name"] = source_spec["name"]
+            if payload.get("storage_groups"):
+                payload["storage_groups"] = [
+                    [renamed.get(name, name) for name in group]
+                    for group in payload["storage_groups"]
+                ]
     payload["graph"] = graph_path.name
     if extra:
         payload.update(extra)
@@ -1469,12 +1788,18 @@ def _parse_intish(value: str, *, default: int = 32) -> int:
     return default
 
 
+def _split_dim_exprs(value: str) -> list[str]:
+    if not value.strip():
+        return []
+    parsed = ast.parse(f"({value},)", mode="eval").body
+    if not isinstance(parsed, ast.Tuple):
+        raise ValueError(f"expected dimension sequence: {value!r}")
+    return [ast.unparse(item) for item in parsed.elts]
+
+
 def _symbolic_dims(shape_str: str) -> list[dict[str, Any]]:
     symbols = []
-    for idx, dim in enumerate(shape_str.split(",")):
-        dim = dim.strip()
-        if not dim:
-            continue
+    for idx, dim in enumerate(_split_dim_exprs(shape_str)):
         try:
             int(dim)
         except ValueError:
@@ -1486,10 +1811,7 @@ def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
     if stride_str is None:
         return []
     symbolic = []
-    for idx, dim in enumerate(stride_str.split(",")):
-        dim = dim.strip()
-        if not dim:
-            continue
+    for idx, dim in enumerate(_split_dim_exprs(stride_str)):
         try:
             int(dim)
         except ValueError:
@@ -1498,23 +1820,13 @@ def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
 
 
 def _parse_shape(shape_str: str) -> tuple[int, ...]:
-    dims = []
-    for dim in shape_str.split(","):
-        dim = dim.strip()
-        if dim:
-            dims.append(_parse_intish(dim))
-    return tuple(dims)
+    return tuple(_parse_intish(dim) for dim in _split_dim_exprs(shape_str))
 
 
 def _parse_stride(stride_str: str | None) -> tuple[int, ...] | None:
     if stride_str is None:
         return None
-    dims = []
-    for dim in stride_str.split(","):
-        dim = dim.strip()
-        if dim:
-            dims.append(_parse_intish(dim))
-    return tuple(dims)
+    return tuple(_parse_intish(dim) for dim in _split_dim_exprs(stride_str))
 
 
 def _parse_device(device_str: str | None) -> str | None:
@@ -1580,7 +1892,9 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
             continue
 
         dtype_token, shape_str, stride_str, device_str = tensor_match.groups()
-        dtype_name = _DTYPE_SHORT_NAMES.get(dtype_token, "float32")
+        if dtype_token not in _DTYPE_SHORT_NAMES:
+            raise ValueError(f"unsupported full graph dtype: {dtype_token}")
+        dtype_name = _DTYPE_SHORT_NAMES[dtype_token]
         shape = _parse_shape(shape_str)
         generator = _default_generator_for_dtype(dtype_name, shape)
         spec = {
@@ -1624,7 +1938,9 @@ def parse_full_graph_tensor_attrs(content: str) -> dict[str, dict[str, Any]]:
         if not match:
             continue
         dtype_token, shape_str, stride_str, device_str, attr_name = match.groups()
-        dtype_name = _DTYPE_SHORT_NAMES.get(dtype_token, "float32")
+        if dtype_token not in _DTYPE_SHORT_NAMES:
+            raise ValueError(f"unsupported full graph dtype: {dtype_token}")
+        dtype_name = _DTYPE_SHORT_NAMES[dtype_token]
         shape = _parse_shape(shape_str)
         generator = _default_generator_for_attr_dtype(dtype_name)
         attrs[attr_name] = {
@@ -1704,7 +2020,18 @@ def _resolve_annotation_expr(
 ) -> int:
     import sympy
 
-    expr = sympy.sympify(expr_text, rational=False)
+    normalized = expr_text.replace("math.ceil", "ceiling").replace(
+        "math.floor", "floor"
+    )
+    expr = sympy.sympify(
+        normalized,
+        locals={
+            "CeilToInt": sympy.ceiling,
+            "FloorDiv": lambda left, right: sympy.floor(left / right),
+            "IntTrueDiv": lambda left, right: left / right,
+        },
+        rational=False,
+    )
     missing = sorted(
         str(symbol)
         for symbol in expr.free_symbols
@@ -1892,7 +2219,9 @@ def _validate_sidecar_inputs(
         annotation_spec = annotation_inputs[idx]
         sidecar_kind = sidecar_spec.get("kind")
         annotation_kind = annotation_spec.get("kind")
-        if sidecar_kind != annotation_kind:
+        if sidecar_kind != annotation_kind and not (
+            sidecar_kind == "generator" and annotation_kind == "scalar"
+        ):
             raise ValueError(
                 "full graph sidecar input kind does not match forward annotations "
                 f"for input {idx}: {sidecar_kind!r} != {annotation_kind!r}"
@@ -1996,6 +2325,399 @@ def _strip_runnable_boilerplate(content: str) -> str:
     return re.sub(r"^mod\s*=\s*Repro\(\)\s*$", "", content, flags=re.MULTILINE)
 
 
+def load_graph_class_from_source(
+    content: str,
+    path: str | Path,
+    *,
+    custom_ops: frozenset[str] = frozenset(),
+    user_triton: Any = None,
+):
+    import builtins
+    import torch
+    import torch.fx as fx
+    import torch.nn
+    from replay_dependencies import BUILTIN_OP_NAMESPACES, COLLECTIVE_OP_NAMESPACES
+
+    tree = ast.parse(content, filename=str(path))
+    graph_classes = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+        and any(ast.unparse(base) in {"Module", "torch.nn.Module"} for base in node.bases)
+    ]
+    if len(graph_classes) != 1:
+        raise ValueError(
+            f"{path} must define exactly one torch.nn.Module graph class"
+        )
+    graph_class = graph_classes[0]
+    # With a resolved bundle (user_triton.ResolvedBundle) covering every
+    # user-Triton HOP call, those calls launch the resolved kernels instead;
+    # otherwise they stay, and full_graph_calls_user_triton refuses the graph.
+    user_triton_launcher = None
+    if user_triton is not None:
+        from user_triton import LAUNCHER_NAME, make_launcher, rewrite_hop_calls
+
+        if rewrite_hop_calls(graph_class, user_triton):
+            user_triton_launcher = make_launcher(user_triton)
+    if (
+        len(graph_class.bases) != 1
+        or ast.unparse(graph_class.bases[0]) not in {"Module", "torch.nn.Module"}
+        or graph_class.decorator_list
+        or graph_class.keywords
+    ):
+        raise ValueError(
+            f"{path} graph class must have one Module base and no decorators or keywords"
+        )
+
+    allowed_calls = {
+        "device",
+        "self.register_buffer",
+        "super",
+        "super().__init__",
+        "tensor",
+        "torch.sym_float",
+        "torch.sym_max",
+        "torch.sym_min",
+        "torch.sym_not",
+        "torch.sym_sum",
+    }
+    if user_triton_launcher is not None:
+        allowed_calls.add(LAUNCHER_NAME)
+    allowed_operator_namespaces = BUILTIN_OP_NAMESPACES | COLLECTIVE_OP_NAMESPACES | {
+        "ads_mkl",
+        "aten",
+        "efficient_module_suite",
+        "ems_mxfp8",
+        "fb",
+        "fbgemm",
+        "flash_attn",
+        "higher_order",
+        "prims",
+    }
+    registered_ops = set()
+    # Operators such as aten::__rshift__ have dunder names; only these are
+    # exempt from the dunder-attribute check, only as torch.ops.<ns>.<op>, and
+    # only when that resolves to the operator (not a namespace object method).
+    dunder_operators = set()
+    for op in torch._C._dispatch_get_all_op_names():
+        namespace, _, operator = op.partition("::")
+        if namespace in allowed_operator_namespaces:
+            packet_name = operator.split(".")[0]
+            if packet_name.startswith("__") and isinstance(
+                getattr(getattr(torch.ops, namespace), packet_name, None),
+                torch._ops.OpOverloadPacket,
+            ):
+                dunder_operators.add(f"torch.ops.{namespace}.{packet_name}")
+            continue
+        name = f"torch.ops.{namespace}.{operator}"
+        registered_ops.add(name)
+        registered_ops.add(f"torch.ops.{namespace}.{operator.split('.')[0]}")
+        if "." not in operator:
+            registered_ops.add(name + ".default")
+    custom_ops = custom_ops | frozenset(registered_ops)
+    custom_namespaces = {op.split(".")[2] for op in custom_ops}
+
+    def is_operator(parts: list[str]) -> bool:
+        return (
+            4 <= len(parts) <= 5
+            and parts[:2] == ["torch", "ops"]
+            and (parts[2] in allowed_operator_namespaces or ".".join(parts) in custom_ops)
+        )
+    allowed_torch_attributes = {
+        *(f"torch.{name}" for name in _DTYPE_SHORT_NAMES.values()),
+        "torch.contiguous_format",
+        "torch.ops",
+        "torch.strided",
+        "torch.sym_float",
+        "torch.sym_max",
+        "torch.sym_min",
+        "torch.sym_not",
+        "torch.sym_sum",
+        "torch.uint8",
+    }
+    forbidden_nodes = (
+        ast.AsyncFunctionDef,
+        ast.Await,
+        ast.ClassDef,
+        ast.Delete,
+        ast.DictComp,
+        ast.For,
+        ast.FunctionDef,
+        ast.GeneratorExp,
+        ast.Global,
+        ast.If,
+        ast.Import,
+        ast.ImportFrom,
+        ast.Lambda,
+        ast.ListComp,
+        ast.Match,
+        ast.Nonlocal,
+        ast.SetComp,
+        ast.Try,
+        ast.While,
+        ast.With,
+        ast.Yield,
+        ast.YieldFrom,
+    )
+    # Device types the graph's __init__ may first use (see the warm-up below).
+    device_types = {"cpu"}
+    for member in graph_class.body:
+        if isinstance(member, ast.Expr) and isinstance(member.value, ast.Constant):
+            continue
+        if not isinstance(member, ast.FunctionDef):
+            raise ValueError(f"{path} graph class contains executable class-level code")
+        if member.decorator_list:
+            raise ValueError(f"{path} graph methods cannot use decorators")
+        defaults = [*member.args.defaults, *member.args.kw_defaults]
+        if any(
+            default is not None and not isinstance(default, ast.Constant)
+            for default in defaults
+        ):
+            raise ValueError(f"{path} graph methods require literal defaults")
+        local_names = {
+            arg.arg
+            for arg in (
+                *member.args.posonlyargs,
+                *member.args.args,
+                *member.args.kwonlyargs,
+            )
+        }
+        if member.args.vararg is not None:
+            local_names.add(member.args.vararg.arg)
+        if member.args.kwarg is not None:
+            local_names.add(member.args.kwarg.arg)
+        local_names.update(
+            node.id
+            for node in ast.walk(member)
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+        )
+        parents = {
+            child: parent
+            for parent in ast.walk(member)
+            for child in ast.iter_child_nodes(parent)
+        }
+        # fx_graph_runnable writes buffers whose values were not saved as
+        # self.register_buffer(name, torch.randint(...)) or torch.randn(...)
+        # (size and dtype only), with .to("<device>") for non-CPU buffers;
+        # allow exactly that form.
+        buffer_factory_nodes: set[ast.AST] = set()
+        for node in ast.walk(member):
+            if not (
+                member.name == "__init__"
+                and isinstance(node, ast.Call)
+                and ast.unparse(node.func) == "self.register_buffer"
+                and len(node.args) == 2
+            ):
+                continue
+            value = node.args[1]
+            to_device = None
+            if (
+                isinstance(value, ast.Call)
+                and isinstance(value.func, ast.Attribute)
+                and value.func.attr == "to"
+                and len(value.args) == 1
+                and not value.keywords
+                and isinstance(value.args[0], ast.Constant)
+                and isinstance(value.args[0].value, str)
+            ):
+                to_device = value
+                value = value.func.value
+            if not (
+                isinstance(value, ast.Call)
+                and ast.unparse(value.func) in {"torch.randint", "torch.randn"}
+                and "torch" not in local_names
+                and not any(isinstance(arg, ast.Starred) for arg in value.args)
+                and all(keyword.arg in {"size", "dtype"} for keyword in value.keywords)
+            ):
+                continue
+            buffer_factory_nodes.update((value, value.func))
+            if to_device is not None:
+                try:
+                    device_type = torch.device(to_device.args[0].value).type
+                except RuntimeError as e:
+                    raise ValueError(f"{path} graph buffer names an invalid device") from e
+                if device_type not in {"cpu", "cuda"}:
+                    raise ValueError(
+                        f"{path} graph buffer names unsupported device type "
+                        f"{device_type!r}"
+                    )
+                buffer_factory_nodes.update((to_device, to_device.func))
+                device_types.add(device_type)
+        for node in ast.walk(member):
+            if node is not member and isinstance(node, forbidden_nodes):
+                raise ValueError(
+                    f"{path} graph method contains unsupported {type(node).__name__}"
+                )
+            if isinstance(node, ast.Name) and node.id in {
+                "__builtins__",
+                "__import__",
+                "compile",
+                "eval",
+                "exec",
+                "globals",
+                "locals",
+                "open",
+            }:
+                raise ValueError(f"{path} graph method references unsafe name {node.id!r}")
+            if (
+                isinstance(node, ast.Name)
+                and isinstance(node.ctx, ast.Load)
+                and node.id not in local_names
+                and node.id
+                not in {"device", "inf", "nan", "super", "tensor", "torch"}
+                and not (user_triton_launcher is not None and node.id == LAUNCHER_NAME)
+            ):
+                raise ValueError(
+                    f"{path} graph method references unsupported global {node.id!r}"
+                )
+            if (
+                isinstance(node, ast.Attribute)
+                and node.attr.startswith("__")
+                and ast.unparse(node) != "super().__init__"
+                and not (
+                    ast.unparse(node) in dunder_operators
+                    and "torch" not in local_names
+                )
+            ):
+                raise ValueError(
+                    f"{path} graph method references unsafe attribute {node.attr!r}"
+                )
+            if isinstance(node, ast.Attribute) and node not in buffer_factory_nodes:
+                attribute_name = ast.unparse(node)
+                parts = attribute_name.split(".")
+                is_operator_attribute = (
+                    len(parts) >= 2
+                    and parts[:2] == ["torch", "ops"]
+                    and (
+                        len(parts) == 2
+                        or (
+                            3 <= len(parts) <= 5
+                            and (
+                                parts[2] in allowed_operator_namespaces
+                                or len(parts) == 3 and parts[2] in custom_namespaces
+                                or is_operator(parts)
+                            )
+                        )
+                    )
+                )
+                if (
+                    attribute_name.startswith("torch.")
+                    and attribute_name not in allowed_torch_attributes
+                    and not is_operator_attribute
+                ):
+                    raise ValueError(
+                        f"{path} graph method references unsupported torch "
+                        f"attribute {attribute_name!r}"
+                    )
+            if (
+                isinstance(node, ast.Name)
+                and isinstance(node.ctx, ast.Load)
+                and node.id == "torch"
+            ):
+                outermost: ast.AST = node
+                while (
+                    isinstance(parents.get(outermost), ast.Attribute)
+                    and parents[outermost].value is outermost
+                ):
+                    outermost = parents[outermost]
+                torch_name = ast.unparse(outermost)
+                parent = parents.get(outermost)
+                is_call_target = (
+                    isinstance(parent, ast.Call) and parent.func is outermost
+                )
+                call_parts = torch_name.split(".")
+                is_operator_call = (
+                    is_call_target
+                    and is_operator(call_parts)
+                )
+                is_operator_argument = (
+                    not is_call_target
+                    and is_operator(call_parts)
+                    and isinstance(parent, ast.Call)
+                    and (
+                        outermost in parent.args
+                        or any(
+                            keyword.value is outermost for keyword in parent.keywords
+                        )
+                    )
+                )
+                if (
+                    torch_name not in allowed_torch_attributes
+                    or torch_name
+                    in {"torch.ops", "torch.sym_float", "torch.sym_not", "torch.sym_sum"}
+                    and not is_call_target
+                ) and not (
+                    is_operator_call
+                    or is_operator_argument
+                    or outermost in buffer_factory_nodes
+                ):
+                    raise ValueError(
+                        f"{path} graph method references unsupported torch value "
+                        f"{torch_name!r}"
+                    )
+            if isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(
+                node.ctx, (ast.Store, ast.Del)
+            ):
+                raise ValueError(
+                    f"{path} graph method cannot mutate attributes or subscripts"
+                )
+            if isinstance(node, ast.Call):
+                call_name = ast.unparse(node.func)
+                call_parts = call_name.split(".")
+                if (
+                    call_name not in allowed_calls
+                    and not is_operator(call_parts)
+                    and node not in buffer_factory_nodes
+                ):
+                    raise ValueError(
+                        f"{path} graph method contains unsupported call {call_name!r}"
+                    )
+
+    exec_globals: dict[str, Any] = {
+        "__builtins__": {
+            "__build_class__": builtins.__build_class__,
+            "super": builtins.super,
+        },
+        "__name__": "better_benchmark_graph",
+        "device": torch.device,
+        "fx": fx,
+        "inf": math.inf,
+        "nan": float("nan"),
+        "tensor": torch.tensor,
+        "torch": torch,
+    }
+    if user_triton_launcher is not None:
+        exec_globals[LAUNCHER_NAME] = user_triton_launcher
+    for attr in dir(torch.nn):
+        if not attr.startswith("_"):
+            exec_globals[attr] = getattr(torch.nn, attr)
+    class_module = ast.fix_missing_locations(
+        ast.Module(body=[graph_class], type_ignores=[])
+    )
+    # The first torch.tensor call on a device type imports modules (torch's
+    # storage types, CUDA's lazy init), which the restricted builtins below
+    # cannot do; graph __init__s may create buffers on any device they name.
+    # Only __init__ runs at load: warming up a device forward() merely names
+    # would initialize CUDA on CPU-only hosts and in parents that later fork.
+    device_types |= {
+        keyword.value.value
+        for member in graph_class.body
+        if isinstance(member, ast.FunctionDef) and member.name == "__init__"
+        for node in ast.walk(member)
+        if isinstance(node, ast.Call) and ast.unparse(node.func) == "device"
+        for keyword in node.keywords
+        if keyword.arg == "type" and isinstance(keyword.value, ast.Constant)
+    }
+    for device_type in sorted(device_types):
+        try:
+            torch.tensor(0, device=device_type)
+        except (AssertionError, RuntimeError):
+            # No such device here; __init__ fails on it either way.
+            pass
+    exec(compile(class_module, str(path), "exec"), exec_globals)
+    return exec_globals[graph_class.name]
+
+
 def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     import torch
     import torch.fx as fx
@@ -2011,33 +2733,24 @@ def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     _validate_sidecar_inputs(sidecar.get("inputs"), annotation_inputs)
     _validate_sidecar_tensor_attrs(sidecar.get("tensor_attrs"), annotation_attrs)
 
-    exec_globals: dict[str, Any] = {"__builtins__": __builtins__}
-    for attr in dir(torch.nn):
-        if not attr.startswith("_"):
-            exec_globals[attr] = getattr(torch.nn, attr)
-    exec_globals.update({
-        "torch": torch,
-        "fx": fx,
-        "inf": math.inf,
-        "nan": float("nan"),
-        "device": torch.device,
-        "tensor": torch.tensor,
-    })
+    custom_ops = set()
+    for entry in (sidecar.get("replay_dependencies") or {}).get("custom_ops", []):
+        op = entry["op"]
+        if not isinstance(op, str) or op.count("::") != 1:
+            raise ValueError("invalid replay dependency operator name")
+        name = "torch.ops." + op.replace("::", ".")
+        if len(name.split(".")) not in {4, 5}:
+            raise ValueError("invalid replay dependency operator name")
+        custom_ops.add(name)
+        custom_ops.add(".".join(name.split(".")[:4]))
+    from user_triton import resolve_bundle
 
-    exec(compile(content, str(path), "exec"), exec_globals)
-
-    graph_cls = None
-    for name, value in exec_globals.items():
-        if (
-            isinstance(value, type)
-            and issubclass(value, torch.nn.Module)
-            and value is not torch.nn.Module
-            and name not in dir(torch.nn)
-        ):
-            graph_cls = value
-            break
-    if graph_cls is None:
-        raise RuntimeError(f"{path} does not define a torch.nn.Module graph class")
+    graph_cls = load_graph_class_from_source(
+        content,
+        path,
+        custom_ops=frozenset(custom_ops),
+        user_triton=resolve_bundle(sidecar, scope=str(path.resolve())),
+    )
 
     return FullGraphDefinition(
         path=path,
@@ -2084,7 +2797,14 @@ def _is_float8_dtype(dtype) -> bool:
 
     return dtype in tuple(
         getattr(torch, name)
-        for name in ("float8_e4m3fn", "float8_e5m2")
+        for name in (
+            "float8_e4m3fn",
+            "float8_e4m3fnuz",
+            "float8_e4m3b11fnuz",
+            "float8_e5m2",
+            "float8_e5m2fnuz",
+            "float8_e8m0fnu",
+        )
         if hasattr(torch, name)
     )
 
@@ -2114,13 +2834,29 @@ def _effective_stride(
     return _contiguous_stride(shape)
 
 
+def _validate_tensor_layout(
+    shape: tuple[int, ...],
+    stride: tuple[int, ...] | list[int] | None,
+    storage_offset: int,
+) -> None:
+    if any(dim < 0 for dim in shape):
+        raise ValueError("input shape dimensions must be non-negative")
+    if storage_offset < 0:
+        raise ValueError("input storage offset must be non-negative")
+    if stride is not None:
+        if len(stride) != len(shape):
+            raise ValueError("input stride rank does not match shape rank")
+        if any(step < 0 for step in stride):
+            raise ValueError("input strides must be non-negative")
+
+
 def _dense_storage_size(
     shape: tuple[int, ...],
     stride: tuple[int, ...] | list[int] | None,
     *,
     storage_offset: int = 0,
 ) -> int:
-    storage_offset = max(int(storage_offset), 0)
+    storage_offset = int(storage_offset)
     if not shape:
         return storage_offset + 1
     stride = _effective_stride(shape, stride)
@@ -2282,6 +3018,7 @@ def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda")
     stride = spec.get("stride")
     dev = _resolve_device(spec.get("device"), default_device)
     storage_offset = int(spec.get("storage_offset", 0) or 0)
+    _validate_tensor_layout(shape, stride, storage_offset)
     generator = _generation_spec(spec) or _default_generator_for_dtype(
         _normalize_dtype_name(spec.get("dtype", "float32")),
         shape,
@@ -2391,17 +3128,116 @@ def make_inputs_from_full_graph_specs(
     *,
     default_device: str = "cuda",
 ) -> tuple[Any, ...]:
-    inputs = []
-    for spec in input_specs:
+    inputs: list[Any] = [None] * len(input_specs)
+    alias_groups: dict[Any, list[int]] = {}
+    for index, spec in enumerate(input_specs):
+        if spec.get("kind") == "tensor":
+            _validate_tensor_layout(
+                tuple(spec.get("shape", ())),
+                spec.get("stride"),
+                int(spec.get("storage_offset", 0) or 0),
+            )
+            if spec.get("alias_group") is not None:
+                alias_groups.setdefault(spec["alias_group"], []).append(index)
+
+    for indices in alias_groups.values():
+        if len(indices) == 1:
+            continue
+        if any(input_specs[index].get("exact") for index in indices):
+            raise ValueError("exact values for aliased full graph inputs are unsupported")
+        first = input_specs[indices[0]]
+        dtype = _normalize_dtype_name(first.get("dtype", "float32"))
+        device = _normalize_device_name(first.get("device"))
+        storage_size = 1
+        for index in indices:
+            spec = input_specs[index]
+            if _normalize_dtype_name(spec.get("dtype", "float32")) != dtype:
+                raise ValueError("aliased full graph inputs must have the same dtype")
+            if _normalize_device_name(spec.get("device")) != device:
+                raise ValueError("aliased full graph inputs must have the same device")
+            storage_size = max(
+                storage_size,
+                _dense_storage_size(
+                    tuple(spec.get("shape", ())),
+                    spec.get("stride"),
+                    storage_offset=int(spec.get("storage_offset", 0) or 0),
+                ),
+            )
+        gens = [
+            _generation_spec(input_specs[index])
+            or _default_generator_for_dtype(dtype, tuple(input_specs[index].get("shape", ())))
+            for index in indices
+        ]
+        gen = gens[0]
+        if all(g.get("kind") in {"index", "randint", "constant"} for g in gens):
+            ranges = [g for g in gens if g.get("kind") != "constant"]
+            constants = [g.get("value", 0) for g in gens if g.get("kind") == "constant"]
+            low = max((int(g.get("low", 0)) for g in ranges), default=0)
+            high = min((int(g.get("high", 100)) for g in ranges), default=1)
+            if constants:
+                value = constants[0]
+                if any(c != value for c in constants) or ranges and not low <= value < high:
+                    raise ValueError("aliased full graph inputs have incompatible generators")
+                gen = {"kind": "constant", "value": value}
+            else:
+                if high <= low:
+                    raise ValueError("aliased full graph inputs have no common generation range")
+                gen = {"kind": "index", "low": low, "high": high}
+        elif any(g != gen for g in gens[1:]):
+            raise ValueError("aliased full graph inputs have incompatible generators")
+        storage_spec = dict(first)
+        storage_spec.update({"alias_group": None, "exact": False, "gen": gen})
+        if gen.get("kind") == "permutation":
+            layouts = []
+            for index in indices:
+                spec = input_specs[index]
+                shape = tuple(spec.get("shape", ()))
+                layouts.append((shape, _effective_stride(shape, spec.get("stride")),
+                                int(spec.get("storage_offset", 0) or 0)))
+            if any(layout != layouts[0] for layout in layouts[1:]):
+                raise ValueError("aliased permutation inputs with different layouts are unsupported")
+        else:
+            storage_spec.update({"shape": (storage_size,), "storage_offset": 0, "stride": (1,)})
+        storage_spec.pop("data", None)
+        storage = make_tensor_from_spec(
+            storage_spec,
+            default_device=default_device,
+        )
+        for index in indices:
+            spec = input_specs[index]
+            inputs[index] = _view_storage(
+                storage,
+                tuple(spec.get("shape", ())),
+                spec.get("stride"),
+                int(spec.get("storage_offset", 0) or 0),
+            )
+
+    for index, spec in enumerate(input_specs):
+        if inputs[index] is not None:
+            continue
         kind = spec.get("kind")
         if kind == "symint":
-            inputs.append(int(spec.get("value", 32)))
+            inputs[index] = int(spec.get("value", 32))
         elif kind == "scalar":
-            inputs.append(spec.get("value", 1))
+            inputs[index] = spec.get("value", 1)
+        elif kind == "generator":
+            import torch
+
+            device_type = spec.get("device_type", "cpu")
+            device_index = int(spec.get("device_index", 0))
+            if device_type == "cuda" and not torch.cuda.is_available():
+                device_type = "cpu"
+                device_index = 0
+            inputs[index] = torch.Generator(
+                device=torch.device(device_type, device_index)
+            )
         elif kind == "tensor":
-            inputs.append(make_tensor_from_spec(spec, default_device=default_device))
+            inputs[index] = make_tensor_from_spec(
+                spec,
+                default_device=default_device,
+            )
         else:
-            inputs.append(1)
+            inputs[index] = 1
     return tuple(inputs)
 
 
@@ -2425,7 +3261,13 @@ def load_full_graph(
     graph_path_or_definition: str | Path | FullGraphDefinition,
     *,
     default_device: str = "cuda",
+    allow_user_triton: bool = False,
 ):
+    """Instantiate a saved full graph with inputs built from its specs.
+
+    A graph that launches user-defined Triton kernels is refused unless
+    ``allow_user_triton`` is set; set it only to trace the graph in fake mode,
+    which never resolves the kernels."""
     definition = (
         graph_path_or_definition
         if isinstance(graph_path_or_definition, FullGraphDefinition)
@@ -2433,6 +3275,20 @@ def load_full_graph(
     )
     if not definition.input_specs and not definition.forward_takes_no_inputs:
         raise RuntimeError(f"{definition.path} has no parseable forward inputs")
+    if not allow_user_triton and full_graph_calls_user_triton(definition):
+        from user_triton import BUNDLE_KEY, RESOLVER_ENV
+
+        unresolved = ""
+        if (definition.metadata or {}).get("sidecar", {}).get(BUNDLE_KEY):
+            unresolved = (
+                f" (its kernel bundle did not resolve here: {RESOLVER_ENV} is "
+                "unset or a kernel changed since capture)"
+            )
+        raise UserTritonKernelReplayError(
+            f"{definition.path} launches user-defined Triton kernels by "
+            "kernel_side_table index, which only the capturing process can "
+            f"resolve; replaying it here would fail or run other kernels{unresolved}"
+        )
     instance = instantiate_full_graph(definition, default_device=default_device)
     inputs = make_inputs_from_full_graph_specs(
         definition.input_specs,
