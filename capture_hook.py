@@ -90,8 +90,25 @@ TRANSPARENT_OPS = {
     torch.ops.aten.as_strided.default,
 }
 
+# Reads of a tensor's symbolic size/stride/offset. They exist only in a
+# symbolic trace (a static re-trace folds them to constants), so like views
+# they never constitute compute.
+SHAPE_METADATA_OPS = {
+    torch.ops.aten.sym_size.int,
+    torch.ops.aten.sym_stride.int,
+    torch.ops.aten.sym_numel.default,
+    torch.ops.aten.sym_storage_offset.default,
+}
+TRANSPARENT_OPS |= SHAPE_METADATA_OPS
+
 ALLOCATION_ONLY_OPS = {
     torch.ops.aten.empty.memory_format,
+}
+
+RUNTIME_ASSERT_OPS = {
+    torch.ops.aten._assert_scalar.default,
+    torch.ops.aten.sym_constrain_range.default,
+    torch.ops.aten.sym_constrain_range_for_size.default,
 }
 
 
@@ -100,10 +117,14 @@ def partition_node_is_supported(node: fx.Node) -> bool:
 
     A node belongs in a fusible partition if it is a transparent view op or
     Inductor's is_fusible_node says it has a fusible lowering (no BLAS/cuDNN
-    flop-counter ops, no fallbacks, no collectives).
+    flop-counter ops, no fallbacks, no collectives). Runtime asserts are
+    never fusible: they have no compute to time, and their symbolic inputs
+    have no value outside the trace.
     """
     from torch._inductor.fx_passes.fusion_regions import is_fusible_node
 
+    if node.op == "call_function" and node.target in RUNTIME_ASSERT_OPS:
+        return False
     if node.op == "call_function" and node.target in TRANSPARENT_OPS:
         return True
     return is_fusible_node(node)
@@ -864,13 +885,48 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     # Harvest the graph-level symbolic block from whatever live ShapeEnv we
     # saw (None for a fully static partition). Fold in any lifted-shape-param
     # exprs so the whole symbolic story for this region is one object.
-    shape_env_block = _harvest_shape_env(_seen_shape_env[0])
+    shape_env_block = _scope_shape_env_block(
+        _harvest_shape_env(_seen_shape_env[0]), placeholder_info,
+        shape_param_exprs)
     if shape_param_exprs:
         if shape_env_block is None:
             shape_env_block = {"symbols": {}, "guards": [],
                                "captured_dynamic": True}
         shape_env_block["shape_param_exprs"] = shape_param_exprs
     return new_gm, placeholder_info, shape_params, shape_env_block
+
+
+def _scope_shape_env_block(block, placeholder_info, shape_param_exprs):
+    """Restrict a graph-wide ShapeEnv block to the symbols this region's
+    inputs reference, and to the guards over only those symbols. Symbols of
+    other parts of the graph would otherwise join the region's family
+    identity and its required bindings. None when the region references no
+    symbol (a static region of a dynamic graph)."""
+    if block is None:
+        return None
+    from input_codec import _sympify_expr
+
+    exprs = []
+    for info in placeholder_info.values():
+        symbolic = info.get("symbolic") or {}
+        exprs += symbolic.get("shape_exprs") or []
+        exprs += symbolic.get("stride_exprs") or []
+        exprs += [symbolic.get("offset_expr"), info.get("expr")]
+    for dims in (shape_param_exprs or {}).values():
+        exprs += dims
+    used = {
+        sym.name
+        for e in exprs if isinstance(e, str)
+        for sym in _sympify_expr(e).free_symbols
+    }
+    symbols = {k: v for k, v in block["symbols"].items() if k in used}
+    if not symbols:
+        return None
+    guards = [
+        g for g in block["guards"]
+        if {sym.name for sym in _sympify_expr(g).free_symbols} <= set(symbols)
+    ]
+    return {**block, "symbols": symbols, "guards": guards}
 
 
 # ----------------------------------------------------------------------------

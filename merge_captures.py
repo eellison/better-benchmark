@@ -746,18 +746,6 @@ def _write_model_json(canonical_dir: Path, model_name: str, patterns: list[str],
     return out_dir
 
 
-def _find_existing_pattern_dir(canonical_path: Path, pattern_hash: str) -> Path | None:
-    """Return an existing canonical dir for pattern_hash, if one exists."""
-    for meta_path in sorted(canonical_path.glob("*/meta.json")):
-        try:
-            meta = json.loads(meta_path.read_text())
-        except Exception:
-            continue
-        if meta.get("pattern_hash") == pattern_hash:
-            return meta_path.parent
-    return None
-
-
 class _DropShapeAnnotations(ast.NodeTransformer):
     """Rewrite AnnAssign -> Assign (drop bare annotations) so the dump of a
     forward body is hint-blind. Emitted repro bodies annotate every assignment
@@ -994,6 +982,24 @@ def _resolve_dynamic_family_dir(canonical_path: Path, pattern_hash: str,
     return _own_dir()
 
 
+def _resolve_static_dir(canonical_path: Path, pattern_hash: str,
+                        dir_name: str) -> Path:
+    """Pick the canonical dir for a STATIC capture: the first static dir of
+    the pattern. A dynamic family dir of the same pattern_hash is a different
+    kernel (and its points carry bindings a static point has none of), so a
+    static capture never joins it and gets its own dir instead."""
+    existing = _pattern_dirs(canonical_path, pattern_hash)
+    for d in existing:
+        if _dir_family_identity(d) is None:
+            return d
+    candidate = canonical_path / dir_name
+    n = 2
+    while candidate in existing or candidate.exists():
+        candidate = canonical_path / f"{dir_name}__{n}"
+        n += 1
+    return candidate
+
+
 def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
     """Infer suite, mode, and clean name from a model label."""
     name = model_name
@@ -1113,9 +1119,7 @@ def merge_one_capture(
                 canonical_path, pattern_hash, dir_name, entry_identity,
                 entry_is_symbolic=bool(entry.get("symbols")))
         else:
-            repro_dir = _find_existing_pattern_dir(canonical_path, pattern_hash)
-            if repro_dir is None:
-                repro_dir = canonical_path / dir_name
+            repro_dir = _resolve_static_dir(canonical_path, pattern_hash, dir_name)
         repro_dir.mkdir(parents=True, exist_ok=True)
 
         # Update shapes.json. The signature travels as DATA in the index
@@ -1138,7 +1142,10 @@ def merge_one_capture(
                         parts.append(_spec_to_T(spec))
                 signature = f"({', '.join(parts)})"
 
-        if signature:
+        if signature or entry.get("inputs") is not None:
+            # The signature is documentation; a dynamic point whose binding
+            # is incomplete (an unobserved unbacked symbol) has none, but its
+            # inputs are the data and must still be written.
             # Build model key: suite/mode/model_name
             model_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
             point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash

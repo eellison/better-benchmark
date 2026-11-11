@@ -37,6 +37,19 @@ from dynamic_shape_replay import (
 )
 
 
+def _dynamic_row_numerics(eager_fn, compiled_fn, make_inputs, label: str) -> dict:
+    """The shared dynamic artifact against eager at one binding (one seed)."""
+    from full_graph_harness import FullGraphNumericsError, run_numerics_gate
+
+    try:
+        summary, _ = run_numerics_gate(
+            eager_fn, compiled_fn, make_inputs,
+            label=label, variant="dynamic", seeds=1)
+    except FullGraphNumericsError as e:
+        summary = e.numerics
+    return summary
+
+
 def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     """Benchmark a dynamic family or an explicitly force-dynamic static repro."""
     symbols, _guards = _symbols_and_guards_for_repro(repro_file)
@@ -268,9 +281,10 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             repro_cls(), first_inputs, dynamic=True,
             compile_policy=dynamic_policy)
         torch._dynamo.reset()
+        shape_model = repro_cls()
         if not parsed.count_kernels_only:
             compiled = _harness.compile_repro(
-                repro_cls(), dynamic=True, compile_policy=dynamic_policy)
+                shape_model, dynamic=True, compile_policy=dynamic_policy)
 
     all_results = {}
     first_dynamic_row = True
@@ -337,6 +351,15 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
                     f"{format_binding(measured_binding)}; number may be "
                     "off-artifact")
             first_dynamic_row = False
+            with (_dynamic_replay_config(prepared_replay)
+                  if prepared_replay is not None
+                  else contextlib.nullcontext()):
+                numerics = _dynamic_row_numerics(
+                    shape_model, compiled,
+                    lambda: artifact_args(
+                        inputs_for(binding, config), binding, config),
+                    row_key)
+            print(f"[{row_key}] numerics={numerics['status']}")
 
         if parsed.count_kernels_only:
             print(
@@ -361,6 +384,8 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         }
         if not parsed.count_kernels_only:
             result["compiled_us"] = compiled_us
+        if mode == "dynamic" and not parsed.count_kernels_only:
+            result["numerics"] = numerics
         if mode == "dynamic":
             result["compile_bindings"] = warm_bindings
             result["compile_bindings_source"] = warm_source
@@ -385,3 +410,48 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
         print(f"\n[perf] Saved to perf.json under hardware={hardware}")
 
     return all_results
+
+
+def check_family(repro_file, repro_cls, bindings=None, device: str = "cuda") -> list:
+    """Compile a dynamic repro's replay module once and run it at every
+    binding (default: the recorded points), checking each against eager.
+
+    No timing, so it runs on any device (``device`` overrides where the
+    inputs are allocated). Returns one row per binding with the numerics
+    summary and whether that binding compiled a new graph after the first.
+    """
+    symbols, _guards = _symbols_and_guards_for_repro(repro_file)
+    if not symbols:
+        raise ValueError(f"{repro_file} has no symbols table")
+    prepared = _prepare_dynamic_replay_for_repro(repro_cls(), repro_file)
+    model = prepared["module"]
+    if bindings is None:
+        bindings = _recorded_point_bindings(repro_file)
+
+    def make_args(binding):
+        config = next(iter(_harness.load_shape_configs(
+            repro_file, symbol_bindings=binding).values()))
+        config = dict(config, inputs=[
+            dict(spec, device=device) if spec.get("kind", "tensor") == "tensor"
+            else spec
+            for spec in config["inputs"]])
+        inputs = _harness.make_inputs_from_config(config)
+        return _dynamic_replay_args(
+            inputs, _effective_binding_for_row(binding, config), prepared)
+
+    torch._dynamo.reset()
+    rows = []
+    with _dynamic_replay_config(prepared):
+        compiled = torch.compile(model)
+        for i, binding in enumerate(bindings):
+            graphs_before = _harness._unique_graph_count()
+            numerics = _dynamic_row_numerics(
+                model, compiled, lambda: make_args(binding),
+                format_binding(binding))
+            rows.append({
+                "binding": binding,
+                "numerics": numerics["status"],
+                "recompiled": (
+                    i > 0 and _harness._unique_graph_count() > graphs_before),
+            })
+    return rows
