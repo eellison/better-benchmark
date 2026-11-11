@@ -381,3 +381,62 @@ are those of `repros/`, and `mm_repro/canonical/` is flat like
 (`--corpus-root mm_repro` for `validate_corpus_invariants.py`, `--canonical-dir
 mm_repro/canonical` with `--benchmark-set`).
 See [docs/matmul_partitioning.md](docs/matmul_partitioning.md).
+
+### Inductor's fused Triton template vs cuBLAS
+
+Two `bench_parallel.py` sweeps compare the two ways Inductor compiles an MM
+region. The baseline is plain `torch.compile`, which calls cuBLAS
+(`extern_kernels.addmm`) and runs the epilogue as a separate Triton kernel. The
+head run allows only Triton GEMM templates, so Inductor can fuse the epilogue
+into the template (`triton_tem_fused_*`). Give each run its own
+`TORCHINDUCTOR_CACHE_DIR`, so neither reuses the other's compiled or autotuned
+kernels. `--check-numerics` makes every compiled artifact match eager (an fp64
+reference where one can be built) before it is timed.
+
+```bash
+# Baseline: cuBLAS addmm + a separate epilogue kernel
+TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cache_cublas python scripts/bench_parallel.py \
+    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics \
+    --tag cublas --output mm_cublas.json
+
+# Head: Triton GEMM templates, with the epilogue fused into the template
+TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cache_triton python scripts/bench_parallel.py \
+    mm_repro/canonical --all-shapes --gpus 0,1 --check-numerics \
+    --inductor-config max_autotune_gemm=True \
+    --inductor-config max_autotune_gemm_backends=TRITON \
+    --tag triton --output mm_triton.json
+
+python scripts/bench_report.py --compare mm_cublas.json mm_triton.json
+```
+
+To test a Triton feature, add it to the head run. A config goes in as another
+`--inductor-config NAME=VALUE`. Code that every worker has to run before it
+compiles, such as registering a lowering or a template, goes in as
+`--worker-init MODULE:CALLABLE`, with MODULE importable:
+`PYTHONPATH=/path/to/feature python scripts/bench_parallel.py ... --worker-init my_feature:install`.
+
+- Inductor fuses only pointwise epilogues into the template, and it can still
+  keep one separate. Reductions (LayerNorm, softmax, losses) stay separate
+  kernels, so for a norm epilogue the head run measures the Triton GEMM
+  against cuBLAS with the same reduction kernel after it. On an H100,
+  `epilogue_addmm_d6fd90850200` (addmm + relu) compiled to
+  `triton_tem_fused_addmm_relu_0`. `epilogue_addmm_83b1f2564243` (addmm + erf
+  GELU in fp32) and `epilogue_addmm_ba3723ee6650` (addmm + residual +
+  LayerNorm) compiled to `triton_tem_fused_addmm_0` followed by a separate
+  `triton_poi_*` or `triton_red_*` kernel.
+- `bench_parallel.py` locks the SM clock of the sweep's GPUs before timing
+  (`--lock-clocks`, on by default, through `sudo nvidia-smi`) to
+  `--lock-clocks-mhz`. The default, 1852, is the highest sustainable B200 bin.
+  On another GPU, pass a bin it supports (`nvidia-smi -q -d SUPPORTED_CLOCKS`)
+  or `--no-lock-clocks`.
+- The chosen kernels are in each run's generated code under its cache dir.
+  `triton_tem_fused_*` is a Triton template (with the fused epilogue ops in
+  its name). `extern_kernels.addmm`, `extern_kernels.mm` and
+  `extern_kernels.bmm` are cuBLAS calls:
+
+  ```bash
+  grep -rhoE --include='*.py' 'triton_tem_fused_[a-z0-9_]+|extern_kernels\.(addmm|mm|bmm)' \
+      /tmp/mm_cache_triton | sort | uniq -c
+  ```
+
+  For one repro, run the sweep on its directory alone with a fresh cache dir.
