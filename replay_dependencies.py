@@ -3,7 +3,8 @@
 A saved graph can only replay in a process where every operator it calls is
 registered. ``replay_dependencies`` reads that off the live GraphModule while
 it is being exported (custom operators, including ones passed as arguments to
-higher-order operators, and collectives with their group size), and
+higher-order operators, collectives with their group size, and user-defined
+Triton kernels), and
 ``check_replay_dependencies`` asks the current process whether each one is
 available, so a graph that cannot run here is reported with the reason instead
 of failing partway through loading or hanging on a collective.
@@ -58,6 +59,13 @@ COLLECTIVE_OP_NAMESPACES = frozenset({
     "symm_mem",
 })
 _NON_COLLECTIVE_OPS = frozenset({"wait_tensor"})
+# A saved graph names a user-defined Triton kernel only by its index into the
+# capturing process's kernel_side_table, so no other process can resolve it:
+# a fresh one fails, and one holding other kernels silently runs those.
+USER_TRITON_HOPS = frozenset({
+    "triton_kernel_wrapper_functional",
+    "triton_kernel_wrapper_mutation",
+})
 
 
 def _qualified_name(op: Any) -> str | None:
@@ -84,6 +92,64 @@ def _leaves(value: Any):
             yield from _leaves(item)
     else:
         yield value
+
+
+def _user_triton_kernel_name(node: Any) -> str | None:
+    """Name of the kernel at ``node``'s side-table index, when this process's
+    table holds a kernel there whose parameters accept the node's arguments.
+
+    The table is process-global, so in a process other than the capturing one
+    the index can hold an unrelated kernel; the parameter check rejects most
+    of those, and the name is only informational."""
+    from torch._higher_order_ops.triton_kernel_wrap import kernel_side_table
+
+    idx = node.kwargs.get("kernel_idx")
+    if idx not in kernel_side_table.id_to_kernel:
+        return None
+    fn = kernel_side_table.get_kernel(idx)
+    # Autotuner / Heuristics wrap the JITFunction in .fn.
+    while not hasattr(fn, "arg_names") and hasattr(fn, "fn"):
+        fn = fn.fn
+    arg_names = getattr(fn, "arg_names", None)
+    if arg_names is None or not set(node.kwargs.get("kwargs") or {}) <= set(arg_names):
+        return None
+    return getattr(fn, "__name__", None)
+
+
+def user_triton_hops_in_class(graph_cls: type) -> list[str]:
+    """User-Triton HOPs a loaded graph class calls, from the bytecode names of
+    its methods and of the nested module classes that hold HOP subgraphs
+    (cond / while_loop / invoke_subgraph bodies).
+
+    For sidecars written before ``replay_dependencies`` recorded the kernels."""
+    found: set[str] = set()
+    pending, seen = [graph_cls], set()
+    while pending:
+        cls = pending.pop()
+        if cls in seen:
+            continue
+        seen.add(cls)
+        for value in vars(cls).values():
+            if isinstance(value, type):
+                pending.append(value)
+                continue
+            code = getattr(value, "__code__", None)
+            found.update(USER_TRITON_HOPS.intersection(getattr(code, "co_names", ())))
+    return sorted(found)
+
+
+def full_graph_calls_user_triton(graph_cls: type, sidecar: dict | None) -> bool:
+    """Whether a saved full graph launches user-defined Triton kernels,
+    according to either its code or its sidecar."""
+    if user_triton_hops_in_class(graph_cls):
+        return True
+    sidecar = sidecar or {}
+    if "user_triton" in (sidecar.get("masked") or {}).get("reasons", ()):
+        return True
+    return any(
+        item["category"] == "user_triton_kernel"
+        for item in check_replay_dependencies(sidecar)["blocked"]
+    )
 
 
 def _graph_modules(gm: Any):
@@ -191,11 +257,19 @@ def replay_dependencies(gm: Any) -> dict[str, Any]:
     collectives: set[str] = set()
     group_sizes: set[int] = set()
     groups: dict[str, int | None] = {}
+    user_triton: dict[tuple, int] = {}
     for module in _graph_modules(gm):
         for node in module.graph.nodes:
             if node.op != "call_function":
                 continue
             target = node.target
+            if (
+                isinstance(target, torch._ops.HigherOrderOperator)
+                and target.name() in USER_TRITON_HOPS
+            ):
+                key = (node.kwargs.get("kernel_idx"), _user_triton_kernel_name(node))
+                user_triton[key] = user_triton.get(key, 0) + 1
+                continue
             if isinstance(target, torch._ops.HigherOrderOperator):
                 for leaf in _leaves((node.args, node.kwargs)):
                     name = _qualified_name(leaf)
@@ -244,6 +318,13 @@ def replay_dependencies(gm: Any) -> dict[str, Any]:
             deps["distributed"]["groups"] = [
                 {"name": name, "size": size} for name, size in sorted(groups.items())
             ]
+    if user_triton:
+        deps["user_triton_kernels"] = [
+            {"kernel_idx": idx, "kernel": name, "calls": calls}
+            for (idx, name), calls in sorted(
+                user_triton.items(), key=lambda kv: (kv[0][0], kv[0][1] or "")
+            )
+        ]
     return deps
 
 
@@ -291,7 +372,9 @@ def check_replay_dependencies(
         deps = deps["replay_dependencies"] or {}
         if not deps:
             return {"status": "unknown", "blocked": []}
-    elif not deps or not set(deps) <= {"schema_version", "custom_ops", "distributed"}:
+    elif not deps or not set(deps) <= {
+        "schema_version", "custom_ops", "distributed", "user_triton_kernels",
+    }:
         return {"status": "unknown", "blocked": []}
 
     blocked = []
@@ -339,4 +422,21 @@ def check_replay_dependencies(
                         "hint": f"Create {need} before replay.",
                     })
 
+    for entry in deps.get("user_triton_kernels") or []:
+        blocked.append(user_triton_blocker(entry.get("kernel"), entry.get("kernel_idx")))
+
     return {"status": "blocked" if blocked else "ready", "blocked": blocked}
+
+
+def user_triton_blocker(kernel: str | None, kernel_idx: int | None) -> dict[str, Any]:
+    item = kernel or f"kernel_side_table index {kernel_idx}"
+    return {
+        "category": "user_triton_kernel",
+        "item": item,
+        "reason": (
+            f"graph launches user-defined Triton kernel {item} by its index into "
+            "the capturing process's kernel_side_table, which no other process "
+            "can resolve"
+        ),
+        "hint": "Benchmark the graph's partitions; the kernel itself is not replayed.",
+    }

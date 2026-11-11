@@ -11,7 +11,12 @@ from full_graph_harness import (
     run_numerics_gate,
     validate_full_graph_numerics,
 )
-from numerics import is_rng_call
+from numerics import (
+    is_rng_call,
+    judge_float_leaf,
+    upcast_casts_mode,
+    upcast_factory_dtypes_mode,
+)
 from oracle_harness import _anchored_numerics_gate
 
 
@@ -149,3 +154,117 @@ def test_oracle_gate_records_are_unchanged():
         "worst_output_idx": 3,
         "ref_precision": "f64",
     }
+
+
+def _bf16(*values):
+    return torch.tensor(values, dtype=torch.bfloat16)
+
+
+def _label(eager, compiled, reference):
+    return judge_float_leaf(eager, compiled, reference)["label"]
+
+
+def test_low_precision_compiled_within_tolerance_of_eager_or_fp32_passes():
+    ref = torch.tensor([1020.0, 0.01])
+    eager = _bf16(992.0, 0.01)
+    assert _label(eager, eager.clone(), None) == "pass"
+    # Eager lost 28 to bf16 intermediates; compiled is 24 from eager but
+    # within one bf16 ulp of the fp32 reference.
+    record = judge_float_leaf(eager, _bf16(1016.0, 0.01), ref)
+    assert record["label"] == "pass" and record["reference"] == "fp32"
+
+
+def test_low_precision_no_worse_than_eager_is_pass_precision():
+    # Both are off the fp32 reference by a few ulps at different elements
+    # (e.g. bf16 accumulation order); compiled's RMSE is no larger.
+    torch.manual_seed(0)
+    ref = torch.randn(4096) * 4
+    noise = lambda: (torch.rand(4096) < 0.1) * 0.25 * torch.randn(4096).sign()
+    eager = (ref + noise()).bfloat16()
+    compiled = (ref + noise() * 0.9).bfloat16()
+    record = judge_float_leaf(eager, compiled, ref)
+    assert record["label"] == "pass_precision", record
+    assert record["rmse_compiled"] <= record["rmse_eager"] * 1.05
+
+
+def test_small_element_error_hidden_by_large_eager_error_fails():
+    # Eager is off by 0.3 at 1000.3 (bf16 ulp 4 there); compiled is off by
+    # 0.24 at the 0.01 element, below eager's max error.
+    ref = torch.tensor([1000.3, 0.01] * 512)
+    eager = ref.bfloat16()
+    compiled = eager.clone()
+    compiled[1] = 0.25
+    record = judge_float_leaf(eager, compiled, ref)
+    assert record["label"] == "fail", record
+
+
+def test_eager_overflow_with_garbage_compiled_fails():
+    ref = torch.tensor([6e4, 1.0])
+    eager = torch.tensor([float("inf"), 1.0], dtype=torch.float16)
+    good = torch.tensor([6e4, 1.0], dtype=torch.float16)
+    assert _label(eager, good, ref) == "pass"
+    for wrong in ([0.0, 5.0], [65504.0, 1.0], [6e4, float("inf")]):
+        assert _label(eager, torch.tensor(wrong, dtype=torch.float16), ref) == "fail"
+
+
+def test_nonfinite_where_reference_is_finite_and_nan_mismatch_fail():
+    nan, inf = float("nan"), float("inf")
+    ref = torch.tensor([1.0, 2.0])
+    eager = _bf16(1.0, 2.0)
+    assert _label(eager, _bf16(nan, 2.0), ref) == "fail"
+    assert _label(eager, _bf16(inf, 2.0), ref) == "fail"
+    ref_nan = torch.tensor([nan, 2.0])
+    assert _label(_bf16(nan, 2.0), _bf16(nan, 2.0), ref_nan) == "pass"
+    assert _label(_bf16(nan, 2.0), _bf16(0.0, 2.0), ref_nan) == "fail"
+
+
+def test_value_that_rounds_to_inf_in_the_output_dtype_must_match_eager():
+    inf = float("inf")
+    ref = torch.tensor([1e40], dtype=torch.float64)
+    assert _label(torch.tensor([inf]), torch.tensor([inf]), ref) == "pass"
+    assert _label(torch.tensor([inf]), torch.tensor([3e38]), ref) == "fail"
+
+
+def test_fp32_uses_eager_then_fp64_as_tiebreak():
+    # Eager's reduction order lost 0.05 of the fp64 value; compiled's lost
+    # less (pass_precision), or more (fail).
+    ref = torch.tensor([100.0, 1.0], dtype=torch.float64)
+    eager = torch.tensor([100.05, 1.0])
+    assert _label(eager, eager + 1e-6, ref) == "pass"
+    record = judge_float_leaf(eager, torch.tensor([100.01, 1.0]), lambda: ref)
+    assert record["label"] == "pass_precision" and record["reference"] == "fp64"
+    assert _label(eager, torch.tensor([100.2, 1.0]), ref) == "fail"
+
+
+def test_missing_reference_fails_with_needs_reference():
+    record = judge_float_leaf(torch.ones(2), torch.ones(2) * 2, lambda: None)
+    assert record["label"] == "fail" and record["needs_reference"]
+
+
+def test_judge_compares_imaginary_parts():
+    reference = torch.tensor([1 + 2j], dtype=torch.complex128)
+    eager = torch.tensor([1 + 2j])
+    assert _label(eager, eager + 1j, reference) == "fail"
+    assert _label(eager, eager + 1e-7j, reference) == "pass"
+
+
+def test_fp32_reference_keeps_float8_quantization():
+    def fake_quant(x):
+        q = torch.ops.prims.convert_element_type.default(x, torch.float8_e4m3fn)
+        q2 = x.to(torch.float8_e5m2)
+        return q.to(torch.bfloat16), q2.to(torch.bfloat16)
+
+    x = torch.tensor([0.3, 100.0])
+    expected = [t.float() for t in fake_quant(x)]
+    with upcast_casts_mode(torch.float32), upcast_factory_dtypes_mode(torch.float32):
+        got = fake_quant(x)
+    for g, e in zip(got, expected):
+        assert g.dtype == torch.float32
+        assert torch.equal(g, e)
+
+
+def test_fp32_reference_leaves_float64_casts_alone():
+    with upcast_casts_mode(torch.float32), upcast_factory_dtypes_mode(torch.float32):
+        out = torch.ones(2, dtype=torch.bfloat16).to(torch.float64)
+        buf = torch.zeros(2, dtype=torch.float16)
+    assert out.dtype == torch.float64 and buf.dtype == torch.float32
