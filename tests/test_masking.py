@@ -266,3 +266,163 @@ def test_unbacked_regions_are_masked_not_dropped(tmp_path):
     assert sidecar["roundtrip"] == "ok"
     merge_one_capture(tmp_path / "capture", tmp_path / "corpus", "hf/infer/bbtest_model")
     assert len(list((tmp_path / "corpus" / "canonical").glob("*/repro.py"))) == 2
+
+
+def test_symbolic_slice_bounds_partition_like_a_static_trace():
+    """Ingest traces int inputs as unbacked symbols, so a slice whose bounds
+    come from an input gets a fresh unbacked storage offset. That symbol is a
+    function of the inputs, not data-dependent: the symbolic trace must
+    partition like the static re-trace the round-trip gate compares it to,
+    and its runtime asserts must not become partitions."""
+    from torch.fx.experimental.dynamic_spec import IntVar, STATIC, TensorSpec
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    from roundtrip_validation import nontransparent_key
+
+    def f(x, start):
+        a = (x * 2.0).sum(1, keepdim=True)
+        y = x[:, start : start + 64].reshape(8, 2, 64).clone().reshape(16, 64)
+        return a, (y + 1.0).sum(1)
+
+    x = torch.randn(16, 128)
+    symbolic = make_fx(
+        f,
+        tracing_mode="fake",
+        dynamic_shapes={"x": TensorSpec([STATIC, STATIC]), "start": IntVar("start")},
+    )(x, 32)
+    static = make_fx(f, tracing_mode="fake")(x, 32)
+
+    def keys(gm):
+        return sorted(
+            nontransparent_key([str(n.target) for n in comp])
+            for comp in get_fusion_partitions(gm)
+        )
+
+    assert not any("unbacked_shape" in mask_reasons(n) for n in symbolic.graph.nodes)
+    assert keys(symbolic) == keys(static)
+
+
+def _slice_by_input(x, start):
+    a = (x * 2.0).sum(1, keepdim=True)
+    y = x[:, start : start + 64].reshape(8, 2, 64).clone().reshape(16, 64)
+    return a, (y + 1.0).sum(1)
+
+
+def _traced_slice_graph(tracing: str):
+    from torch.fx.experimental.dynamic_spec import IntVar, STATIC, TensorSpec
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    x = torch.randn(16, 128, device="cuda")
+    if tracing == "unbacked":
+        # Ingest's ShapesSpec path: int inputs become unbacked symbols, and
+        # the slice's offset gets runtime asserts built from
+        # aten.sym_storage_offset.
+        gm = make_fx(
+            _slice_by_input,
+            tracing_mode="fake",
+            dynamic_shapes={"x": TensorSpec([STATIC, STATIC]), "start": IntVar("start")},
+        )(x, 32)
+    else:
+        gm = make_fx(_slice_by_input, tracing_mode=tracing)(x, 32)
+    # The ingest loader records the concrete input values.
+    gm.meta["better_benchmark_input_specs"] = [
+        {"kind": "tensor", "shape": [16, 128]},
+        {"kind": "symint", "value": 32},
+    ]
+    return gm
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="runs the written graph on CUDA")
+@pytest.mark.parametrize("tracing", ["symbolic", "unbacked"])
+def test_written_full_graph_compiles_with_dynamo(tracing, tmp_path):
+    """The driver benchmarks unmasked full graphs with torch.compile, so the
+    written source must trace under Dynamo, whatever trace produced it."""
+    from full_graph_harness import (
+        instantiate_full_graph,
+        load_full_graph_definition,
+        make_inputs_from_full_graph_specs,
+    )
+
+    state = capture_hook._CaptureState(
+        str(tmp_path / "capture"), label="m", graph_dir=str(tmp_path / "graphs")
+    )
+
+    state.process_graph(_traced_slice_graph(tracing))
+
+    path = tmp_path / "graphs" / "full_graph_000.py"
+    assert "masked" not in json.loads(path.with_suffix(".meta.json").read_text())
+    definition = load_full_graph_definition(path)
+    module = instantiate_full_graph(definition, default_device="cuda")
+    inputs = make_inputs_from_full_graph_specs(definition.input_specs, default_device="cuda")
+    torch._dynamo.reset()
+    torch.compile(module, fullgraph=True, backend="eager")(*inputs)
+
+
+@torch.library.custom_op("bbtest::positive_values", mutates_args=())
+def _positive_values(x: torch.Tensor) -> torch.Tensor:
+    return x[x > 0].clone()
+
+
+@_positive_values.register_fake
+def _(x):
+    return x.new_empty(torch.library.get_ctx().new_dynamic_size())
+
+
+def test_custom_op_with_a_data_dependent_size_is_masked():
+    """A custom op whose fake impl calls new_dynamic_size carries no aten
+    tags (the jagged ops do this), but its output size still comes from
+    tensor data: its consumers must stay unbacked_shape-masked."""
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    def f(x):
+        return (_positive_values(x) * 2.0).sum(), (x + 1.0).sum()
+
+    gm = make_fx(f, tracing_mode="symbolic")(torch.randn(64))
+    masked = {
+        str(n.target) for n in gm.graph.nodes if "unbacked_shape" in mask_reasons(n)
+    }
+
+    assert {"aten.mul.Tensor", "bbtest.positive_values.default"} <= masked
+    assert "aten.add.Tensor" not in masked
+    assert sorted(
+        [str(n.target) for n in comp] for comp in get_fusion_partitions(gm)
+    ) == [["aten.add.Tensor", "aten.sum.default"]]
+
+
+def test_stripping_runtime_asserts_keeps_the_scalar_they_check():
+    """``.item()`` is a device-to-host sync the full graph must still time,
+    even when only runtime asserts read its value."""
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from torch.fx.passes.runtime_assert import insert_deferred_runtime_asserts
+
+    def f(x):
+        n = (x > 0).sum().item()
+        torch._check(n >= 0)
+        torch._check(n <= 64)
+        return x * 2.0
+
+    gm = make_fx(f, tracing_mode="symbolic")(torch.randn(64))
+    shape_env = next(
+        n.meta["val"].node.shape_env
+        for n in gm.graph.nodes
+        if isinstance(n.meta.get("val"), torch.SymInt)
+    )
+    insert_deferred_runtime_asserts(gm, shape_env, "test")
+    gm.recompile()
+    output = next(n for n in gm.graph.nodes if n.op == "output")
+    output.meta["marker"] = True
+
+    class _CodeGen(torch.fx.graph.CodeGen):
+        pass
+
+    gm.graph.set_codegen(_CodeGen())
+
+    stripped = capture_hook._without_runtime_asserts(gm)
+
+    targets = {n.target for n in stripped.graph.nodes}
+    assert torch.ops.aten._local_scalar_dense.default in targets
+    assert torch.ops.aten._assert_scalar.default not in targets
+    assert next(n for n in stripped.graph.nodes if n.op == "output").meta["marker"]
+    assert isinstance(stripped.graph._codegen, _CodeGen)
+    # The input graph is left as it was.
+    assert torch.ops.aten._assert_scalar.default in {n.target for n in gm.graph.nodes}
