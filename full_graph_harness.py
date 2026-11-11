@@ -594,6 +594,223 @@ def _concrete_int(value: Any, *, default: int = 32) -> int:
         return default
 
 
+# ---------------------------------------------------------------------------
+# SymNode -> exact sympy expression (THE shared extractor)
+#
+# Both capture paths (region partitions in capture_hook, full-graph sidecars
+# here) read symbolic shapes/strides from LIVE SymNodes at capture time. The
+# expr is exact data — never regex an int out of printed annotation text, and
+# never collapse a stride to a hint. Store the expr string (re-parseable via
+# sympy.sympify against the symbol table); evaluate to a concrete int only
+# when an input must actually be allocated, via evaluate_symbolic_entry /
+# instantiate_point in input_codec.
+# ---------------------------------------------------------------------------
+
+def _canonical_expr_str(expr) -> str:
+    """ONE canonical string rendering of a symbolic expr, so the SAME
+    mathematical expression always serializes to the SAME string regardless
+    of how it was constructed/rendered (live SymNode str() vs print_readable
+    annotation text). Render = str(sympify(...)): commutative orderings and
+    //-cancellation collapse (64*s0*s53 and s0*s53*64 both -> '64*s0*s53';
+    64*s0*s53//64 -> 's0*s53'). Because both the sidecar and the annotation
+    normalize through this at WRITE/parse time, the round-trip has no skew and
+    downstream equality is plain string ==, no sympy-equivalence reasoning.
+    Accepts a sympy expr or an expr string; ints/plain strings pass through.
+
+    BOTH branches route through _sympify_expr so _canonical_expr_str is a fixed
+    point (idempotent). A raw str(expr) on the expr branch is NOT idempotent:
+    torch prints FloorDiv as '(s0//8)', but re-parsing that string yields
+    'floor(s0/8)' — so the sidecar form stored via a live expr would differ
+    from the re-canonicalized annotation string under the plain '==' this
+    contract promises. Normalizing the expr through the same sympify pass makes
+    the two agree (and str(expr) is a self-generated shape expr, so it clears
+    the _sympify_expr safe-grammar gate)."""
+    from input_codec import _sympify_expr
+    if isinstance(expr, str):
+        return str(_sympify_expr(expr))
+    return str(_sympify_expr(str(expr)))
+
+
+def _sym_expr_str(x: Any) -> str | None:
+    """Canonical sympy-printed expr for a live SymInt/SymFloat, else None.
+
+    A bare symbol prints as its name ('s0'); a derived node prints compound
+    ('64*s0*s53'). Returns None when there is no symbol to preserve (plain
+    int, or a SymInt whose expr is a constant — the hint already captures
+    it). Routed through _canonical_expr_str so it matches the annotation
+    rendering of the same expr. THE extractor; capture_hook imports it."""
+    import torch
+
+    if not isinstance(x, (torch.SymInt, torch.SymFloat)):
+        return None
+    node = getattr(x, "node", None)
+    expr = getattr(node, "expr", None)
+    if expr is None:
+        return None
+    if getattr(expr, "is_number", False):
+        return None
+    return _canonical_expr_str(expr)
+
+
+def _shape_env_of(x: Any) -> Any:
+    """ShapeEnv backing a live SymInt/SymFloat, or None."""
+    node = getattr(x, "node", None)
+    return getattr(node, "shape_env", None)
+
+
+def _symbolic_block_from_value(value: Any) -> dict | None:
+    """Per-tensor {shape_exprs?, stride_exprs?} from a live tensor's SymNodes,
+    or None if fully static. Each list is per-slot: the exact expr string
+    where the slot is symbolic, None where it is a plain int. Shared by both
+    the region capture and the full-graph sidecar so symbolic shape/stride is
+    recorded ONE way."""
+    import torch
+
+    if not torch.is_tensor(value):
+        return None
+    shape_exprs = [_sym_expr_str(s) for s in value.shape]
+    stride_exprs = [_sym_expr_str(s) for s in value.stride()]
+    block: dict[str, Any] = {}
+    if any(e is not None for e in shape_exprs):
+        block["shape_exprs"] = shape_exprs
+    if any(e is not None for e in stride_exprs):
+        block["stride_exprs"] = stride_exprs
+    # A VIEW can have a symbolic storage_offset (e.g. a slice at a symbolic
+    # start). Record its expr too, else a rebind as_strides at the frozen
+    # hint offset.
+    off_expr = _sym_expr_str(value.storage_offset())
+    if off_expr is not None:
+        block["offset_expr"] = off_expr
+    return block or None
+
+
+def _jsonable_range_bound(v: Any) -> int | None:
+    """A ValueRanges bound -> JSON int, or None for unbounded (sympy
+    oo/int_oo/-oo). No exceptions: we inspect our own sympy objects."""
+    if v is None:
+        return None
+    if "oo" in str(v):  # int_oo, oo, -oo
+        return None
+    return int(v)
+
+
+def _harvest_shape_env(shape_env: Any) -> dict | None:
+    """Graph-level {symbols, guards, captured_dynamic} from a live ShapeEnv.
+
+    THE shared harvester (capture_hook + full-graph sidecar both call it).
+    symbols: name -> {hint, range} for free backed symbols. Unbacked symbols
+    add {unbacked: true}, optional "observed_value", and optional, independent
+    "optimization_hint". A backed symbol specialized to one value (range
+    [k,k]) is a baked-in constant, skipped.
+    guards: sympy-printed residual guard exprs, kept only when every free
+    symbol is in the table (a guard over a dropped symbol can't be
+    evaluated by the consumer). None if nothing is dynamic."""
+    if shape_env is None:
+        return None
+    import sympy
+
+    var_to_val = getattr(shape_env, "backed_var_to_val", None)
+    if var_to_val is None:  # compatibility with older torch ShapeEnv
+        var_to_val = getattr(shape_env, "var_to_val", {})
+    var_to_val = var_to_val or {}
+    var_to_range = getattr(shape_env, "var_to_range", {}) or {}
+
+    # Symbols specialized to one value (range [k,k]) -> {sympy.Symbol: int}.
+    # They are dropped from the free table, but a guard may REFERENCE one
+    # (e.g. Eq(s0*s53, s77) with s77==64 IS the constraint s0*s53==64).
+    # Substituting them back into guards before the drop-filter preserves
+    # that constraint instead of silently losing it.
+    specialized: dict = {}
+
+    hint_overrides = getattr(shape_env, "var_to_hint_override", {}) or {}
+
+    def _record(sym, hint=None, *, unbacked):
+        rng = var_to_range.get(sym)
+        lo = _jsonable_range_bound(getattr(rng, "lower", None)) if rng is not None else None
+        hi = _jsonable_range_bound(getattr(rng, "upper", None)) if rng is not None else None
+        if not unbacked and lo is not None and hi is not None and lo == hi:
+            specialized[sym] = lo   # remember the baked-in constant
+            return  # backed symbol specialized to a constant — not free
+        entry = {"range": [lo, hi]}
+        if hint is not None:
+            ihint = int(hint)
+            if ihint != hint:
+                raise ValueError(
+                    f"symbol {sym} has non-integer observed value {hint!r}")
+            entry["observed_value" if unbacked else "hint"] = ihint
+        if unbacked:
+            # Backing, an observed runtime point, and a perf-only optimization
+            # hint are three separate facts. Never turn a range boundary or an
+            # optimizer hint into a captured benchmark point.
+            entry["unbacked"] = True
+            optimization_hint = hint_overrides.get(sym)
+            if optimization_hint is not None:
+                if (not isinstance(optimization_hint, int)
+                        or isinstance(optimization_hint, bool)):
+                    raise ValueError(
+                        f"symbol {sym} has non-integer optimization hint "
+                        f"{optimization_hint!r}")
+                entry["optimization_hint"] = optimization_hint
+        symbols[str(sym)] = entry
+
+    symbols = {}
+    for sym, val in var_to_val.items():
+        _record(sym, val, unbacked=False)
+
+    # Unbacked symbols (u0, u1 — from data-dependent ops: nonzero/item/unique/
+    # masked-index) have no guarding hint. Real-tensor propagation may provide
+    # the value that actually occurred; when it does not, keep the symbol and
+    # range but omit "hint", requiring an explicit benchmark binding later.
+    is_unbacked = getattr(shape_env, "is_unbacked_symint", None)
+    real_vals = getattr(shape_env, "real_tensor_prop_unbacked_vals", {}) or {}
+    if is_unbacked is not None:
+        for sym in list(var_to_range):
+            if sym in var_to_val or not is_unbacked(sym):
+                continue
+            _record(sym, real_vals.get(sym), unbacked=True)
+
+    if not symbols:
+        return None
+
+    known = set(symbols)
+    guards = []
+    for g in (getattr(shape_env, "guards", []) or []):
+        expr = getattr(g, "expr", g)
+        # Substitute specialized symbols with their constant value FIRST, so a
+        # guard like Eq(s0*s53, s77) (s77==64) becomes Eq(s0*s53, 64) — the
+        # real constraint — instead of being dropped for referencing s77.
+        if specialized:
+            try:
+                expr = expr.subs(specialized)
+            except Exception:
+                pass
+        if expr == sympy.true:
+            continue   # trivially satisfied after substitution
+        free = {str(s) for s in expr.free_symbols}
+        if free and free.issubset(known):
+            guards.append(str(expr))
+
+    return {"symbols": symbols, "guards": guards, "captured_dynamic": True}
+
+
+def _shape_env_from_gm(gm: Any) -> Any:
+    """The live ShapeEnv backing any SymInt dim/stride/input in gm, or None."""
+    import torch
+
+    for node in gm.graph.nodes:
+        val = (node.meta or {}).get("val")
+        if torch.is_tensor(val):
+            for s in (*val.shape, *val.stride()):
+                se = _shape_env_of(s)
+                if se is not None:
+                    return se
+        elif isinstance(val, (torch.SymInt, torch.SymFloat)):
+            se = _shape_env_of(val)
+            if se is not None:
+                return se
+    return None
+
+
 def placeholder_info_from_gm(gm: Any) -> dict[str, dict]:
     """Build the placeholder_info shape/dtype map used for input generators."""
     import torch
@@ -1122,6 +1339,13 @@ def _tensor_spec_from_value(
         "storage_offset": _concrete_int(value.storage_offset(), default=0),
         "generator": generator,
     }
+    # Symbolic shape/stride from the LIVE SymNodes (dynamic capture): the
+    # exact exprs, recorded the same way as region capture so the sidecar
+    # stride is '64*s0*s53', not a hint int or a regex-mangled number. None
+    # for static tensors. compact_from_spec overlays these into the entry.
+    symbolic = _symbolic_block_from_value(value)
+    if symbolic:
+        spec["symbolic"] = symbolic
     if generator.get("kind") in {"index", "permutation", "runs"}:
         spec["gen"] = generator
         spec["constraint_source"] = "graph_inference" if gen_override else "dtype_shape_default"
@@ -1175,7 +1399,14 @@ def _scalar_spec_from_value(name: str, value: Any) -> dict[str, Any]:
     import torch
 
     if isinstance(value, (torch.SymInt, torch.SymFloat)):
-        return {"kind": "symint", "name": name, "value": _concrete_int(value)}
+        spec = {"kind": "symint", "name": name, "value": _concrete_int(value)}
+        # Keep the exact expr for a live symint input ('s53', 's0*s53') so the
+        # sidecar can rebind, same as the region path's ['I', hint, expr].
+        # None for a constant-valued symint (the hint already captures it).
+        expr = _sym_expr_str(value)
+        if expr is not None:
+            spec["expr"] = expr
+        return spec
     if isinstance(value, (int, float, bool)):
         return {"kind": "scalar", "name": name, "value": value}
     return {"kind": "scalar", "name": name, "value": 1}
@@ -1300,6 +1531,14 @@ def graph_constraints_from_gm(
         "outputs": outputs,
         "tensor_attrs": tensor_attrs,
     }
+    # Dynamic shapes: the graph-level symbol table + guards from the live
+    # ShapeEnv, so the sidecar's symbolic shape/stride exprs can be evaluated
+    # at the hint (or any valid binding) by a consumer. None for static.
+    shape_env_block = _harvest_shape_env(_shape_env_from_gm(gm))
+    if shape_env_block is not None:
+        payload["symbols"] = shape_env_block["symbols"]
+        payload["guards"] = shape_env_block["guards"]
+        payload["captured_dynamic"] = True
     storage_groups = _placeholder_storage_groups(gm)
     if storage_groups:
         # Inputs that are VIEWS OF ONE STORAGE (packed-qkv saved views in
@@ -1452,6 +1691,55 @@ def _split_signature_args(sig: str) -> list[str]:
     return args
 
 
+def _is_int_token(tok: str) -> bool:
+    """True if a rendered dim token is a plain (possibly negative) integer.
+    String method, not a regex; no exceptions."""
+    return tok.lstrip("-").isdigit()
+
+
+def _split_dim_commas(s: str) -> list:
+    """Split a rendered shape/stride body on TOP-LEVEL commas only — commas
+    nested inside a symbolic dim's own call (Mod(s0, 8), Max(1, s0)) belong to
+    that dim, not to the slot separator. Bracket/paren-depth aware, no regex."""
+    parts, depth, start = [], 0, 0
+    for i, ch in enumerate(s):
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append(s[start:i])
+            start = i + 1
+    parts.append(s[start:])
+    return parts
+
+
+def _dim_tokens(s: str | None) -> list:
+    """Split a rendered shape/stride annotation into per-slot values WITHOUT
+    losing symbolic information: an integer slot becomes an int, a symbolic
+    slot is CANONICALIZED (_canonical_expr_str) to the same steady-state form
+    the sidecar stores — so the two renderings of one expr are
+    string-identical and the cross-check is plain ==. Returns [] / None for
+    empty / None."""
+    if s is None:
+        return None
+    out = []
+    for tok in _split_dim_commas(s):
+        tok = tok.strip()
+        if not tok:
+            continue
+        if _is_int_token(tok):
+            out.append(int(tok))
+            continue
+        canon = _canonical_expr_str(tok)
+        # A dim expr that CONSTANT-FOLDS to an integer ('2**3' -> '8',
+        # 'Mod(16, 8)' -> '0') is a concrete dim, not a symbolic one — return
+        # it as an int so downstream symbolic detection doesn't treat a folded
+        # constant as a live symbol.
+        out.append(int(canon) if _is_int_token(canon) else canon)
+    return out
+
+
 def _parse_intish(value: str, *, default: int = 32) -> int:
     value = value.strip()
     try:
@@ -1471,7 +1759,7 @@ def _parse_intish(value: str, *, default: int = 32) -> int:
 
 def _symbolic_dims(shape_str: str) -> list[dict[str, Any]]:
     symbols = []
-    for idx, dim in enumerate(shape_str.split(",")):
+    for idx, dim in enumerate(_split_dim_commas(shape_str)):
         dim = dim.strip()
         if not dim:
             continue
@@ -1486,7 +1774,7 @@ def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
     if stride_str is None:
         return []
     symbolic = []
-    for idx, dim in enumerate(stride_str.split(",")):
+    for idx, dim in enumerate(_split_dim_commas(stride_str)):
         dim = dim.strip()
         if not dim:
             continue
@@ -1498,23 +1786,15 @@ def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
 
 
 def _parse_shape(shape_str: str) -> tuple[int, ...]:
-    dims = []
-    for dim in shape_str.split(","):
-        dim = dim.strip()
-        if dim:
-            dims.append(_parse_intish(dim))
-    return tuple(dims)
+    """Concrete dims of a rendered shape (symbols take _parse_intish's default);
+    the exact exprs are kept separately (``_dim_tokens``)."""
+    return tuple(_parse_intish(dim) for dim in _split_dim_commas(shape_str) if dim.strip())
 
 
 def _parse_stride(stride_str: str | None) -> tuple[int, ...] | None:
     if stride_str is None:
         return None
-    dims = []
-    for dim in stride_str.split(","):
-        dim = dim.strip()
-        if dim:
-            dims.append(_parse_intish(dim))
-    return tuple(dims)
+    return tuple(_parse_intish(dim) for dim in _split_dim_commas(stride_str) if dim.strip())
 
 
 def _parse_device(device_str: str | None) -> str | None:
@@ -1540,13 +1820,20 @@ def forward_takes_no_inputs(content: str) -> bool:
     return sig is not None and not sig.strip()
 
 
-def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
+def parse_full_graph_inputs(
+    content: str, symbolic_slots: bool = False,
+) -> list[dict[str, Any]]:
     """Parse forward annotations into input specs.
 
     Examples handled:
       x: "f32[2, 3][3, 1]cuda:0"
       s0: "Sym(s0)"
       unannotated scalar parameters
+
+    By default symbolic dims/symints get concrete stand-ins (the legacy
+    hint-free loaders' contract) next to their exact exprs. With
+    ``symbolic_slots`` the shape/stride slots hold the exprs themselves and a
+    symint has no stand-in value: the form a symbolic re-trace consumes.
     """
     sig = _forward_signature(content)
     if sig is None or not sig.strip():
@@ -1562,13 +1849,21 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
             continue
 
         annotation = annotation_match.group(1)
-        if annotation.startswith("Sym("):
-            specs.append({
-                "kind": "symint",
-                "name": name,
-                "value": _parse_intish(annotation),
-                "symbolic_expr": annotation.removeprefix("Sym(").removesuffix(")"),
-            })
+        if annotation.startswith("Sym(") and annotation.endswith(")"):
+            # A live symint input. ``value`` is the concrete stand-in legacy
+            # (hint-only) loaders use; a non-literal annotation also keeps
+            # the EXACT expr ('s53', 's0*s53'), which wins when a symbol
+            # binding is evaluated (input_codec.evaluate_spec).
+            inner = annotation[len("Sym("):-1].strip()
+            sym_spec: dict[str, Any] = {"kind": "symint", "name": name}
+            if _is_int_token(inner):
+                sym_spec["value"] = int(inner)
+            else:
+                sym_spec["expr"] = inner
+            if not symbolic_slots:
+                sym_spec["value"] = _parse_intish(annotation)
+                sym_spec["symbolic_expr"] = inner
+            specs.append(sym_spec)
             continue
 
         tensor_match = re.match(
@@ -1581,14 +1876,36 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
 
         dtype_token, shape_str, stride_str, device_str = tensor_match.groups()
         dtype_name = _DTYPE_SHORT_NAMES.get(dtype_token, "float32")
-        shape = _parse_shape(shape_str)
-        generator = _default_generator_for_dtype(dtype_name, shape)
+        # shape/stride stay concrete (symbols take _parse_intish's default);
+        # the exact expr tokens go in a "symbolic" block (None where static),
+        # the same structure the sidecar records from live SymNodes, so the
+        # two are compared expr-to-expr.
+        from input_codec import _exprs_from_slots
+        shape_tokens = _dim_tokens(shape_str) or []
+        stride_tokens = _dim_tokens(stride_str)
+        symbolic: dict[str, Any] = {}
+        sh_e = _exprs_from_slots(shape_tokens)
+        if sh_e is not None:
+            symbolic["shape_exprs"] = sh_e
+        if stride_tokens is not None:
+            st_e = _exprs_from_slots(stride_tokens)
+            if st_e is not None:
+                symbolic["stride_exprs"] = st_e
+        if symbolic_slots:
+            shape, stride = shape_tokens, stride_tokens
+            gen_shape = tuple(d for d in shape if isinstance(d, int))
+        else:
+            shape = list(_parse_shape(shape_str))
+            stride = _parse_stride(stride_str)
+            stride = list(stride) if stride is not None else None
+            gen_shape = tuple(shape)
+        generator = _default_generator_for_dtype(dtype_name, gen_shape)
         spec = {
             "kind": "tensor",
             "name": name,
             "shape": shape,
             "dtype": dtype_name,
-            "stride": _parse_stride(stride_str),
+            "stride": stride,
             "device": _parse_device(device_str),
             # print_readable annotations don't carry storage_offset: None =
             # unknown (validator skips), never a false claim of 0 — packed
@@ -1599,15 +1916,16 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
         if generator.get("kind") == "index":
             spec["gen"] = generator
             spec["constraint_source"] = "annotation_default"
-        symbolic_dims = _symbolic_dims(shape_str)
-        if symbolic_dims:
-            spec["symbolic_dims"] = symbolic_dims
-        symbolic_stride_dims = _symbolic_stride_dims(stride_str)
-        if symbolic_stride_dims:
-            spec["symbolic_stride_dims"] = symbolic_stride_dims
-        specs.append({
-            **spec,
-        })
+        if not symbolic_slots:
+            symbolic_dims = _symbolic_dims(shape_str)
+            if symbolic_dims:
+                spec["symbolic_dims"] = symbolic_dims
+            symbolic_stride_dims = _symbolic_stride_dims(stride_str)
+            if symbolic_stride_dims:
+                spec["symbolic_stride_dims"] = symbolic_stride_dims
+        if symbolic:
+            spec["symbolic"] = symbolic
+        specs.append(spec)
 
     return specs
 
@@ -1724,6 +2042,56 @@ def _resolve_annotation_expr(
             f"integer for {label} dim {dim}: {expected}"
         )
     return int(expected)
+def _dims_differ(a: Any, b: Any) -> bool:
+    """Whether two shape/stride slots disagree. Both the sidecar and the
+    annotation render symbolic exprs through _canonical_expr_str (one round of
+    simplification -> idempotent steady state), so the SAME expression has the
+    SAME string on both sides and equality is plain ==. Ints compare directly;
+    an int vs a canonical string compares unequal (a symbolic slot is not the
+    same as a concrete one). No sympy-equivalence reasoning needed here — the
+    canonicalization at write/parse time already removed the rendering skew."""
+    if isinstance(a, int) and isinstance(b, int):
+        return a != b
+    # one side symbolic, other int, or both strings: canonical string compare
+    return _canonical_expr_str(a) != _canonical_expr_str(b)
+
+
+def _specialized_away(a: Any, b: Any, live_symbols) -> bool:
+    """One slot is an int and the other an expr none of whose symbols is
+    live: the ShapeEnv replaced those symbols by constants after the graph
+    was printed (the sidecar records the replacement, the annotation the
+    stale symbol), so the int is the specialized value."""
+    if live_symbols is None or isinstance(a, int) == isinstance(b, int):
+        return False
+    from input_codec import _sympify_expr
+
+    expr = b if isinstance(a, int) else a
+    names = {str(sym) for sym in _sympify_expr(expr).free_symbols}
+    return not (names & set(live_symbols))
+
+
+def _validate_dim_vector(sidecar, annotation, side_exprs, ann_exprs,
+                         label: str, what: str, live_symbols=None) -> None:
+    """Compare a sidecar vs annotation shape/stride vector. Symbolic slots are
+    compared by their CANONICAL string (both sides canonicalized at
+    write/parse), static slots as ints. A real disagreement is a genuine
+    capture bug, not a rendering artifact (canonicalization removed those)."""
+    if sidecar is None or annotation is None:
+        return
+    if len(sidecar) != len(annotation):
+        raise ValueError(
+            f"full graph sidecar tensor {what} rank does not match forward "
+            f"annotations for {label}: {len(sidecar)} != {len(annotation)}")
+    side_exprs = side_exprs or [None] * len(sidecar)
+    ann_exprs = ann_exprs or [None] * len(annotation)
+    for idx in range(len(sidecar)):
+        # Prefer the expr where a side has one; else the (int) value.
+        a = side_exprs[idx] if side_exprs[idx] is not None else sidecar[idx]
+        b = ann_exprs[idx] if ann_exprs[idx] is not None else annotation[idx]
+        if _dims_differ(a, b) and not _specialized_away(a, b, live_symbols):
+            raise ValueError(
+                f"full graph sidecar tensor {what} does not match forward "
+                f"annotations for {label} dim {idx}: {a} != {b}")
 
 
 def _validate_tensor_sidecar_spec(
@@ -1731,6 +2099,7 @@ def _validate_tensor_sidecar_spec(
     annotation_spec: dict[str, Any],
     label: str,
     symbol_bindings: dict[str, int] | None = None,
+    live_symbols=None,
 ) -> None:
     sidecar_dtype = _normalize_dtype_name(sidecar_spec.get("dtype", "float32"))
     annotation_dtype = _normalize_dtype_name(annotation_spec.get("dtype", "float32"))
@@ -1739,6 +2108,22 @@ def _validate_tensor_sidecar_spec(
             "full graph sidecar tensor dtype does not match forward annotations "
             f"for {label}: {sidecar_dtype!r} != {annotation_dtype!r}"
         )
+
+    if sidecar_spec.get("symbolic"):
+        # Dynamic capture: the sidecar records the live exprs; compare
+        # them expr-to-expr with the annotation's.
+        _validate_dim_vector(
+            sidecar_spec.get("shape"), annotation_spec.get("shape"),
+            sidecar_spec.get("symbolic", {}).get("shape_exprs"),
+            annotation_spec.get("symbolic", {}).get("shape_exprs"),
+            label, "shape", live_symbols)
+        _validate_dim_vector(
+            sidecar_spec.get("stride"), annotation_spec.get("stride"),
+            sidecar_spec.get("symbolic", {}).get("stride_exprs"),
+            annotation_spec.get("symbolic", {}).get("stride_exprs"),
+            label, "stride", live_symbols)
+        _validate_tensor_device_and_offset(sidecar_spec, annotation_spec, label)
+        return
 
     sidecar_shape = sidecar_spec.get("shape")
     annotation_shape = annotation_spec.get("shape")
@@ -1807,7 +2192,10 @@ def _validate_tensor_sidecar_spec(
                     "full graph sidecar tensor stride does not match forward annotations "
                     f"for {label} dim {idx}: {sidecar_dim} != {expected}"
                 )
+    _validate_tensor_device_and_offset(sidecar_spec, annotation_spec, label)
 
+
+def _validate_tensor_device_and_offset(sidecar_spec, annotation_spec, label) -> None:
     sidecar_device = _normalize_device_name(sidecar_spec.get("device"))
     annotation_device = _normalize_device_name(annotation_spec.get("device"))
     if sidecar_device and annotation_device and sidecar_device != annotation_device:
@@ -1832,6 +2220,7 @@ def _validate_tensor_sidecar_spec(
 def _validate_sidecar_inputs(
     sidecar_inputs: list[dict[str, Any]] | None,
     annotation_inputs: list[dict[str, Any]],
+    live_symbols=None,
 ) -> None:
     if sidecar_inputs is None:
         return
@@ -1872,7 +2261,9 @@ def _validate_sidecar_inputs(
         ):
             continue
         sidecar_shape = sidecar_spec.get("shape")
-        if sidecar_shape is None:
+        if sidecar_shape is None or sidecar_spec.get("symbolic"):
+            # A dynamic sidecar records the exprs themselves (compared
+            # expr-to-expr in _validate_tensor_sidecar_spec).
             continue
         for item in annotation_spec.get("symbolic_dims", []):
             symbol = item.get("symbol")
@@ -1911,6 +2302,7 @@ def _validate_sidecar_inputs(
             annotation_spec,
             str(sidecar_name or idx),
             symbol_bindings,
+            live_symbols,
         )
 
 
@@ -1996,7 +2388,10 @@ def _strip_runnable_boilerplate(content: str) -> str:
     return re.sub(r"^mod\s*=\s*Repro\(\)\s*$", "", content, flags=re.MULTILINE)
 
 
-def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
+def load_full_graph_definition(
+    graph_path: str | Path,
+    symbol_bindings: dict[str, int] | None = None,
+) -> FullGraphDefinition:
     import torch
     import torch.fx as fx
     import torch.nn
@@ -2008,7 +2403,8 @@ def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     sidecar = load_full_graph_sidecar(path)
     annotation_inputs = parse_full_graph_inputs(raw_content)
     annotation_attrs = parse_full_graph_tensor_attrs(raw_content)
-    _validate_sidecar_inputs(sidecar.get("inputs"), annotation_inputs)
+    _validate_sidecar_inputs(
+        sidecar.get("inputs"), annotation_inputs, sidecar.get("symbols"))
     _validate_sidecar_tensor_attrs(sidecar.get("tensor_attrs"), annotation_attrs)
 
     exec_globals: dict[str, Any] = {"__builtins__": __builtins__}
@@ -2039,10 +2435,39 @@ def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     if graph_cls is None:
         raise RuntimeError(f"{path} does not define a torch.nn.Module graph class")
 
+    input_specs = sidecar.get("inputs") or annotation_inputs
+    # Dynamic graph: input specs carry symbolic shape/stride exprs. Resolve
+    # them to concrete dims at the symbol HINT binding (the captured
+    # snapshot) so construction is concrete. A different binding is reachable
+    # by re-evaluating from the sidecar's symbols table + exprs — the exprs
+    # are retained on disk, only the in-memory definition is specialized.
+    symbols = sidecar.get("symbols")
+    if symbols:
+        from input_codec import (
+            _symbol_point_value,
+            evaluate_spec,
+            validate_bindings,
+        )
+        effective = {
+            name: value
+            for name, definition in symbols.items()
+            if isinstance(
+                (value := _symbol_point_value(definition)), int)
+            and not isinstance(value, bool)
+        }
+        effective.update(symbol_bindings or {})
+        missing = sorted(set(symbols) - set(effective))
+        if missing:
+            raise ValueError(
+                f"{path} needs explicit symbol_bindings for {missing}; "
+                "these unbacked symbols had no observed capture point")
+        validate_bindings(symbols, effective, sidecar.get("guards"))
+        input_specs = [evaluate_spec(s, effective) for s in input_specs]
+
     return FullGraphDefinition(
         path=path,
         graph_cls=graph_cls,
-        input_specs=sidecar.get("inputs") or annotation_inputs,
+        input_specs=input_specs,
         tensor_attrs=sidecar.get("tensor_attrs") or annotation_attrs,
         forward_takes_no_inputs=forward_takes_no_inputs(raw_content),
         metadata={

@@ -3798,7 +3798,7 @@ def bench_oracle_point(canonical_dir, shape_label):
         inputs = make_inputs_from_config(config)
         return {{shape_label: bench_oracle(
             fn, instance, inputs, point_id, warmup=WARMUP, rep=REP,
-            compile_policy=compile_policy)}}
+            compile_policy=compile_policy, point=config.get("shape_hash"))}}
     return {{shape_label: {{"repro_id": point_id,
                            "compile_policy": compile_policy,
                            "status": "UNVERIFIED_NUMERICS"}}}}
@@ -3843,7 +3843,7 @@ def bench_oracle_dir(canonical_dir):
             inputs = make_inputs_from_config(config)
             results[label] = bench_oracle(
                 fn, instance, inputs, point_id, warmup=WARMUP, rep=REP,
-                compile_policy=compile_policy)
+                compile_policy=compile_policy, point=config.get("shape_hash"))
         else:
             results[label] = {{"repro_id": point_id,
                                "compile_policy": compile_policy,
