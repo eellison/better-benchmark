@@ -263,9 +263,11 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None, *,
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
     partition, as if they were not fusible.
 
-    ``only_include_mm=True`` returns the four matmul corpus categories. The
+    ``only_include_mm=True`` returns the five matmul corpus categories. The
     prologue/epilogue pass assigns one MM to a whole normal partition, producer
-    (epilogue) absorption first, and never reuses an augmented partition. The
+    (epilogue) absorption first, and never reuses an augmented partition. Each
+    aten._grouped_mm takes its whole producer and consumer partitions
+    (grouped), which may be shared with a neighboring grouped MM. The
     horizontal/horizontal_combine window searches remain separate and
     may overlap those examples. Every MM region names its escaping outputs.
 
@@ -1333,7 +1335,7 @@ def compute_partition_pattern(
         "placeholder_info": placeholder_info,
         "shape_params": shape_params,
         **({"normal_pattern_hash": pattern_key}
-           if is_mm_region and comp.category in {"prologue", "epilogue"} else {}),
+           if is_mm_region and comp.category in {"prologue", "epilogue", "grouped"} else {}),
     }
 
 

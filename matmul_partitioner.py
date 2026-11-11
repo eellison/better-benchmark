@@ -12,6 +12,12 @@ Each is then trimmed to the outputs that depend on its MM and kept only if
 tensor; epilogues also read at most max_epilogue_extra_inputs extra tensors.
 Their category is the source absorption direction.
 
+Grouped (mm_grouped_absorption): every aten._grouped_mm takes the whole normal
+partitions producing its multiplied operands and consuming its result, with no
+reduction/scan restriction; back-to-back grouped MMs share the partition
+between them. offs is a region input. They are trimmed the same way and need
+non-MM computation and no CPU input, but have no size bound.
+
 Horizontal/horizontal_combine keep the independent 2..3-MM window search:
 a shared operand (same slot and values, operand_keys), equal output shapes,
 and optional surrounding local work within MatmulLimits. These windows may
@@ -509,7 +515,13 @@ class _ReplaySafety:
                                 keys.update(self.aliases[item])
             self.writes[node] = keys
 
-    def safe(self, core):
+    def safe(self, core, exempt=()):
+        """``exempt``: (outside node, inside user) edges allowed to re-enter.
+
+        A grouped MM's ``offs`` may be computed outside its region from a
+        value of its own prologue (gpt-oss: the sorted expert ids feed
+        histc -> cumsum -> offs); the region then reads offs as an input.
+        """
         last = max(self.order[n] for n in core)
         # (a) No value leaves the candidate and flows back into it.
         pending = [
@@ -521,9 +533,9 @@ class _ReplaySafety:
             if n in seen:
                 continue
             seen.add(n)
-            if any(u in core for u in n.users):
+            if any(u in core and (n, u) not in exempt for u in n.users):
                 return False
-            pending.extend(u for u in n.users if self.order[u] < last)
+            pending.extend(u for u in n.users if u not in core and self.order[u] < last)
         # (b) No outside op between the candidate's first and last node writes
         #     memory the candidate reads or writes.
         reads, writes = self.reads, self.writes
@@ -556,7 +568,10 @@ CATEGORIES = (
     "epilogue",
     "horizontal",
     "horizontal_combine",
+    "grouped",
 )
+# Categories whose region is whole normal BB partitions around one MM.
+NORMAL_CATEGORIES = frozenset({"prologue", "epilogue", "grouped"})
 
 # What shared_operand() looks through between an MM operand and an earlier
 # node. Copies keep the logical values; casts, reshapes, expands and permutes
@@ -700,7 +715,8 @@ class MatmulLimits:
     max_horizontal..max_outputs bound horizontal/horizontal_combine windows.
     Prologue/epilogue partitions are whole BB partitions, trimmed to the
     outputs that depend on their MM; max_normal_compute bounds both and
-    max_epilogue_extra_inputs bounds epilogues.
+    max_epilogue_extra_inputs bounds epilogues. Grouped regions are exempt
+    from both.
     """
 
     max_horizontal: int = 3  # MMs in a horizontal group; growth stops at 3
@@ -1158,6 +1174,66 @@ def extra_inputs(nodes, mm):
     }
 
 
+def _grouped_mm_regions(gm, collector, excluded, rejections):
+    """Grouped MMs with their whole producer and consumer partitions.
+
+    See mm_grouped_absorption. The region is trimmed like prologue/epilogue
+    (trim_to_matmul) and needs non-MM computation and no CPU tensor inputs,
+    but max_normal_compute and max_epilogue_extra_inputs do not apply: the
+    region is the grouped MM's whole MoE block, and in gpt-oss the
+    down-projection region has 32 non-MM ops and reads 6 extra tensors from
+    its epilogue side (expert bias, router scores, permutation, sentinel
+    mask, residual, norm weight):
+
+        [bias + swiglu] -> _grouped_mm_1 -> [bias gather/add, router softmax,
+            score weighting, sentinel mask, unpermute, top-k sum, residual
+            add, next RMSNorm]
+
+    Both numbers are recorded in the region metrics.
+    """
+    from mm_grouped_absorption import absorb_grouped_matmuls, grouped_operands
+
+    regions = []
+    for nodes, mm, prologue, epilogue in absorb_grouped_matmuls(gm, excluded=excluded):
+        offs = grouped_operands(mm)[2]
+        exempt = {(offs, mm)} if isinstance(offs, Node) else set()
+        if not collector.safe(set(nodes), exempt):
+            rejections["grouped_cycle_or_alias"] = rejections.get("grouped_cycle_or_alias", 0) + 1
+            continue
+        core = set(nodes)
+        outputs = [n for n in nodes if is_mutating(n) or any(u not in core for u in n.users)]
+        nodes, outputs = trim_to_matmul(nodes, outputs, mm)
+        core = set(nodes)
+        non_mm = sum(map(is_computation, nodes))
+        if not non_mm:
+            rejections["grouped_bare"] = rejections.get("grouped_bare", 0) + 1
+            continue
+        epilogue_nodes = [n for n in nodes if n in set(epilogue)]
+        # Tensors the epilogue side reads from outside the region (the
+        # epilogue bound's count; recorded, not bounded).
+        extra = len(extra_inputs(epilogue_nodes, mm) - core)
+        if cpu_inputs(nodes):
+            rejections["grouped_cpu_input"] = rejections.get("grouped_cpu_input", 0) + 1
+            continue
+        depth = {}
+        for node in nodes:
+            depth[node] = max((depth[a] for a in value_inputs(node) if a in core), default=0) + int(is_reduction(node))
+        prologue = set(prologue)
+        metrics = {
+            "nodes": len(nodes), "mm": 1,
+            "compute": non_mm + 1,
+            "non_mm_compute": non_mm,
+            "prologue_nodes": sum(n in prologue for n in nodes),
+            "epilogue_nodes": len(epilogue_nodes),
+            "inputs": len({a for n in nodes for a in n.all_input_nodes if a not in core}),
+            "extra_inputs": extra,
+            "outputs": len(outputs), "contraction_depth": max(depth.values(), default=0),
+            "selection": "grouped_absorption_v1",
+        }
+        regions.append(MatmulRegion(nodes, outputs, metrics, "grouped"))
+    return regions
+
+
 def _normal_mm_regions(gm, excluded, categories, limits):
     """Augmented normal partitions, trimmed to their MM and bounded in size."""
     from mm_partition_absorption import absorb_matmuls
@@ -1205,6 +1281,8 @@ def get_matmul_regions(gm, is_supported, *, limits=None, excluded=(), categories
         _normal_mm_regions(gm, excluded, set(categories), limits)
         if {"prologue", "epilogue"} & set(categories) else []
     )
+    if "grouped" in categories:
+        regions += _grouped_mm_regions(gm, ex.collector, excluded, ex.rejections)
     if {"horizontal", "horizontal_combine"} & set(categories):
         for group in ex.horizontal_groups(mms):
             region = ex.horizontal(group)
@@ -1231,6 +1309,12 @@ def classify_pattern_graph(gm, *, expected=None):
     nodes = list(gm.graph.nodes)
     mms = [n for n in nodes if is_matmul(n)]
     reductions = [n for n in nodes if is_reduction(n) and not is_matmul(n)]
+    if expected == "grouped":
+        if len(mms) != 1 or op_name(mms[0]) != "aten::_grouped_mm":
+            return None
+        if not any(n.op == "call_function" and n not in mms for n in nodes):
+            return None
+        return expected
     if expected in {"prologue", "epilogue"}:
         if len(mms) != 1 or op_name(mms[0]) not in {"aten::mm", "aten::addmm", "aten::bmm"}:
             return None

@@ -63,7 +63,7 @@ def filter_patterns(records, limits):
     (matmul_partitioner._normal_mm_regions), so they pass through here.
     """
     return [record for record in records
-            if record.get("category") in {"prologue", "epilogue"}
+            if record.get("category") in {"prologue", "epilogue", "grouped"}
             or admits(record["metrics"], limits)]
 
 

@@ -113,7 +113,10 @@ def _gen_to_compact(gen: dict) -> list | None:
             out.append(int(gen["size"]))
         return out
     if kind == "offsets":
-        return ["offsets", int(gen.get("high", 1))]
+        out = ["offsets", int(gen.get("high", 1))]
+        if gen.get("end") is not None:
+            out.append(int(gen["end"]))
+        return out
     if kind == "constant":
         return ["const", gen.get("value", 0)]
     if kind == "runs":
@@ -134,7 +137,10 @@ def _gen_from_compact(c: list) -> dict:
         return {"kind": "permutation",
                 "size": c[1] if len(c) > 1 else None}
     if kind == "offsets":
-        return {"kind": "offsets", "high": c[1]}
+        gen = {"kind": "offsets", "high": c[1]}
+        if len(c) > 2:
+            gen["end"] = c[2]
+        return gen
     if kind == "const":
         return {"kind": "constant", "value": c[1]}
     if kind == "runs":
@@ -261,7 +267,7 @@ def render_T(entry_or_spec) -> str:
         elif g[0] == "perm":
             kwargs.append(f"gen=Perm({g[1] if len(g) > 1 else ''})")
         elif g[0] == "offsets":
-            kwargs.append(f"gen=Offsets({g[1]})")
+            kwargs.append(f"gen=Offsets({g[1]}" + (f", end={g[2]})" if len(g) > 2 else ")"))
         elif g[0] == "runs":
             kwargs.append(f"gen=Runs({g[2]}, low={g[1]}, unique={g[3]}, "
                           f"runs={g[4]}, sorted={bool(g[5])})")

@@ -58,7 +58,7 @@ def validate_repro(path: str) -> dict:
     except Exception:
         result["failures"].append({"error": traceback.format_exc()})
         return result
-    normal = category in {"prologue", "epilogue"}
+    normal = category in {"prologue", "epilogue", "grouped"}
     for label, config in configs.items():
         try:
             with torch.no_grad():

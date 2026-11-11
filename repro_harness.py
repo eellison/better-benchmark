@@ -830,12 +830,20 @@ def make_inputs_from_config(config: dict) -> list:
             if gen and gen.get("kind") == "offsets":
                 # Segment offsets (e.g. _embedding_bag): non-decreasing,
                 # first element 0, bounded by high (= len(indices)).
-                hi = max(int(gen.get("high", 1)), 1)
+                # With "end" (aten._grouped_mm offs, the end of each group):
+                # non-decreasing values in [0, end] whose last element is end,
+                # the grouped dim. Otherwise rows past the last offset are
+                # never written, and an offset past the dim device-asserts.
+                end = gen.get("end")
+                hi = int(end) + 1 if end is not None else max(int(gen.get("high", 1)), 1)
                 vals, _ = torch.sort(
                     torch.randint(0, hi, shape, dtype=dtype, device=device))
                 flat = vals.reshape(-1)
                 if flat.numel():
-                    flat[0] = 0
+                    if end is None:
+                        flat[0] = 0
+                    else:
+                        flat[-1] = int(end)
                 result.append(vals)
                 continue
 

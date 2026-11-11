@@ -8,8 +8,8 @@ from capture_hook import get_fusion_partitions, partition_node_is_supported
 from matmul_partitioner import CATEGORIES, classify_pattern_graph, get_matmul_regions
 
 
-def test_matmul_categories_are_exactly_the_supported_four():
-    assert CATEGORIES == ("prologue", "epilogue", "horizontal", "horizontal_combine")
+def test_matmul_categories_are_exactly_the_supported_five():
+    assert CATEGORIES == ("prologue", "epilogue", "horizontal", "horizontal_combine", "grouped")
 
 
 def test_dependent_mms_are_not_horizontal_regions():

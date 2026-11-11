@@ -1,4 +1,4 @@
-"""Invariants of the committed four-category MM corpus."""
+"""Invariants of the committed five-category MM corpus."""
 from __future__ import annotations
 
 import json
@@ -13,6 +13,7 @@ EXPECTED = {
     "epilogue": (415, 1029),
     "horizontal": (91, 156),
     "horizontal_combine": (5, 7),
+    "grouped": (0, 0),  # the committed corpus predates grouped regions
 }
 TOTAL = tuple(map(sum, zip(*EXPECTED.values())))
 
@@ -25,7 +26,7 @@ def test_committed_snapshot_and_source_references():
     assert len(files) == report["unique_repros"] == TOTAL[0]
     assert all(p.is_dir() for p in (corpus / "canonical").iterdir())
     assert tuple(EXPECTED) == CATEGORIES
-    assert set(report["pattern_categories"]) == set(CATEGORIES)
+    assert set(report["pattern_categories"]) == set(CATEGORIES) - {"grouped"}
     limits = MatmulLimits()
     assert report["policy"] == asdict(limits)
     points, hashes = {}, set()

@@ -1,7 +1,8 @@
 # Matmul pattern corpus (`mm_repro/`)
 
-`mm_repro/` holds benchmark repros of matmul fusion patterns in four
-categories: `prologue`, `epilogue`, `horizontal` and `horizontal_combine`. Each
+`mm_repro/` holds benchmark repros of matmul fusion patterns in five
+categories: `prologue`, `epilogue`, `grouped`, `horizontal` and
+`horizontal_combine`. Each
 repro is a region of a saved post-grad FX model graph (`repros/models/**/
 full_graph_*.py`) with every input configuration (shape point) it was seen
 with. The layout and input generation are those of `repros/`, so the repro
@@ -30,8 +31,8 @@ Validation runs every repro eagerly on a GPU, each in its own subprocess so a
 device assert cannot poison the sweep. For every shape point it generates the
 inputs with `repro_harness`, runs `Repro` on them, then traces a second run
 with fresh inputs in `make_fx` real mode (also on the GPU, no FakeTensor) and
-checks that the graph keeps its category, its single MM (prologue/epilogue)
-and its pattern hash. Non-finite outputs are reported but do not fail the run
+checks that the graph keeps its category, its single MM
+(prologue/epilogue/grouped) and its pattern hash. Non-finite outputs are reported but do not fail the run
 (see Known limitations).
 
 ## Existing repro tooling
@@ -59,7 +60,7 @@ any canonical repro.
 
 1. **Load**: run a source graph's module under FakeTensors and retrace it.
 2. **Select regions** (`matmul_partitioner.get_matmul_regions`):
-   prologue/epilogue from whole normal BB partitions, horizontal windows around
+   prologue/epilogue/grouped from whole normal BB partitions, horizontal windows around
    MMs that share an operand. Both are described below. A region returns
    values, not views of them (see Outputs).
 3. **Capture** (`capture_hook`): copy each region into a standalone
@@ -171,6 +172,31 @@ reductions; only the bounds of steps 6 and 7 apply. A front partition with
 another kind of reduction is not cut into a pointwise suffix for a prologue.
 The prologue/epilogue label is the absorption direction in the source graph,
 not inferred from standalone topology.
+
+## Grouped: whole partitions around `aten._grouped_mm`
+
+`mm_grouped_absorption` gives every `aten._grouped_mm` the whole normal BB
+partitions that produce its two multiplied operands (prologue side, no
+reduction/scan restriction) and that consume its result (epilogue side),
+through unpartitioned views. Partitions are not consumed, so back-to-back
+grouped MMs share the partition between them; mm/addmm/bmm absorption is
+separate and unchanged. `offs` (and a bias) is not multiplied: its producer
+stays outside and `offs` is an input. In gpt-oss the routing partition (topk,
+sort, row gather, sentinel mask) feeds `offs` through `histc -> cumsum` outside
+the region; that one re-entry edge is allowed (`_ReplaySafety.safe(exempt=)`).
+
+The region is trimmed with `trim_to_matmul` and needs non-MM computation and
+no CPU input, but `max_normal_compute` and `max_epilogue_extra_inputs` do not
+apply: a grouped region is a whole MoE block. gpt-oss's down-projection region
+has 32 non-MM ops and its epilogue side reads 6 extra tensors (expert bias,
+router scores, permutation, sentinel mask, residual, norm weight); both counts
+are recorded in the partition metrics.
+
+Curation annotates every placeholder used as `offs` with
+`{"kind": "offsets", "high": G + 1, "end": G}`, G the grouped dim (rows of A
+for 2d x 3d): `repro_harness` draws sorted values in `[0, G]` and sets the last
+to G. Random ints device-assert (an offset past G) or leave rows unwritten
+(a last offset short of G).
 
 ## Horizontal categories: shared-operand windows
 

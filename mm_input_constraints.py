@@ -149,3 +149,60 @@ def annotate_external_sqrt_inputs(
             info["gen"] = {"kind": "positive", "minimum": minimum}
         annotated.append(node.name)
     return annotated
+
+
+_GROUPED_MM_OPS = {"aten._grouped_mm.default"}
+
+
+def grouped_mm_group_dim(mat_a: torch.Tensor, mat_b: torch.Tensor) -> int | None:
+    """Size of the dim aten._grouped_mm splits with ``offs``.
+
+    2d x 3d: rows of A (M, MoE tokens sorted by expert); 3d x 2d: columns of
+    B (N); 2d x 2d: the shared K. 3d x 3d is batched and has no offs.
+    """
+    if mat_a.dim() == 2 and mat_b.dim() == 3:
+        return int(mat_a.shape[0])
+    if mat_a.dim() == 3 and mat_b.dim() == 2:
+        return int(mat_b.shape[-1])
+    if mat_a.dim() == 2 and mat_b.dim() == 2:
+        return int(mat_a.shape[1])
+    return None
+
+
+def annotate_grouped_mm_offsets(
+    gm: fx.GraphModule, placeholder_info: dict[str, dict[str, Any]]
+) -> list[str]:
+    """Give each placeholder used as a grouped MM's ``offs`` an offsets generator.
+
+    ``offs[i]`` is the end of group i, so it must be non-decreasing with the
+    last element equal to the grouped dim: random ints device-assert (an
+    offset past the dim) or leave rows unwritten (last offset short of it).
+    Returns the annotated placeholder names in graph order.
+    """
+    found: dict[fx.Node, int] = {}
+    for node in gm.graph.nodes:
+        if node.op != "call_function" or str(node.target) not in _GROUPED_MM_OPS:
+            continue
+        bindings = {
+            argument.name: value
+            for argument, value in zip(node.target._schema.arguments, node.args)
+        }
+        bindings.update(node.kwargs)
+        offs = bindings.get("offs")
+        if not isinstance(offs, fx.Node) or offs.op != "placeholder":
+            continue
+        a, b = (bindings[k].meta.get("val") for k in ("self", "mat2"))
+        end = grouped_mm_group_dim(a, b)
+        if end is None:
+            continue
+        if found.get(offs, end) != end:
+            raise ValueError(f"{offs.name} is the offs of grouped MMs with different grouped dims")
+        found[offs] = end
+    annotated = []
+    for node in gm.graph.nodes:
+        if node in found and node.name in placeholder_info:
+            info = placeholder_info[node.name]
+            info.pop("generator", None)
+            info["gen"] = {"kind": "offsets", "high": found[node] + 1, "end": found[node]}
+            annotated.append(node.name)
+    return annotated

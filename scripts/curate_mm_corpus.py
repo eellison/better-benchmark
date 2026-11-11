@@ -1,7 +1,8 @@
-"""Curate captured MM regions into the four-category mm_repro corpus.
+"""Curate captured MM regions into the five-category mm_repro corpus.
 
-Prologue/epilogue partitions were trimmed and bounded at extraction and keep
-their inner views/casts. Horizontal/horizontal_combine windows get
+Prologue/epilogue/grouped partitions were trimmed and bounded at extraction and
+keep their inner views/casts. A grouped MM's offs input gets an offsets
+generator (sorted group ends, the last one the grouped dim). Horizontal/horizontal_combine windows get
 metadata-proven graph normalization and must fit MatmulLimits. In every
 category, extraction already returns values rather than views of them
 (matmul_partitioner.output_values).
@@ -44,7 +45,7 @@ from matmul_partitioner import (
     MatmulLimits,
     classify_pattern_graph,
 )
-from mm_input_constraints import annotate_external_sqrt_inputs
+from mm_input_constraints import annotate_external_sqrt_inputs, annotate_grouped_mm_offsets
 from repro_harness import load_shape_configs, make_inputs_from_config
 from roundtrip_validation import fake_tensor_ctx
 
@@ -258,7 +259,7 @@ def export_core(output, groups, rows, admitted_points, source_report):
     )
     policy = source_report["policy"]
     (output / "README.md").write_text(
-        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`; `python scripts/validate_matmul_repros.py` runs every shape point eagerly on a GPU. Prologue/epilogue repros are normal BB partitions that absorbed one producer MM (epilogue, tried first) or one consumer MM (prologue), trimmed to the work that depends on the MM, with 1 to {policy['max_normal_compute']} non-MM compute ops, no CPU tensor inputs and, for epilogues, at most {policy['max_epilogue_extra_inputs']} extra input tensors. Horizontal windows group 2-3 independent MMs that share an operand. Repros return values, not views of them. Every repro is one pattern hash, which ignores scalar literals as in repros/: literal variants are one repro with the first captured code. There is no repro or shape-point cap. `canonical/<category>_<mm ops>_<hash>/` is flat like `repros/canonical/`, so the repro tools (`validate_eager.py`, `bench_parallel.py`, `validate_corpus_invariants.py --corpus-root mm_repro`) run on it. See [docs/matmul_partitioning.md](../docs/matmul_partitioning.md).\n\n[Report](report.json)\n"
+        f"# MM pattern corpus\n\n{report['unique_repros']} repros / {report['shape_points']} shape points / {report['region_occurrences']} source occurrences.\n\n{per_category}Regenerate with `python scripts/extract_matmul_corpus.py`; `python scripts/validate_matmul_repros.py` runs every shape point eagerly on a GPU. Prologue/epilogue repros are normal BB partitions that absorbed one producer MM (epilogue, tried first) or one consumer MM (prologue), trimmed to the work that depends on the MM, with 1 to {policy['max_normal_compute']} non-MM compute ops, no CPU tensor inputs and, for epilogues, at most {policy['max_epilogue_extra_inputs']} extra input tensors. Grouped repros are an aten._grouped_mm with the whole normal partitions producing its multiplied operands and consuming its result, with no size bound (offs is an input with sorted group ends). Horizontal windows group 2-3 independent MMs that share an operand. Repros return values, not views of them. Every repro is one pattern hash, which ignores scalar literals as in repros/: literal variants are one repro with the first captured code. There is no repro or shape-point cap. `canonical/<category>_<mm ops>_<hash>/` is flat like `repros/canonical/`, so the repro tools (`validate_eager.py`, `bench_parallel.py`, `validate_corpus_invariants.py --corpus-root mm_repro`) run on it. See [docs/matmul_partitioning.md](../docs/matmul_partitioning.md).\n\n[Report](report.json)\n"
     )
     return report
 
@@ -286,7 +287,7 @@ def curate_corpus(source: Path, output: Path):
                 gm, infos = trace_repro(path, config)
                 original_contract = metadata_contract(gm)
                 extracted = point["partition_metrics"]["category"]
-                normal = extracted in {"prologue", "epilogue"}
+                normal = extracted in {"prologue", "epilogue", "grouped"}
                 if normal:
                     # Keep whole normal partitions, including their views/casts.
                     # Restore shape parameters bound by trace_repro, without the
@@ -297,6 +298,9 @@ def curate_corpus(source: Path, output: Path):
                 else:
                     gm, infos, _shape_params = normalize_graph(gm, infos)
                 annotate_external_sqrt_inputs(gm, infos)
+                # A grouped MM's offs input: sorted group ends, the last one
+                # the grouped dim (else the kernel asserts or skips rows).
+                annotate_grouped_mm_offsets(gm, infos)
                 canonicalize_seed_slots(gm)
                 candidate = {"gm": gm, "infos": infos}
                 contract = metadata_contract(gm)
