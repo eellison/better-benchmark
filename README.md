@@ -409,34 +409,50 @@ TORCHINDUCTOR_CACHE_DIR=/tmp/mm_cache_triton python scripts/bench_parallel.py \
 python scripts/bench_report.py --compare mm_cublas.json mm_triton.json
 ```
 
-To test a Triton feature, add it to the head run. A config goes in as another
-`--inductor-config NAME=VALUE`. Code that every worker has to run before it
-compiles, such as registering a lowering or a template, goes in as
-`--worker-init MODULE:CALLABLE`, with MODULE importable:
-`PYTHONPATH=/path/to/feature python scripts/bench_parallel.py ... --worker-init my_feature:install`.
+### Benchmarking part of the corpus
 
-- Inductor fuses only pointwise epilogues into the template, and it can still
-  keep one separate. Reductions (LayerNorm, softmax, losses) stay separate
-  kernels, so for a norm epilogue the head run measures the Triton GEMM
-  against cuBLAS with the same reduction kernel after it. On an H100,
-  `epilogue_addmm_d6fd90850200` (addmm + relu) compiled to
-  `triton_tem_fused_addmm_relu_0`. `epilogue_addmm_83b1f2564243` (addmm + erf
-  GELU in fp32) and `epilogue_addmm_ba3723ee6650` (addmm + residual +
-  LayerNorm) compiled to `triton_tem_fused_addmm_0` followed by a separate
-  `triton_poi_*` or `triton_red_*` kernel.
-- `bench_parallel.py` locks the SM clock of the sweep's GPUs before timing
-  (`--lock-clocks`, on by default, through `sudo nvidia-smi`) to
-  `--lock-clocks-mhz`. The default, 1852, is the highest sustainable B200 bin.
-  On another GPU, pass a bin it supports (`nvidia-smi -q -d SUPPORTED_CLOCKS`)
-  or `--no-lock-clocks`.
-- The chosen kernels are in each run's generated code under its cache dir.
-  `triton_tem_fused_*` is a Triton template (with the fused epilogue ops in
-  its name). `extern_kernels.addmm`, `extern_kernels.mm` and
-  `extern_kernels.bmm` are cuBLAS calls:
+To time only some repros, replace `mm_repro/canonical` in both sweeps above
+with them; the other flags stay. `bench_parallel.py` takes repro directories
+and `repro.py` files, and without `--all-shapes` it times each repro at its
+first shape point only. `<id>` below is a directory name under
+`mm_repro/canonical/`, e.g. `epilogue_addmm_d6fd90850200`.
 
-  ```bash
-  grep -rhoE --include='*.py' 'triton_tem_fused_[a-z0-9_]+|extern_kernels\.(addmm|mm|bmm)' \
-      /tmp/mm_cache_triton | sort | uniq -c
-  ```
+```bash
+# One category: canonical/ is flat, so a glob selects it
+# (horizontal_* also matches horizontal_combine_*)
+python scripts/bench_parallel.py mm_repro/canonical/epilogue_* --all-shapes --gpus 0,1 --output mm_epilogue.json
+python scripts/bench_parallel.py mm_repro/canonical/grouped_* --all-shapes --gpus 0 --output mm_grouped.json
 
-  For one repro, run the sweep on its directory alone with a fresh cache dir.
+# Named repros
+python scripts/bench_parallel.py mm_repro/canonical/<id> mm_repro/canonical/<id> \
+    --all-shapes --gpus 0 --output mm_named.json
+
+# Repros that contain an op, e.g. every epilogue with a LayerNorm/RMSNorm
+python scripts/bench_parallel.py $(grep -l 'var_mean\|rsqrt' mm_repro/canonical/epilogue_*/repro.py) \
+    --all-shapes --gpus 0,1 --output mm_norm_epilogues.json
+```
+
+Particular shape points go in a benchmark set: a JSON list naming repros under
+`--canonical-dir`. An entry without a selector runs every shape point of its
+repro; `shape_hashes` takes `shape_hash` values from the repro's `shapes.json`.
+
+```bash
+cat > mm_subset.json <<'EOF'
+[
+  {"name": "<id>"},
+  {"name": "<id>", "shape_hashes": ["<shape_hash>", "<shape_hash>"]}
+]
+EOF
+python scripts/bench_parallel.py --benchmark-set mm_subset.json --canonical-dir mm_repro/canonical \
+    --gpus 0 --output mm_subset_results.json
+```
+
+One repro also runs on its own, at every shape point (`--all-shapes`) or at
+one (`--shape <model>_<shape_hash>`, the label it prints). The head run's
+settings go in as environment variables:
+
+```bash
+python mm_repro/canonical/<id>/repro.py --all-shapes
+TORCHINDUCTOR_MAX_AUTOTUNE_GEMM=1 TORCHINDUCTOR_MAX_AUTOTUNE_GEMM_BACKENDS=TRITON \
+    python mm_repro/canonical/<id>/repro.py --shape <model>_<shape_hash>
+```
