@@ -927,6 +927,12 @@ def count_bytes_adjusted(mod, inputs) -> int:
     return count_bytes_effective(mod, inputs)
 
 
+def analyze_bytes_adjusted(mod, inputs):
+    from byte_accounting import analyze_bytes_effective
+
+    return analyze_bytes_effective(mod, inputs)
+
+
 def count_kernels(
     mod,
     inputs,
@@ -1272,7 +1278,8 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                 eager_out = mod(*inputs)
 
             total_bytes_naive = count_bytes_naive(inputs, eager_out)
-            total_bytes = count_bytes_adjusted(mod, inputs)
+            accounting = analyze_bytes_adjusted(mod, inputs)
+            total_bytes = accounting.total_bytes
             if total_bytes_naive > total_bytes * 1.1:
                 print(f"\n[{label}] Bytes adjusted: {total_bytes_naive/1e6:.1f} MB naive -> {total_bytes/1e6:.1f} MB actual")
 
@@ -1290,7 +1297,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                     "compile_policy": point_policy,
                     "n_kernels": n_kernels,
                     "kernel_names": kernel_names,
-                    "total_bytes": total_bytes,
+                    **accounting.to_result_fields(),
                 }
                 continue
 
@@ -1348,16 +1355,23 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
             if cd_us is not None:
                 print(f"[{label}] Gap (CD / SOL):          {cd_us / sol_us:8.2f}x")
 
+            from byte_accounting import sol_result_fields
+
             all_results[label] = {
                 "compile_policy": point_policy,
                 "compiled_us": compiled_us,
                 "coord_descent_us": cd_us,
                 "memcopy_sol_us": sol_us,
-                "total_bytes": total_bytes,
                 "n_kernels": n_kernels,
                 "kernel_names": kernel_names,
                 "gap_default": compiled_us / sol_us if sol_us > 0 else None,
                 "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
+                **sol_result_fields(
+                    accounting,
+                    proxy_bytes=copy_elems * 8,
+                    proxy_op="torch.add.float32_scalar_out",
+                    sol_us=sol_us,
+                ),
             }
 
         if parsed.output:

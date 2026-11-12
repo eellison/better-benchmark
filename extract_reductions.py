@@ -363,7 +363,7 @@ def _count_bytes(inputs, outputs):
 
 
 def _count_bytes_adjusted(mod, inputs):
-    """Count actual DRAM bytes by tracking op semantics.
+    """Count logical boundary bytes by tracking op semantics.
 
     Handles: view-only pass-throughs (not counted) and
     sparse index/gather/scatter access.
@@ -454,6 +454,14 @@ def _count_bytes_adjusted(mod, inputs):
     return bc.total(out)
 
 
+def _analyze_bytes_adjusted(mod, inputs):
+    try:
+        from byte_accounting import analyze_bytes_effective
+        return analyze_bytes_effective(mod, inputs)
+    except ImportError:
+        return None
+
+
 def _count_kernels(mod, inputs):
     """Compile and count how many Triton kernels Inductor generates."""
     import glob
@@ -491,7 +499,8 @@ def benchmark(n_warmup=25, n_rep=200):
         eager_out = mod(*inputs)
 
     total_bytes_naive = _count_bytes(inputs, eager_out)
-    total_bytes = _count_bytes_adjusted(mod, inputs)
+    accounting = _analyze_bytes_adjusted(mod, inputs)
+    total_bytes = accounting.total_bytes if accounting is not None else _count_bytes_adjusted(mod, inputs)
     if total_bytes_naive > total_bytes * 1.1:
         print(f"\\nBytes adjusted: {{total_bytes_naive/1e6:.1f}} MB naive -> {{total_bytes/1e6:.1f}} MB actual")
 
@@ -537,14 +546,29 @@ def benchmark(n_warmup=25, n_rep=200):
     print(f"Gap (default / SOL):     {{compiled_us / sol_us:8.2f}}x")
     print(f"Gap (CD / SOL):          {{cd_us / sol_us:8.2f}}x")
 
-    return {{
+    result = {{
         "compiled_us": compiled_us,
         "coord_descent_us": cd_us,
         "memcopy_sol_us": sol_us,
-        "total_bytes": total_bytes,
         "n_kernels": n_kernels,
         "kernel_names": kernel_names,
     }}
+    if accounting is not None:
+        from byte_accounting import sol_result_fields
+        result.update(sol_result_fields(
+            accounting,
+            proxy_bytes=copy_elems * 8,
+            proxy_op="torch.copy_.float32",
+            sol_us=sol_us,
+        ))
+    else:
+        result.update({{
+            "total_bytes": total_bytes,
+            "sol_accounting_version": "legacy-generated-fallback",
+            "sol_proxy_bytes": copy_elems * 8,
+            "sol_proxy_op": "torch.copy_.float32",
+        }})
+    return result
 
 
 if __name__ == "__main__":

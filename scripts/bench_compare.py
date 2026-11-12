@@ -134,7 +134,7 @@ from repro_harness import (
     make_inputs_safely,
     preserve_compile_environment,
 )
-from byte_accounting import count_bytes_effective
+from byte_accounting import analyze_bytes_effective
 
 N_WARMUP = {args_dict["n_warmup"]}
 N_REP = {args_dict["n_rep"]}
@@ -353,7 +353,7 @@ def compare_one(repro_path):
 
     with torch.no_grad():
         eager_out = instance(*inputs)
-    total_bytes = count_bytes_effective(instance, inputs)
+    accounting = analyze_bytes_effective(instance, inputs)
 
     # --- Compile and capture CUDAGraph for each config ---
     graphs = []  # list of (graph, fallback_fn) tuples
@@ -412,7 +412,7 @@ def compare_one(repro_path):
     return {{
         "compile_policy": compile_policy,
         "configs": configs_result,
-        "total_bytes": total_bytes,
+        **accounting.to_result_fields(),
         "rounds": N_ROUNDS,
         "rep_per_round": rep,
     }}

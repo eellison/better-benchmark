@@ -2376,7 +2376,7 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
     from triton.testing import do_bench
     import importlib.util
     import math
-    from byte_accounting import count_bytes_effective
+    from byte_accounting import analyze_bytes_effective, sol_result_fields
     from repro_harness import (
         compile_repro,
         compile_policy_from_config,
@@ -2430,7 +2430,8 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
             with torch.no_grad():
                 eager_out = instance(*inputs)
 
-            total_bytes = count_bytes_effective(instance, inputs)
+            accounting = analyze_bytes_effective(instance, inputs)
+            total_bytes = accounting.total_bytes
 
             # SOL
             copy_elems = max(total_bytes // (2 * 4), 256)
@@ -2486,9 +2487,14 @@ def worker(gpu_idx: str, task_queue: mp.Queue, result_queue: mp.Queue,
                 "compiled_us": compiled_us,
                 "coord_descent_us": cd_us,
                 "memcopy_sol_us": sol_us,
-                "total_bytes": total_bytes,
                 "gap_default": compiled_us / sol_us if sol_us > 0 else None,
                 "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
+                **sol_result_fields(
+                    accounting,
+                    proxy_bytes=copy_elems * 8,
+                    proxy_op="torch.add.float32_scalar_out",
+                    sol_us=sol_us,
+                ),
             }
 
         return results
@@ -3916,7 +3922,7 @@ import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
 from repro_harness import compile_policy_from_config, compile_repro, load_shape_configs, make_inputs_from_config, make_inputs_safely, preserve_compile_environment
-from byte_accounting import count_bytes_effective
+from byte_accounting import analyze_bytes_effective, sol_result_fields
 from full_graph_harness import FullGraphNumericsError, load_full_graph_definition, load_full_graph, make_inputs_from_full_graph_specs, result_metadata, run_numerics_gate, tensor_bytes
 from torch._inductor.utils import fresh_cache
 
@@ -4465,7 +4471,8 @@ def bench_one(task_key):
             with torch.no_grad():
                 eager_out = instance(*inputs)
             torch.cuda.synchronize()
-            total_bytes = count_bytes_effective(instance, inputs)
+            accounting = analyze_bytes_effective(instance, inputs)
+            total_bytes = accounting.total_bytes
             torch.cuda.synchronize()
 
         # --- Phase 1: Compile all configs and capture CUDAGraphs (no exclusive lock) ---
@@ -4567,10 +4574,15 @@ def bench_one(task_key):
             "compiled_us": compiled_us,
             "coord_descent_us": cd_us,
             "memcopy_sol_us": sol_us,
-            "total_bytes": total_bytes,
             "n_kernels": n_kernels,
             "gap_default": compiled_us / sol_us if sol_us > 0 else None,
             "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
+            **sol_result_fields(
+                accounting,
+                proxy_bytes=copy_elems * 8,
+                proxy_op="torch.add.float32_scalar_out",
+                sol_us=sol_us,
+            ),
         }}
         if COMPILED_NOCUDAGRAPHS:
             all_results[label]["compiled_nocudagraphs_us"] = compiled_nocudagraphs_us
@@ -4670,7 +4682,7 @@ mod.nan = math.nan
 spec.loader.exec_module(mod)
 
 from repro_harness import compile_policy_from_config, compile_repro, load_shape_configs, make_inputs_from_config, make_inputs_safely
-from byte_accounting import count_bytes_effective
+from byte_accounting import analyze_bytes_effective, sol_result_fields
 
 instance = mod.Repro()
 
@@ -4722,7 +4734,8 @@ for shape_name, shape_config in shape_items:
     with torch.no_grad():
         eager_out = instance(*inputs)
 
-    total_bytes = count_bytes_effective(instance, inputs)
+    accounting = analyze_bytes_effective(instance, inputs)
+    total_bytes = accounting.total_bytes
 
     # --- Phase 1: Compile all configs and capture CUDAGraphs ---
     copy_elems = max(total_bytes // 8, 256)
@@ -4796,10 +4809,15 @@ for shape_name, shape_config in shape_items:
         "compiled_us": compiled_us,
         "coord_descent_us": cd_us,
         "memcopy_sol_us": sol_us,
-        "total_bytes": total_bytes,
         "n_kernels": n_kernels,
         "gap_default": compiled_us / sol_us if sol_us > 0 else None,
         "gap_cd": cd_us / sol_us if (cd_us and sol_us > 0) else None,
+        **sol_result_fields(
+            accounting,
+            proxy_bytes=copy_elems * 8,
+            proxy_op="torch.copy_.float32",
+            sol_us=sol_us,
+        ),
     }}
 
 _result_file.write(json.dumps(all_results) + "\\n")
