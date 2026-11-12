@@ -730,6 +730,7 @@ def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list
         return st
 
     result = []
+    index_members = []
     for spec in config["inputs"]:
         if spec.get("kind") == "symfloat":
             result.append(float(spec["value"]))
@@ -772,7 +773,10 @@ def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list
                     f"alias_group {spec['alias_group']} view requires "
                     f"{required} bytes but capture recorded {nbytes}")
             typed = buf.view(dtype) if dtype != torch.uint8 else buf
-            result.append(typed.as_strided(shape, stride, offset))
+            view = typed.as_strided(shape, stride, offset)
+            if _generation_spec(spec) and not dtype.is_floating_point:
+                index_members.append((spec, view))
+            result.append(view)
             continue
 
         shape = spec["shape"]
@@ -877,6 +881,22 @@ def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list
             # view can't be the destination of copy_.
             padded[offset:].copy_(t.as_strided((extent,), (1,), t.storage_offset()))
             result[i] = padded.as_strided(t.shape, t.stride(), offset)
+
+    def _bound_width(spec):
+        gen = _generation_spec(spec)
+        high = gen.get("high", gen.get("size"))
+        return float("inf") if high is None else high - gen.get("low", 0)
+
+    # An integer alias-group member read as raw bytes indexes out of bounds:
+    # draw it from its generator, in place. Members can overlap, so the
+    # narrowest bound is drawn last and holds in the shared elements (index
+    # bounds start at 0, so it also lies inside the wider ones).
+    for spec, view in sorted(index_members, key=lambda m: _bound_width(m[0]), reverse=True):
+        # A stride-0 dim repeats one element: draw it once.
+        dense = view.as_strided(
+            [1 if st == 0 else n for n, st in zip(view.shape, view.stride())], view.stride())
+        plain = {k: v for k, v in spec.items() if k not in ("alias_group", "storage_offset", "stride")}
+        dense.copy_(make_inputs_from_config({"inputs": [{**plain, "shape": list(dense.shape)}]})[0])
     return result
 
 

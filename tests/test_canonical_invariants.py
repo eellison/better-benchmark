@@ -1000,6 +1000,50 @@ def test_alias_group_generation_shares_storage():
     assert k.storage_offset() - q.storage_offset() == D
 
 
+def test_alias_group_index_member_follows_its_generator():
+    """An id matrix and a column view of it, one storage: the ids are drawn
+    from the index generator, not left as raw bytes."""
+    import torch
+    from repro_harness import make_inputs_from_config
+
+    rows, cols = 16, 7
+    config = {
+        "alias_group_nbytes": [rows * cols * 8],
+        "inputs": [
+            {"kind": "tensor", "shape": [rows, cols], "dtype": "int64", "alias_group": 0,
+             "device": "cpu", "gen": {"kind": "index", "low": 0, "high": 21}},
+            {"kind": "tensor", "shape": [rows], "dtype": "int64", "stride": [cols],
+             "alias_group": 0, "device": "cpu"},
+        ],
+    }
+    ids, column = make_inputs_from_config(config)
+    assert ids.untyped_storage().data_ptr() == column.untyped_storage().data_ptr()
+    assert 0 <= int(ids.min()) and int(ids.max()) < 21
+    assert torch.equal(column, ids[:, 0])
+
+
+def test_overlapping_alias_group_index_members_keep_every_bound():
+    """Ids in [0, 1000) and a column of them that indexes a 10-row table:
+    whichever member is listed first, the shared column holds both bounds.
+    A stride-0 member is drawn too, not left as raw bytes."""
+    from repro_harness import make_inputs_from_config
+
+    rows, cols = 16, 7
+    ids = {"kind": "tensor", "shape": [rows, cols], "dtype": "int64", "alias_group": 0,
+           "device": "cpu", "gen": {"kind": "index", "low": 0, "high": 1000}}
+    column = {"kind": "tensor", "shape": [rows], "dtype": "int64", "stride": [cols],
+              "alias_group": 0, "device": "cpu", "gen": {"kind": "index", "low": 0, "high": 10}}
+    for members in ([ids, column], [column, ids]):
+        out = make_inputs_from_config({"alias_group_nbytes": [rows * cols * 8], "inputs": members})
+        m, c = out if members[0] is ids else out[::-1]
+        assert int(m.min()) >= 0 and int(m.max()) < 1000
+        assert int(c.min()) >= 0 and int(c.max()) < 10, c
+    broadcast = {"kind": "tensor", "shape": [rows, cols], "dtype": "int64", "stride": [0, 1],
+                 "alias_group": 0, "device": "cpu", "gen": {"kind": "index", "low": 0, "high": 10}}
+    (t,) = make_inputs_from_config({"alias_group_nbytes": [cols * 8], "inputs": [broadcast]})
+    assert int(t.min()) >= 0 and int(t.max()) < 10, t
+
+
 def test_alias_group_float_buffer_is_finite():
     """A float alias group is filled with normal values, not raw byte noise,
     which reinterpreted as fp16/bf16 includes NaN/Inf bit patterns."""
