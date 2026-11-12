@@ -661,13 +661,16 @@ def _load_torchbench(model_name: str, batch_size: int, mode: str):
 
 def _mark_batch_dynamic(inputs, batch_size: int | None) -> None:
     """mark_dynamic dim 0 of every input tensor whose leading size is the
-    batch (every input tensor's dim 0 when the batch size is unknown)."""
+    batch."""
     import torch
     from torch.utils._pytree import tree_leaves
 
+    if batch_size is None or batch_size < 2:
+        raise ValueError(
+            f"--dynamic batch needs the model's batch size (got {batch_size}); "
+            "pass --batch-size N with N >= 2, or use --dynamic all")
     for t in tree_leaves(inputs):
-        if (isinstance(t, torch.Tensor) and t.dim() > 0
-                and (batch_size is None or t.shape[0] == batch_size)):
+        if isinstance(t, torch.Tensor) and t.dim() > 0 and t.shape[0] == batch_size:
             torch._dynamo.mark_dynamic(t, 0)
 
 
@@ -791,7 +794,7 @@ def run_orchestrator(args):
     # Build work list: (model_name, mode, batch_size)
     work = []
     for model_name in models:
-        bs = all_models.get(model_name, 128)  # default batch size
+        bs = args.batch_size or all_models.get(model_name, 128)  # default batch size
         for mode in modes:
             work.append((model_name, mode, bs))
 
@@ -1012,7 +1015,7 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="List what would run without actually capturing")
     parser.add_argument("--batch-size", type=int, default=None,
-                        help="Override batch size for the model (worker mode)")
+                        help="Batch size for every model (default: the suite list's)")
     parser.add_argument("--dynamic", choices=["all", "batch", "none"], default="all",
                         help="Shapes to compile the model with: all (dynamic=True, "
                              "every input size symbolic; the default), batch "
@@ -1024,6 +1027,8 @@ def main():
     parser.add_argument("--_worker", action="store_true", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
+    if args.dynamic == "batch" and (args.batch_size is None or args.batch_size < 2):
+        parser.error("--dynamic batch needs --batch-size N (N >= 2): the input dims of size N are marked dynamic")
 
     # Safety: corpus-root must never be the existing repros/ directory
     corpus_root = Path(args.corpus_root).resolve()

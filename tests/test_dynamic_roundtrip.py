@@ -513,6 +513,23 @@ def test_output_aliasing_another_output_fails_with_an_explicit_message(tmp_path)
         _check(tmp_path, name, [{"s0": 512}])
 
 
+def test_batch_dynamic_needs_a_batch_size(tmp_path, capsys):
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import run_recapture
+
+    with pytest.raises(ValueError, match="needs the model's batch size"):
+        run_recapture._mark_batch_dynamic([torch.randn(1, 4)], None)
+    argv = ["run_recapture.py", "--suite", "timm", "--mode", "infer", "--models", "resnet18",
+            "--corpus-root", str(tmp_path), "--dry-run", "--dynamic", "batch"]
+    with mock.patch.object(sys, "argv", argv), pytest.raises(SystemExit):
+        run_recapture.main()
+    assert "--dynamic batch needs --batch-size" in capsys.readouterr().err
+    with mock.patch.object(sys, "argv", argv + ["--batch-size", "4"]), \
+            mock.patch.object(run_recapture, "get_suite_models", lambda suite: {"resnet18": 8}):
+        run_recapture.main()
+    assert "(batch=4)" in capsys.readouterr().out
+
+
 def test_recapture_resume_refuses_a_different_capture_mode(tmp_path, capsys):
     sys.path.insert(0, str(ROOT / "scripts"))
     import run_recapture

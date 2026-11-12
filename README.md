@@ -102,6 +102,24 @@ recorded points as static rows. Saved full graphs with a symbols table are
 compiled specialized at their captured binding under `--full-graphs`; add
 `--dynamic-full-graphs` to replay them as one dynamic artifact instead.
 
+### Recapturing with dynamic shapes
+
+`scripts/run_recapture.py` compiles each model with `--dynamic all` by
+default: every input size is symbolic. Pick another mode per model when that
+doesn't work for it:
+
+- `--dynamic batch --batch-size N` marks only the input dims of size `N`
+  dynamic. Use it for a model that fails to compile with every size dynamic
+  (data-dependent ops, guards that specialize most sizes) or whose other
+  sizes are fixed by design.
+- `--dynamic none` is the historical static compile, for a model that fails
+  even with a dynamic batch.
+
+Run such a model on its own (`--models <name> --dynamic batch --batch-size 8`)
+into the same `--corpus-root`. `run_log.json` records each model's mode, and a
+resumed run refuses to continue a model captured in a different mode (re-run
+with its mode, or `--force` to recapture it).
+
 ## Oracles
 
 Each canonical repro carries an **oracle** — a reference implementation
