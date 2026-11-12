@@ -55,8 +55,13 @@ def fake_tensor_ctx():
     """
     import torch
     from torch._subclasses.fake_tensor import FakeTensorMode
+    from torch.fx.experimental.symbolic_shapes import ShapeEnv
 
-    mode = FakeTensorMode(allow_non_fake_inputs=True)
+    # A ShapeEnv lets data-dependent ops (unique, nonzero, .item()) trace to
+    # unbacked symbols instead of raising; inputs stay static.
+    mode = FakeTensorMode(
+        allow_non_fake_inputs=True, shape_env=ShapeEnv(), static_shapes=True
+    )
     if torch.cuda.is_available():
         with mode:
             yield mode
