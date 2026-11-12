@@ -55,6 +55,31 @@ class UserTritonResolutionError(RuntimeError):
     """A bundle entry cannot be turned into a trusted kernel object."""
 
 
+# A kernel launched from a working copy whose code differs from the captured
+# kernel (someone editing it) is a dev run: its times describe the edit, not
+# the captured model. Dev-run kernels carry this attribute; resolve_bundle
+# refuses them, so they never feed full-graph replay coverage or numerics
+# verdicts, and every process that resolved one is listed by dev_runs().
+DEV_RUN_ATTR = "better_benchmark_dev_run"
+_dev_runs: dict[str, str] = {}
+
+
+def mark_dev_run(kernel: Any, name: str, reason: str) -> Any:
+    setattr(kernel, DEV_RUN_ATTR, reason)
+    _dev_runs[name] = reason
+    return kernel
+
+
+def is_dev_run(kernel: Any) -> bool:
+    return bool(getattr(kernel, DEV_RUN_ATTR, None))
+
+
+def dev_runs() -> dict[str, str]:
+    """Kernel name -> why it is a dev run, for every dev-run kernel this
+    process resolved."""
+    return dict(_dev_runs)
+
+
 class ResolvedBundle(NamedTuple):
     # captured kernel_idx -> kernel object; captured constant_args_idx -> args
     kernels: dict[int, Any]
@@ -106,6 +131,11 @@ def resolve_bundle(
                     _resolved[key] = kernel
         except Exception as error:  # noqa: BLE001 - any failure leaves the graph refused
             print(f"[user_triton] kernel_idx {idx} ({entry.get('name')}): {error}",
+                  file=sys.stderr)
+            return None
+        if is_dev_run(kernel):
+            print(f"[user_triton] kernel_idx {idx} ({entry.get('name')}) is a dev run "
+                  f"({getattr(kernel, DEV_RUN_ATTR)}); the graph stays unreplayable",
                   file=sys.stderr)
             return None
         kernels[int(idx)] = kernel
