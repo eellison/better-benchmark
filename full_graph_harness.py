@@ -1246,6 +1246,8 @@ def _infer_index_bounds_from_gm(
                 b = _invert(_concrete(size), chain)
                 found.append(b)
                 expr = _sym_expr_str(size)
+                if expr is None and any(kind == "adds" for kind, _ in chain):
+                    expr = str(_concrete(size))
                 if expr is None:
                     found_exprs.append(str(b))
                     return
@@ -1253,6 +1255,8 @@ def _infer_index_bounds_from_gm(
                 for kind, arg in reversed(chain):
                     if kind == "addc":
                         expr = f"{expr} - {abs(int(arg))}"
+                    elif kind == "adds":
+                        expr = f"{expr} - ({arg[1]})"
                     elif kind == "mulc" and abs(int(arg)) > 1:
                         expr = f"floor(({expr})/{abs(int(arg))})"
                     elif kind == "mult":
@@ -1267,6 +1271,8 @@ def _infer_index_bounds_from_gm(
                 for kind, arg in reversed(chain):
                     if kind == "addc":
                         b = b - abs(int(arg))
+                    elif kind == "adds":
+                        b = b - arg[0]
                     elif kind == "mulc":
                         c = abs(int(arg))
                         b = b // c if c > 1 else b
@@ -1295,38 +1301,57 @@ def _infer_index_bounds_from_gm(
             }
 
             def _static_max(m, depth=0):
-                # Max value of an operand computed only from iota and
-                # constants, else None. Inductor's split scatter indexes
-                # P*N rows with idx + (iota & (P-1)) * N: idx is bounded by
-                # N = rows - (P-1)*N, not rows // 2.
-                if not hasattr(m, "op"):
-                    return int(m) if isinstance(m, int) and m >= 0 else None
+                # Max value of an operand computed only from iota, constants
+                # and sizes, as (value at the captured sizes, expression over
+                # the symbols or None when constant), else None. Inductor's
+                # split scatter indexes P*N rows with idx + (iota & (P-1)) * N:
+                # idx is bounded by N = rows - (P-1)*N, not rows // 2. On a
+                # symbolic graph N is a SymInt (a placeholder or sym_size).
+                if isinstance(m, torch.fx.Node):
+                    val = m.meta.get("val")
+                    if isinstance(val, torch.SymInt):
+                        value = _concrete(val)
+                        return (value, _sym_expr_str(val)) if value >= 0 else None
+                elif isinstance(m, torch.SymInt):
+                    value = _concrete(m)
+                    return (value, _sym_expr_str(m)) if value >= 0 else None
+                else:
+                    return (int(m), None) if isinstance(m, int) and m >= 0 else None
                 if m.op != "call_function" or depth > 8:
                     return None
+
+                def combine(kind, x, y):
+                    value = {"+": x[0] + y[0], "*": x[0] * y[0],
+                             "Max": max(x[0], y[0]), "Min": min(x[0], y[0])}[kind]
+                    if x[1] is None and y[1] is None:
+                        return value, None
+                    ex, ey = x[1] or str(x[0]), y[1] or str(y[0])
+                    return value, (f"{kind}({ex}, {ey})" if kind in ("Max", "Min")
+                                   else f"({ex}) {kind} ({ey})")
+
                 t = m.target
                 if t == torch.ops.prims.iota.default:
-                    length = m.args[0]
-                    start = m.kwargs.get("start", 0)
-                    step = m.kwargs.get("step", 1)
-                    if (isinstance(length, int) and isinstance(start, int)
-                            and isinstance(step, int) and start >= 0 and step >= 0):
-                        return start + max(length - 1, 0) * step
-                    return None
+                    parts = [_static_max(v, depth + 1) for v in
+                             (m.args[0], m.kwargs.get("start", 0), m.kwargs.get("step", 1))]
+                    if any(p is None for p in parts):
+                        return None
+                    length, start, step = parts
+                    last = combine("Max", combine("+", length, (-1, None)), (0, None))
+                    return combine("+", start, combine("*", last, step))
                 if t == torch.ops.aten.full.default and len(m.args) > 1:
-                    v = m.args[1]
-                    return int(v) if isinstance(v, int) and v >= 0 else None
+                    return _static_max(m.args[1], depth + 1)
                 if t == torch.ops.aten.bitwise_and.Scalar:
                     mask = m.args[1]
                     if isinstance(mask, int) and mask >= 0:
                         inner = _static_max(m.args[0], depth + 1)
-                        return mask if inner is None else min(mask, inner)
+                        return (mask, None) if inner is None else combine("Min", (mask, None), inner)
                     return None
                 if t in (torch.ops.aten.mul.Tensor, torch.ops.aten.add.Tensor):
                     a = _static_max(m.args[0], depth + 1)
                     b = _static_max(m.args[1], depth + 1)
                     if a is None or b is None:
                         return None
-                    return a * b if t == torch.ops.aten.mul.Tensor else a + b
+                    return combine("*" if t == torch.ops.aten.mul.Tensor else "+", a, b)
                 if t in _STATIC_PASSTHROUGH and m.args:
                     return _static_max(m.args[0], depth + 1)
                 return None
@@ -1401,9 +1426,12 @@ def _infer_index_bounds_from_gm(
                             if isinstance(other, (int, float)):
                                 next_frontier.append(
                                     (user, chain + ((kind + "c", other),)))
+                            elif static is not None and static[1] is None:
+                                next_frontier.append(
+                                    (user, chain + (("addc", static[0]),)))
                             elif static is not None:
                                 next_frontier.append(
-                                    (user, chain + (("addc", static),)))
+                                    (user, chain + (("adds", static),)))
                             else:
                                 next_frontier.append(
                                     (user, chain + ((kind + "t", None),)))
