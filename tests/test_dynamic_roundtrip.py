@@ -283,6 +283,145 @@ def test_floor_of_a_constant_over_symbols(text, want):
     assert _symint_expr_evaluator(_exact_floors(_sympify_expr(text)))({"s0": 3, "s1": 7}) == want
 
 
+class _FloorNorm(torch.nn.Module):
+    """A LayerNorm over rows reshaped by a symbol that is never a bare dim:
+    x is [s0, floor(200*s1/s0), 1, 192]."""
+
+    def forward(self, x, s0, rows, w, b):
+        v = x.view(s0, rows, 192)
+        mean = v.mean(-1, keepdim=True)
+        var = ((v - mean) ** 2).mean(-1, keepdim=True)
+        return (v - mean) * torch.rsqrt(var + 1e-5) * w + b
+
+
+class _ScaledDim(torch.nn.Module):
+    """x is [2, 32*s0, 128]; s0 only arrives as a SymInt input."""
+
+    def forward(self, x, s0, w):
+        return x.view(2, s0, 32, 128).mean(2) @ w.t()
+
+
+class _HalfOpen(torch.nn.Module):
+    """s0 has the range [3, inf), as after a guard s0 - 1 >= 2."""
+
+    def forward(self, x):
+        return (x[1:] - x[:-1]).sum(0), x * 2
+
+
+def _floor_case(s0, s1):
+    contract = {
+        "points": [{"inputs": [
+            [["s0", "floor(200*s1/s0)", 1, 192], "f32", {"st": ["192*floor(200*s1/s0)", 192, 192, 1]}],
+            ["I", 128, "s0"], ["I", 200, "floor(200*s1/s0)"], [[192], "f32"], [[192], "f32"]],
+            "bindings": {"s0": 128, "s1": 128}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [2, None], "hint": 128}, "s1": {"range": [2, None], "hint": 128}},
+        "guards": ["Eq(Mod(200*s1, s0), 0)"],
+    }
+    w, b, src = torch.randn(192), torch.randn(192), torch.randn(s1, 200, 192)
+    x = src.view(s0, -1, 1, 192)
+
+    def original(a, src, w, b):
+        x = src.view(a.size(0), -1, 1, 192)
+        return _FloorNorm()(x, a.size(0), x.size(1), w, b)
+
+    return (_FloorNorm(), contract, original, [torch.randn(s0), src, w, b], [(0, 0), (1, 0)],
+            [x, s0, x.size(1), w, b], {"s0": s0, "s1": s1})
+
+
+def _scaled_case(s0):
+    contract = {
+        "points": [{"inputs": [[[2, "32*s0", 128], "f32"], ["I", 64, "s0"], [[64, 128], "f32"]],
+                    "bindings": {"s0": 64}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [2, None], "hint": 64}},
+    }
+    w, src = torch.randn(64, 128), torch.randn(2, s0, 32, 128)
+
+    def original(src, w):
+        return _ScaledDim()(src.view(2, -1, 128), src.size(1), w)
+
+    return _ScaledDim(), contract, original, [src, w], [(0, 1)], [src.view(2, -1, 128), s0, w], {"s0": s0}
+
+
+def _half_open_case(s0):
+    contract = {
+        "points": [{"inputs": [[["s0", 64], "f32"]], "bindings": {"s0": 64}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [3, None], "hint": 64}},
+        "guards": ["s0 - 1 >= 2"],
+    }
+    x = torch.randn(s0, 64)
+
+    def original(x):
+        torch._check(x.size(0) >= 3)
+        return _HalfOpen()(x)
+
+    return _HalfOpen(), contract, original, [x], [(0, 0)], [x], {"s0": s0}
+
+
+# name -> (case factory, sizes compiled at, sizes replayed at without recompiling)
+_BACKED_CASES = {
+    "floor_only": (_floor_case, (64, 96), (32, 48)),
+    "scaled_dim": (_scaled_case, (40,), (24,)),
+    "half_open_range": (_half_open_case, (37,), (5,)),
+}
+
+
+@pytest.mark.parametrize("case", sorted(_BACKED_CASES))
+def test_backed_plan_matches_a_direct_dynamic_compile(case):
+    """These families fell back to unbacked ShapesSpec replay, which can
+    change Inductor's fusion. The backed plan replays them with the kernel
+    count of the original graph compiled with dynamic shapes, and serves a
+    second binding without recompiling."""
+    import torch._inductor.metrics as metrics
+    from dynamic_shape_replay import _dynamic_replay_args, _prepare_dynamic_replay_from_contract
+
+    factory, sizes, other_sizes = _BACKED_CASES[case]
+    region, contract, original, original_args, marks, inputs, binding = factory(*sizes)
+    prepared = _prepare_dynamic_replay_from_contract(region, contract)
+    assert prepared["kind"] == "backed"
+
+    torch._dynamo.reset()
+    metrics.reset()
+    for pos, dim in marks:
+        torch._dynamo.mark_dynamic(original_args[pos], dim)
+    reference = torch.compile(original)(*original_args)
+    expected = metrics.generated_kernel_count
+
+    torch._dynamo.reset()
+    metrics.reset()
+    compiled = torch.compile(prepared["module"])
+    torch.testing.assert_close(compiled(*_dynamic_replay_args(inputs, binding, prepared)), reference)
+    assert metrics.generated_kernel_count == expected
+    *_, inputs, binding = factory(*other_sizes)
+    with torch._dynamo.config.patch(error_on_recompile=True):
+        compiled(*_dynamic_replay_args(inputs, binding, prepared))
+
+
+def test_families_off_the_bare_dim_path_pick_the_backed_plan():
+    from dynamic_shape_replay import _backed_replay_plan_from_contract
+
+    def plan(inputs, symbols, guards=()):
+        point = {"inputs": inputs, "bindings": {k: v["hint"] for k, v in symbols.items()}, "captured_dynamic": True}
+        return _backed_replay_plan_from_contract({"points": [point], "symbols": symbols, "guards": list(guards)})
+
+    rows = "floor(200*s1/s0)"
+    floor_only = plan(
+        [[["s0", rows, 1, 192], "f16", {"st": [f"192*{rows}", 192, 192, 1]}], ["I", 128, "s0"], ["I", 200, rows],
+         [[192], "f16"], ["I", 25600, f"s0*{rows}"]],
+        {"s0": {"range": [2, None], "hint": 128}, "s1": {"range": [2, None], "hint": 128}},
+        ["Eq(38400*s1, 192*s0*floor(200*s1/s0))", "Eq(Mod(200*s1, s0), 0)", f"Ne({rows}, 1)",
+         f"Eq(Max(1, {rows}), {rows})", f"192*Max(1, {rows}) > 192"])
+    assert floor_only is not None and floor_only["aux"] == ("s1",)
+    scaled = plan([[[2, "32*s0", 128], "f16", {"st": ["4096*s0", 128, 1]}], ["I", 1190, "s0"]],
+                  {"s0": {"range": [2, None], "hint": 1190}})
+    assert scaled is not None and scaled["aux"] == ("s0",)
+    half_open = plan([[["s0"], "i64"], [["s1", 80], "f16"], ["I", 127, "s1 - 1"]],
+                     {"s0": {"range": [2, None], "hint": 128}, "s1": {"range": [3, None], "hint": 128}}, ["s1 - 1 >= 2"])
+    assert half_open is not None and not half_open["aux"]
+    assert "s1 >= 3" in [text for text, _ in half_open["guards"]]
+    # 0/1-capable ranges still need ShapesSpec.
+    assert plan([[["s0"], "f32"]], {"s0": {"range": [0, None], "hint": 4}}) is None
+
+
 def test_torch_max_min_in_captured_strides_evaluate():
     from dynamic_shape_replay import _symint_expr_evaluator
     from input_codec import _sympify_expr

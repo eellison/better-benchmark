@@ -580,7 +580,7 @@ class FullGraphExecution:
                 inputs, effective, self._prepared))
         if self._plan_kind == "backed":
             from dynamic_shape_replay import _backed_args
-            return tuple(_backed_args(list(inputs), self._plan))
+            return tuple(_backed_args(list(inputs), self._plan, effective))
         if self._plan_kind == "shape_env":
             return (
                 *inputs[:self._original_input_count],

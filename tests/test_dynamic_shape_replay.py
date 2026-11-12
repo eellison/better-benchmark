@@ -1067,8 +1067,10 @@ class Repro(torch.nn.Module):
             (spec, names, input_count,
              checks, frozen) = _shape_env_spec_for_repro(
                  str(d / "repro.py"), frozen={"s0": 4})
-            self.assertIsNone(_backed_replay_plan_for_repro(
-                str(d / "repro.py"), frozen={"s0": 4}))
+            # The backed plan carries s1 on an auxiliary input; the ShapesSpec
+            # path below must still bind it.
+            self.assertEqual(_backed_replay_plan_for_repro(
+                str(d / "repro.py"), frozen={"s0": 4})["aux"], ("s1",))
             self.assertEqual(names, ("s1",))
             graphs = []
 

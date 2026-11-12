@@ -629,24 +629,26 @@ def _backed_replay_plan_from_contract(data: dict,
         for dim, value in enumerate(entry[0]):
             if value in live_names:
                 sources.setdefault(value, (pos, dim))
-    if set(sources) != set(live_names):
-        return None
+    # A symbol that is never a bare dim (s1 only in floor(200*s1/s0), s0 only
+    # in 32*s0) is carried by an auxiliary stride-0 input appended to the
+    # call, so it is still a backed tensor size and the dims that use it are
+    # checked against expressions over it, as for any secondary occurrence.
+    aux = tuple(name for name in live_names if name not in sources)
 
-    root_mark_bounds = {}
+    range_bounds = {}
     for name in live_names:
         meta = symbols[name] or {}
         lo, hi = meta.get("range") or [None, None]
-        if lo == 2 and hi is None:
-            bounds = None  # plain mark_dynamic is exactly [2, +inf)
-        elif (isinstance(lo, int) and not isinstance(lo, bool)
-              and isinstance(hi, int) and not isinstance(hi, bool)
-              and lo < hi):
+        if not (isinstance(lo, int) and not isinstance(lo, bool) and lo >= 2):
+            # 0/1-capable and hint-less ranges: a plain mark specializes 0/1.
+            return None
+        if hi is None:
+            bounds = None if lo == 2 else (lo, None)
+        elif isinstance(hi, int) and not isinstance(hi, bool) and lo < hi:
             bounds = (lo, hi)
         else:
-            # Half-open 0/1-capable ranges and hint-less ranges cannot be
-            # represented safely by mark_dynamic on this torch version.
             return None
-        root_mark_bounds[name] = bounds
+        range_bounds[name] = bounds
 
     def evaluator(text):
         expr = _sympify_expr(text, symbols)
@@ -660,93 +662,34 @@ def _backed_replay_plan_from_contract(data: dict,
             return None
         return _symint_expr_evaluator(_exact_floors(expr))
 
-    def occurrence_mark_bounds(text):
-        """Bounds suitable for a non-canonical symbolic tensor dimension.
-
-        The canonical bare source owns the exact family range. Secondary
-        occurrences only need to remain symbolic so their relation check does
-        not specialize the canonical root back to the captured hint. Reuse a
-        bare root's exact bounds; for affine/composite dimensions, conservatively
-        bound the expression from the serialized root ranges. If this torch
-        version cannot represent the result, decline the backed path and let
-        ShapesSpec own the complete contract.
-        """
-        if text in root_mark_bounds:
-            return True, root_mark_bounds[text]
-
-        from torch.utils._sympy.value_ranges import ValueRanges, bound_sympy
-        import sympy
-
+    def depends_on_live_symbol(text):
         expr = _sympify_expr(text, symbols)
-        if frozen:
-            expr = expr.subs({
-                symbol: frozen[symbol.name]
-                for symbol in expr.free_symbols
-                if symbol.name in frozen
-            })
-        live_free = {
-            symbol for symbol in expr.free_symbols
-            if symbol.name in live_names
-        }
-        if not live_free:
-            return False, None
-        ranges = {}
-        for symbol in live_free:
-            lo, hi = (symbols[symbol.name] or {}).get("range") or [None, None]
-            if lo is None:
-                return None
-            ranges[symbol] = ValueRanges(
-                int(lo),
-                sympy.oo if hi is None else int(hi),
-            )
-        try:
-            value_range = bound_sympy(expr, ranges)
-        except Exception:
-            return None
-
-        lower, upper = value_range.lower, value_range.upper
-        if "oo" in str(lower):
-            return None
-        lower = int(lower)
-        if "oo" in str(upper):
-            # The no-bounds mark_dynamic spelling is [2, +inf). It may widen
-            # a secondary expression's lower bound, but the canonical source
-            # and the relation check still enforce the captured contract.
-            return (True, None) if lower >= 2 else None
-        upper = int(upper)
-        if lower == upper:
-            return False, None
-        if lower < upper:
-            return True, (lower, upper)
-        return None
+        return any(symbol.name in live_names and symbol.name not in frozen
+                   for symbol in expr.free_symbols)
 
     # Mark EVERY symbolic tensor-size occurrence, not just the canonical
     # source. Otherwise an unmarked repeated/affine occurrence specializes at
     # its hint and its equality check forces the marked source to that same
     # constant, producing a ConstraintViolationError on the first compile.
-    marks = {}
-    for pos, entry in enumerate(entries):
-        if not (isinstance(entry, list) and entry
-                and isinstance(entry[0], list)):
-            continue
-        for dim, value in enumerate(entry[0]):
-            if not isinstance(value, str):
-                continue
-            mark = occurrence_mark_bounds(value)
-            if mark is None:
-                return None
-            is_dynamic, bounds = mark
-            if is_dynamic:
-                marks[(pos, dim)] = bounds
-
-    # mark_dynamic's min/max is strict: a guard the replay compile adds that
-    # narrows the range (Ne(s0, 53) when a size could equal a static dim, a
-    # reduction heuristic's s0 <= 4096) raises ConstraintViolationError. Mark
-    # plain dynamic dims and check bounded ranges as guards instead.
-    marks = dict.fromkeys(marks)
-    range_guards = [
-        guard for name, bounds in root_mark_bounds.items() if bounds is not None
-        for guard in (f"{name} >= {bounds[0]}", f"{name} <= {bounds[1]}")]
+    # Marks are plain mark_dynamic, which only rejects specialization:
+    # min/max is strict, and a guard the replay compile adds that narrows the
+    # range (Ne(s0, 53) when a size could equal a static dim, a reduction
+    # heuristic's s0 <= 4096) would raise ConstraintViolationError. Bounded
+    # ranges are checked as guards instead. A dim whose value at a binding is
+    # 0 or 1 still specializes, and Dynamo reports it.
+    marks = {
+        (pos, dim): None
+        for pos, entry in enumerate(entries)
+        if isinstance(entry, list) and entry and isinstance(entry[0], list)
+        for dim, value in enumerate(entry[0])
+        if isinstance(value, str) and depends_on_live_symbol(value)
+    }
+    range_guards = []
+    for name, bounds in range_bounds.items():
+        if bounds is not None:
+            range_guards.append(f"{name} >= {bounds[0]}")
+            if bounds[1] is not None:
+                range_guards.append(f"{name} <= {bounds[1]}")
 
     derived = {}
     for pos, entry in enumerate(entries):
@@ -816,6 +759,7 @@ def _backed_replay_plan_from_contract(data: dict,
             for (pos, dim), bounds in sorted(marks.items())),
         "sources": tuple(
             (name, pos, dim) for name, (pos, dim) in sorted(sources.items())),
+        "aux": aux,
         "derived": tuple(sorted(derived.items())),
         "checks": tuple(checks),
         "guards": tuple(guards),
@@ -837,6 +781,8 @@ def _backed_repro(inner, plan):
             values = dict(plan["frozen"])
             for name, pos, dim in plan["sources"]:
                 values[name] = full[pos].size(dim)
+            for name, carrier in zip(plan.get("aux", ()), args[len(plan["kept"]):]):
+                values[name] = carrier.size(0)
             for pos, fn in plan["derived"]:
                 full[pos] = fn(values)
             for pos, kind, dim, expression, fn in plan["checks"]:
@@ -860,8 +806,11 @@ def _backed_repro(inner, plan):
     return BackedRepro()
 
 
-def _backed_args(inputs, plan):
-    """Select the compiled call arguments and mark exact backed dimensions."""
+def _backed_args(inputs, plan, binding: dict | None = None):
+    """Select the compiled call arguments and mark exact backed dimensions.
+
+    Symbols carried by an auxiliary input (``plan["aux"]``) take their value
+    from ``binding``."""
     args = [inputs[pos] for pos in plan["kept"]]
     for pos, dim, bounds in plan["markings"]:
         tensor = args[pos]
@@ -870,6 +819,15 @@ def _backed_args(inputs, plan):
         else:
             torch._dynamo.mark_dynamic(
                 tensor, dim, min=bounds[0], max=bounds[1])
+    if plan.get("aux"):
+        missing = [name for name in plan["aux"] if name not in (binding or {})]
+        if missing:
+            raise ValueError(f"backed replay needs a binding for {missing}")
+        device = next((a.device for a in args if isinstance(a, torch.Tensor)), "cpu")
+        for name in plan["aux"]:
+            carrier = torch.empty(1, device=device).expand(int(binding[name]))
+            torch._dynamo.mark_dynamic(carrier, 0)
+            args.append(carrier)
     return args
 
 
@@ -1167,6 +1125,8 @@ def _prepare_dynamic_replay_from_contract(inner, data: dict,
     target = _symfloat_repro(inner, float_plan) if float_plan else inner
 
     backed = _backed_replay_plan_from_contract(contract, frozen=frozen)
+    if backed is not None and float_plan and backed["aux"]:
+        backed = None  # the SymFloat layer reads integer symbols from input dims
     if backed is not None:
         if float_plan:
             float_plan["int_sources"] = backed["sources"]
@@ -1225,7 +1185,7 @@ def _dynamic_replay_args(inputs, binding: dict, prepared):
         if prepared["float"] else list(inputs)
     )
     if prepared["kind"] == "backed":
-        return _backed_args(args, prepared["backed"])
+        return _backed_args(args, prepared["backed"], binding)
     if prepared["kind"] == "shape_env":
         return [
             *args,
