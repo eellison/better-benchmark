@@ -514,11 +514,9 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 meta["models"].sort()
                 meta["n_models"] = len(meta["models"])
                 changed = True
-            if entry.get("masked_reason") != meta.get("masked_reason"):
-                if entry.get("masked_reason"):
-                    meta["masked_reason"] = entry["masked_reason"]
-                else:
-                    meta.pop("masked_reason", None)
+            # The repro is masked if any model's capture masks it.
+            if entry.get("masked_reason") and not meta.get("masked_reason"):
+                meta["masked_reason"] = entry["masked_reason"]
                 changed = True
             if changed:
                 _atomic_write_text(meta_path, json.dumps(meta, indent=2))
