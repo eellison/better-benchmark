@@ -1319,11 +1319,32 @@ def compute_observed_stats(tensor: torch.Tensor) -> dict | None:
         return None
 
 
+_SOURCE_LOCATION_META = ("stack_trace", "custom")
+
+
+def _print_readable(gm, strip_source_locations: bool, **kwargs) -> str:
+    """print_readable, optionally without the model's source file paths and
+    source lines (node stack traces and user annotations)."""
+    if not strip_source_locations:
+        return gm.print_readable(print_output=False, **kwargs)
+    saved = []
+    for node in gm.graph.nodes:
+        for key in _SOURCE_LOCATION_META:
+            if key in node.meta:
+                saved.append((node, key, node.meta.pop(key)))
+    try:
+        return gm.print_readable(print_output=False, **kwargs)
+    finally:
+        for node, key, value in saved:
+            node.meta[key] = value
+
+
 class _CaptureState:
     def __init__(self, output_dir: str, label: str = "capture", graph_dir: str | None = None,
                  validate: bool = True, capture_only: bool = False,
-                 constant_folding: bool = False):
+                 constant_folding: bool = False, strip_source_locations: bool = False):
         self.output_dir = output_dir
+        self.strip_source_locations = strip_source_locations
         # The compiled model folds constants at load time (AOTInductor's
         # use_runtime_constant_folding): constant-only work is not per-call
         # work, so it is kept out of the captured regions.
@@ -1521,7 +1542,7 @@ class _CaptureState:
 
     def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
         shape_params = shape_params or {}
-        code = gm.print_readable(print_output=False)
+        code = _print_readable(gm, self.strip_source_locations)
         import re as _re
         code = _re.sub(r"^class \S+\(torch\.nn\.Module\):",
                        "class Repro(torch.nn.Module):", code, count=1,
@@ -1860,8 +1881,9 @@ if __name__ == "__main__":
             full_graph_path = os.path.join(self.graph_dir, full_graph_name)
             self.graph_counter += 1
             try:
-                full_code = gm.print_readable(
-                    print_output=False,
+                full_code = _print_readable(
+                    gm,
+                    self.strip_source_locations,
                     include_stride=True,
                     include_device=True,
                 )
@@ -1885,6 +1907,7 @@ if __name__ == "__main__":
                             "node_accounting": graph_node_accounting(
                                 gm, components, constant_folded=folded),
                             "replay_dependencies": replay_dependencies(gm),
+                            "source_locations_stripped": self.strip_source_locations,
                             **({"constant_inputs": constant_inputs}
                                if constant_inputs is not None else {}),
                         },
@@ -2051,6 +2074,7 @@ if __name__ == "__main__":
             "dropped": self.dropped,
             "n_captured": len(self.captured),
             "n_dropped": len(self.dropped),
+            "source_locations_stripped": self.strip_source_locations,
         }
         if self.constant_folding:
             payload["constant_folding"] = {
@@ -2076,7 +2100,8 @@ _active_state: _CaptureState | None = None
 
 def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str | None = None,
                          validate: bool = True, capture_only: bool = False,
-                         constant_folding: bool = False):
+                         constant_folding: bool = False,
+                         strip_source_locations: bool = False):
     """Install the post-grad capture hook.
 
     Call this before torch.compile(). All subsequent compilations will have
@@ -2097,10 +2122,13 @@ def install_capture_hook(output_dir: str, label: str = "capture", graph_dir: str
             mutation in eager code is not detected. Merging does not remove a
             model's earlier points, so recapture into a clean model entry when
             switching this flag.
+        strip_source_locations: Leave the model's source file paths, source
+            lines and user annotations out of the written graphs and repros.
     """
     global _active_state
     _active_state = _CaptureState(output_dir, label, graph_dir=graph_dir, validate=validate,
-                                  capture_only=capture_only, constant_folding=constant_folding)
+                                  capture_only=capture_only, constant_folding=constant_folding,
+                                  strip_source_locations=strip_source_locations)
 
     _old_pass = inductor_config.post_grad_custom_pre_pass
 
