@@ -283,6 +283,18 @@ def graph_mask(gm: fx.GraphModule) -> dict | None:
     return {"reasons": sorted(reasons), "scope": "graph"}
 
 
+def node_mask_counts(gm: fx.GraphModule) -> dict:
+    """Masked nodes per mask reason over the graph and its HOP subgraphs."""
+    counts = collections.Counter(
+        reason
+        for module in gm.modules()
+        if isinstance(module, fx.GraphModule)
+        for node in module.graph.nodes
+        for reason in mask_reasons(node)
+    )
+    return dict(sorted(counts.items()))
+
+
 def partition_node_is_supported(node: fx.Node) -> bool:
     """Capture-pipeline fusibility test for a single node.
 
@@ -2346,6 +2358,9 @@ if __name__ == "__main__":
         mask = graph_mask(gm)
         if mask is not None:
             extra["masked"] = mask
+        mask_counts = node_mask_counts(gm)
+        if mask_counts:
+            extra["node_mask_counts"] = mask_counts
         side_effects = (gm.meta or {}).get("better_benchmark_side_effects") or {}
         if side_effects.get("stripped") or side_effects.get("blocked"):
             # Ops removed from (or kept in) the source at ingest; see
