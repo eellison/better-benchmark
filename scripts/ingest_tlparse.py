@@ -289,6 +289,19 @@ def _parse_input_shapes_from_reader(content: str):
                 and isinstance(expr_node.value, str)
                 else None
             )
+            if value is None and expr is not None:
+                # Some writers omit the value even though the expression's
+                # symbols are bound (module-level `sN = ...` or other inputs).
+                try:
+                    value = _evaluate_int_expression(expr, bindings)
+                except (SyntaxError, TypeError, ValueError):
+                    pass
+            if expr is not None and re.fullmatch(r"-?\d+", expr.strip()):
+                # A SymInt specialized to a constant (expr='992') traces as a
+                # plain int, so the captured placeholder is a scalar.
+                inputs.append({"kind": "scalar", "name": input_name(call),
+                               "value": int(expr)})
+                continue
             spec = {"kind": "symint", "name": input_name(call), "value": value}
             if expr is not None:
                 spec["symbolic_expr"] = expr
@@ -601,7 +614,23 @@ def _dynamic_shapes_from_specs(input_specs):
                     for index, dim in enumerate(spec["shape"])
                 ])
         elif spec.get("kind") == "symint" and spec.get("symbolic_expr"):
-            params[name] = parse_expr(spec["symbolic_expr"])
+            value = parse_expr(spec["symbolic_expr"])
+            if not isinstance(value, (IntVar, int)):
+                # make_fx binds a scalar input only to a variable or an int,
+                # so an input that is an expression (e.g. `s0 + s1`) gets its
+                # own variable; its relation to the other inputs is dropped.
+                hint = spec.get("value", spec.get("hint"))
+                expr = spec["symbolic_expr"]
+                if hint is not None and expression_names(expr) <= hints.keys():
+                    expected = _evaluate_int_expression(expr, hints)
+                    if expected != int(hint):
+                        raise ValueError(
+                            f"SymInt input {name!r} is {hint} but {expr!r} is {expected}"
+                        )
+                value = IntVar(
+                    name, optimization_hint=None if hint is None else int(hint)
+                )
+            params[name] = value
     return ShapesSpec(params), True
 
 
