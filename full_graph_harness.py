@@ -2485,6 +2485,26 @@ def load_graph_class_from_source(
     class_module = ast.fix_missing_locations(
         ast.Module(body=[graph_class], type_ignores=[])
     )
+    # The first torch.tensor call on a device type imports modules (torch's
+    # storage types, CUDA's lazy init), which the restricted builtins below
+    # cannot do; graph __init__s may call `tensor` on any device they name.
+    # Only __init__ runs at load: warming up a device forward() merely names
+    # would initialize CUDA on CPU-only hosts and in parents that later fork.
+    device_types = {"cpu"} | {
+        keyword.value.value
+        for member in graph_class.body
+        if isinstance(member, ast.FunctionDef) and member.name == "__init__"
+        for node in ast.walk(member)
+        if isinstance(node, ast.Call) and ast.unparse(node.func) == "device"
+        for keyword in node.keywords
+        if keyword.arg == "type" and isinstance(keyword.value, ast.Constant)
+    }
+    for device_type in sorted(device_types):
+        try:
+            torch.tensor(0, device=device_type)
+        except (AssertionError, RuntimeError):
+            # No such device here; __init__ fails on it either way.
+            pass
     exec(compile(class_module, str(path), "exec"), exec_globals)
     return exec_globals[graph_class.name]
 
