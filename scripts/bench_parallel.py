@@ -1659,6 +1659,37 @@ def _full_graph_skip_failure(path: Path, reasons: list[dict[str, str]]) -> dict:
     }
 
 
+def _full_graph_mask(definition) -> dict | None:
+    """The graph-level mask recorded at capture, or for sidecars written
+    before masking, a user_triton mask when the graph calls user-defined
+    Triton kernels."""
+    from full_graph_harness import full_graph_calls_user_triton
+
+    sidecar = (definition.metadata or {}).get("sidecar") or {}
+    if sidecar.get("masked"):
+        return sidecar["masked"]
+    if full_graph_calls_user_triton(definition):
+        return {"reasons": ["user_triton"], "scope": "graph"}
+    return None
+
+
+def _full_graph_masked_skip(
+    path: Path, mask: dict, reasons: list[dict[str, str]]
+) -> dict:
+    """A masked graph is skipped, not failed: its full-graph time is held at
+    production, and its partitions are benchmarked separately."""
+    failure = _full_graph_skip_failure(path, [
+        {
+            "category": "masked",
+            "reason": f"masked ({', '.join(mask['reasons'])}): full-graph replay skipped",
+            "hint": "Benchmark the graph's partitions; projections hold its time at production.",
+        },
+        *(reason for reason in reasons if reason["category"] != "user_triton_kernel"),
+    ])
+    failure["masked"] = mask
+    return failure
+
+
 def _full_graph_preflight_error(path: Path, exc: Exception) -> dict:
     return {
         "status": "failed",
@@ -1675,7 +1706,8 @@ def _replay_dependency_reasons(definition, has_worker_init: bool) -> list[dict[s
     """Blocked replay dependencies recorded in the sidecar at export time.
 
     A --worker-init hook may register custom ops in the workers, so with one a
-    missing op is only a warning.
+    missing op is only a warning. It cannot make a user-Triton kernel index
+    resolve to the captured kernel, so those stay blocked.
     """
     from replay_dependencies import check_replay_dependencies
 
@@ -1713,10 +1745,13 @@ def _preflight_full_graphs(
                 definition,
                 allow_unsafe=allow_unsafe,
             )
+            mask = _full_graph_mask(definition)
         except Exception as exc:
             failures[str(repro_path)] = _full_graph_preflight_error(repro_path, exc)
             continue
-        if reasons:
+        if mask:
+            failures[str(repro_path)] = _full_graph_masked_skip(repro_path, mask, reasons)
+        elif reasons:
             failures[str(repro_path)] = _full_graph_skip_failure(repro_path, reasons)
         else:
             queueable.append(repro_path)
