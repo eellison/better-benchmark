@@ -1662,14 +1662,17 @@ def _full_graph_skip_failure(path: Path, reasons: list[dict[str, str]]) -> dict:
 def _full_graph_mask(definition) -> dict | None:
     """The graph-level mask recorded at capture, or for sidecars written
     before masking, a user_triton mask when the graph calls user-defined
-    Triton kernels."""
+    Triton kernels. A graph whose kernel bundle (which un-masked it at ingest)
+    does not resolve in this process is masked ``user_triton_unresolved``."""
     from full_graph_harness import full_graph_calls_user_triton
+    from user_triton import BUNDLE_KEY
 
     sidecar = (definition.metadata or {}).get("sidecar") or {}
     if sidecar.get("masked"):
         return sidecar["masked"]
     if full_graph_calls_user_triton(definition):
-        return {"reasons": ["user_triton"], "scope": "graph"}
+        reason = "user_triton_unresolved" if sidecar.get(BUNDLE_KEY) else "user_triton"
+        return {"reasons": [reason], "scope": "graph"}
     return None
 
 
