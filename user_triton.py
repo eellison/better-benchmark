@@ -228,7 +228,8 @@ def make_launcher(bundle: ResolvedBundle) -> Callable[..., dict[str, Any]]:
                 config = copy.copy(config)
                 config.num_stages = 1
                 configs.append(config)
-            single_stage[kernel_idx] = triton.autotune(configs=configs, key=[])(kernel.fn)
+            single_stage[kernel_idx] = triton.autotune(
+                configs=configs, key=list(kernel.keys))(kernel.fn)
         single_stage[kernel_idx][grid](**args, **constant_args)
 
     def launch_user_triton(*, kernel_idx, constant_args_idx, grid,
