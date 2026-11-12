@@ -567,6 +567,28 @@ def test_static_and_dynamic_rows_place_views_alike(tmp_path):
     assert seen == [True, True]
 
 
+def test_dynamic_rows_are_checked_against_fp64(tmp_path):
+    """A padded view input (stride s1 > width) made the float64 run of the
+    replay wrapper fail its stride check, so dynamic rows were compared
+    strictly against eager while static rows had an fp64 reference."""
+    import dynamic_benchmark
+
+    _capture(lambda x: x.float().pow(2).mean(-1).rsqrt(), [(torch.randn(12, 80, dtype=torch.bfloat16)[:, :64],)], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    assert any(isinstance(e[2], dict) and "st" in e[2] for e in shapes["points"][0]["inputs"]), shapes
+    summaries = []
+    real = dynamic_benchmark._dynamic_row_numerics
+
+    def record(*args, **kwargs):
+        summaries.append(real(*args, **kwargs))
+        return summaries[-1]
+
+    with mock.patch.object(dynamic_benchmark, "_dynamic_row_numerics", record):
+        rows = _check(tmp_path, name, [shapes["points"][0]["bindings"]])
+    assert [r["numerics"] for r in rows] == ["pass"], rows
+    assert [(s["reference"], s["fp64_reference_error"]) for s in summaries] == [("fp64", None)], summaries
+
+
 def test_a_failing_dynamic_half_keeps_the_static_rows(tmp_path):
     import repro_harness
 

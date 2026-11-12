@@ -46,17 +46,29 @@ class FullGraphNumericsError(RuntimeError):
 
 
 def _float64_inputs(inputs: Any) -> Any:
-    """Float64 copies of the float tensors in ``inputs``; repeated tensors stay shared."""
+    """Float64 copies of the float tensors in ``inputs`` with the same layout.
+
+    Each storage is upcast once and every view keeps its size, stride and
+    storage offset, so views of one storage stay aliased and a padded or
+    offset view stays one (the dynamic replay checks those relations)."""
     import torch
     from torch.utils._pytree import tree_map
 
-    copies: dict[int, Any] = {}
+    storages: dict[tuple, Any] = {}
+    copies: dict[int, Any] = {}  # a tensor passed twice stays one tensor
 
     def upcast(value: Any) -> Any:
         if not (isinstance(value, torch.Tensor) and value.is_floating_point()):
             return value
-        if id(value) not in copies:
-            copies[id(value)] = value.to(torch.float64, copy=True)
+        if id(value) in copies:
+            return copies[id(value)]
+        storage = value.untyped_storage()
+        key = (storage.data_ptr(), storage.nbytes(), value.dtype)
+        if key not in storages:
+            flat = torch.empty(0, dtype=value.dtype, device=value.device)
+            flat.set_(storage, 0, (storage.nbytes() // value.element_size(),), (1,))
+            storages[key] = flat.to(torch.float64)
+        copies[id(value)] = storages[key].as_strided(value.size(), value.stride(), value.storage_offset())
         return copies[id(value)]
 
     return tree_map(upcast, inputs)
@@ -104,11 +116,12 @@ def rng_dependent_output_leaves(
     return scan_rng_dependence(fn, inputs)
 
 
-def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> Any | None:
+def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> tuple[Any | None, str | None]:
     """Run a float64 copy of ``fn`` on float64 copies of the float inputs.
 
-    Float-to-float casts inside ``fn`` also produce float64. Returns ``None``
-    when the float64 run fails (unsupported dtype, OOM, ...).
+    Float-to-float casts inside ``fn`` also produce float64. Returns
+    ``(output, None)``, or ``(None, error)`` when the float64 run fails
+    (unsupported dtype, OOM, ...).
     """
     import copy
 
@@ -121,9 +134,9 @@ def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> Any | None:
         if isinstance(fn64, torch.nn.Module):
             fn64 = fn64.double()
         with float64_casts_mode():
-            return _run_seeded(fn64, make_inputs, seed, upcast=True)
-    except Exception:
-        return None
+            return _run_seeded(fn64, make_inputs, seed, upcast=True), None
+    except Exception as e:
+        return None, f"{type(e).__name__}: {e}"[:300]
 
 
 def _comparable(value: Any) -> Any:
@@ -390,14 +403,16 @@ def validate_full_graph_numerics(
     eager nondeterminism from a stable compiled mismatch. ``skip_output_leaves``
     indexes the flattened outputs, e.g. from RNG detection.
 
-    Returns ``(eager_output, reference)`` where ``reference`` is ``"fp64"`` or
-    ``"eager"``.
+    Returns ``(eager_output, reference, fp64_error)`` where ``reference`` is
+    ``"fp64"`` or ``"eager"`` and ``fp64_error`` says why there is no usable
+    float64 reference (``None`` when there is one).
     """
     eager = _run_seeded(eager_fn, make_inputs, seed)
     skip = frozenset(skip_output_leaves)
-    reference = _fp64_reference(eager_fn, make_inputs, seed)
+    reference, fp64_error = _fp64_reference(eager_fn, make_inputs, seed)
     if reference is not None and not _reference_covers_eager(reference, eager, skip):
         reference = None
+        fp64_error = "fp64 output does not cover eager's (shape, or nonfinite where eager is finite)"
     reference_kind = "eager" if reference is None else "fp64"
     compiled = _run_seeded(compiled_fn, make_inputs, seed)
     records = compare_output_records(reference, eager, compiled, skip_leaves=skip)
@@ -412,14 +427,16 @@ def validate_full_graph_numerics(
             else "eager_self_instability"
         )
         details = _details(records)
+        unavailable = f", fp64 reference unavailable: {fp64_error}" if fp64_error else ""
         raise FullGraphNumericsError(
             f"{label} output mismatch (seed={seed}, dynamo same vs "
-            f"{reference_kind}, {classification}): {'; '.join(details)}",
+            f"{reference_kind}{unavailable}, {classification}): {'; '.join(details)}",
             classification=classification,
             seed_record={
                 "seed": seed,
                 "pass": False,
                 "reference": reference_kind,
+                "fp64_reference_error": fp64_error,
                 "failure_classification": classification,
                 "eager_self_check": {"pass": eager_stable},
                 "diagnostics": details,
@@ -427,7 +444,7 @@ def validate_full_graph_numerics(
                 "per_output": _failing_records(records),
             },
         )
-    return eager, reference_kind
+    return eager, reference_kind, fp64_error
 
 
 def run_numerics_gate(
@@ -449,7 +466,8 @@ def run_numerics_gate(
     ``failed_variant`` attached.
 
     Seeds without a usable float64 reference are compared against eager
-    alone; ``reference`` in the summary records which anchor was used.
+    alone; ``reference`` in the summary records which anchor was used and
+    ``fp64_reference_error`` why the float64 run was not usable.
     Status is ``numerics_unavailable`` rather than ``pass`` when RNG-dependent
     output leaves are not listed in ``non_semantic_output_leaves`` (an
     explicit output contract) or RNG detection failed.
@@ -461,7 +479,7 @@ def run_numerics_gate(
     reference_kinds: set[str] = set()
     for seed in range(seeds):
         try:
-            eager_out, reference_kind = validate_full_graph_numerics(
+            eager_out, reference_kind, fp64_error = validate_full_graph_numerics(
                 eager_fn,
                 compiled_fn,
                 make_inputs,
@@ -483,6 +501,7 @@ def run_numerics_gate(
                 "seed": seed,
                 "pass": True,
                 "reference": reference_kind,
+                "fp64_reference_error": fp64_error,
                 "failure_classification": None,
                 "eager_self_check": None,
                 "diagnostics": [],
@@ -507,6 +526,9 @@ def run_numerics_gate(
             next(iter(reference_kinds)) if len(reference_kinds) == 1 else "mixed"
         ),
         "fp64_reference_available": reference_kinds == {"fp64"},
+        # Why a seed fell back to the eager comparison, if one did.
+        "fp64_reference_error": next(
+            (r["fp64_reference_error"] for r in records if r.get("fp64_reference_error")), None),
         "rng_detection_ok": rng_leaves is not None,
         "skipped_rng_output_leaves": skipped,
         "unjustified_skipped_output_leaves": unjustified,

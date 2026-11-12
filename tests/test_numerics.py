@@ -61,7 +61,7 @@ def test_bitcast_output_falls_back_to_eager_reference():
     def eager(x):
         return x.view(torch.int16).view(torch.bfloat16)
 
-    _, reference = validate_full_graph_numerics(eager, eager, lambda: [torch.ones(4)])
+    _, reference, _ = validate_full_graph_numerics(eager, eager, lambda: [torch.ones(4)])
     assert reference == "eager"
 
 
