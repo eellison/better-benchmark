@@ -44,6 +44,7 @@ from full_graph_harness import (
     placeholder_info_from_gm,
 )
 from input_codec import index_gen_from_observed
+from jagged_inputs import JaggedInputs, jagged_input_specs
 from mask_rules import (
     hw_unsupported_rule,
     jagged_rule,
@@ -326,9 +327,12 @@ def region_mask_reason(comp: list) -> str | None:
     return None
 
 
-def graph_mask(gm: fx.GraphModule) -> dict | None:
+def graph_mask(gm: fx.GraphModule, jagged: JaggedInputs | None = None) -> dict | None:
     """Graph-level mask for a full-graph sidecar, or None when nothing in the
-    graph or its HOP subgraphs is masked with a graph-scope reason."""
+    graph or its HOP subgraphs is masked with a graph-scope reason. Jagged
+    nodes that ``jagged`` covers (their inputs get valid lengths/offsets)
+    are not masked."""
+    covered = jagged.covered if jagged is not None else set()
     reasons = {
         reason
         for module in gm.modules()
@@ -336,10 +340,22 @@ def graph_mask(gm: fx.GraphModule) -> dict | None:
         for node in module.graph.nodes
         for reason in mask_reasons(node)
         if reason in GRAPH_SCOPE_MASK_REASONS
+        and not (reason == "jagged" and node in covered)
     }
     if not reasons:
         return None
     return {"reasons": sorted(reasons), "scope": "graph"}
+
+
+def graph_jagged_inputs(gm: fx.GraphModule) -> JaggedInputs:
+    """Valid lengths/offsets generators for the inputs of the graph's
+    top-level jagged nodes (see jagged_inputs). Jagged nodes inside HOP
+    subgraphs are never covered."""
+    from full_graph_harness import _placeholder_storage_groups
+
+    grouped = {name for group in _placeholder_storage_groups(gm) for name in group}
+    nodes = [n for n in gm.graph.nodes if "jagged" in mask_reasons(n)]
+    return jagged_input_specs(gm, nodes, grouped_inputs=grouped)
 
 
 def node_mask_counts(gm: fx.GraphModule) -> dict:
@@ -2468,9 +2484,15 @@ if __name__ == "__main__":
             "source": infer_full_graph_source(full_graph_path),
             "replay_dependencies": replay_dependencies(gm),
         }
-        mask = graph_mask(gm)
+        jagged = graph_jagged_inputs(gm)
+        if set(jagged.specs) & (set(index_bounds or {}) | set(permutation_indices or {})):
+            # An input that is also an index has two constraints; keep it masked.
+            jagged = JaggedInputs(uncovered=jagged.covered | jagged.uncovered)
+        mask = graph_mask(gm, jagged)
         if mask is not None:
             extra["masked"] = mask
+        if jagged.specs and not jagged.uncovered:
+            extra["jagged_inputs"] = sorted(jagged.specs)
         mask_counts = node_mask_counts(gm)
         if mask_counts:
             extra["node_mask_counts"] = mask_counts
@@ -2497,6 +2519,7 @@ if __name__ == "__main__":
             source_input_specs=(gm.meta or {}).get(
                 "better_benchmark_input_specs"
             ),
+            jagged_specs=jagged.specs if not jagged.uncovered else None,
         )
 
         from roundtrip_validation import run_write_gate
