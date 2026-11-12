@@ -9,6 +9,7 @@ those annotations so the benchmark runner can time the whole graph directly.
 from __future__ import annotations
 
 import ast
+import contextlib
 import math
 import operator
 import re
@@ -124,36 +125,58 @@ def upcast_reference(
     seed: int,
     target: Any,
     errors: list[str] | None = None,
+    islanded: set[str] | None = None,
 ) -> Any | None:
     """Run a copy of ``fn`` with float inputs, parameters, casts and factory
     dtypes narrower than ``target`` upcast to ``target``.
 
-    Casts to float8 keep their quantization. Returns ``None`` when the run
-    fails (unsupported dtype, OOM, ...), appending the error to ``errors``.
+    Casts to float8 keep their quantization. When a float64 run fails, it is
+    retried with the ops that have no float64 kernel run in float32
+    (``numerics.float32_islands_mode``); their names go to ``islanded``.
+    Returns ``None`` when the run fails (unsupported dtype, OOM, ...),
+    appending the error to ``errors``.
     """
     import copy
 
     import torch
 
-    from numerics import upcast_casts_mode, upcast_factory_dtypes_mode
+    from numerics import float32_islands_mode, upcast_casts_mode, upcast_factory_dtypes_mode
 
     def upcast(t: Any) -> Any:
         if t.is_floating_point() and t.itemsize < target.itemsize:
             return t.to(target)
         return t
 
-    try:
+    def run(islands: set[str] | None) -> Any:
         fn_up = copy.deepcopy(fn)
         if isinstance(fn_up, torch.nn.Module):
             fn_up = fn_up._apply(upcast)
         torch.manual_seed(seed)
         inputs = _upcast_inputs(make_inputs(), target)
-        with upcast_casts_mode(target), upcast_factory_dtypes_mode(target):
+        with contextlib.ExitStack() as stack:
+            if islands is not None:
+                stack.enter_context(float32_islands_mode(islands))
+            stack.enter_context(upcast_casts_mode(target))
+            stack.enter_context(upcast_factory_dtypes_mode(target))
             return _run_seeded(fn_up, lambda: inputs, seed)
+
+    try:
+        return run(None)
+    except Exception as error:  # noqa: BLE001 - no reference; callers fall back
+        if errors is not None:
+            errors.append(f"{type(error).__name__}: {error}"[:300])
+        if target != torch.float64:
+            return None
+    islands: set[str] = set()
+    try:
+        ref = run(islands)
     except Exception as error:  # noqa: BLE001 - no reference; callers fall back
         if errors is not None:
             errors.append(f"{type(error).__name__}: {error}"[:300])
         return None
+    if islanded is not None:
+        islanded.update(islands)
+    return ref
 
 
 def _reference_lookup(reference: Any, baseline_spec: Any):
@@ -381,9 +404,12 @@ def validate_full_graph_numerics(
     @functools.cache
     def reference(target: Any) -> Any | None:
         retries = len(SINGLE_STAGE_RETRIES)
-        ref = upcast_reference(eager_fn, make_inputs, seed, target)
+        islanded: set[str] = set()
+        ref = upcast_reference(eager_fn, make_inputs, seed, target, islanded=islanded)
         if info is not None and len(SINGLE_STAGE_RETRIES) > retries:
             info["ref_num_stages"] = 1
+        if info is not None and islanded:
+            info["reference_float32_islands"] = sorted(islanded)
         return ref
 
     compiled = _run_seeded(compiled_fn, make_inputs, seed)
@@ -462,6 +488,7 @@ def run_numerics_gate(
     reference_kinds: set[str] = set()
     labels: list[str] = []
     ref_num_stages = None
+    islands: set[str] = set()
     for seed in range(seeds):
         info: dict[str, Any] = {}
         try:
@@ -476,11 +503,13 @@ def run_numerics_gate(
             )
         except FullGraphNumericsError as exc:
             ref_num_stages = ref_num_stages or info.get("ref_num_stages")
+            islands.update(info.get("reference_float32_islands", ()))
             records.append(exc.seed_record)
             reference_kinds.add(exc.seed_record["reference"])
             first_error = first_error or exc
             continue
         ref_num_stages = ref_num_stages or info.get("ref_num_stages")
+        islands.update(info.get("reference_float32_islands", ()))
         labels.append(info["label"])
         reference_kinds.add(reference_kind)
         if first_eager_out is None:
@@ -536,6 +565,10 @@ def run_numerics_gate(
             else "pass_precision" if "pass_precision" in labels else "pass"
         ),
         **({"ref_num_stages": ref_num_stages} if ref_num_stages else {}),
+        **({"reference_float32_islands": sorted(islands)} if islands else {}),
+        # A pass_precision judged against a reference that rounds at float32
+        # somewhere is a weaker verdict than one against a full float64 run.
+        **({"weak_anchor": True} if islands and "pass_precision" in labels else {}),
         "rng_detection_ok": rng_leaves is not None,
         "skipped_rng_output_leaves": skipped,
         "unjustified_skipped_output_leaves": unjustified,
