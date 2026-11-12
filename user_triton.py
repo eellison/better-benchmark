@@ -157,18 +157,19 @@ def rewrite_hop_calls(graph_class: ast.ClassDef, bundle: ResolvedBundle) -> bool
     ):
         return False
     grids = [kw.get("grid") for kw in keywords]
-    # The HOP holds one grid per autotune config. Only calls whose configs all
-    # share one grid are replayed, so the launcher passes wrap_triton that grid.
-    if any(
-        not isinstance(grid, ast.List)
-        or not grid.elts
-        or any(ast.dump(g) != ast.dump(grid.elts[0]) for g in grid.elts)
-        for grid in grids
-    ):
-        return False
+    # The HOP holds one grid per autotune config, in the order of the captured
+    # configs. When they differ (the grid depends on a block size), the
+    # launcher picks the one of the config being launched.
+    for (kidx, _), grid in zip(calls, grids):
+        if not isinstance(grid, ast.List) or not grid.elts:
+            return False
+        shared = all(ast.dump(g) == ast.dump(grid.elts[0]) for g in grid.elts)
+        if not shared and len(grid.elts) != len(getattr(bundle.kernels[kidx], "configs", ())):
+            return False
     for node, grid in zip(nodes, grids):
         node.func = ast.copy_location(ast.Name(id=LAUNCHER_NAME, ctx=ast.Load()), node.func)
-        grid.elts = grid.elts[:1]
+        if all(ast.dump(g) == ast.dump(grid.elts[0]) for g in grid.elts):
+            grid.elts = grid.elts[:1]
     return True
 
 
@@ -201,6 +202,31 @@ def make_launcher(bundle: ResolvedBundle) -> Callable[..., dict[str, Any]]:
         return torch.empty(size, device="cuda", dtype=torch.int8)
 
     single_stage: dict[int, Any] = {}
+
+    # Per kernel, the kwargs of each captured config, to find the grid of the
+    # config a launch runs (read in a traced grid function, so no builtins).
+    config_kwargs = {
+        idx: [(i, list(config.kwargs.items()))
+              for i, config in enumerate(getattr(kernel, "configs", ()))]
+        for idx, kernel in bundle.kernels.items()
+    }
+
+    def _grid(kernel_idx: int, grid: list) -> Any:
+        if not grid[1:]:
+            return grid[0]
+        candidates = config_kwargs[kernel_idx]
+
+        def config_grid(meta: dict[str, Any]) -> Any:
+            for index, items in candidates:
+                matches = True
+                for key, value in items:
+                    if meta[key] != value:
+                        matches = False
+                if matches:
+                    return grid[index]
+            raise UserTritonResolutionError("launch config is not a captured config")
+
+        return config_grid
 
     def _launch_direct(kernel_idx: int, grid: Any, args: dict[str, Any],
                        constant_args: dict[str, Any]) -> None:
@@ -245,14 +271,14 @@ def make_launcher(bundle: ResolvedBundle) -> Callable[..., dict[str, Any]]:
         # No builtins in here: guarding a builtin read here fails in Dynamo
         # (KeyError) for graph classes, which run with restricted builtins.
         if torch.compiler.is_compiling() or _tracing(args):
-            wrap_triton(kernel)[grid[0]](**args, **constant_args)
+            wrap_triton(kernel)[_grid(kernel_idx, grid)](**args, **constant_args)
         else:
             # Real tensors: launch directly, also under numerics dispatch modes
             # (the upcast reference), where wrap_triton would emit a HOP the
             # mode has no rule for. Kernels that build TMA descriptors on
             # device need a scratch allocator; the model's own wrapper set one,
             # and Inductor sets one for compiled code.
-            _launch_direct(kernel_idx, grid[0], args, constant_args)
+            _launch_direct(kernel_idx, _grid(kernel_idx, grid), args, constant_args)
         return {key: val for key, val in args.items() if key in tensors_to_clone}
 
     return launch_user_triton

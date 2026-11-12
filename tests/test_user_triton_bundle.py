@@ -42,11 +42,53 @@ def test_rewrite_needs_every_kernel_and_constant_args():
     assert "launch_user_triton(kernel_idx=3, constant_args_idx=5, grid=[(16, 1, 1)]" in text
 
 
-def test_rewrite_refuses_per_config_grids_and_leaves_mutation_hops():
-    cls = _graph_class(_GRAPH.replace("[(16, 1, 1), (16, 1, 1)]", "[(16, 1, 1), (8, 1, 1)]"))
+class _TwoConfigs:
+    configs = (object(), object())
+
+
+def test_rewrite_keeps_per_config_grids_only_when_they_match_the_configs():
+    per_config = _GRAPH.replace("[(16, 1, 1), (16, 1, 1)]", "[(16, 1, 1), (8, 1, 1)]")
+    cls = _graph_class(per_config)
     assert not rewrite_hop_calls(cls, ResolvedBundle({3: object()}, {5: {}}))
+    cls = _graph_class(per_config)
+    assert rewrite_hop_calls(cls, ResolvedBundle({3: _TwoConfigs()}, {5: {}}))
+    assert "grid=[(16, 1, 1), (8, 1, 1)]" in ast.unparse(cls)
     mutation = _GRAPH.replace("triton_kernel_wrapper_functional", "triton_kernel_wrapper_mutation")
     assert not rewrite_hop_calls(_graph_class(mutation), ResolvedBundle({3: object()}, {5: {}}))
+
+
+@pytest.mark.skipif(
+    not __import__("torch").cuda.is_available(), reason="user-defined Triton kernels need CUDA"
+)
+@pytest.mark.parametrize("chosen", [0, 1])
+def test_launcher_uses_the_grid_of_the_launched_config(chosen):
+    import triton
+    import triton.language as tl
+    from user_triton import make_launcher
+
+    @triton.autotune(
+        configs=[triton.Config({"BLOCK": 64}), triton.Config({"BLOCK": 128})],
+        key=[],
+        prune_configs_by={"early_config_prune": lambda configs, nargs, **kw: [configs[chosen]]},
+    )
+    @triton.jit
+    def count_kernel(x_ptr, count_ptr, BLOCK: tl.constexpr):
+        tl.atomic_add(count_ptr, 1)
+
+    n = 4096
+    grid = [(n // 64, 1, 1), (n // 128, 1, 1)]
+    launch = make_launcher(ResolvedBundle({0: count_kernel}, {0: {}}))
+
+    def run(x):
+        count = torch.zeros(1, dtype=torch.int32, device=x.device)
+        out = launch(kernel_idx=0, constant_args_idx=0, grid=grid, tma_descriptor_metadata={},
+                     kwargs={"x_ptr": x, "count_ptr": count}, tensors_to_clone=["count_ptr"])
+        return out["count_ptr"]
+
+    x = torch.randn(n, device="cuda")
+    assert run(x).item() == grid[chosen][0]
+    torch._dynamo.reset()
+    assert torch.compile(run, fullgraph=True)(x).item() == grid[chosen][0]
 
 
 def test_rewrite_refuses_calls_the_launcher_cannot_replay():

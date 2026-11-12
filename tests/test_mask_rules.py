@@ -493,3 +493,22 @@ def test_unlisted_ops_never_hw_unsupported(monkeypatch):
     monkeypatch.setenv(mask_rules.TARGET_CAPABILITY_ENV, "7.0")
     gm = _graph(lambda g, x, idx, rep, off: g.call_function(torch.ops.aten.mm.default, (x, x)))
     assert mask_rules.hw_unsupported_rule(_call(gm, torch.ops.aten.mm.default)) is None
+
+
+def test_held_graph_is_masked_whatever_its_sidecar_says():
+    from scripts.bench_parallel import _full_graph_mask
+    from types import SimpleNamespace
+
+    mask_rules.register_held_graphs([{"runnable_sha256": "ab12", "reason": "needs a bigger GPU"}])
+    try:
+        held = {mask_rules.SOURCE_SHA_KEY: "ab12"}
+        assert mask_rules.held_mask(held) == {
+            "reasons": ["held"], "scope": "graph", "held_reason": "needs a bigger GPU"}
+        jagged = {**held, "masked": {"reasons": ["jagged"], "scope": "graph"}}
+        assert mask_rules.held_mask(jagged)["reasons"] == ["held", "jagged"]
+        assert mask_rules.held_mask({mask_rules.SOURCE_SHA_KEY: "cd34"}) is None
+        assert mask_rules.held_mask({}) is None
+        definition = SimpleNamespace(metadata={"sidecar": held}, graph_cls=None)
+        assert _full_graph_mask(definition)["reasons"] == ["held"]
+    finally:
+        mask_rules.HELD_GRAPHS.pop("ab12")
