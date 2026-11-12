@@ -103,13 +103,13 @@ ALLOCATION_ONLY_OPS = {
 # still captured and timed but held at production in projections.
 MASK_REASONS = (
     "jagged", "hstu", "user_triton", "side_effect", "hw_unsupported",
-    "unbacked_shape", "approx_index",
+    "unbacked_shape", "approx_index", "written_constant",
 )
 NODE_MASK_REASONS = frozenset(
     {"jagged", "hstu", "user_triton", "side_effect", "hw_unsupported",
      "unbacked_shape"}
 )
-REGION_MASK_REASONS = frozenset({"approx_index"})
+REGION_MASK_REASONS = frozenset({"approx_index", "written_constant"})
 NON_FUSIBLE_MASK_REASONS = NODE_MASK_REASONS
 GRAPH_SCOPE_MASK_REASONS = NODE_MASK_REASONS
 
@@ -186,7 +186,39 @@ MASK_RULES: list = [
 # a rule, append a function here; like node rules it must decide from the
 # graph alone. The first rule that returns a reason wins, and the reason is
 # recorded as the repro's "masked_reason".
-REGION_MASK_RULES: list = [region_approx_index_rule]
+_written_constants: "weakref.WeakKeyDictionary[fx.Graph, tuple]" = weakref.WeakKeyDictionary()
+
+
+def _region_reads_written_constant(comp: list) -> str | None:
+    """A region that reads a graph constant (``get_attr``) after a node
+    outside the region writes it in place. The repro lifts the constant to
+    an input holding its recorded value, from before the write, and no cut
+    helps: the constant is an input either way."""
+    nodes = [n for n in comp if isinstance(n, fx.Node)]
+    if not nodes or nodes[0].graph.owning_module is None:
+        return None
+    graph = nodes[0].graph
+    cached = _written_constants.get(graph)
+    if cached is None or cached[0] != len(graph.nodes):
+        writes = [w for w in _in_place_writes(graph.owning_module) if w[0].op == "get_attr"]
+        cached = (len(graph.nodes), writes)
+        _written_constants[graph] = cached
+    if not cached[1]:
+        return None
+    order = {n: i for i, n in enumerate(graph.nodes)}
+    members = set(nodes)
+    for base, aliases, writers in cached[1]:
+        if any(
+            user in members and order[user] > order[w]
+            for w in writers if w not in members
+            for alias in aliases
+            for user in alias.users
+        ):
+            return "written_constant"
+    return None
+
+
+REGION_MASK_RULES: list = [region_approx_index_rule, _region_reads_written_constant]
 
 
 _warned_mask_reasons: set = set()
@@ -426,6 +458,178 @@ def _split_connected_components(nodes):
     return result_components
 
 
+_UNINITIALIZED_ALLOCATION_OPS = ALLOCATION_ONLY_OPS | {
+    torch.ops.aten.empty_strided.default,
+    torch.ops.aten.empty_like.default,
+    torch.ops.aten.new_empty.default,
+    torch.ops.aten.new_empty_strided.default,
+}
+
+
+def _written_in_place_args(node: fx.Node) -> list:
+    """Graph values ``node`` may write in place: every tensor argument of a
+    user Triton kernel launch (which ones it writes is only known to the
+    kernel), and the ``alias_info.is_write`` arguments of an aten op."""
+    from torch.utils import _pytree as pytree
+
+    if node.op != "call_function":
+        return []
+    target = node.target
+    if (
+        isinstance(target, torch._ops.HigherOrderOperator)
+        and target.name() == "triton_kernel_wrapper_mutation"
+    ):
+        return [a for a in pytree.tree_leaves(node.kwargs) if isinstance(a, fx.Node)]
+    if not isinstance(target, torch._ops.OpOverload):
+        return []
+    schema_args = target._schema.arguments
+    written = []
+    for i, arg in enumerate(schema_args):
+        if arg.alias_info is None or not arg.alias_info.is_write:
+            continue
+        value = node.args[i] if i < len(node.args) else node.kwargs.get(arg.name)
+        written.extend(a for a in pytree.tree_leaves(value) if isinstance(a, fx.Node))
+    return written
+
+
+def _storages(gm: fx.GraphModule) -> dict:
+    """The storages each node's value lives in.
+
+    Read from the fake values, so every view (split_with_sizes outputs,
+    view.dtype, alias, unflatten, ...) shares its base's storage whatever
+    the op. A view without a value inherits its input's storages; any other
+    node without a value is its own storage.
+    """
+    from torch.multiprocessing.reductions import StorageWeakRef
+    from torch.utils import _pytree as pytree
+
+    storages: dict = {}
+    for node in gm.graph.nodes:
+        val = node.meta.get("val")
+        found = set()
+        for leaf in pytree.tree_leaves(val):
+            if isinstance(leaf, torch.Tensor):
+                try:
+                    found.add(StorageWeakRef(leaf.untyped_storage()))
+                except (NotImplementedError, RuntimeError):
+                    pass
+        if not found and val is None:
+            target = node.target
+            if (
+                node.op == "call_function" and node.args
+                and isinstance(node.args[0], fx.Node)
+                and (target is _operator.getitem or getattr(target, "is_view", False))
+            ):
+                found = set(storages.get(node.args[0], ()))
+            else:
+                found = {node}
+        storages[node] = frozenset(found)
+    return storages
+
+
+def _in_place_writes(gm: fx.GraphModule) -> list:
+    """(base, aliases, writers) for every storage a node writes in place.
+
+    ``base`` is the first node holding the storage, ``aliases`` every node
+    holding it that does not write it (the base, its views and their
+    readers' inputs), and ``writers`` the nodes that write it, in graph order.
+    """
+    storages = _storages(gm)
+    writers: dict = collections.defaultdict(list)
+    for node in gm.graph.nodes:
+        for arg in _written_in_place_args(node):
+            for storage in storages.get(arg, ()):
+                if node not in writers[storage]:
+                    writers[storage].append(node)
+    holders: dict = collections.defaultdict(list)
+    for node, held in storages.items():
+        for storage in held:
+            if storage in writers:
+                holders[storage].append(node)
+    result = []
+    for storage, storage_writers in writers.items():
+        aliases = [n for n in holders[storage] if n not in storage_writers]
+        if aliases:
+            result.append((aliases[0], set(aliases), storage_writers))
+    return result
+
+
+def _read_after(writer: fx.Node, aliases: set, order: dict) -> bool:
+    """Whether any node after ``writer``, the graph output included, reads
+    the written storage."""
+    return any(
+        order[user] > order[writer]
+        for alias in aliases
+        for user in alias.users
+    )
+
+
+def written_allocation_aliases(gm: fx.GraphModule, excluded=()) -> set:
+    """Buffers written in place where no partition can see the write, plus
+    every view of them.
+
+    The write is not a data edge, so a partition holding the buffer's
+    producer and a reader of the written values, but not the writer, would
+    replay the values from before the write: uninitialized memory for an
+    ``empty``, the fill value for a reinplaced ``full`` accumulator, the
+    copied values for the ``clone`` a decomposed Triton kernel writes into.
+    That applies to an uninitialized allocation written by anything, and to
+    any other buffer written by a node outside every partition (not
+    partition-supported, or ``excluded``) and read after the write.
+
+    A user Triton kernel launch counts as writing every tensor it takes: the
+    graph does not say which ones it writes. The TTIR mutation analysis needs
+    the kernel from the capturing process's ``kernel_side_table``, which a
+    saved graph only names by index, and partitions must come out the same
+    when a saved graph is re-partitioned elsewhere. Keeping
+    these nodes out of every partition makes readers take the buffer as an
+    input instead. Graph inputs, constants and buffers no partition can
+    hold (an extern's output) are inputs already.
+    """
+    excluded = set(excluded)
+    order = {node: i for i, node in enumerate(gm.graph.nodes)}
+    cut: set = set()
+    for base, aliases, writers in _in_place_writes(gm):
+        # Only a partition holding the buffer's producer replays its
+        # pre-write values; views of a buffer no partition holds read it as
+        # an input.
+        if (
+            base.op != "call_function" or base in excluded
+            or not partition_node_is_supported(base)
+        ):
+            continue
+        if base.target in _UNINITIALIZED_ALLOCATION_OPS or any(
+            (w in excluded or not partition_node_is_supported(w))
+            and _read_after(w, aliases, order)
+            for w in writers
+        ):
+            cut |= aliases
+    return cut
+
+
+def _split_writes(gm: fx.GraphModule, components: list) -> set:
+    """Aliases of buffers whose producer shares a partition with a reader
+    of a write made outside that partition."""
+    order = {node: i for i, node in enumerate(gm.graph.nodes)}
+    owner = {node: i for i, comp in enumerate(components) for node in comp}
+    cut: set = set()
+    for base, aliases, writers in _in_place_writes(gm):
+        part = owner.get(base)
+        if part is None:
+            continue
+        for w in writers:
+            if owner.get(w) == part:
+                continue
+            if any(
+                owner.get(user) == part and order[user] > order[w]
+                for alias in aliases
+                for user in alias.users
+            ):
+                cut |= aliases
+                break
+    return cut
+
+
 def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
@@ -440,10 +644,32 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     would capture.
 
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
-    partition, as if they were not fusible.
+    partition, as if they were not fusible, and so are buffers written in
+    place by a node outside the partition and their views
+    (``written_allocation_aliases``).
 
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
+    excluded = set(excluded or ())
+    excluded |= written_allocation_aliases(gm, excluded)
+    while True:
+        components = _propose_partitions(gm, excluded)
+        # A partition-supported writer usually joins its buffer's partition;
+        # when it lands elsewhere, cut the buffer and partition again.
+        split = _split_writes(gm, components) - excluded
+        if not split:
+            break
+        excluded |= split
+
+    return [
+        comp
+        for comp in components
+        if partition_has_real_compute(comp)
+        and not partition_is_standalone_allocation_only(comp)
+    ]
+
+
+def _propose_partitions(gm: fx.GraphModule, excluded: set) -> list:
     import inspect
 
     from torch.fx.passes.operator_support import create_op_support
@@ -451,8 +677,6 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     from fusion_partitioner import (
         PrunedCapabilityBasedPartitioner as CapabilityBasedPartitioner,
     )
-
-    excluded = excluded or ()
 
     def _is_supported(_submodules, node):
         return node not in excluded and partition_node_is_supported(node)
@@ -476,13 +700,7 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
         for comp in components:
             split_components.extend(_split_connected_components(comp))
         components = split_components
-
-    return [
-        comp
-        for comp in components
-        if partition_has_real_compute(comp)
-        and not partition_is_standalone_allocation_only(comp)
-    ]
+    return components
 
 
 def graph_input_kind(gm: fx.GraphModule) -> str:
