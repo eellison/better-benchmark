@@ -513,6 +513,29 @@ def test_output_aliasing_another_output_fails_with_an_explicit_message(tmp_path)
         _check(tmp_path, name, [{"s0": 512}])
 
 
+def test_recapture_resume_refuses_a_different_capture_mode(tmp_path, capsys):
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import run_recapture
+
+    def run(*flags):
+        argv = ["run_recapture.py", "--suite", "timm", "--mode", "infer", "--models", "resnet18",
+                "--corpus-root", str(tmp_path), "--dry-run", *flags]
+        with mock.patch.object(sys, "argv", argv), \
+                mock.patch.object(run_recapture, "get_suite_models", lambda suite: {"resnet18": 8}):
+            run_recapture.main()
+        return capsys.readouterr().out
+
+    entry = {"model_key": "timm/infer/resnet18", "status": "ok"}  # before --dynamic: static
+    (tmp_path / "run_log.json").write_text(json.dumps([entry]))
+    with pytest.raises(SystemExit):
+        run()
+    assert "--dynamic all differs" in capsys.readouterr().out
+    assert "0 models to capture" in run("--dynamic", "none")
+    assert "1 models to capture" in run("--force")
+    (tmp_path / "run_log.json").write_text(json.dumps([dict(entry, dynamic="all")]))
+    assert "0 models to capture" in run()
+
+
 def test_family_identity_includes_symbolic_generator_bounds():
     from merge_captures import _hintfree_inputs_signature as sig
 
