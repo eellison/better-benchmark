@@ -823,12 +823,12 @@ def load_graph_module(
 
         # Recreate saved self.* tensor attributes referenced by printed full graphs.
         # Their values do not affect partitioning; shape/dtype/device do.
-        dtype_short_map = {
-            'f32': torch.float32, 'f16': torch.float16,
-            'bf16': torch.bfloat16, 'i64': torch.int64,
-            'i32': torch.int32, 'i16': torch.int16, 'b8': torch.bool,
-            'f64': torch.float64, 'i8': torch.int8, 'u8': torch.uint8,
-        }
+        try:
+            from torch.utils._dtype_abbrs import dtype_abbrs
+        except ImportError:  # older torch
+            from torch.fx.graph import dtype_abbrs
+
+        dtype_short_map = {abbr: dtype for dtype, abbr in dtype_abbrs.items()}
 
         def parse_shape(shape_str: str) -> tuple[int, ...]:
             dims = []
@@ -852,10 +852,9 @@ def load_graph_module(
                 if not match:
                     continue
                 dtype_str, shape_str, attr_name = match.groups()
-                info[attr_name] = (
-                    parse_shape(shape_str),
-                    dtype_short_map.get(dtype_str, torch.float32),
-                )
+                if dtype_str not in dtype_short_map:
+                    raise ValueError(f"unknown dtype {dtype_str!r} for self.{attr_name}")
+                info[attr_name] = (parse_shape(shape_str), dtype_short_map[dtype_str])
             return info
 
         tensor_attrs = {}
