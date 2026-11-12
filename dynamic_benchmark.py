@@ -50,6 +50,31 @@ def _dynamic_row_numerics(eager_fn, compiled_fn, make_inputs, label: str) -> dic
     return summary
 
 
+def _explain_replay_error(error, model, args):
+    """A clearer error for a known replay limitation, else None.
+
+    When a region returns an output that aliases another output (y and
+    y.permute(1, 0)), AOTAutograd compares their sizes at the binding; a
+    dynamic size equal to a static one (s0 == 512 next to a static 512) then
+    compares equal, guards Eq(s0, 512) and the dynamic dim specializes."""
+    from torch.fx.experimental.symbolic_shapes import ConstraintViolationError
+    from torch.utils._pytree import tree_leaves
+
+    if not isinstance(error, ConstraintViolationError):
+        return None
+    with torch.no_grad():
+        outputs = [t for t in tree_leaves(model(*args)) if isinstance(t, torch.Tensor)]
+    for j, later in enumerate(outputs):
+        for i, earlier in enumerate(outputs[:j]):
+            if later.untyped_storage().data_ptr() == earlier.untyped_storage().data_ptr():
+                return RuntimeError(
+                    f"unsupported: output {j} {tuple(later.shape)} aliases output {i} "
+                    f"{tuple(earlier.shape)}; AOTAutograd compares aliased outputs' sizes "
+                    "at the binding, which specializes a dynamic size equal to a static "
+                    f"one. Replay at a binding where they differ. ({str(error).splitlines()[0]})")
+    return None
+
+
 def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     """Benchmark a dynamic family or an explicitly force-dynamic static repro."""
     symbols, _guards = _symbols_and_guards_for_repro(repro_file)
@@ -247,13 +272,19 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
             if len(warm_bindings) > 1 else None
         )
         with _dynamic_replay_config(prepared_replay):
-            n_kernels, kernel_names = _harness.count_kernels(
-                shape_model,
-                count_first,
-                dynamic=count_dynamic,
-                compile_policy=dynamic_policy,
-                second_inputs=count_second,
-            )
+            try:
+                n_kernels, kernel_names = _harness.count_kernels(
+                    shape_model,
+                    count_first,
+                    dynamic=count_dynamic,
+                    compile_policy=dynamic_policy,
+                    second_inputs=count_second,
+                )
+            except Exception as e:
+                explained = _explain_replay_error(e, shape_model, count_first)
+                if explained is None:
+                    raise
+                raise explained from e
         torch._dynamo.reset()
         if not parsed.count_kernels_only:
             with _dynamic_replay_config(prepared_replay):
@@ -445,9 +476,15 @@ def check_family(repro_file, repro_cls, bindings=None, device: str = "cuda") -> 
         compiled = torch.compile(model)
         for i, binding in enumerate(bindings):
             graphs_before = _harness._unique_graph_count()
-            numerics = _dynamic_row_numerics(
-                model, compiled, lambda: make_args(binding),
-                format_binding(binding))
+            try:
+                numerics = _dynamic_row_numerics(
+                    model, compiled, lambda: make_args(binding),
+                    format_binding(binding))
+            except Exception as e:
+                explained = _explain_replay_error(e, model, make_args(binding))
+                if explained is None:
+                    raise
+                raise explained from e
             rows.append({
                 "binding": binding,
                 "numerics": numerics["status"],

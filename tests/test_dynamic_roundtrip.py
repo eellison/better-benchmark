@@ -455,6 +455,27 @@ def test_torch_max_min_in_captured_strides_evaluate():
     assert _symint_expr_evaluator(_sympify_expr("Min(s0, 7)"))({"s0": 9}) == 7
 
 
+def test_output_aliasing_another_output_fails_with_an_explicit_message(tmp_path):
+    """y and y.permute(1, 0) are both outputs. At s0 == 512, next to the static
+    512, AOTAutograd's aliasing check specializes s0. That is unsupported;
+    the error must say so instead of a bare ConstraintViolationError."""
+    def f(x, w):
+        y = (x @ w).relu() * 2
+        return y, y.permute(1, 0)
+
+    x = torch.randn(300, 64)
+    torch._dynamo.mark_dynamic(x, 0)
+    _capture(f, [(x, torch.randn(64, 512))], tmp_path, dynamic=None)
+    (name, shapes), = _regions(tmp_path).items()
+    # This capture records Ne(s0, 512); an exported graph's family may not.
+    shapes.pop("guards", None)
+    (tmp_path / "canonical" / name / "shapes.json").write_text(json.dumps(shapes))
+    assert [r["numerics"] for r in _check(tmp_path, name, [{"s0": 300}])] == ["pass"]
+    torch._dynamo.reset()
+    with pytest.raises(RuntimeError, match=r"unsupported: output 1 \(512, 512\) aliases output 0"):
+        _check(tmp_path, name, [{"s0": 512}])
+
+
 def test_family_identity_includes_symbolic_generator_bounds():
     from merge_captures import _hintfree_inputs_signature as sig
 
