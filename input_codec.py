@@ -29,6 +29,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from jagged_inputs import JAGGED_KINDS
+
 SHORT_DTYPE = {
     "float32": "f32", "float16": "f16", "bfloat16": "bf16",
     "float64": "f64", "int64": "i64", "int32": "i32",
@@ -36,6 +38,10 @@ SHORT_DTYPE = {
     "uint16": "u16", "uint32": "u32", "uint64": "u64",
     "complex64": "c64", "complex128": "c128",
     "float8_e4m3fn": "f8e4m3fn", "float8_e5m2": "f8e5m2",
+    "float8_e4m3fnuz": "f8e4m3fnuz",
+    "float8_e4m3b11fnuz": "f8e4m3b11fnuz",
+    "float8_e5m2fnuz": "f8e5m2fnuz",
+    "float8_e8m0fnu": "f8e8m0fnu",
 }
 LONG_DTYPE = {v: k for k, v in SHORT_DTYPE.items()}
 
@@ -117,6 +123,8 @@ def _gen_to_compact(gen: dict) -> list | None:
     if kind == "runs":
         return ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
                 int(gen["n_runs"]), int(bool(gen["sorted"]))]
+    if kind in JAGGED_KINDS:
+        return [kind, gen["total"], gen.get("max_len"), gen.get("distribution")]
     return [kind] + [v for k, v in sorted(gen.items()) if k != "kind"]
 
 
@@ -136,6 +144,8 @@ def _gen_from_compact(c: list) -> dict:
     if kind == "runs":
         return {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
                 "n_runs": c[4], "sorted": bool(c[5])}
+    if kind in JAGGED_KINDS:
+        return {"kind": kind, "total": c[1], "max_len": c[2], "distribution": c[3]}
     return {"kind": kind}
 
 
@@ -146,15 +156,63 @@ _KNOWN_KEYS = {"kind", "name", "shape", "dtype", "stride", "device",
                "alias_group"}
 
 
+def _with_metadata(
+    entry: list,
+    spec: dict,
+    *,
+    include_name: bool,
+    known_keys: set[str],
+) -> list:
+    opts = {}
+    if include_name and spec.get("name"):
+        opts["n"] = spec["name"]
+    extras = {
+        key: value
+        for key, value in spec.items()
+        if key not in known_keys and value is not None
+    }
+    if extras:
+        opts["x"] = extras
+    if opts:
+        entry.append(opts)
+    return entry
+
+
 def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     """Verbose spec dict -> compact JSON entry (lossless)."""
     kind = spec.get("kind", "tensor")
     if kind == "shape":
-        return ["S", list(spec["dims"])]
+        return _with_metadata(
+            ["S", list(spec["dims"])],
+            spec,
+            include_name=include_name,
+            known_keys={"dims", "kind", "name"},
+        )
     if kind == "symint":
-        return ["sym", spec.get("value", spec.get("hint", 1))]
+        return _with_metadata(
+            ["sym", spec.get("value", spec.get("hint", 1))],
+            spec,
+            include_name=include_name,
+            known_keys={"hint", "kind", "name", "value"},
+        )
     if kind == "scalar":
-        return ["sc", spec.get("value")]
+        return _with_metadata(
+            ["sc", spec.get("value")],
+            spec,
+            include_name=include_name,
+            known_keys={"kind", "name", "value"},
+        )
+    if kind == "generator":
+        return _with_metadata(
+            [
+                "genr",
+                spec.get("device_type", "cpu"),
+                int(spec.get("device_index", 0)),
+            ],
+            spec,
+            include_name=include_name,
+            known_keys={"device_index", "device_type", "kind", "name"},
+        )
 
     entry: list = [list(spec["shape"]), _short_dtype(spec["dtype"])]
     opts: dict = {}
@@ -199,12 +257,41 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
 
 def spec_from_compact(entry: list, name: str | None = None) -> dict:
     """Compact JSON entry -> verbose spec dict (the in-memory format)."""
+    min_fields = 3 if entry and entry[0] == "genr" else 2
+    if len(entry) < min_fields:
+        raise ValueError(f"compact input entry has too few fields: {entry!r}")
+
+    def add_metadata(spec: dict, index: int) -> dict:
+        opts = entry[index] if len(entry) > index else {}
+        if not isinstance(opts, dict):
+            return spec
+        if "n" in opts and name is None:
+            spec["name"] = opts["n"]
+        spec.update(opts.get("x", {}))
+        return spec
+
     if entry and entry[0] == "S":
-        return {"kind": "shape", "name": name, "dims": list(entry[1])}
+        return add_metadata(
+            {"kind": "shape", "name": name, "dims": list(entry[1])}, 2
+        )
     if entry and entry[0] == "sym":
-        return {"kind": "symint", "name": name, "value": entry[1]}
+        return add_metadata(
+            {"kind": "symint", "name": name, "value": entry[1]}, 2
+        )
     if entry and entry[0] == "sc":
-        return {"kind": "scalar", "name": name, "value": entry[1]}
+        return add_metadata(
+            {"kind": "scalar", "name": name, "value": entry[1]}, 2
+        )
+    if entry and entry[0] == "genr":
+        return add_metadata(
+            {
+                "kind": "generator",
+                "name": name,
+                "device_type": entry[1],
+                "device_index": int(entry[2]),
+            },
+            3,
+        )
 
     shape, dtype = list(entry[0]), _long_dtype(entry[1])
     opts = entry[2] if len(entry) > 2 else {}
