@@ -379,9 +379,41 @@ def _stride_case(width):
     return _ColumnSlice(), contract, original, [buf, y], [(0, 1)], [buf[:, :64], y], {"s0": width}
 
 
+class _FloorRowsFlatten(torch.nn.Module):
+    """x is [s0, floor(200*s1/s0), 64], normalized in place and then flattened
+    to [s0*floor(200*s1/s0), 64]. The flatten is a view only if Inductor sees
+    the expression as x's size, not a fresh symbol tied to it by a guard."""
+
+    def forward(self, x, w, n):
+        mean = x.mean(-1, keepdim=True)
+        y = (x - mean) * torch.rsqrt(((x - mean) ** 2).mean(-1, keepdim=True) + 1e-5) * w
+        return y.sigmoid().view(n, 64)
+
+
+def _floor_reshape_case(s0, s1):
+    rows = "floor(200*s1/s0)"
+    contract = {
+        "points": [{"inputs": [
+            [["s0", rows, 64], "f32", {"st": [f"64*{rows}", 64, 1]}], [[64], "f32"], ["I", 25600, f"s0*{rows}"]],
+            "bindings": {"s0": 128, "s1": 128}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [2, None], "hint": 128}, "s1": {"range": [2, None], "hint": 128}},
+        "guards": ["Eq(Mod(200*s1, s0), 0)"],
+    }
+    w, src = torch.randn(64), torch.randn(s1, 200, 64)
+    x = src.view(s0, -1, 64)
+
+    def original(a, src, w):
+        x = src.view(a.size(0), -1, 64)
+        return _FloorRowsFlatten()(x, w, x.size(0) * x.size(1))
+
+    return (_FloorRowsFlatten(), contract, original, [torch.randn(s0), src, w], [(0, 0), (1, 0)],
+            [x, w, x.numel() // 64], {"s0": s0, "s1": s1})
+
+
 # name -> (case factory, sizes compiled at, sizes replayed at without recompiling)
 _BACKED_CASES = {
     "floor_only": (_floor_case, (64, 96), (32, 48)),
+    "floor_reshape": (_floor_reshape_case, (64, 96), (32, 48)),
     "scaled_dim": (_scaled_case, (40,), (24,)),
     "half_open_range": (_half_open_case, (37,), (5,)),
     "stride_only": (_stride_case, (80,), (96,)),
@@ -433,7 +465,10 @@ def test_families_off_the_bare_dim_path_pick_the_backed_plan():
         {"s0": {"range": [2, None], "hint": 128}, "s1": {"range": [2, None], "hint": 128}},
         ["Eq(38400*s1, 192*s0*floor(200*s1/s0))", "Eq(Mod(200*s1, s0), 0)", f"Ne({rows}, 1)",
          f"Eq(Max(1, {rows}), {rows})", f"192*Max(1, {rows}) > 192"])
-    assert floor_only is not None and floor_only["aux"] == ("s1",)
+    # x's size is an expression, so x is rebuilt from a 1-D base and s0 too
+    # needs a carrier.
+    assert floor_only is not None and floor_only["aux"] == ("s0", "s1")
+    assert [spec[0] for spec in floor_only["rebased"]] == [0]
     scaled = plan([[[2, "32*s0", 128], "f16", {"st": ["4096*s0", 128, 1]}], ["I", 1190, "s0"]],
                   {"s0": {"range": [2, None], "hint": 1190}})
     assert scaled is not None and scaled["aux"] == ("s0",)
