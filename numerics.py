@@ -125,50 +125,6 @@ _RNG_PROBABILITY_ARGS = ("p", "dropout_p", "dropout")
 _RNG_TRAINING_ARGS = ("train", "training")
 
 
-def float64_casts_mode() -> TorchDispatchMode:
-    """Dispatch mode that turns float-to-float dtype casts into float64 casts.
-
-    Captured graphs cast explicitly (``convert_element_type(x, bfloat16)``), so
-    upcasting only parameters and inputs would mix dtypes and fail.
-    """
-    convert = torch.ops.prims.convert_element_type.default
-    to_copy = torch.ops.aten._to_copy.default
-
-    class Float64Casts(TorchDispatchMode):
-        def __torch_dispatch__(self, func, types, args=(), kwargs=None):
-            kwargs = dict(kwargs or {})
-            if (
-                func is convert
-                and args[0].is_floating_point()
-                and args[1].is_floating_point
-            ):
-                args = (args[0], torch.float64)
-            elif (
-                func is to_copy
-                and args[0].is_floating_point()
-                and kwargs.get("dtype") is not None
-                and kwargs["dtype"].is_floating_point
-            ):
-                kwargs["dtype"] = torch.float64
-            return func(*args, **kwargs)
-
-    return Float64Casts()
-
-
-# ---------------------------------------------------------------------------
-# RNG detection
-# ---------------------------------------------------------------------------
-
-# RNG prims without the ``nondeterministic_seeded`` tag.
-_RNG_OP_NAMES = frozenset(
-    {"inductor_random", "inductor_randint", "inductor_seed", "inductor_seeds", "philox_rand"}
-)
-# Tagged ops (attention, RNNs, dropout) that only draw random numbers when a
-# dropout probability is nonzero or training is on.
-_RNG_PROBABILITY_ARGS = ("p", "dropout_p", "dropout")
-_RNG_TRAINING_ARGS = ("train", "training")
-
-
 def _rng_disabled_by_args(func: Any, args: Any, kwargs: dict[str, Any]) -> bool:
     for index, arg in enumerate(func._schema.arguments):
         if arg.name not in _RNG_PROBABILITY_ARGS + _RNG_TRAINING_ARGS:

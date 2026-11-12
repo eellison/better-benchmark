@@ -42,12 +42,20 @@ def test_conjugate_output_mismatch_is_caught():
         validate_full_graph_numerics(eager, compiled, lambda: [torch.tensor([1 + 2j])])
 
 
-def test_compiled_may_be_finite_where_eager_overflows_and_fp64_is_finite():
-    reference = torch.tensor([7e4, 1.0], dtype=torch.float64)
+def test_compiled_must_match_fp64_where_eager_overflows():
+    # Eager overflowed an fp16 intermediate; compiled kept it in fp32. There,
+    # compiled must match fp64 within tolerance, not just be finite.
+    reference = torch.tensor([6e4, 1.0], dtype=torch.float64)
     eager = torch.tensor([float("inf"), 1.0], dtype=torch.float16)
-    compiled = torch.tensor([65504.0, 1.0], dtype=torch.float16)
-    ok, details = compare_outputs(reference, eager, compiled)
+    ok, details = compare_outputs(
+        reference, eager, torch.tensor([6e4, 1.0], dtype=torch.float16)
+    )
     assert ok, details
+    for wrong in ([65504.0, 1.0], [0.0, 1.0], [6e4, float("inf")]):
+        ok, _ = compare_outputs(
+            reference, eager, torch.tensor(wrong, dtype=torch.float16)
+        )
+        assert not ok, wrong
 
 
 def test_float8_outputs_are_compared():
@@ -67,7 +75,7 @@ def test_bitcast_output_falls_back_to_eager_reference():
         return x.view(torch.int16).view(torch.bfloat16)
 
     _, reference = validate_full_graph_numerics(eager, eager, lambda: [torch.ones(4)])
-    assert reference == "eager"
+    assert reference == "none"
 
 
 def test_complex_outputs_use_a_tolerance():
