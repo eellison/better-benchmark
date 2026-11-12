@@ -219,6 +219,11 @@ The hook:
 - Lifts shape params from reshape/view/expand targets so repros run across shapes
 - Validates each captured repro runs in eager before writing
 
+For a model whose source is not public, pass `strip_source_locations=True`:
+graphs and repros are printed without node stack traces and user annotations
+(the `# File: <path>:<line>` comments), and `index.json` and each full graph's
+`.meta.json` record `source_locations_stripped`.
+
 For a model deployed with AOTInductor's runtime constant folding, pass
 `constant_folding=True`: in inference graphs, work derived only from module
 parameters, buffers and tensor attributes runs once at load time, so it is left
