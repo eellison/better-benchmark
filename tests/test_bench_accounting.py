@@ -596,7 +596,7 @@ class GraphModule(torch.nn.Module):
         s1: "Sym(s1)",
         s2: "Sym(s2)",
         x: "f32[s0, s1, s2][s1*s2, s2, 1]cpu",
-        y: "f32[s0*s1, s2][s2, 1]cpu",
+        y: "f32[FloorDiv(s0*s1, 1), s2][s2, 1]cpu",
     ):
         return (x, y)
 '''
