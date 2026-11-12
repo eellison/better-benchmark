@@ -1,9 +1,9 @@
-"""CPU tests for --prewarm/--compile-at validation.
+"""CPU tests for --compile-at validation.
 
 These guards fail loudly BEFORE any GPU/config work, so they are CPU-only:
   - a symbol-less static path rejects compile history;
   - a fully specialized run rejects compile history;
-Plus: _parse_bind_args attributes a --prewarm typo to --prewarm, not --bind.
+Plus: _parse_bind_args attributes a --compile-at typo to --compile-at, not --bind.
 
 Usage:
     python tests/test_prewarm_guards.py
@@ -38,17 +38,17 @@ def _mk(shape_config=None):
 
 
 class TestParseBindArgsAttribution(unittest.TestCase):
-    def test_prewarm_typo_names_prewarm_not_bind(self):
+    def test_compile_at_typo_names_compile_at_not_bind(self):
         with self.assertRaises(ValueError) as cm:
-            _parse_bind_args(["s0=bad"], flag_name="--prewarm")
+            _parse_bind_args(["s0=bad"], flag_name="--compile-at")
         msg = str(cm.exception)
-        self.assertIn("--prewarm", msg)
+        self.assertIn("--compile-at", msg)
         self.assertNotIn("--bind", msg)
 
     def test_missing_equals_names_the_flag(self):
         with self.assertRaises(ValueError) as cm:
-            _parse_bind_args(["nope"], flag_name="--prewarm")
-        self.assertIn("--prewarm", str(cm.exception))
+            _parse_bind_args(["nope"], flag_name="--compile-at")
+        self.assertIn("--compile-at", str(cm.exception))
 
     def test_default_flag_name_is_bind(self):
         with self.assertRaises(ValueError) as cm:
@@ -57,8 +57,8 @@ class TestParseBindArgsAttribution(unittest.TestCase):
 
     def test_empty_binding_names_the_flag(self):
         with self.assertRaises(ValueError) as cm:
-            _parse_bind_args([","], flag_name="--prewarm")
-        self.assertIn("--prewarm", str(cm.exception))
+            _parse_bind_args([","], flag_name="--compile-at")
+        self.assertIn("--compile-at", str(cm.exception))
 
 
 class TestPrewarmGuards(unittest.TestCase):
@@ -66,9 +66,9 @@ class TestPrewarmGuards(unittest.TestCase):
         err = io.StringIO()
         with self.assertRaises(SystemExit) as cm, \
                 contextlib.redirect_stderr(err):
-            benchmark_repro("x.py", _Dummy, _mk, args=["--prewarm", "s0=8"])
+            benchmark_repro("x.py", _Dummy, _mk, args=["--compile-at", "s0=8"])
         self.assertEqual(cm.exception.code, 2)
-        self.assertIn("--prewarm only applies to the dynamic bench path",
+        self.assertIn("--compile-at only applies to the dynamic bench path",
                       err.getvalue())
 
     def test_prewarm_in_static_mode_errors(self):
@@ -81,7 +81,7 @@ class TestPrewarmGuards(unittest.TestCase):
                 contextlib.redirect_stderr(err):
             benchmark_repro(
                 "x.py", _Dummy, _mk,
-                args=["--bind", "s0=8", "--prewarm", "s0=8", "--no-gpu-lock"])
+                args=["--bind", "s0=8", "--compile-at", "s0=8", "--no-gpu-lock"])
         self.assertEqual(cm.exception.code, 2)
         self.assertIn("only applies to the dynamic bench path",
                       err.getvalue())

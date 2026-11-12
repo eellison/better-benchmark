@@ -283,10 +283,6 @@ class TestCompileAtRunAt(unittest.TestCase):
                             args=["--run-at", "s0=8", "--bind", "s0=16",
                                   "--no-gpu-lock"])
         self.assertEqual(cm.exception.code, 2)
-        with self.assertRaises(SystemExit), contextlib.redirect_stderr(err):
-            benchmark_repro("x.py", _Scale, _mk,
-                            args=["--compile-at", "s0=8", "--prewarm",
-                                  "s0=16", "--dynamic", "--no-gpu-lock"])
 
 
 class TestFreeze(unittest.TestCase):

@@ -55,7 +55,7 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     symbols, _guards = _symbols_and_guards_for_repro(repro_file)
     is_family = bool(symbols)
     run_flag = getattr(parsed, "_run_at_flag", "--bind")
-    compile_flag = getattr(parsed, "_compile_at_flag", "--prewarm")
+    compile_flag = getattr(parsed, "_compile_at_flag", "--compile-at")
     bindings = _parse_bind_args(parsed.bind, flag_name=run_flag)
 
     if parsed.static:

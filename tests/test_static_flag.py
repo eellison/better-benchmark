@@ -153,7 +153,7 @@ class TestStaticAtHints(unittest.TestCase):
     def test_static_prewarm_errors_via_dynamic_path_guard(self):
         with self.assertRaises(SystemExit) as cm:
             benchmark_repro("x.py", _Scale, _mk,
-                            args=["--static", "--prewarm", "s0=4",
+                            args=["--static", "--compile-at", "s0=4",
                                   "--no-gpu-lock"])
         self.assertEqual(cm.exception.code, 2)
 

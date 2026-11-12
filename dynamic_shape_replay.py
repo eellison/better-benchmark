@@ -30,9 +30,9 @@ def _parse_bind_args(bind_args: list | None, flag_name: str = "--bind") -> list:
     {"s16": 24, "s82": 24}. Returns [] when bind_args is None/empty.
     Malformed entries raise ValueError (loud beats benchmarking a typo).
 
-    ``flag_name`` names the flag in error messages: the identical
-    symbol=int grammar also backs --prewarm, and attributing a --prewarm
-    typo to --bind sends the reader to the wrong argument.
+    ``flag_name`` names the flag in error messages: the same symbol=int
+    grammar backs --run-at (alias --bind) and --compile-at, and a typo should
+    name the flag it came from.
     """
     out = []
     for raw in bind_args or []:

@@ -1155,8 +1155,6 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                              "at ITS saved bindings) and the default dynamic "
                              "replay; conflicts loudly with --dynamic, "
                              "--compile-at, --freeze, and --all-shapes.")
-    parser.add_argument("--prewarm", action="append", default=None,
-                        help=argparse.SUPPRESS)  # compat alias of --compile-at
     parser.add_argument("--count-kernels-only", action="store_true",
                         help="Only count generated kernels, skip timing")
     parser.add_argument("--n-warmup", type=int, default=25)
@@ -1169,22 +1167,15 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                         help="Disable the per-GPU benchmark lock")
     parsed = parser.parse_args(args)
 
-    # --run-at/--compile-at are the public spellings; --bind/--prewarm are
-    # hidden compat aliases. Mixing spellings for one role in
-    # one invocation is rejected — a command that says both is ambiguous
-    # about intent. After the merge, downstream code reads parsed.bind /
-    # parsed.prewarm (the historical attribute names) with the flag the user
-    # actually typed preserved for error attribution.
+    # --run-at is the public spelling of main's --bind. Downstream code reads
+    # parsed.bind / parsed.prewarm, with the flag the user typed kept for
+    # error messages.
     if parsed.run_at and parsed.bind:
-        parser.error("use --run-at or its compat alias --bind, not both")
-    if parsed.compile_at and parsed.prewarm:
-        parser.error("use --compile-at or its compat alias --prewarm, "
-                     "not both")
+        parser.error("use --run-at or its alias --bind, not both")
     parsed._run_at_flag = "--run-at" if parsed.run_at else "--bind"
-    parsed._compile_at_flag = ("--compile-at" if parsed.compile_at
-                               else "--prewarm")
+    parsed._compile_at_flag = "--compile-at"
     parsed.bind = parsed.run_at or parsed.bind
-    parsed.prewarm = parsed.compile_at or parsed.prewarm
+    parsed.prewarm = parsed.compile_at
 
     # Whether THIS repro is a dynamic family decides the default execution
     # mode: dynamic families run dynamically with no flags;

@@ -216,6 +216,16 @@ def test_guard_floor_of_rational_sum_is_exact():
     assert _symint_expr_evaluator(_exact_floors(_sympify_expr("ceiling(s1/3)")))({"s1": 200}) == 67
 
 
+def test_torch_max_min_in_captured_strides_evaluate():
+    from dynamic_shape_replay import _symint_expr_evaluator
+    from input_codec import _sympify_expr
+
+    # Captured exprs carry torch.utils._sympy.functions.Max/Min, not sympy's.
+    stride = _symint_expr_evaluator(_sympify_expr("864*Max(1, s1)"))
+    assert stride is not None and stride({"s1": 3}) == 2592
+    assert _symint_expr_evaluator(_sympify_expr("Min(s0, 7)"))({"s0": 9}) == 7
+
+
 def test_tautological_guards_do_not_keep_stale_symbol_names():
     from merge_captures import _canonicalize_symbols
 
