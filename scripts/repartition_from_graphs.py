@@ -4,7 +4,9 @@ Re-partition ALL saved full_graph_*.py files using the fixed capture hook.
 The capture hook now splits independent chains into separate repros (via
 connected-component analysis). This script loads each saved post-grad FX graph,
 runs process_graph() to partition it, and merges the resulting regions into
-repros/canonical/.
+repros/canonical/. A graph whose forward annotations carry symbols
+("f32[64, s16]", "Sym(s16)") is traced symbolically, so its regions are
+dynamic families with the symbols' recorded values as their bindings.
 
 Usage:
     python scripts/repartition_from_graphs.py
@@ -294,6 +296,19 @@ def load_graph_module(graph_path: Path):
         if hasattr(instance, 'graph') and isinstance(instance.graph, fx.Graph):
             return instance
 
+        # A graph whose annotations carry symbols re-traces symbolically, so
+        # its regions keep them (see saved_graph_replay.symbolic_retrace).
+        from saved_graph_replay import symbolic_retrace
+
+        dev = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+        try:
+            gm = symbolic_retrace(instance, content, graph_path, dev)
+        except ValueError as e:
+            print(f"  {e}")
+            return None
+        if gm is not None:
+            return gm
+
         # Otherwise, trace with make_fx (fake mode) to produce a proper GraphModule
         # with metadata (shapes/dtypes on nodes) that process_graph needs.
         if not input_shapes:
@@ -314,8 +329,6 @@ def load_graph_module(graph_path: Path):
         from torch.fx.experimental.proxy_tensor import make_fx
 
         # Use fake tensors -- no real computation, just shape propagation.
-        # Use CUDA device since these are post-grad graphs from CUDA compilation.
-        dev = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         with FakeTensorMode() as fake_mode:
             inputs = []
             for entry in input_shapes:

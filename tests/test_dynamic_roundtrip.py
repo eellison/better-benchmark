@@ -235,3 +235,67 @@ def test_full_graph_replays_one_artifact_at_two_bindings(mlp_root):
             torch.testing.assert_close(compiled(*args), execution.module(*args))
     assert counters["stats"]["unique_graphs"] - before == 1
 
+
+def test_recapturing_a_dynamic_full_graph_is_a_fixed_point(mlp_root, tmp_path):
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import recapture_full_graphs
+
+    models = mlp_root / "models"
+    assert recapture_full_graphs.main([
+        str(models), "--models-root", str(models), "--canonical-root",
+        str(tmp_path), "--no-validate", "--no-isolate"]) == 0
+    # The saved graph is the batch-16 compile: the same families, one point.
+    first = {name: s for name, s in _regions(mlp_root).items()}
+    again = _regions(tmp_path)
+    assert sorted(again) == sorted(first)
+    for name, shapes in again.items():
+        assert [p["bindings"] for p in shapes["points"]] == [{"s0": 16}]
+        assert shapes["points"][0]["inputs"] == first[name]["points"][1]["inputs"]
+
+
+LEGACY_GRAPH = """
+class GraphModule(torch.nn.Module):
+    def forward(self, arg0_1: "Sym(s16)", arg1_1: "f32[64, s16][s16, 1]cpu"):
+        mul: "f32[64, s16][s16, 1]cpu" = torch.ops.aten.mul.Tensor(arg1_1, 2.0)
+        sum_1: "f32[64][1]cpu" = torch.ops.aten.sum.dim_IntList(mul, [1])
+        return (sum_1,)
+"""
+
+
+@pytest.mark.parametrize("loader", ["repartition", "ingest"])
+def test_legacy_symbolic_graph_retraces_at_its_recorded_sizes(tmp_path, loader):
+    """A graph saved before dynamic capture names its symbols in the forward
+    annotations while its sidecar holds the concrete inputs it ran with. Its
+    regions take those values as their bindings (not a template value)."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    graph = tmp_path / "full_graph_000.py"
+    graph.write_text(LEGACY_GRAPH)
+    graph.with_suffix(".meta.json").write_text(json.dumps({
+        "schema_version": 2,
+        "inputs": [["sym", 24], [[64, 24], "f32", {"n": "arg1_1", "dev": "cpu"}]],
+    }))
+    if loader == "repartition":
+        from repartition_from_graphs import load_graph_module
+    else:
+        from ingest_tlparse import load_graph_module
+    gm = load_graph_module(graph)
+    vals = [n.meta["val"] for n in gm.graph.find_nodes(op="placeholder")]
+    assert isinstance(vals[0], torch.SymInt)
+    assert vals[1].shape[1].node.expr == vals[0].node.expr
+    assert vals[0].node.hint == 24
+
+
+def test_tlparse_ingest_takes_hints_from_the_runnable(tmp_path):
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from ingest_tlparse import load_graph_module, runnable_symbol_hints
+
+    graph = tmp_path / "inductor_post_grad_graph_0.txt"
+    graph.write_text(LEGACY_GRAPH.replace("class GraphModule", "class <lambda>"))
+    (tmp_path / "fx_graph_runnable_0.txt").write_text("s16 = 1811\ns99 = 3\n")
+    hints = runnable_symbol_hints(graph)
+    assert hints == {"s16": 1811, "s99": 3}
+    gm = load_graph_module(graph, symbol_hints=hints)
+    (symint, _x) = [n.meta["val"] for n in gm.graph.find_nodes(op="placeholder")]
+    assert symint.node.hint == 1811
+
+

@@ -314,3 +314,55 @@ def _build_symbolic_inputs(specs, dev, symbol_hints=None,
             return None  # unresolved -> let caller fall back to real mode
         inputs.append(built)
     return fake_mode, inputs
+
+
+def _legacy_sidecar_hints(graph_path: Path, content: str) -> dict:
+    """Symbol values of a graph saved before dynamic capture: its forward
+    annotations name symbols (``Sym(s16)``, ``bf16[64, s16]``) but its sidecar
+    records only the concrete inputs it ran with. {} when the sidecar has a
+    symbols table (its own hints apply) or cannot be matched."""
+    from full_graph_harness import (
+        load_full_graph_sidecar,
+        parse_full_graph_inputs,
+        sidecar_symbol_values,
+    )
+
+    sidecar = load_full_graph_sidecar(graph_path)
+    if sidecar.get("symbols") or not sidecar.get("inputs"):
+        return {}
+    try:
+        return sidecar_symbol_values(
+            sidecar["inputs"], parse_full_graph_inputs(content))
+    except ValueError:
+        return {}
+
+
+def symbolic_retrace(instance, content: str, graph_path: Path, dev,
+                     symbol_hints: dict | None = None):
+    """Re-trace a saved graph whose forward annotations carry symbols with
+    one shared ShapeEnv symbol per name, at the symbols' recorded values
+    (``symbol_hints`` overrides them, e.g. a TORCH_TRACE's hints).
+
+    Returns None when the annotations are static (the caller traces
+    concretely). Raises when the graph is symbolic but cannot be rebuilt: a
+    dynamic graph recaptured as static would silently change its regions.
+    """
+    from torch.fx.experimental.proxy_tensor import make_fx
+    from full_graph_harness import parse_full_graph_inputs
+
+    specs = parse_full_graph_inputs(content, symbolic_slots=True)
+    if not specs or not _specs_have_symbols(specs):
+        return None
+    graph_path = Path(graph_path)
+    sym_inputs = _build_symbolic_inputs(
+        specs, dev,
+        symbol_hints={**_legacy_sidecar_hints(graph_path, content),
+                      **(symbol_hints or {})},
+        symbol_definitions=_sidecar_symbol_definitions(graph_path))
+    if sym_inputs is None:
+        raise ValueError(
+            f"{graph_path.name} carries symbolic inputs but their symbolic "
+            "rebuild failed (unresolved symbol or expression)")
+    fake_mode, inputs = sym_inputs
+    with fake_mode:
+        return make_fx(instance, tracing_mode="symbolic")(*inputs)

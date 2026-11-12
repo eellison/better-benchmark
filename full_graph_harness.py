@@ -2498,19 +2498,15 @@ def _validate_tensor_device_and_offset(sidecar_spec, annotation_spec, label) -> 
         )
 
 
-def _validate_sidecar_inputs(
-    sidecar_inputs: list[dict[str, Any]] | None,
+def sidecar_symbol_values(
+    sidecar_inputs: list[dict[str, Any]],
     annotation_inputs: list[dict[str, Any]],
-    live_symbols=None,
-) -> None:
-    if sidecar_inputs is None:
-        return
-    if annotation_inputs and len(sidecar_inputs) != len(annotation_inputs):
-        raise ValueError(
-            "full graph sidecar input count does not match forward annotations: "
-            f"{len(sidecar_inputs)} != {len(annotation_inputs)}"
-        )
-    symbol_bindings = {}
+) -> dict[str, int]:
+    """Values of the bare symbols a graph's forward annotations name
+    (``Sym(s16)``, ``f32[64, s16]``), read off a concrete sidecar: a symint
+    input's recorded value, else the recorded size of a tensor dim the
+    symbol names. Conflicting values raise."""
+    symbol_bindings: dict[str, int] = {}
     explicit_symbols = set()
 
     def bind_symbol(symbol: str, value: int) -> None:
@@ -2557,6 +2553,23 @@ def _validate_sidecar_inputs(
                 value = int(sidecar_shape[dim])
                 if symbol not in explicit_symbols:
                     bind_symbol(symbol, value)
+
+    return symbol_bindings
+
+
+def _validate_sidecar_inputs(
+    sidecar_inputs: list[dict[str, Any]] | None,
+    annotation_inputs: list[dict[str, Any]],
+    live_symbols=None,
+) -> None:
+    if sidecar_inputs is None:
+        return
+    if annotation_inputs and len(sidecar_inputs) != len(annotation_inputs):
+        raise ValueError(
+            "full graph sidecar input count does not match forward annotations: "
+            f"{len(sidecar_inputs)} != {len(annotation_inputs)}"
+        )
+    symbol_bindings = sidecar_symbol_values(sidecar_inputs, annotation_inputs)
 
     for idx, sidecar_spec in enumerate(sidecar_inputs):
         if idx >= len(annotation_inputs):
