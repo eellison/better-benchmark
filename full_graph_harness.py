@@ -2260,9 +2260,19 @@ def load_graph_class_from_source(
         "prims",
     }
     registered_ops = set()
+    # Operators such as aten::__rshift__ have dunder names; only these are
+    # exempt from the dunder-attribute check, only as torch.ops.<ns>.<op>, and
+    # only when that resolves to the operator (not a namespace object method).
+    dunder_operators = set()
     for op in torch._C._dispatch_get_all_op_names():
         namespace, _, operator = op.partition("::")
         if namespace in allowed_operator_namespaces:
+            packet_name = operator.split(".")[0]
+            if packet_name.startswith("__") and isinstance(
+                getattr(getattr(torch.ops, namespace), packet_name, None),
+                torch._ops.OpOverloadPacket,
+            ):
+                dunder_operators.add(f"torch.ops.{namespace}.{packet_name}")
             continue
         name = f"torch.ops.{namespace}.{operator}"
         registered_ops.add(name)
@@ -2314,6 +2324,8 @@ def load_graph_class_from_source(
         ast.Yield,
         ast.YieldFrom,
     )
+    # Device types the graph's __init__ may first use (see the warm-up below).
+    device_types = {"cpu"}
     for member in graph_class.body:
         if isinstance(member, ast.Expr) and isinstance(member.value, ast.Constant):
             continue
@@ -2349,6 +2361,53 @@ def load_graph_class_from_source(
             for parent in ast.walk(member)
             for child in ast.iter_child_nodes(parent)
         }
+        # fx_graph_runnable writes buffers whose values were not saved as
+        # self.register_buffer(name, torch.randint(...)) or torch.randn(...)
+        # (size and dtype only), with .to("<device>") for non-CPU buffers;
+        # allow exactly that form.
+        buffer_factory_nodes: set[ast.AST] = set()
+        for node in ast.walk(member):
+            if not (
+                member.name == "__init__"
+                and isinstance(node, ast.Call)
+                and ast.unparse(node.func) == "self.register_buffer"
+                and len(node.args) == 2
+            ):
+                continue
+            value = node.args[1]
+            to_device = None
+            if (
+                isinstance(value, ast.Call)
+                and isinstance(value.func, ast.Attribute)
+                and value.func.attr == "to"
+                and len(value.args) == 1
+                and not value.keywords
+                and isinstance(value.args[0], ast.Constant)
+                and isinstance(value.args[0].value, str)
+            ):
+                to_device = value
+                value = value.func.value
+            if not (
+                isinstance(value, ast.Call)
+                and ast.unparse(value.func) in {"torch.randint", "torch.randn"}
+                and "torch" not in local_names
+                and not any(isinstance(arg, ast.Starred) for arg in value.args)
+                and all(keyword.arg in {"size", "dtype"} for keyword in value.keywords)
+            ):
+                continue
+            buffer_factory_nodes.update((value, value.func))
+            if to_device is not None:
+                try:
+                    device_type = torch.device(to_device.args[0].value).type
+                except RuntimeError as e:
+                    raise ValueError(f"{path} graph buffer names an invalid device") from e
+                if device_type not in {"cpu", "cuda"}:
+                    raise ValueError(
+                        f"{path} graph buffer names unsupported device type "
+                        f"{device_type!r}"
+                    )
+                buffer_factory_nodes.update((to_device, to_device.func))
+                device_types.add(device_type)
         for node in ast.walk(member):
             if node is not member and isinstance(node, forbidden_nodes):
                 raise ValueError(
@@ -2379,11 +2438,15 @@ def load_graph_class_from_source(
                 isinstance(node, ast.Attribute)
                 and node.attr.startswith("__")
                 and ast.unparse(node) != "super().__init__"
+                and not (
+                    ast.unparse(node) in dunder_operators
+                    and "torch" not in local_names
+                )
             ):
                 raise ValueError(
                     f"{path} graph method references unsafe attribute {node.attr!r}"
                 )
-            if isinstance(node, ast.Attribute):
+            if isinstance(node, ast.Attribute) and node not in buffer_factory_nodes:
                 attribute_name = ast.unparse(node)
                 parts = attribute_name.split(".")
                 is_operator_attribute = (
@@ -2447,7 +2510,11 @@ def load_graph_class_from_source(
                     or torch_name
                     in {"torch.ops", "torch.sym_float", "torch.sym_not", "torch.sym_sum"}
                     and not is_call_target
-                ) and not (is_operator_call or is_operator_argument):
+                ) and not (
+                    is_operator_call
+                    or is_operator_argument
+                    or outermost in buffer_factory_nodes
+                ):
                     raise ValueError(
                         f"{path} graph method references unsupported torch value "
                         f"{torch_name!r}"
@@ -2461,7 +2528,11 @@ def load_graph_class_from_source(
             if isinstance(node, ast.Call):
                 call_name = ast.unparse(node.func)
                 call_parts = call_name.split(".")
-                if call_name not in allowed_calls and not is_operator(call_parts):
+                if (
+                    call_name not in allowed_calls
+                    and not is_operator(call_parts)
+                    and node not in buffer_factory_nodes
+                ):
                     raise ValueError(
                         f"{path} graph method contains unsupported call {call_name!r}"
                     )
@@ -2487,10 +2558,10 @@ def load_graph_class_from_source(
     )
     # The first torch.tensor call on a device type imports modules (torch's
     # storage types, CUDA's lazy init), which the restricted builtins below
-    # cannot do; graph __init__s may call `tensor` on any device they name.
+    # cannot do; graph __init__s may create buffers on any device they name.
     # Only __init__ runs at load: warming up a device forward() merely names
     # would initialize CUDA on CPU-only hosts and in parents that later fork.
-    device_types = {"cpu"} | {
+    device_types |= {
         keyword.value.value
         for member in graph_class.body
         if isinstance(member, ast.FunctionDef) and member.name == "__init__"
