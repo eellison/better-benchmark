@@ -27,6 +27,10 @@ Usage:
   python scripts/run_recapture.py --suite timm --mode infer \\
       --models all --corpus-root /tmp/recapture_corpus/repros
 
+  # Static (pre-dynamic-capture) regions:
+  python scripts/run_recapture.py --suite timm --mode infer \\
+      --models mobilenetv2_100 --corpus-root /tmp/recapture_test/repros --dynamic none
+
   # Multi-GPU workers:
   python scripts/run_recapture.py --suite timm --mode both \\
       --models all --corpus-root /tmp/recapture_corpus/repros --gpus 0,1
@@ -295,6 +299,7 @@ def capture_single_model(
     batch_size: int,
     corpus_root: Path,
     timeout: int = 300,
+    dynamic: str = "all",
 ) -> dict:
     """Capture a single model. Returns a run_log entry dict.
 
@@ -314,6 +319,7 @@ def capture_single_model(
         "suite": suite,
         "model": model_name,
         "mode": mode,
+        "dynamic": dynamic,
         "status": "failed",
         "wall_time_s": 0,
         "region_count": 0,
@@ -376,7 +382,9 @@ def capture_single_model(
 
             # Compile and run
             with fresh_inductor_cache():
-                compiled = torch.compile(model_obj)
+                compiled = torch.compile(model_obj, dynamic=dynamic == "all" or None)
+                if dynamic == "batch":
+                    _mark_batch_dynamic(inputs, batch_size)
 
                 if mode == "train":
                     # DTYPE POLICY: autocast bf16 + backward — except
@@ -651,9 +659,24 @@ def _load_torchbench(model_name: str, batch_size: int, mode: str):
 # Worker subprocess entry point
 # ============================================================================
 
+def _mark_batch_dynamic(inputs, batch_size: int | None) -> None:
+    """mark_dynamic dim 0 of every input tensor whose leading size is the
+    batch."""
+    import torch
+    from torch.utils._pytree import tree_leaves
+
+    if batch_size is None or batch_size < 2:
+        raise ValueError(
+            f"--dynamic batch needs the model's batch size (got {batch_size}); "
+            "pass --batch-size N with N >= 2, or use --dynamic all")
+    for t in tree_leaves(inputs):
+        if isinstance(t, torch.Tensor) and t.dim() > 0 and t.shape[0] == batch_size:
+            torch._dynamo.mark_dynamic(t, 0)
+
+
 def run_worker(suite: str, model_name: str, mode: str, batch_size: int,
                corpus_root: Path, timeout: int = 300,
-               gpu_id: str | None = None):
+               gpu_id: str | None = None, dynamic: str = "all"):
     """Run capture for a single model in a subprocess. Returns the run_log entry."""
     env = os.environ.copy()
     # GPU assignment goes on the COPIED env only. Mutating the global
@@ -674,6 +697,7 @@ def run_worker(suite: str, model_name: str, mode: str, batch_size: int,
         "--models", model_name,
         "--corpus-root", str(corpus_root),
         "--timeout", str(timeout),
+        "--dynamic", dynamic,
     ]
     if batch_size is not None:
         cmd += ["--batch-size", str(batch_size)]
@@ -770,7 +794,7 @@ def run_orchestrator(args):
     # Build work list: (model_name, mode, batch_size)
     work = []
     for model_name in models:
-        bs = all_models.get(model_name, 128)  # default batch size
+        bs = args.batch_size or all_models.get(model_name, 128)  # default batch size
         for mode in modes:
             work.append((model_name, mode, bs))
 
@@ -780,12 +804,22 @@ def run_orchestrator(args):
     # Filter already-done models (resume)
     if not args.force:
         pending = []
+        mismatched = []
         for model_name, mode, bs in work:
             model_key = f"{args.suite}/{mode}/{model_name}"
             existing = run_log.get(model_key)
             if existing and existing.get("status") == "ok":
+                # Entries written before --dynamic existed were static captures.
+                if existing.get("dynamic", "none") != args.dynamic:
+                    mismatched.append(f"{model_key} (--dynamic {existing.get('dynamic', 'none')})")
                 continue
             pending.append((model_name, mode, bs))
+        if mismatched:
+            # Resuming would mix static and dynamic captures of one suite.
+            print(f"ERROR: --dynamic {args.dynamic} differs from the mode these models were "
+                  f"captured with in {corpus_root}: {', '.join(mismatched)}. Re-run with the "
+                  "same --dynamic, use a fresh --corpus-root, or pass --force to recapture.")
+            sys.exit(1)
     else:
         pending = work
 
@@ -834,6 +868,7 @@ def _run_sequential(args, pending, gpu_id: str, corpus_root: Path):
             corpus_root=corpus_root,
             timeout=args.timeout,
             gpu_id=gpu_id,
+            dynamic=args.dynamic,
         )
 
         # Write atomically
@@ -879,6 +914,7 @@ def _run_multi_gpu(args, pending, gpu_list: list[str], corpus_root: Path):
             corpus_root=corpus_root,
             timeout=args.timeout,
             gpu_id=gpu_id,
+            dynamic=args.dynamic,
         )
 
     with ThreadPoolExecutor(max_workers=n_gpus) as executor:
@@ -979,12 +1015,20 @@ def main():
     parser.add_argument("--dry-run", action="store_true",
                         help="List what would run without actually capturing")
     parser.add_argument("--batch-size", type=int, default=None,
-                        help="Override batch size for the model (worker mode)")
+                        help="Batch size for every model (default: the suite list's)")
+    parser.add_argument("--dynamic", choices=["all", "batch", "none"], default="all",
+                        help="Shapes to compile the model with: all (dynamic=True, "
+                             "every input size symbolic; the default), batch "
+                             "(mark_dynamic on the batch dim only), or none "
+                             "(the historical static compile). Regions of a "
+                             "dynamic compile keep their symbols in shapes.json.")
 
     # Internal: subprocess worker mode
     parser.add_argument("--_worker", action="store_true", help=argparse.SUPPRESS)
 
     args = parser.parse_args()
+    if args.dynamic == "batch" and (args.batch_size is None or args.batch_size < 2):
+        parser.error("--dynamic batch needs --batch-size N (N >= 2): the input dims of size N are marked dynamic")
 
     # Safety: corpus-root must never be the existing repros/ directory
     corpus_root = Path(args.corpus_root).resolve()
@@ -1011,6 +1055,7 @@ def main():
             batch_size=bs,
             corpus_root=corpus_root,
             timeout=args.timeout,
+            dynamic=args.dynamic,
         )
         # Write to run_log from worker too (atomic)
         write_run_log_entry(corpus_root, entry)
