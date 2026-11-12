@@ -1661,12 +1661,21 @@ def compute_partition_pattern(
                 "int" in dtype or "bool" in dtype):
             info["observed"] = observed_stats[name]
     if shape_env_block is not None:
-        # Canonicalization bakes sizes to the hint, so an index bound that is
-        # a symbolic dim (rows of a batch-sized table) is only visible here.
+        # Canonicalization bakes sizes to the hint, so a generator bound that
+        # is a symbolic dim (rows of a batch-sized table, a permutation of the
+        # batch) is only visible here.
         bound_exprs: dict[str, str] = {}
         infer_index_bounds_from_gm(sub_gm, placeholder_info, exprs_out=bound_exprs)
         for name, expr in bound_exprs.items():
             placeholder_info[name]["index_bound_expr"] = expr
+        perm_exprs: dict[str, str] = {}
+        with graph_guards_suppressed(sub_gm):
+            perm_sizes = infer_permutation_indices_from_gm(
+                sub_gm, placeholder_info, exprs_out=perm_exprs)
+        for name, size in perm_sizes.items():
+            placeholder_info[name]["perm_size"] = size
+            if name in perm_exprs:
+                placeholder_info[name]["perm_size_expr"] = perm_exprs[name]
     cast_index_put_values(sub_gm)
     sub_gm, placeholder_info, shape_params = canonicalize_subgraph(
         sub_gm, placeholder_info, shape_params)
@@ -2175,9 +2184,11 @@ class _CaptureState:
                     if name in constant_values:
                         spec["gen"] = {"kind": "constant",
                                        "value": constant_values[name]}
-                    elif name in permutation_indices:
+                    elif name in permutation_indices or "perm_size" in info:
                         spec["gen"] = {"kind": "permutation",
-                                       "size": permutation_indices[name]}
+                                       "size": permutation_indices.get(name, info.get("perm_size"))}
+                        if info.get("perm_size_expr"):
+                            spec["gen"]["size_expr"] = info["perm_size_expr"]
                     elif "int" in info["dtype"] and bound:
                         spec["gen"] = index_gen_from_observed(
                             bound, info.get("observed"))
@@ -2436,7 +2447,10 @@ if __name__ == "__main__":
                     index_bound_exprs: dict[str, str] = {}
                     index_bounds = infer_index_bounds_from_gm(
                         gm, placeholder_info, exprs_out=index_bound_exprs)
-                    permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+                    permutation_exprs: dict[str, str] = {}
+                    with graph_guards_suppressed(gm):
+                        permutation_indices = infer_permutation_indices_from_gm(
+                            gm, placeholder_info, exprs_out=permutation_exprs)
                     write_full_graph_metadata(
                         full_graph_path,
                         gm,
@@ -2452,6 +2466,7 @@ if __name__ == "__main__":
                         index_bounds=index_bounds,
                         index_bound_exprs=index_bound_exprs,
                         permutation_indices=permutation_indices,
+                        permutation_exprs=permutation_exprs,
                         observed_stats=self._current_observed_stats or {},
                     )
                 except Exception as exc:

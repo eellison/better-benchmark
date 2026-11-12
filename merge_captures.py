@@ -221,7 +221,7 @@ def _rename_symbols_in_inputs(inputs, rename: dict):
                 if "st" in opts:
                     opts["st"] = [_slot(s) for s in opts["st"]]
                 gen = opts.get("gen")
-                if isinstance(gen, list) and gen and gen[0] in {"index", "runs"}:
+                if isinstance(gen, list) and gen and gen[0] in {"index", "runs", "perm"}:
                     opts["gen"] = [_slot(g) if isinstance(g, str) and i > 0 else g
                                    for i, g in enumerate(gen)]
                 if "off" in opts:

@@ -268,6 +268,34 @@ def test_unbacked_symbol_needs_an_explicit_binding(tmp_path):
     assert [r["numerics"] for r in rows] == ["pass", "pass"]
 
 
+def test_permutation_inputs_are_detected_and_follow_the_batch(tmp_path):
+    """index_put of arange into an empty buffer needs a true permutation;
+    random ids leave slots uninitialized."""
+    from full_graph_harness import prepare_full_graph_execution
+
+    def f(perm, x):
+        n = perm.shape[0]
+        out = torch.empty(n, dtype=torch.int64).index_put_((perm,), torch.arange(n))
+        return x[out] * 2
+
+    _capture(f, [(torch.randperm(16), torch.randn(16, 8))], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    perm = shapes["points"][0]["inputs"][1]
+    assert perm[2]["gen"] == ["perm", 16, "s0"], perm
+    base = shapes["points"][0]["bindings"]
+    rows = _check(tmp_path, name, [{**base, "s0": s0} for s0 in (16, 12, 40)])
+    assert [r["numerics"] for r in rows] == ["pass"] * 3, rows
+
+    (graph,) = (tmp_path / "models/toy/infer/m").glob("full_graph_*.py")
+    sidecar = json.loads(graph.with_suffix(".meta.json").read_text())
+    (batch,) = [s for s, d in sidecar["symbols"].items() if d["hint"] == 16]
+    execution = prepare_full_graph_execution(graph, default_device="cpu")
+    hints = {s: d["hint"] for s, d in sidecar["symbols"].items()}
+    ids = next(a for a in execution.args({**hints, batch: 12})
+               if torch.is_tensor(a) and a.dtype == torch.int64)
+    assert sorted(ids.tolist()) == list(range(12))
+
+
 def test_index_bound_follows_a_symbolic_table(tmp_path):
     from full_graph_harness import prepare_full_graph_execution
 

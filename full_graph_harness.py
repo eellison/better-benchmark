@@ -1471,11 +1471,38 @@ def infer_sorted_inputs_from_gm(gm: Any, placeholder_info: dict[str, dict]) -> N
 def infer_permutation_indices_from_gm(
     gm: Any,
     placeholder_info: dict[str, dict],
+    exprs_out: dict[str, str] | None = None,
 ) -> dict[str, int]:
-    """Find integer placeholders that must be valid permutations."""
+    """Find integer placeholders that must be valid permutations.
+
+    Returns {name: size at the captured sizes}; `exprs_out` receives the size
+    as an expression when it is symbolic."""
     import torch
 
     permutation_sizes = {}
+
+    def _dim(x):
+        """(hint, expr) of a size that is an int, a SymInt, or a node whose
+        value is one; (None, None) otherwise."""
+        if hasattr(x, "meta"):
+            x = x.meta.get("val")
+        if isinstance(x, int):
+            return x, None
+        if isinstance(x, torch.SymInt):
+            hint = getattr(x.node, "hint", None)
+            return (None if hint is None else int(hint)), _sym_expr_str(x)
+        return None, None
+
+    def _record(name, target_dim, iota_len):
+        (t_hint, t_expr), (i_hint, i_expr) = _dim(target_dim), _dim(iota_len)
+        if t_hint is None or t_hint != i_hint:
+            return
+        if t_expr is not None and i_expr is not None and t_expr != i_expr:
+            return
+        permutation_sizes[name] = i_hint
+        expr = i_expr or t_expr
+        if expr is not None and exprs_out is not None:
+            exprs_out[name] = expr
     ph_nodes = {n.name: n for n in gm.graph.nodes if n.op == "placeholder"}
 
     def _shape_from_alloc(n):
@@ -1519,17 +1546,7 @@ def infer_permutation_indices_from_gm(
             return None
         if not n.args:
             return None
-        length = n.args[0]
-        # lifted/symbolic length: resolve via meta['val'] or SymInt hint
-        if not isinstance(length, int) and hasattr(length, "meta"):
-            mv = length.meta.get("val")
-            if isinstance(mv, int):
-                length = mv
-            elif hasattr(mv, "node") and hasattr(mv.node, "hint"):
-                length = int(mv.node.hint)
-        if isinstance(length, int):
-            return length
-        return None
+        return n.args[0]
 
     for name, node in ph_nodes.items():
         info = placeholder_info.get(name, {})
@@ -1546,8 +1563,8 @@ def infer_permutation_indices_from_gm(
                 continue
             target_shape = _shape_from_alloc(user.args[0])
             iota_size = _iota_size(user.args[2])
-            if target_shape and iota_size and target_shape[0] == iota_size:
-                permutation_sizes[name] = iota_size
+            if target_shape and iota_size is not None:
+                _record(name, target_shape[0], iota_size)
 
         for user in node.users:
             if user.op != "call_function" or user.target != torch.ops.aten.scatter.src:
@@ -1557,11 +1574,11 @@ def infer_permutation_indices_from_gm(
             target_shape = _shape_from_alloc(user.args[0])
             iota_size = _iota_size(user.args[3])
             dim = user.args[1]
-            if target_shape and iota_size and isinstance(dim, int):
+            if target_shape and iota_size is not None and isinstance(dim, int):
                 if dim < 0:
                     dim += len(target_shape)
-                if 0 <= dim < len(target_shape) and target_shape[dim] == iota_size:
-                    permutation_sizes[name] = iota_size
+                if 0 <= dim < len(target_shape):
+                    _record(name, target_shape[dim], iota_size)
     return permutation_sizes
 
 
@@ -1708,6 +1725,7 @@ def graph_constraints_from_gm(
     index_bounds: dict[str, int] | None = None,
     index_bound_exprs: dict[str, str] | None = None,
     permutation_indices: dict[str, int] | None = None,
+    permutation_exprs: dict[str, str] | None = None,
     observed_stats: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
     """Extract replay constraints from an FX GraphModule.
@@ -1740,6 +1758,8 @@ def graph_constraints_from_gm(
                         "kind": "permutation",
                         "size": int(permutation_indices[node.name]),
                     }
+                    if (permutation_exprs or {}).get(node.name):
+                        gen_override["size_expr"] = permutation_exprs[node.name]
                     constraint_source = "graph_inference"
                 elif node.name in index_bounds:
                     # Same rule as region capture, so region and full-graph
@@ -1901,6 +1921,7 @@ def write_full_graph_metadata(
     index_bounds: dict[str, int] | None = None,
     index_bound_exprs: dict[str, str] | None = None,
     permutation_indices: dict[str, int] | None = None,
+    permutation_exprs: dict[str, str] | None = None,
     observed_stats: dict[str, dict] | None = None,
 ) -> Path:
     graph_path = Path(graph_path)
@@ -1909,6 +1930,7 @@ def write_full_graph_metadata(
         index_bounds=index_bounds,
         index_bound_exprs=index_bound_exprs,
         permutation_indices=permutation_indices,
+        permutation_exprs=permutation_exprs,
         observed_stats=observed_stats,
     )
     payload["graph"] = graph_path.name

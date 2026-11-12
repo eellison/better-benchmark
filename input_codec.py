@@ -125,6 +125,8 @@ def _gen_to_compact(gen: dict) -> list | None:
         out = ["perm"]
         if gen.get("size") is not None:
             out.append(int(gen["size"]))
+            if gen.get("size_expr") is not None:
+                out.append(gen["size_expr"])
         return out
     if kind == "offsets":
         return ["offsets", int(gen.get("high", 1))]
@@ -149,8 +151,10 @@ def _gen_from_compact(c: list) -> dict:
     if kind == "randint":
         return {"kind": "randint", "low": c[1], "high": c[2]}
     if kind == "perm":
-        return {"kind": "permutation",
-                "size": c[1] if len(c) > 1 else None}
+        gen = {"kind": "permutation", "size": c[1] if len(c) > 1 else None}
+        if len(c) > 2:
+            gen["size_expr"] = c[2]
+        return gen
     if kind == "offsets":
         return {"kind": "offsets", "high": c[1]}
     if kind == "const":
@@ -164,10 +168,11 @@ def _gen_from_compact(c: list) -> dict:
     return {"kind": kind}
 
 
-# An index generator's bound can be an expression over the size symbols (the
-# rows of a batch-sized table): compact ["index", low, high, expr] and
-# ["runs", ..., sorted, expr], where high is the bound at the captured sizes.
-_GEN_EXPR_SLOT = {"index": 3, "runs": 6}
+# A generator's bound can be an expression over the size symbols (the rows of
+# a batch-sized table): compact ["index", low, high, expr],
+# ["runs", ..., sorted, expr] and ["perm", size, expr], where high/size is the
+# value at the captured sizes.
+_GEN_EXPR_SLOT = {"index": 3, "runs": 6, "perm": 2}
 
 
 def _gen_bound_expr(gen) -> str | None:
@@ -186,6 +191,8 @@ def _bind_gen(gen: list, bindings: dict) -> list:
     bound = max(_eval_dim(expr, bindings), 1)
     if gen[0] == "index":
         return ["index", gen[1], bound]
+    if gen[0] == "perm":
+        return ["perm", bound]
     # runs: the observed range, clipped to the bound at this binding.
     low, high = gen[1], min(gen[2], bound)
     if high <= low:
@@ -952,7 +959,7 @@ def evaluate_spec(spec: dict, bindings: dict,
     symbolic = spec.get("symbolic") or {}
     storage_nbytes_expr = spec.get("storage_nbytes_expr")
     gen = spec.get("gen") or spec.get("generator")
-    gen_expr = gen.get("high_expr") if isinstance(gen, dict) else None
+    gen_expr = (gen.get("high_expr") or gen.get("size_expr")) if isinstance(gen, dict) else None
     if not symbolic and storage_nbytes_expr is None and gen_expr is None:
         return spec
     out = dict(spec)
