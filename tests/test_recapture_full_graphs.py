@@ -692,6 +692,111 @@ class GraphModule(torch.nn.Module):
                 with self.assertRaisesRegex(ValueError, error):
                     load_graph_class_from_source(source, "test_graph.py")
 
+    def test_loader_resolves_and_binds_symint_inputs_from_expressions(self):
+        # primals_1 has no written value but its symbol is bound at module
+        # level; primals_2 is an expression of two symbols.
+        source = """
+s0 = 6
+s1 = 2
+
+
+class Repro(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, primals_1, primals_2, primals_3):
+        full = torch.ops.aten.full.default([primals_2], 1.0, dtype = torch.float32, layout = torch.strided, device = device(type='cpu'), pin_memory = False)
+        cat = torch.ops.aten.cat.default([primals_3, full]);  primals_3 = full = None
+        mul = primals_1 * 2;  primals_1 = None
+        return (cat, mul)
+
+
+def load_args(reader):
+    reader.symint(None, expr='s0')  # primals_1
+    reader.symint(8, expr='s0 + s1')  # primals_2
+    buf0 = reader.storage(None, 4*s0, device=device(type='cpu'), dtype_hint=torch.float32)
+    reader.tensor(buf0, (s0,), is_leaf=True)  # primals_3
+load_args._version = 0
+mod = Repro()
+"""
+        specs = _parse_input_shapes_from_reader(source)
+        self.assertEqual([6, 8], [spec["value"] for spec in specs[:2]])
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "fx_graph_runnable.py", source)
+            graphs = [load_graph_module(path, tracing_mode=mode) for mode in ("real", "symbolic")]
+
+        real, symbolic = graphs
+        self.assertIsNotNone(real)
+        self.assertIsNotNone(symbolic)
+        self.assertTrue(symbolic.meta["better_benchmark_captured_dynamic"])
+        placeholders = [n.meta["val"] for n in symbolic.graph.nodes if n.op == "placeholder"]
+        self.assertTrue(all(isinstance(value, torch.SymInt) for value in placeholders[:2]))
+
+    def test_loader_rejects_symint_expression_inputs_that_disagree_with_shapes(self):
+        source = """
+class GraphModule(torch.nn.Module):
+    def forward(self, primals_1: "Sym(2*s0)", primals_2: "f32[2, s0]"):
+        view = torch.ops.aten.view.default(primals_2, [primals_1]);  primals_1 = primals_2 = None
+        return (view,)
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            self.assertIsNone(load_graph_module(path, tracing_mode="symbolic"))
+
+    def test_ingest_writes_graphs_with_constant_symint_inputs(self):
+        # A SymInt specialized to a constant (expr='4') traces as a plain int,
+        # so its input spec must be a scalar like the captured placeholder.
+        source = """
+class Repro(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, primals_1, primals_2):
+        view = torch.ops.aten.view.default(primals_2, [primals_1, 2]);  primals_1 = primals_2 = None
+        relu = torch.ops.aten.relu.default(view);  view = None
+        return (relu,)
+
+
+def load_args(reader):
+    reader.symint(4, expr='4')  # primals_1
+    buf0 = reader.storage(None, 32, device=device(type='cpu'), dtype_hint=torch.float32)
+    reader.tensor(buf0, (8,), is_leaf=True)  # primals_2
+load_args._version = 0
+mod = Repro()
+"""
+        specs = _parse_input_shapes_from_reader(source)
+        self.assertEqual(("scalar", 4), (specs[0]["kind"], specs[0]["value"]))
+
+        from capture_hook import _CaptureState
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "fx_graph_runnable.py", source)
+            graph_module = load_graph_module(path, tracing_mode="symbolic")
+            state = _CaptureState(str(Path(tmp) / "capture"), label="g", graph_dir=str(Path(tmp) / "g"))
+            state.process_graph(graph_module)
+            state.finalize()
+            self.assertTrue((Path(tmp) / "g" / "full_graph_000.py").exists())
+
+    def test_loader_still_rejects_unresolvable_symint_inputs(self):
+        source = """
+class Repro(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def forward(self, primals_1):
+        mul = primals_1 * 2;  primals_1 = None
+        return (mul,)
+
+
+def load_args(reader):
+    reader.symint(None, expr='s7')  # primals_1
+load_args._version = 0
+mod = Repro()
+"""
+        specs = _parse_input_shapes_from_reader(source)
+        self.assertIsNone(specs[0]["value"])
+
 
 if __name__ == "__main__":
     unittest.main()
