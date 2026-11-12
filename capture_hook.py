@@ -541,9 +541,10 @@ _UNINITIALIZED_ALLOCATION_OPS = ALLOCATION_ONLY_OPS | {
 
 
 def _written_in_place_args(node: fx.Node) -> list:
-    """Graph values ``node`` may write in place: every tensor argument of a
-    user Triton kernel launch (which ones it writes is only known to the
-    kernel), and the ``alias_info.is_write`` arguments of an aten op."""
+    """Graph values ``node`` may write in place: the ``alias_info.is_write``
+    arguments of an aten op, and for a user Triton kernel launch the tensors
+    its kernel writes when the loader attached a trusted kernel
+    (``user_triton.TrustedKernels``), else every value it takes."""
     from torch.utils import _pytree as pytree
 
     if node.op != "call_function":
@@ -553,6 +554,16 @@ def _written_in_place_args(node: fx.Node) -> list:
         isinstance(target, torch._ops.HigherOrderOperator)
         and target.name() == "triton_kernel_wrapper_mutation"
     ):
+        from user_triton import WRITE_ANALYSIS_KEY
+
+        module = node.graph.owning_module
+        trusted = (getattr(module, "meta", None) or {}).get(WRITE_ANALYSIS_KEY)
+        names = trusted.written_kwargs(node) if trusted is not None else None
+        if names is not None:
+            return [
+                arg for name, arg in node.kwargs["kwargs"].items()
+                if name in names and isinstance(arg, fx.Node)
+            ]
         return [a for a in pytree.tree_leaves(node.kwargs) if isinstance(a, fx.Node)]
     if not isinstance(target, torch._ops.OpOverload):
         return []
@@ -651,11 +662,11 @@ def written_allocation_aliases(gm: fx.GraphModule, excluded=()) -> set:
     any other buffer written by a node outside every partition (not
     partition-supported, or ``excluded``) and read after the write.
 
-    A user Triton kernel launch counts as writing every tensor it takes: the
-    graph does not say which ones it writes. The TTIR mutation analysis needs
-    the kernel from the capturing process's ``kernel_side_table``, which a
-    saved graph only names by index, and partitions must come out the same
-    when a saved graph is re-partitioned elsewhere. Keeping
+    A user Triton kernel launch counts as writing every value it takes
+    unless the loader attached a trusted kernel for it: the graph names the
+    kernel only by its index into the capturing process's
+    ``kernel_side_table``, so only a kernel whose identity was checked
+    against reviewed source can be analyzed. Keeping
     these nodes out of every partition makes readers take the buffer as an
     input instead. Graph inputs, constants and buffers no partition can
     hold (an extern's output) are inputs already.
