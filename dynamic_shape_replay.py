@@ -434,20 +434,26 @@ def _effective_binding_for_row(binding: dict | None, cfg: dict) -> dict:
 
 
 def _exact_floors(expr):
-    """Rewrite floor/ceiling of a polynomial over an integer denominator
-    (floor(s1/3 + s2/3)) as integer FloorDiv: evaluated in floats it can land
-    just below an integer, and spec-time IntVars can't take sympy floor."""
+    """Rewrite floor/ceiling of an integer polynomial over an integer or
+    integer-polynomial denominator (floor(s1/3 + s2/3), floor(200*s0/s1),
+    floor(4096/s0)) as integer FloorDiv: evaluated in floats it can land just
+    below an integer, and spec-time IntVars take neither sympy floor nor
+    negative powers."""
     import sympy
     from torch.utils._sympy.functions import FloorDiv
+
+    def _int_poly(e):
+        return e.is_Integer or (e.is_polynomial() and all(
+            c.is_Integer for c in sympy.Poly(e, *e.free_symbols).coeffs()))
 
     def rewrite(node):
         name = type(node).__name__
         if name not in {"floor", "FloorToInt", "ceiling", "CeilToInt"}:
             return None
         num, den = sympy.fraction(sympy.together(node.args[0]))
-        if not (den.is_Integer and den > 1 and num.free_symbols and num.is_polynomial()):
+        if not (_int_poly(num) and _int_poly(den) and (num.free_symbols or den.free_symbols)):
             return None
-        if not all(c.is_Integer for c in sympy.Poly(num, *num.free_symbols).coeffs()):
+        if den.is_Integer and den < 2:
             return None
         if name in {"floor", "FloorToInt"}:
             return FloorDiv(num, den)

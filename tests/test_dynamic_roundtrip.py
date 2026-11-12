@@ -6,6 +6,7 @@ Capture and replay run on CPU (Inductor's C++ backend).
 """
 import importlib.util
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -214,6 +215,35 @@ def test_guard_floor_of_rational_sum_is_exact():
     guard = _symint_expr_evaluator(_exact_floors(_sympify_expr(text)))
     assert guard({"s1": 200, "s2": 200, "s3": 200})
     assert _symint_expr_evaluator(_exact_floors(_sympify_expr("ceiling(s1/3)")))({"s1": 200}) == 67
+
+
+def test_floor_over_a_symbolic_denominator_builds_a_spec():
+    from dynamic_shape_replay import _shape_env_spec_from_contract
+
+    # A reshape to (-1, 200, 192) of (s1, ...) rows records floor(200*s0/s1).
+    contract = {
+        "points": [{"inputs": [[["s0", "floor(200*s0/s1)"], "f32"], ["I", 128, "s1"]],
+                    "bindings": {"s0": 128, "s1": 128}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [2, None], "hint": 128},
+                    "s1": {"range": [2, None], "hint": 128}},
+    }
+    spec = str(_shape_env_spec_from_contract(contract)[0])
+    assert re.search(r"\(\(200\*s0#\d+\)//s1#\d+\)", spec), spec
+
+
+@pytest.mark.parametrize("text, want", [
+    ("floor(4096/s0)", 4096 // 3), ("ceiling(4096/s0)", -(-4096 // 3)), ("floor(4096/(s0*s1))", 4096 // 21)])
+def test_floor_of_a_constant_over_symbols(text, want):
+    from dynamic_shape_replay import _exact_floors, _shape_env_spec_from_contract, _symint_expr_evaluator
+    from input_codec import _sympify_expr
+
+    contract = {
+        "points": [{"inputs": [[["s0", text], "f32"], ["I", 7, "s1"]],
+                    "bindings": {"s0": 3, "s1": 7}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [2, None], "hint": 3}, "s1": {"range": [2, None], "hint": 7}},
+    }
+    _shape_env_spec_from_contract(contract)
+    assert _symint_expr_evaluator(_exact_floors(_sympify_expr(text)))({"s0": 3, "s1": 7}) == want
 
 
 def test_torch_max_min_in_captured_strides_evaluate():
