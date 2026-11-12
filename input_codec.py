@@ -29,6 +29,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from jagged_inputs import JAGGED_KINDS
+
 SHORT_DTYPE = {
     "float32": "f32", "float16": "f16", "bfloat16": "bf16",
     "float64": "f64", "int64": "i64", "int32": "i32",
@@ -121,6 +123,8 @@ def _gen_to_compact(gen: dict) -> list | None:
     if kind == "runs":
         return ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
                 int(gen["n_runs"]), int(bool(gen["sorted"]))]
+    if kind in JAGGED_KINDS:
+        return [kind, gen["total"], gen.get("max_len"), gen.get("distribution")]
     return [kind] + [v for k, v in sorted(gen.items()) if k != "kind"]
 
 
@@ -140,6 +144,8 @@ def _gen_from_compact(c: list) -> dict:
     if kind == "runs":
         return {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
                 "n_runs": c[4], "sorted": bool(c[5])}
+    if kind in JAGGED_KINDS:
+        return {"kind": kind, "total": c[1], "max_len": c[2], "distribution": c[3]}
     return {"kind": kind}
 
 
