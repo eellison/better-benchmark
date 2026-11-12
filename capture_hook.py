@@ -28,6 +28,7 @@ import hashlib
 import json
 import os
 import sys
+import weakref
 from pathlib import Path
 from typing import Any
 
@@ -101,10 +102,12 @@ ALLOCATION_ONLY_OPS = {
 # of the graph are still captured. Region-level reasons mark a repro that is
 # still captured and timed but held at production in projections.
 MASK_REASONS = (
-    "jagged", "hstu", "user_triton", "side_effect", "hw_unsupported", "approx_index"
+    "jagged", "hstu", "user_triton", "side_effect", "hw_unsupported",
+    "unbacked_shape", "approx_index",
 )
 NODE_MASK_REASONS = frozenset(
-    {"jagged", "hstu", "user_triton", "side_effect", "hw_unsupported"}
+    {"jagged", "hstu", "user_triton", "side_effect", "hw_unsupported",
+     "unbacked_shape"}
 )
 REGION_MASK_REASONS = frozenset({"approx_index"})
 NON_FUSIBLE_MASK_REASONS = NODE_MASK_REASONS
@@ -127,6 +130,45 @@ def _mask_user_triton(node: fx.Node) -> str | None:
     return None
 
 
+_input_bound_symbols: "weakref.WeakKeyDictionary[fx.Graph, frozenset]" = (
+    weakref.WeakKeyDictionary()
+)
+
+
+def _unbacked_symbols(values) -> set:
+    from torch.fx.experimental.symbolic_shapes import free_unbacked_symbols
+    from torch.utils import _pytree as pytree
+
+    return {
+        symbol
+        for value in pytree.tree_leaves(values)
+        if isinstance(value, (torch.Tensor, torch.SymInt, torch.SymFloat, torch.SymBool))
+        for symbol in free_unbacked_symbols(value)
+    }
+
+
+def _mask_unbacked_shape(node: fx.Node) -> str | None:
+    """A node whose output or inputs have sizes or values produced by a
+    data-dependent op in the graph (unique, nonzero, .item()). Unbacked
+    symbols bound by graph inputs are excluded: the loader records their
+    concrete values. The capture has no value for the others, and random
+    replay inputs would not reproduce the real sizes."""
+    from torch.utils import _pytree as pytree
+
+    if node.op != "call_function":
+        return None
+    bound = _input_bound_symbols.get(node.graph)
+    if bound is None:
+        bound = frozenset(_unbacked_symbols([
+            p.meta.get("val") for p in node.graph.find_nodes(op="placeholder")
+        ]))
+        _input_bound_symbols[node.graph] = bound
+    values = [node.meta.get("val")]
+    for arg in pytree.tree_leaves((node.args, node.kwargs)):
+        values.append(arg.meta.get("val") if isinstance(arg, fx.Node) else arg)
+    return "unbacked_shape" if _unbacked_symbols(values) - bound else None
+
+
 # Node rules. Each maps an fx.Node to a reason in NODE_MASK_REASONS, or None;
 # any other value is ignored. To add a rule, append a function here. It must
 # decide from the node and its graph alone (a saved full graph or runnable),
@@ -135,7 +177,8 @@ def _mask_user_triton(node: fx.Node) -> str | None:
 # exception: it reads the benchmark target's compute capability). Every rule
 # runs, and a node is masked for all the reasons returned.
 MASK_RULES: list = [
-    _mask_user_triton, side_effect_rule, jagged_rule, hw_unsupported_rule
+    _mask_user_triton, side_effect_rule, jagged_rule, hw_unsupported_rule,
+    _mask_unbacked_shape,
 ]
 
 # Region rules. Each maps a partition (its list of nodes in the full graph) to
