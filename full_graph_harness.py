@@ -722,6 +722,13 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.scatter.src: (0, 1),
         torch.ops.aten.scatter.value: (0, 1),
         torch.ops.aten.scatter_add.default: (0, 1),
+        torch.ops.aten.scatter.reduce: (0, 1),
+        torch.ops.aten.scatter.value_reduce: (0, 1),
+        torch.ops.aten.scatter_reduce.two: (0, 1),
+        torch.ops.aten.index_add.default: (0, 1),
+        torch.ops.aten.index_copy.default: (0, 1),
+        torch.ops.aten.index_fill.int_Scalar: (0, 1),
+        torch.ops.aten.index_fill.int_Tensor: (0, 1),
         torch.ops.aten.gather.default: (0, 1),
 
         torch.ops.aten.index_select.default: (0, 1),
@@ -733,6 +740,13 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.scatter.src: 2,
         torch.ops.aten.scatter.value: 2,
         torch.ops.aten.scatter_add.default: 2,
+        torch.ops.aten.scatter.reduce: 2,
+        torch.ops.aten.scatter.value_reduce: 2,
+        torch.ops.aten.scatter_reduce.two: 2,
+        torch.ops.aten.index_add.default: 2,
+        torch.ops.aten.index_copy.default: 2,
+        torch.ops.aten.index_fill.int_Scalar: 2,
+        torch.ops.aten.index_fill.int_Tensor: 2,
         torch.ops.aten.gather.default: 2,
         torch.ops.aten.index_select.default: 2,
         torch.ops.aten.embedding.default: 1,
@@ -877,6 +891,23 @@ def infer_index_bounds_from_gm(
 
             found: list[int] = []
 
+            def _dim(v):
+                """A dim's concrete size, or None for a data-dependent
+                (unbacked) size: that index is left unbounded."""
+                if isinstance(v, torch.SymInt):
+                    hint = getattr(v.node, "hint", None)
+                    if hint is not None:
+                        return int(hint)
+                    try:
+                        return int(v)
+                    except Exception:
+                        return None
+                return int(v)
+
+            def _add(size, chain) -> None:
+                if size is not None:
+                    found.append(_invert(size, chain))
+
             def _invert(bound: int, chain) -> int:
                 b = bound
                 for kind, arg in reversed(chain):
@@ -962,13 +993,30 @@ def infer_index_bounds_from_gm(
                                 if weight_arg and hasattr(weight_arg, "meta"):
                                     val = weight_arg.meta.get("val")
                                     if isinstance(val, torch.Tensor) and len(val.shape) > 0:
-                                        found.append(_invert(int(val.shape[0]), chain))
+                                        _add(_dim(val.shape[0]), chain)
                                         continue
 
+                        if (target == torch.ops.aten.embedding_dense_backward.default
+                                and len(user.args) > 2 and user.args[1] is n
+                                and isinstance(user.args[2], int)):
+                            found.append(_invert(int(user.args[2]), chain))
+                            continue
+
+                        # The masked variants take (self, mask, indices, ...).
+                        indices_pos = (
+                            2 if target in (
+                                torch.ops.aten._unsafe_masked_index.default,
+                                torch.ops.aten._unsafe_masked_index_put_accumulate.default,
+                            ) else 1
+                        )
                         if (target in (torch.ops.aten.index.Tensor,
                                        torch.ops.aten.index_put.default,
-                                       torch.ops.aten.index_put_.default)
-                                and len(user.args) >= 2):
+                                       torch.ops.aten.index_put_.default,
+                                       torch.ops.aten._unsafe_index.Tensor,
+                                       torch.ops.aten._unsafe_index_put.default,
+                                       torch.ops.aten._unsafe_masked_index.default,
+                                       torch.ops.aten._unsafe_masked_index_put_accumulate.default)
+                                and len(user.args) > indices_pos):
                             # indices list position maps to DIM, INCLUDING
                             # None slots (index_put([None, None, i, j]):
                             # i indexes dim 2, j dim 3 — Yitu: bounding j
@@ -976,11 +1024,11 @@ def infer_index_bounds_from_gm(
                             # index_put_ (in-place) shares the schema; both
                             # take (self, indices_list, values, ...).
                             target_shape = _node_shape(user.args[0])
-                            indices = user.args[1]
+                            indices = user.args[indices_pos]
                             if target_shape and isinstance(indices, (list, tuple)):
                                 for dim, index_node in enumerate(indices):
                                     if index_node is n and dim < len(target_shape):
-                                        found.append(_invert(int(target_shape[dim]), chain))
+                                        _add(_dim(target_shape[dim]), chain)
 
                         if target == torch.ops.aten.gather.default:
                             if user.args and user.args[0] is n:
@@ -998,9 +1046,9 @@ def infer_index_bounds_from_gm(
                                     if dim_arg_idx is not None and len(user.args) > dim_arg_idx:
                                         dim = user.args[dim_arg_idx]
                                         if isinstance(dim, int) and dim < len(target_shape):
-                                            found.append(_invert(int(target_shape[dim]), chain))
+                                            _add(_dim(target_shape[dim]), chain)
                                     else:
-                                        found.append(_invert(int(target_shape[0]), chain))
+                                        _add(_dim(target_shape[0]), chain)
 
                         if target in passthrough_ops or target in _VALUE_PRESERVING:
                             next_frontier.append((user, chain))

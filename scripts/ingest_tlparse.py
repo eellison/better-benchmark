@@ -747,6 +747,12 @@ def load_graph_module(
     2. Strip __main__ blocks to avoid running the graph
     3. Replace `class <lambda>` with `class Repro`
     4. Trace the instantiated module with make_fx to produce a GraphModule
+
+    ``tracing_mode="fake"`` traces without running the graph: inputs and
+    tensor attributes are FakeTensors, so no device memory is allocated and
+    value-dependent ops (repeat_interleave with output_size) cannot assert.
+    Side-effect ops registered in mask_rules are stripped from the source
+    when nothing reads their results.
     """
     import re
     import torch
@@ -770,6 +776,10 @@ def load_graph_module(
     # (the file creates the instance itself which we'll do ourselves)
     content = re.sub(r'^mod\s*=\s*Repro\(\)\s*$', '', content, flags=re.MULTILINE)
 
+    from mask_rules import strip_side_effect_source
+
+    content, stripped, strip_blocked = strip_side_effect_source(content)
+
     try:
         from full_graph_harness import (
             _validate_tensor_layout,
@@ -783,6 +793,20 @@ def load_graph_module(
         annotation_content = (
             annotation_path.read_text() if annotation_path is not None else content
         )
+        if annotation_path is not None:
+            annotation_content, annotation_stripped, annotation_blocked = (
+                strip_side_effect_source(annotation_content)
+            )
+            if sorted(annotation_stripped) != sorted(stripped):
+                raise ValueError(
+                    "runnable and post-grad graph disagree on strippable "
+                    f"side-effect ops: {stripped} vs {annotation_stripped}"
+                )
+            strip_blocked = strip_blocked + annotation_blocked
+        side_effects = {
+            "stripped": stripped,
+            "blocked": [list(item) for item in strip_blocked],
+        }
         annotation_specs = (
             parse_full_graph_inputs(annotation_content)
             if annotation_path is not None or not reader_specs
@@ -842,16 +866,36 @@ def load_graph_module(
         # `_tensor_constant0: "f32[]" = self._tensor_constant0`
         tensor_attrs.update(collect_self_tensor_attrs("_tensor_constant"))
 
-        if tensor_attrs:
+        fake_mode = None
+        if tracing_mode == "fake":
+            from torch._subclasses.fake_tensor import FakeTensorMode
+            from torch.fx.experimental.symbolic_shapes import ShapeEnv
+
+            fake_mode = FakeTensorMode(
+                allow_non_fake_inputs=True,
+                shape_env=ShapeEnv(),
+                static_shapes=True,
+            )
+        if fake_mode is not None:
+            # Fake tensors need no GPU, so keep the graph's CUDA device.
+            dev = torch.device('cuda:0')
+        else:
             dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+
+        if tensor_attrs:
             for attr_name, (shape, dtype) in tensor_attrs.items():
                 if hasattr(instance, attr_name):
                     continue
-                buf = torch.zeros(shape, dtype=dtype, device=dev)
+                if fake_mode is not None:
+                    with fake_mode:
+                        buf = torch.empty(shape, dtype=dtype, device=dev)
+                else:
+                    buf = torch.zeros(shape, dtype=dtype, device=dev)
                 instance.register_buffer(attr_name, buf)
 
         # If already a GraphModule (has .graph), return directly
         if hasattr(instance, 'graph'):
+            instance.meta["better_benchmark_side_effects"] = side_effects
             return instance
 
         # Otherwise, trace with make_fx to produce a proper GraphModule
@@ -862,8 +906,8 @@ def load_graph_module(
         from torch.fx.experimental.proxy_tensor import make_fx
 
         # Create inputs on CUDA (forward methods typically hardcode cuda:0 device)
-        dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
-        instance = instance.to(dev)
+        if fake_mode is None:
+            instance = instance.to(dev)
 
         def normalize_input_spec(spec):
             if isinstance(spec, dict):
@@ -903,7 +947,9 @@ def load_graph_module(
             stride = spec.get("stride")
             storage_offset = int(spec.get("storage_offset", 0) or 0)
             device_text = spec.get("device") or ""
-            if device_text.startswith("cuda") and torch.cuda.is_available():
+            if device_text.startswith("cuda") and (
+                fake_mode is not None or torch.cuda.is_available()
+            ):
                 tensor_dev = torch.device("cuda:0")
             elif device_text.startswith("cpu"):
                 tensor_dev = torch.device("cpu")
@@ -918,6 +964,12 @@ def load_graph_module(
                 ).to(dtype)
             else:
                 make_base = lambda size: torch.randn(size, dtype=dtype, device=tensor_dev)
+            if fake_mode is not None:
+                make_real = make_base
+
+                def make_base(size):
+                    with fake_mode:
+                        return make_real(size)
 
             if stride is not None or storage_offset:
                 if stride is None:
@@ -1026,6 +1078,7 @@ def load_graph_module(
             gm = make_fx(instance, tracing_mode=tracing_mode)(*inputs)
         gm.meta["better_benchmark_input_specs"] = input_shapes
         gm.meta["better_benchmark_captured_dynamic"] = captured_dynamic
+        gm.meta["better_benchmark_side_effects"] = side_effects
         if annotation_path is not None or any(spec.get("kind") == "generator" for spec in normalized_specs):
             gm.meta["better_benchmark_source_code"] = annotation_content.replace(
                 "class <lambda>", "class Repro"
