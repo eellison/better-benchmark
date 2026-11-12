@@ -508,10 +508,19 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
         if meta_path.exists():
             with open(meta_path) as f:
                 meta = json.load(f)
+            changed = False
             if qual_key not in meta.get("models", []):
                 meta["models"].append(qual_key)
                 meta["models"].sort()
                 meta["n_models"] = len(meta["models"])
+                changed = True
+            if entry.get("masked_reason") != meta.get("masked_reason"):
+                if entry.get("masked_reason"):
+                    meta["masked_reason"] = entry["masked_reason"]
+                else:
+                    meta.pop("masked_reason", None)
+                changed = True
+            if changed:
                 _atomic_write_text(meta_path, json.dumps(meta, indent=2))
         else:
             meta = {
@@ -523,6 +532,8 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
                 "n_models": 1,
                 "models": [qual_key],
             }
+            if entry.get("masked_reason"):
+                meta["masked_reason"] = entry["masked_reason"]
             _atomic_write_text(meta_path, json.dumps(meta, indent=2))
 
         # Write canonical repro.py if it doesn't exist or is older-format
