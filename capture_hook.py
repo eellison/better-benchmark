@@ -1807,6 +1807,91 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
+    def capture_full_graph(
+        self,
+        gm: fx.GraphModule,
+        *,
+        components=None,
+        validate_partitions: bool = True,
+        constant_folded=None,
+        constant_inputs=None,
+    ):
+        """Write and validate one full graph without requiring partition capture."""
+        if not self.graph_dir:
+            return None
+        full_graph_path = os.path.join(
+            self.graph_dir, f"full_graph_{self.graph_counter:03d}.py"
+        )
+        self.graph_counter += 1
+        try:
+            self._write_full_graph(
+                full_graph_path, gm, components=components,
+                validate_partitions=validate_partitions,
+                constant_folded=constant_folded,
+                constant_inputs=constant_inputs,
+            )
+        except Exception:
+            for path in (full_graph_path, os.path.splitext(full_graph_path)[0] + ".meta.json"):
+                if os.path.exists(path):
+                    os.unlink(path)
+            raise
+        return full_graph_path
+
+    def _write_full_graph(
+        self, full_graph_path, gm, *, components, validate_partitions,
+        constant_folded=None, constant_inputs=None,
+    ):
+        full_code = (gm.meta or {}).get("better_benchmark_source_code")
+        if full_code is None:
+            full_code = gm.print_readable(
+                print_output=False,
+                include_stride=True,
+                include_device=True,
+            )
+        with open(full_graph_path, "w") as f:
+            f.write(full_code)
+
+        from full_graph_harness import (
+            infer_full_graph_source,
+            write_full_graph_metadata,
+        )
+
+        placeholder_info = placeholder_info_from_gm(gm)
+        index_bounds = self._infer_index_bounds(gm, placeholder_info)
+        permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+        extra = {
+            "source": infer_full_graph_source(full_graph_path),
+            "replay_dependencies": replay_dependencies(gm),
+        }
+        if components is not None:
+            extra["node_accounting"] = graph_node_accounting(
+                gm, components, constant_folded=constant_folded)
+        if constant_inputs is not None:
+            extra["constant_inputs"] = constant_inputs
+        write_full_graph_metadata(
+            full_graph_path,
+            gm,
+            extra=extra,
+            index_bounds=index_bounds,
+            permutation_indices=permutation_indices,
+            observed_stats=self._current_observed_stats or {},
+            source_input_specs=(gm.meta or {}).get(
+                "better_benchmark_input_specs"
+            ),
+        )
+
+        from roundtrip_validation import run_write_gate
+
+        verdict = run_write_gate(
+            full_graph_path,
+            original_gm=gm if validate_partitions else None,
+            validate_execution=not validate_partitions,
+        )
+        if verdict.get("status") != "ok":
+            raise RuntimeError(
+                f"full graph round-trip validation failed: {verdict.get('reason')}"
+            )
+
     def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
         """Called by the hook for each post-grad graph. Partitions and captures.
 
@@ -1835,66 +1920,12 @@ if __name__ == "__main__":
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
-            full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
-            self.graph_counter += 1
-            try:
-                full_code = gm.print_readable(
-                    print_output=False,
-                    include_stride=True,
-                    include_device=True,
-                )
-                with open(full_graph_path, "w") as f:
-                    f.write(full_code)
-                try:
-                    from full_graph_harness import (
-                        infer_full_graph_source,
-                        write_full_graph_metadata,
-                    )
-
-                    placeholder_info = placeholder_info_from_gm(gm)
-                    index_bounds = self._infer_index_bounds(gm, placeholder_info)
-                    permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
-                    write_full_graph_metadata(
-                        full_graph_path,
-                        gm,
-                        extra={
-                            "source": infer_full_graph_source(full_graph_path),
-                            "node_accounting": graph_node_accounting(
-                                gm, components, constant_folded=folded),
-                            "replay_dependencies": replay_dependencies(gm),
-                            **({"constant_inputs": constant_inputs}
-                               if constant_inputs is not None else {}),
-                        },
-                        index_bounds=index_bounds,
-                        permutation_indices=permutation_indices,
-                        observed_stats=self._current_observed_stats or {},
-                    )
-                except Exception as exc:
-                    print(
-                        f"[capture_hook] WARNING: could not write full graph metadata "
-                        f"for {full_graph_path}: {exc}",
-                        file=sys.stderr,
-                    )
-                # Validate-before-write gate: reload the just-written artifact,
-                # run input round-trip (A) + partition round-trip (C) against
-                # the live gm, stamp the sidecar "roundtrip": "ok"|"failed: ..".
-                # Never deletes the artifact; failures WARN loudly on stderr.
-                try:
-                    from roundtrip_validation import run_write_gate
-
-                    run_write_gate(full_graph_path, original_gm=gm)
-                except Exception as exc:
-                    print(
-                        f"[capture_hook] WARNING: round-trip gate unavailable "
-                        f"for {full_graph_path}: {exc}",
-                        file=sys.stderr,
-                    )
-            except Exception as exc:
-                print(
-                    f"[capture_hook] WARNING: could not write full graph "
-                    f"{full_graph_path}: {exc}",
-                    file=sys.stderr,
-                )
+            self.capture_full_graph(
+                gm,
+                components=components,
+                constant_folded=folded,
+                constant_inputs=constant_inputs,
+            )
         # Shared partitioning + hashing (see module-level helpers above):
         # this is the single source of truth for how graphs are cut into
         # canonical repros and how each partition is content-addressed.
