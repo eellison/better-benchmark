@@ -258,6 +258,82 @@ def test_padded_view_input_with_a_stride_zero_dim():
     assert (t.shape, t.stride(), t.storage_offset()) == ((4, 3), (0, 1), 5)
 
 
+def _lowering_pass(fn):
+    """Run ``fn(graph)`` while the model is lowered: after the capture pass,
+    where Inductor adds its own guards."""
+    import torch._inductor.config as inductor_config
+
+    return inductor_config.patch(post_grad_custom_post_pass=fn)
+
+
+def _first_tensor(graph):
+    return next(n.meta["val"] for n in graph.find_nodes(op="placeholder")
+                if isinstance(n.meta.get("val"), torch.Tensor))
+
+
+def test_size_specialized_during_lowering_stays_dynamic(tmp_path):
+    """A lowering that guards a size to a constant is a codegen choice of the
+    model's compile; the family stays dynamic and replays at its point."""
+    def specialize_batch(graph):
+        assert _first_tensor(graph).shape[0] == 12
+
+    def f(x):
+        return x.relu().sum(-1)
+
+    with _lowering_pass(specialize_batch):
+        _capture(f, [(torch.randn(12, 64),)], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    assert "guards" not in shapes, shapes["guards"]
+    batch = next(s for s, d in shapes["symbols"].items() if d["hint"] == 12)
+    point = shapes["points"][0]["bindings"]
+    rows = _check(tmp_path, name, [point, {**point, batch: 5}])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
+def test_index_width_bound_stays_out_of_the_family(tmp_path):
+    """Inductor's 32-bit indexing check over a storage size simplifies to a
+    bound that is no longer INT32_MAX (4096*s0 + s1 <= 2147487742)."""
+    from torch._inductor.sizevars import SizeVarAllocator
+
+    def storage_bound(graph):
+        x = _first_tensor(graph)
+        rows, cols = (d.node.expr for d in x.shape)
+        SizeVarAllocator(x.shape[0].node.shape_env).check_leq(4096 * (rows - 1) + cols, 2**31 - 1)
+
+    with _lowering_pass(storage_bound):
+        _capture(lambda x: x.relu() * 2, [(torch.randn(12, 64),)], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    assert "guards" not in shapes, shapes["guards"]
+    assert all(d["range"] == [2, None] for d in shapes["symbols"].values()), shapes["symbols"]
+
+
+def test_neighbouring_lowering_guards_do_not_split_a_family(tmp_path):
+    """m2's reduction lowering guards the shared symbol (s1 <= 4096 on CPU).
+    The pointwise region it shares with m1 is still one family, and the
+    reduction replays past that threshold."""
+    def m1(x, y):
+        return (x.sin() * 3,)
+
+    def m2(x, y):
+        return x.sin() * 3, y.cos().sum(-1)
+
+    args = (torch.randn(12, 64), torch.randn(12, 64))
+    _capture(m1, [args], tmp_path, name="m1")
+    _capture(m2, [args], tmp_path, name="m2")
+    regions = _regions(tmp_path)
+    (pointwise,) = [s for n, s in regions.items() if n.startswith("pointwise")]
+    assert {m for p in pointwise["points"] for m in p["models"]} == {"toy/infer/m1", "toy/infer/m2"}
+    for name, shapes in regions.items():
+        assert "guards" not in shapes, (name, shapes["guards"])
+        assert all(d["range"] == [2, None] for d in shapes["symbols"].values()), name
+    (reduction,) = [n for n in regions if n.startswith("sum")]
+    shapes = regions[reduction]
+    width = next(s for s, d in shapes["symbols"].items() if d["hint"] == 64)
+    point = shapes["points"][0]["bindings"]
+    rows = _check(tmp_path, reduction, [point, {**point, width: 8192}])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
 def test_size_one_dims_are_specialized(tmp_path):
     def f(x, y):
         return (x * y).sum(-1)
