@@ -123,8 +123,15 @@ def trace_full_graph_fake(definition):
 
     with fake_tensor_ctx():
         instance = instantiate_full_graph(definition, default_device="cuda")
+        # Fake tracing cannot accept real Generator arguments. Keep runtime
+        # specs unchanged and use the optional-generator default for validation.
+        input_specs = [
+            {**spec, "kind": "scalar", "value": None}
+            if spec.get("kind") == "generator" else spec
+            for spec in definition.input_specs
+        ]
         inputs = make_inputs_from_full_graph_specs(
-            definition.input_specs, default_device="cuda"
+            input_specs, default_device="cuda"
         )
         with torch.no_grad():
             return make_fx(instance, tracing_mode="fake")(*inputs)
@@ -328,6 +335,7 @@ def validate_written_full_graph(
     graph_path: str | Path,
     *,
     original_gm=None,
+    validate_execution: bool = False,
 ) -> dict[str, Any]:
     """Run invariants A + C against a just-written full_graph_*.py artifact.
 
@@ -372,13 +380,22 @@ def validate_written_full_graph(
         _fail(f"A: {a_failures[0]}")
         return result
 
+    traced_gm = None
+    if validate_execution:
+        try:
+            traced_gm = trace_full_graph_fake(definition)
+        except Exception as exc:
+            _fail(f"execution: {type(exc).__name__}: {exc}")
+            return result
+
     # --- Invariant C (needs the original gm to compare against) ---
     if original_gm is None:
         return result
     try:
         original_parts = derive_partitions(original_gm)
-        gm = trace_full_graph_fake(definition)
-        derived_parts = derive_partitions(gm)
+        if traced_gm is None:
+            traced_gm = trace_full_graph_fake(definition)
+        derived_parts = derive_partitions(traced_gm)
     except Exception as exc:
         _fail(f"C: re-trace failed: {type(exc).__name__}: {exc}")
         return result
@@ -441,7 +458,12 @@ def stamp_roundtrip(graph_path: str | Path, verdict: dict[str, Any]) -> None:
         )
 
 
-def run_write_gate(graph_path: str | Path, original_gm=None) -> dict[str, Any]:
+def run_write_gate(
+    graph_path: str | Path,
+    original_gm=None,
+    *,
+    validate_execution: bool = False,
+) -> dict[str, Any]:
     """Validate-before-write gate for capture paths that emit full_graph_*.py.
 
     Call right after the artifact (+ sidecar) is written. Reloads the
@@ -473,7 +495,9 @@ def run_write_gate(graph_path: str | Path, original_gm=None) -> dict[str, Any]:
         # clears the TracingContext for the validation scope.
         with tracing(None), unset_fake_temporarily():
             verdict = validate_written_full_graph(
-                graph_path, original_gm=original_gm
+                graph_path,
+                original_gm=original_gm,
+                validate_execution=validate_execution,
             )
     except Exception as exc:
         verdict = {
