@@ -90,8 +90,25 @@ TRANSPARENT_OPS = {
     torch.ops.aten.as_strided.default,
 }
 
+# Reads of a tensor's symbolic size/stride/offset. They exist only in a
+# symbolic trace (a static re-trace folds them to constants), so like views
+# they never constitute compute.
+SHAPE_METADATA_OPS = {
+    torch.ops.aten.sym_size.int,
+    torch.ops.aten.sym_stride.int,
+    torch.ops.aten.sym_numel.default,
+    torch.ops.aten.sym_storage_offset.default,
+}
+TRANSPARENT_OPS |= SHAPE_METADATA_OPS
+
 ALLOCATION_ONLY_OPS = {
     torch.ops.aten.empty.memory_format,
+}
+
+RUNTIME_ASSERT_OPS = {
+    torch.ops.aten._assert_scalar.default,
+    torch.ops.aten.sym_constrain_range.default,
+    torch.ops.aten.sym_constrain_range_for_size.default,
 }
 
 
@@ -130,7 +147,7 @@ def _mask_user_triton(node: fx.Node) -> str | None:
     return None
 
 
-_input_bound_symbols: "weakref.WeakKeyDictionary[fx.Graph, frozenset]" = (
+_data_dependent_symbols: "weakref.WeakKeyDictionary[fx.Graph, frozenset]" = (
     weakref.WeakKeyDictionary()
 )
 
@@ -147,26 +164,68 @@ def _unbacked_symbols(values) -> set:
     }
 
 
-def _mask_unbacked_shape(node: fx.Node) -> str | None:
-    """A node whose output or inputs have sizes or values produced by a
-    data-dependent op in the graph (unique, nonzero, .item()). Unbacked
-    symbols bound by graph inputs are excluded: the loader records their
-    concrete values. The capture has no value for the others, and random
-    replay inputs would not reproduce the real sizes."""
+def _node_values(node: fx.Node) -> tuple[list, list]:
+    """``node``'s output value and the values of its arguments."""
     from torch.utils import _pytree as pytree
 
+    args = [
+        arg.meta.get("val") if isinstance(arg, fx.Node) else arg
+        for arg in pytree.tree_leaves((node.args, node.kwargs))
+    ]
+    return [node.meta.get("val")], args
+
+
+def _introduces_input_derived_symbols(node: fx.Node) -> bool:
+    """Whether the fresh unbacked symbols in ``node``'s output are functions
+    of its inputs: a view (a slice whose bounds come from inputs gets a
+    fresh storage offset) or a read of a tensor's size, stride or offset.
+    Any other op that introduces a symbol (nonzero, .item(), a custom op
+    whose fake impl calls ``new_dynamic_size``) sized it from tensor data."""
+    target = node.target
+    return target in SHAPE_METADATA_OPS or (
+        isinstance(target, torch._ops.OpOverload) and target.is_view
+    )
+
+
+def _graph_data_dependent_symbols(graph: fx.Graph) -> frozenset:
+    """Unbacked symbols whose value depends on tensor data.
+
+    A node introduces the unbacked symbols first seen in its output. They
+    are functions of the inputs when a graph input introduces them, or a
+    view or shape read (``_introduces_input_derived_symbols``) whose inputs
+    carry no data-dependent symbols. Every other op's are data-dependent
+    (unique, nonzero, .item(), custom ops with data-dependent output sizes).
+    """
+    cached = _data_dependent_symbols.get(graph)
+    if cached is not None:
+        return cached
+    seen: set = set()
+    data_dependent: set = set()
+    for node in graph.nodes:
+        out, args = _node_values(node)
+        produced = _unbacked_symbols(out) - seen
+        seen |= produced
+        if node.op == "call_function" and (
+            not _introduces_input_derived_symbols(node)
+            or _unbacked_symbols(args) & data_dependent
+        ):
+            data_dependent |= produced
+    result = frozenset(data_dependent)
+    _data_dependent_symbols[graph] = result
+    return result
+
+
+def _mask_unbacked_shape(node: fx.Node) -> str | None:
+    """A node whose output or inputs have sizes or values produced by a
+    data-dependent op in the graph (unique, nonzero, .item(), a custom op
+    with a data-dependent output size). The capture
+    has no value for them, and random replay inputs would not reproduce the
+    real sizes."""
     if node.op != "call_function":
         return None
-    bound = _input_bound_symbols.get(node.graph)
-    if bound is None:
-        bound = frozenset(_unbacked_symbols([
-            p.meta.get("val") for p in node.graph.find_nodes(op="placeholder")
-        ]))
-        _input_bound_symbols[node.graph] = bound
-    values = [node.meta.get("val")]
-    for arg in pytree.tree_leaves((node.args, node.kwargs)):
-        values.append(arg.meta.get("val") if isinstance(arg, fx.Node) else arg)
-    return "unbacked_shape" if _unbacked_symbols(values) - bound else None
+    out, args = _node_values(node)
+    dependent = _unbacked_symbols(out + args) & _graph_data_dependent_symbols(node.graph)
+    return "unbacked_shape" if dependent else None
 
 
 # Node rules. Each maps an fx.Node to a reason in NODE_MASK_REASONS, or None;
@@ -301,10 +360,13 @@ def partition_node_is_supported(node: fx.Node) -> bool:
     A node belongs in a fusible partition if it is a transparent view op or
     Inductor's is_fusible_node says it has a fusible lowering (no BLAS/cuDNN
     flop-counter ops, no fallbacks, no collectives), and it is not masked as
-    non-fusible.
+    non-fusible. Runtime asserts are never fusible: they have no compute
+    to time, and their symbolic inputs have no value outside the trace.
     """
     from torch._inductor.fx_passes.fusion_regions import is_fusible_node
 
+    if node.op == "call_function" and node.target in RUNTIME_ASSERT_OPS:
+        return False
     if NON_FUSIBLE_MASK_REASONS.intersection(mask_reasons(node)):
         return False
     if node.op == "call_function" and node.target in TRANSPARENT_OPS:
@@ -896,6 +958,46 @@ def _sym_hint(x, known: dict | None = None):
     if isinstance(x, torch.SymBool):
         return bool(expr)
     return float(expr) if isinstance(x, torch.SymFloat) else int(expr)
+
+
+def _without_runtime_asserts(gm: fx.GraphModule) -> fx.GraphModule:
+    """A copy of ``gm`` without runtime asserts and the symbolic shape reads
+    and SymInt arithmetic only they used.
+
+    A symbolic trace adds asserts on unbacked symbols, built from
+    ``aten.sym_storage_offset`` and similar reads that Dynamo cannot trace
+    (they return a non-Tensor). A full graph replays with concrete inputs,
+    and a static re-trace has none of these nodes either. Ops that produce
+    the scalars (``.item()``, custom ops) stay: they are work, such as a
+    device-to-host sync, that the replay must time.
+    """
+    graph = copy.deepcopy(gm.graph)
+
+    def is_shape_arithmetic(node):
+        target = node.target
+        return isinstance(
+            node.meta.get("val"), (torch.SymInt, torch.SymBool, torch.SymFloat)
+        ) and (
+            target in SHAPE_METADATA_OPS
+            or not isinstance(
+                target, (torch._ops.OpOverload, torch._ops.HigherOrderOperator)
+            )
+        )
+
+    removable = [
+        n for n in graph.nodes
+        if n.op == "call_function" and n.target in RUNTIME_ASSERT_OPS
+    ]
+    while removable:
+        node = removable.pop()
+        inputs = list(node.all_input_nodes)
+        graph.erase_node(node)
+        removable.extend(
+            n for n in inputs
+            if not n.users and n.op == "call_function" and is_shape_arithmetic(n)
+            and n not in removable
+        )
+    return fx.GraphModule(gm, graph)
 
 
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
@@ -2335,7 +2437,7 @@ if __name__ == "__main__":
     ):
         full_code = (gm.meta or {}).get("better_benchmark_source_code")
         if full_code is None:
-            full_code = gm.print_readable(
+            full_code = _without_runtime_asserts(gm).print_readable(
                 print_output=False,
                 include_stride=True,
                 include_device=True,
