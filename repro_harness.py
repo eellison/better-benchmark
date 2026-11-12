@@ -664,12 +664,14 @@ def _randn(size, dtype, device) -> torch.Tensor:
     return torch.randn(size, dtype=dtype, device=device)
 
 
-def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list:
+def make_inputs_from_config(config: dict, storage_offsets: bool | None = None) -> list:
     """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
 
     ``storage_offsets`` places each standalone view at its recorded storage
-    offset (the dynamic replay checks a symbolic offset's relation); static
-    replay keeps every non-aliased input at offset 0.
+    offset (the dynamic replay checks a symbolic offset's relation). It
+    defaults to whether the config is a dynamic family's point (has
+    ``bindings``), so a family's static and dynamic rows place views alike
+    in every caller; a static repro keeps every non-aliased input at offset 0.
 
     Alias groups: specs carrying "alias_group" are views of ONE storage
     (packed-qkv saved views). One buffer is allocated per group — sized by
@@ -678,6 +680,8 @@ def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list
     Footprint and locality then match the model instead of giving every
     view a private storage.
     """
+    if storage_offsets is None:
+        storage_offsets = "bindings" in config
     group_nbytes = config.get("alias_group_nbytes")
     if group_nbytes and config.get("bindings"):
         # The recorded capacity is the allocation at the captured sizes; at
@@ -1333,7 +1337,7 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
         for name in shape_names:
             if name is not None:
                 shape_config = configs[name]
-                inputs = make_inputs_from_config(shape_config)
+                inputs = make_inputs_from_config(shape_config, storage_offsets=_repro_is_dynamic)
                 label = name
                 # If shapes.json doesn't include shape params but forward() expects them,
                 # merge shape params from _default_make_inputs at the correct positions

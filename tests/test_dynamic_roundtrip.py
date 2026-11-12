@@ -536,6 +536,37 @@ def test_tautological_guards_do_not_keep_stale_symbol_names():
     assert guards == ["Eq(Mod(s0 + s1, 9), 0)"]
 
 
+def test_static_and_dynamic_rows_place_views_alike(tmp_path):
+    import repro_harness
+
+    def f(x):
+        return x.relu().sum(-1)
+
+    _capture(f, [(torch.randn(36, 64)[12:24],)], tmp_path)
+    (name,) = _regions(tmp_path)
+    repro = str(tmp_path / "canonical" / name / "repro.py")
+    module = _repro_module(repro)
+
+    class Stop(Exception):
+        pass
+
+    seen = []
+    real = repro_harness.make_inputs_from_config
+
+    def spy(config, storage_offsets=False):
+        seen.append(storage_offsets)
+        config = dict(config, inputs=[dict(spec, device="cpu") for spec in config["inputs"]])
+        inputs = real(config, storage_offsets=storage_offsets)
+        assert inputs[0].storage_offset() == (768 if storage_offsets else 0)
+        raise Stop
+
+    for flag in ("--static-only", "--dynamic-only"):
+        with mock.patch.object(repro_harness, "make_inputs_from_config", spy), pytest.raises(Stop):
+            repro_harness.benchmark_repro(repro, module.Repro, module.make_inputs,
+                                          args=[flag, "--no-gpu-lock"])
+    assert seen == [True, True]
+
+
 def test_a_failing_dynamic_half_keeps_the_static_rows(tmp_path):
     import repro_harness
 
@@ -563,6 +594,20 @@ def test_a_failing_dynamic_half_keeps_the_static_rows(tmp_path):
         assert [row["n_kernels"] for row in rows.values()] == [1], rows
         with pytest.raises(RuntimeError, match="specialized"):
             bench("--dynamic-only")
+
+
+def test_family_points_place_views_at_their_offset_by_default(tmp_path):
+    """Callers that build a point's inputs with the default flags
+    (bench_parallel's static rows) place views like repro.py's rows."""
+    from repro_harness import load_shape_configs, make_inputs_from_config
+
+    _capture(lambda x: x.relu().sum(-1), [(torch.randn(36, 64)[12:24],)], tmp_path)
+    (name,) = _regions(tmp_path)
+    (config,) = load_shape_configs(str(tmp_path / "canonical" / name / "repro.py")).values()
+    config = dict(config, inputs=[dict(spec, device="cpu") for spec in config["inputs"]])
+    assert make_inputs_from_config(config)[0].storage_offset() == 768
+    static = {k: v for k, v in config.items() if k != "bindings"}
+    assert make_inputs_from_config(static)[0].storage_offset() == 0
 
 
 def test_padded_view_input_with_a_stride_zero_dim():
