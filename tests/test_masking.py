@@ -203,3 +203,58 @@ def test_region_rule_marks_repro_without_dropping_it(tmp_path, monkeypatch):
     merge_one_capture(tmp_path / "capture", tmp_path / "corpus", "hf/infer/bbtest_model")
     (meta_path,) = (tmp_path / "corpus" / "canonical").glob("*/meta.json")
     assert json.loads(meta_path.read_text())["masked_reason"] == "approx_index"
+
+
+def _unbacked(x, idx):
+    u = torch.unique(idx)
+    n = idx.sum().item()
+    return (x * 2.0 + 1.0).relu(), u.float() * 3.0, torch.ones(n, device=x.device) + 1.0
+
+
+def test_nodes_with_unbacked_sizes_or_values_are_masked():
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    gm = make_fx(_unbacked, tracing_mode="symbolic")(
+        torch.randn(8, 16), torch.randint(0, 5, (32,))
+    )
+    masked = {
+        str(n.target) for n in gm.graph.nodes if "unbacked_shape" in mask_reasons(n)
+    }
+
+    assert {
+        "aten._unique2.default",
+        "aten._local_scalar_dense.default",
+        "aten.ones.default",
+        "aten._to_copy.default",
+    } <= masked
+    assert "aten.relu.default" not in masked
+    assert "aten.sum.default" not in masked
+    assert graph_mask(gm) == {"reasons": ["unbacked_shape"], "scope": "graph"}
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="validates the repro on CUDA")
+def test_unbacked_regions_are_masked_not_dropped(tmp_path):
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    from merge_captures import merge_one_capture
+
+    gm = make_fx(_unbacked, tracing_mode="symbolic")(
+        torch.randn(8, 16, device="cuda"), torch.randint(0, 5, (32,), device="cuda")
+    )
+    state = capture_hook._CaptureState(
+        str(tmp_path / "capture"), label="m", graph_dir=str(tmp_path / "graphs")
+    )
+
+    state.process_graph(gm)
+    state.finalize()
+
+    assert state.dropped == []
+    assert sorted(tuple(e["origin_ops"]) for e in state.captured) == [
+        ("aten.add.Tensor", "aten.mul.Tensor", "aten.relu.default"),
+        ("aten.sum.default",),
+    ]
+    sidecar = json.loads((tmp_path / "graphs" / "full_graph_000.meta.json").read_text())
+    assert sidecar["masked"] == {"reasons": ["unbacked_shape"], "scope": "graph"}
+    assert sidecar["roundtrip"] == "ok"
+    merge_one_capture(tmp_path / "capture", tmp_path / "corpus", "hf/infer/bbtest_model")
+    assert len(list((tmp_path / "corpus" / "canonical").glob("*/repro.py"))) == 2
