@@ -367,6 +367,104 @@ def test_buffer_leaves_a_partition_its_fusible_writer_cannot_join():
     assert buffer not in region
 
 
+def _layer_norm_kernel():
+    """A layer norm forward shaped like a captured user kernel: it reads X, W
+    and B and writes Y, Mean and Rstd."""
+    import triton
+    import triton.language as tl
+
+    @triton.jit
+    def layer_norm_fwd(X, Y, W, B, Mean, Rstd, N, BLOCK_D: tl.constexpr):
+        row = tl.program_id(0)
+        cols = tl.arange(0, BLOCK_D)
+        mask = cols < N
+        x = tl.load(X + row * N + cols, mask=mask, other=0.0).to(tl.float32)
+        mean = tl.sum(x, axis=0) / N
+        diff = tl.where(mask, x - mean, 0.0)
+        rstd = 1 / tl.sqrt(tl.sum(diff * diff, axis=0) / N + 1e-5)
+        tl.store(Mean + row, mean)
+        tl.store(Rstd + row, rstd)
+        w = tl.load(W + cols, mask=mask)
+        b = tl.load(B + cols, mask=mask)
+        tl.store(Y + row * N + cols, (diff * rstd * w + b).to(Y.dtype.element_ty), mask=mask)
+
+    return layer_norm_fwd
+
+
+def _graph_normalizing_a_value_read_again():
+    """``h = a + b``; a layer-norm launch reads ``h`` as X and writes the
+    allocations Y, Mean and Rstd; ``h + c`` reads ``h`` after the launch, the
+    way a residual stream is read again after its norm."""
+    from torch._higher_order_ops.triton_kernel_wrap import (
+        triton_kernel_wrapper_mutation,
+    )
+    from torch.fx.experimental.proxy_tensor import make_fx
+
+    def f(a, b, c, w, bias):
+        h = a + b
+        y = torch.empty_like(h)
+        mean = torch.empty(64, device="cuda")
+        rstd = torch.empty(64, device="cuda")
+        return (h + c).pow(2).mean(1), y.float().sum(1), mean, rstd
+
+    inputs = [torch.randn(64, 128, device="cuda") for _ in range(3)] + [
+        torch.randn(128, device="cuda") for _ in range(2)
+    ]
+    gm = make_fx(f, tracing_mode="fake")(*inputs)
+    placeholders = [n for n in gm.graph.nodes if n.op == "placeholder"]
+    h = next(n for n in gm.graph.nodes if n.target is torch.ops.aten.add.Tensor)
+    y = next(n for n in gm.graph.nodes if n.target is torch.ops.aten.empty_like.default)
+    mean, rstd = [n for n in gm.graph.nodes if n.target is torch.ops.aten.empty.memory_format]
+    with gm.graph.inserting_after(rstd):
+        gm.graph.call_function(
+            triton_kernel_wrapper_mutation,
+            (),
+            {
+                "kernel_idx": 0,
+                "constant_args_idx": 0,
+                "grid": [(64, 1, 1)],
+                "tma_descriptor_metadata": {},
+                "kwargs": {
+                    "X": h, "Y": y, "W": placeholders[3], "B": placeholders[4],
+                    "Mean": mean, "Rstd": rstd, "N": 128,
+                },
+            },
+        )
+    gm.recompile()
+    return gm, h, y
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="Triton analyzes the kernel for CUDA")
+def test_trusted_kernel_reading_a_value_leaves_it_in_its_partition():
+    from user_triton import TrustedKernels, WRITE_ANALYSIS_KEY
+
+    gm, h, y = _graph_normalizing_a_value_read_again()
+    gm.meta[WRITE_ANALYSIS_KEY] = TrustedKernels({0: _layer_norm_kernel()}, {0: {"BLOCK_D": 128}})
+
+    written = capture_hook.written_allocation_aliases(gm)
+
+    assert y in written
+    assert h not in written
+    assert any(h in p for p in capture_hook.get_fusion_partitions(gm))
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="traces on CUDA")
+@pytest.mark.parametrize("trusted", ["none", "other_kernel_index"])
+def test_untrusted_kernel_counts_as_writing_everything_it_takes(trusted):
+    from user_triton import TrustedKernels, WRITE_ANALYSIS_KEY
+
+    gm, h, y = _graph_normalizing_a_value_read_again()
+    if trusted == "other_kernel_index":
+        # The loader trusted no kernel at this launch's index (e.g. its
+        # identity did not match the reviewed source).
+        gm.meta[WRITE_ANALYSIS_KEY] = TrustedKernels({1: _layer_norm_kernel()}, {0: {"BLOCK_D": 128}})
+
+    written = capture_hook.written_allocation_aliases(gm)
+
+    assert {h, y} <= written
+    assert not any(h in p for p in capture_hook.get_fusion_partitions(gm))
+
+
 def test_views_of_a_written_buffer_no_partition_holds_stay_partitioned():
     """A matmul's output written by a kernel and sliced afterwards: no
     partition recomputes the matmul, so its views read it as an input and

@@ -255,3 +255,67 @@ def make_launcher(bundle: ResolvedBundle) -> Callable[..., dict[str, Any]]:
         return {key: val for key, val in args.items() if key in tensors_to_clone}
 
     return launch_user_triton
+
+
+WRITE_ANALYSIS_KEY = "better_benchmark_user_triton_write_analysis"
+
+
+class TrustedKernels:
+    """Kernel objects for captured kernel indices whose identity a loader
+    checked against reviewed source, with the captured constant args.
+
+    Stored in ``graph_module.meta[WRITE_ANALYSIS_KEY]`` so the partitioner
+    can ask which tensors a launch writes (``written_kwargs``) instead of
+    assuming it writes every tensor it takes. Shared, not copied, when the
+    graph module is deep-copied.
+    """
+
+    def __init__(self, kernels: dict[int, Any], constant_args: dict[int, dict[str, Any]]):
+        self.kernels = kernels
+        self.constant_args = constant_args
+        self._writes: dict[tuple, frozenset[str] | None] = {}
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> "TrustedKernels":
+        return self
+
+    def written_kwargs(self, node: Any) -> frozenset[str] | None:
+        """Names of the tensor kwargs a ``triton_kernel_wrapper_mutation``
+        launch writes, from Triton's TTIR mutation analysis; None when the
+        kernel or its constant args are not trusted, or a value is unknown."""
+        import torch
+
+        kernel_idx = node.kwargs.get("kernel_idx")
+        constant_args_idx = node.kwargs.get("constant_args_idx")
+        if kernel_idx not in self.kernels or constant_args_idx not in self.constant_args:
+            return None
+        values = {}
+        for name, arg in (node.kwargs.get("kwargs") or {}).items():
+            value = arg.meta.get("val") if hasattr(arg, "meta") else arg
+            if isinstance(value, torch.SymInt):
+                value = value.node.hint if not value.node.expr.is_number else int(value.node.expr)
+                if value is None:
+                    return None
+            if value is None and hasattr(arg, "meta"):
+                return None
+            values[name] = value
+        tensors = frozenset(n for n, v in values.items() if isinstance(v, torch.Tensor))
+        key = (kernel_idx, constant_args_idx, tensors)
+        if key not in self._writes:
+            self._writes[key] = self._analyze(
+                self.kernels[kernel_idx],
+                {**values, **self.constant_args[constant_args_idx]},
+                node.kwargs.get("tma_descriptor_metadata") or {},
+                tensors,
+            )
+        return self._writes[key]
+
+    @staticmethod
+    def _analyze(kernel, kwargs, tma_descriptor_metadata, tensors) -> frozenset[str] | None:
+        # A failed analysis reports every tensor as written.
+        from torch._higher_order_ops.triton_kernel_wrap import identify_accessed_tensors
+
+        try:
+            accesses = identify_accessed_tensors(kernel, kwargs, tma_descriptor_metadata)
+        except Exception:  # noqa: BLE001 - fall back to "writes every tensor"
+            return None
+        return frozenset(dep.name for dep in accesses.read_writes.writes if dep.name in tensors)
