@@ -108,6 +108,82 @@ class TestShapesJsonWriter(unittest.TestCase):
             hashes = {p["shape_hash"] for p in data["points"]}
             self.assertEqual(hashes, {"aaaa1111", "bbbb2222"})
 
+    def test_writer_persists_occurrence_sources_per_model(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repro_dir = Path(tmp) / "repro"
+            repro_dir.mkdir()
+            groups = [["add", "mul"], ["add_1", "mul_1"]]
+            sources = [
+                {
+                    "graph": "full_graph_000.py",
+                    "source_node_names": groups[0],
+                },
+                {
+                    "graph": "full_graph_001.py",
+                    "source_node_names": groups[1],
+                },
+            ]
+
+            _write_shapes_json(
+                repro_dir,
+                "aabb1122",
+                "(T([32], f32),)",
+                "hf/infer/model",
+                occurrences=2,
+                occurrence_sources=sources,
+            )
+
+            data = json.loads((repro_dir / "shapes.json").read_text())
+            model = data["points"][0]["models"]["hf/infer/model"]
+            self.assertEqual(model, {"occurrences": 2, "occurrence_sources": sources})
+
+            # A legacy/partial recapture may update only the occurrence count.
+            # Keep the richer source-node provenance already attached to the
+            # same exact model point.
+            _write_shapes_json(
+                repro_dir,
+                "aabb1122",
+                "(T([32], f32),)",
+                "hf/infer/model",
+                occurrences=3,
+            )
+            data = json.loads((repro_dir / "shapes.json").read_text())
+            model = data["points"][0]["models"]["hf/infer/model"]
+            self.assertEqual(model["occurrences"], 3)
+            self.assertEqual(model["occurrence_sources"], sources)
+
+    def test_remerge_replaces_sources_of_the_same_graph(self):
+        def source(graph, *names):
+            return {"graph": graph, "source_node_names": list(names)}
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repro_dir = Path(tmp) / "repro"
+            repro_dir.mkdir()
+
+            def write(sources):
+                _write_shapes_json(
+                    repro_dir, "aabb1122", "(T([32], f32),)", "hf/infer/model",
+                    occurrences=len(sources), occurrence_sources=sources,
+                    merge_occurrence_sources=True,
+                )
+                data = json.loads((repro_dir / "shapes.json").read_text())
+                return data["points"][0]["models"]["hf/infer/model"]
+
+            write([source("full_graph_000.py", "add"), source("full_graph_001.py", "mul")])
+            # Re-partitioning graph 001 replaces only graph 001's occurrences.
+            model = write([source("full_graph_001.py", "mul_1"), source("full_graph_001.py", "mul_2")])
+            self.assertEqual(model["occurrences"], 3)
+            self.assertEqual(model["occurrence_sources"], [
+                source("full_graph_000.py", "add"),
+                source("full_graph_001.py", "mul_1"),
+                source("full_graph_001.py", "mul_2"),
+            ])
+            # Repeating the same refresh is idempotent.
+            self.assertEqual(
+                write([source("full_graph_001.py", "mul_1"), source("full_graph_001.py", "mul_2")]),
+                model,
+            )
+
 
 class TestShapesJsonLoader(unittest.TestCase):
     """Test load_shape_configs with shapes.json."""
@@ -406,6 +482,84 @@ def _default_make_inputs():
             self.assertIn("timm/infer/mobilenetv2_100", models)
             self.assertIn("timm/infer/resnet50", models)
             self.assertIn("timm/train/efficientnet_b0", models)
+
+    def test_merge_remaps_capture_local_graph_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            output = root / "repros"
+            capture = self._make_v2_capture(
+                root,
+                pattern_hash="abc111def222",
+                shape_hash="1234567890abcdef",
+                signature="(T([8, 16], bf16),)",
+            )
+            index_path = capture / "index.json"
+            payload = json.loads(index_path.read_text())
+            payload[0]["occurrences"] = 1
+            payload[0]["occurrence_sources"] = [
+                {
+                    "graph": "full_graph_000.py",
+                    "source_node_names": ["mul"],
+                }
+            ]
+            index_path.write_text(json.dumps(payload) + "\n")
+
+            merge_one_capture(
+                capture,
+                output,
+                "model",
+                suite="other",
+                mode="infer",
+                graph_name_map={"full_graph_000.py": "full_graph_004.py"},
+            )
+
+            shapes = json.loads(
+                (
+                    output
+                    / "canonical"
+                    / "pointwise_abc111def222"
+                    / "shapes.json"
+                ).read_text()
+            )
+            model = shapes["points"][0]["models"]["other/infer/model"]
+            self.assertEqual(
+                model["occurrence_sources"],
+                [
+                    {
+                        "graph": "full_graph_004.py",
+                        "source_node_names": ["mul"],
+                    }
+                ],
+            )
+
+    def test_merge_rejects_uncopied_occurrence_graph(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            capture = self._make_v2_capture(
+                root,
+                pattern_hash="abc111def222",
+                shape_hash="1234567890abcdef",
+                signature="(T([8, 16], bf16),)",
+            )
+            index_path = capture / "index.json"
+            payload = json.loads(index_path.read_text())
+            payload[0]["occurrence_sources"] = [
+                {
+                    "graph": "full_graph_000.py",
+                    "source_node_names": ["mul"],
+                }
+            ]
+            index_path.write_text(json.dumps(payload) + "\n")
+
+            with self.assertRaisesRegex(ValueError, "uncopied graph"):
+                merge_one_capture(
+                    capture,
+                    root / "repros",
+                    "model",
+                    suite="other",
+                    mode="infer",
+                    graph_name_map={"full_graph_001.py": "full_graph_004.py"},
+                )
 
 
 if __name__ == "__main__":

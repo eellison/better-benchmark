@@ -976,6 +976,85 @@ def test_capture_hook_exports_full_graph_constraints_sidecar():
     assert inp0["dtype"] == "float32"
 
 
+def test_capture_hook_records_graph_for_each_partition_occurrence():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4, dtype=torch.float32)
+    out = graph.call_function(torch.ops.aten.relu.default, (x,))
+    out.meta["val"] = torch.empty(4, dtype=torch.float32)
+    graph.output(out)
+    gm = torch.fx.GraphModule({}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        capture_dir = Path(tmp) / "capture"
+        graph_dir = Path(tmp) / "models" / "suite" / "infer" / "model"
+        state = _CaptureState(
+            str(capture_dir),
+            graph_dir=str(graph_dir),
+            validate=False,
+        )
+        state.process_graph(gm)
+        state.process_graph(gm)
+        state.finalize()
+        payload = json.loads((capture_dir / "index.json").read_text())
+
+    assert len(payload["captured"]) == 1
+    entry = payload["captured"][0]
+    assert entry["occurrences"] == 2
+    assert entry["occurrence_sources"] == [
+        {"graph": "full_graph_000.py", "source_node_names": ["relu_default"]},
+        {"graph": "full_graph_001.py", "source_node_names": ["relu_default"]},
+    ]
+
+
+def test_capture_hook_names_the_source_graph_when_it_is_not_saved():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4, dtype=torch.float32)
+    out = graph.call_function(torch.ops.aten.relu.default, (x,))
+    out.meta["val"] = torch.empty(4, dtype=torch.float32)
+    graph.output(out)
+    gm = torch.fx.GraphModule({}, graph)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(str(Path(tmp) / "capture"), validate=False)
+        state.process_graph(gm, retraced_from="full_graph_007.py")
+        state.process_graph(gm)
+        state.finalize()
+        payload = json.loads((Path(tmp) / "capture" / "index.json").read_text())
+
+    (entry,) = payload["captured"]
+    assert entry["occurrence_sources"] == [
+        {"graph": "full_graph_007.py", "retraced_node_names": ["relu_default"]},
+        {"source_node_names": ["relu_default"]},
+    ]
+
+
+def test_capture_hook_names_no_graph_when_saving_it_fails():
+    graph = torch.fx.Graph()
+    x = graph.placeholder("x")
+    x.meta["val"] = torch.empty(4, dtype=torch.float32)
+    out = graph.call_function(torch.ops.aten.relu.default, (x,))
+    out.meta["val"] = torch.empty(4, dtype=torch.float32)
+    graph.output(out)
+    gm = torch.fx.GraphModule({}, graph)
+
+    def unprintable(**kwargs):
+        raise OSError("disk full")
+
+    gm.print_readable = unprintable
+    with tempfile.TemporaryDirectory() as tmp:
+        state = _CaptureState(
+            str(Path(tmp) / "capture"), graph_dir=str(Path(tmp) / "graphs"), validate=False
+        )
+        state.process_graph(gm)
+        state.finalize()
+        payload = json.loads((Path(tmp) / "capture" / "index.json").read_text())
+
+    (entry,) = payload["captured"]
+    assert entry["occurrence_sources"] == [{"source_node_names": ["relu_default"]}]
+
+
 def test_make_inputs_safely_handles_legacy_bool_randn():
     (value,) = make_inputs_safely(
         lambda: [torch.randn([2, 3], dtype=torch.bool, device="cpu")]

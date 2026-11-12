@@ -159,7 +159,7 @@ def process_graph_for_target(
     with tempfile.TemporaryDirectory(prefix="recapture_full_graph_") as tmp:
         cap_dir = Path(tmp)
         state = _CaptureState(str(cap_dir), label=target.label, validate=validate)
-        state.process_graph(gm)
+        state.process_graph(gm, retraced_from=target.path.name)
         state.finalize()
 
         index_path = cap_dir / "index.json"
@@ -172,6 +172,7 @@ def process_graph_for_target(
             target.model,
             suite=target.suite,
             mode=target.mode,
+            merge_occurrence_sources=True,
         )
 
 

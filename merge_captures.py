@@ -20,7 +20,7 @@ import tempfile
 from pathlib import Path
 
 
-from typing import Iterator
+from typing import Iterator, Mapping
 
 from canonicalize_repros import (
     extract_docstring,
@@ -131,6 +131,8 @@ def _write_shapes_json(
     occurrences: int | None = None,
     inputs: list | None = None,
     alias_group_nbytes: list | None = None,
+    occurrence_sources: list[dict] | None = None,
+    merge_occurrence_sources: bool = False,
 ) -> None:
     """Write or update shapes.json for a canonical repro directory.
 
@@ -151,7 +153,16 @@ def _write_shapes_json(
         {"shape_hash": "<8hex>",
          "inputs": [[[128,512,7,7], "bf16", {"st": [...]}], ["S", [128]]],
          "signature": "<rendered T()/S() doc string>",
-         "models": {"<suite>/<mode>/<model>": {"occurrences": 7}},
+         "models": {"<suite>/<mode>/<model>": {
+             "occurrences": 7,
+             "occurrence_sources": [
+                 {"graph": "full_graph_000.py", "source_node_names": ["add", "mul"]}
+             ]
+         }},
+         # source_node_names are the original post-grad node names. Entries
+         # written by recapture/repartition carry retraced_node_names instead:
+         # the names of a make_fx re-trace of the graph file, which do not
+         # match the original names (or kernel names from a profile).
          "source": "captured"}
       ]
     }
@@ -174,8 +185,38 @@ def _write_shapes_json(
         # Point exists — add/update this model's entry (a recapture with a
         # real count REPLACES a stale null from an older merge).
         models = existing_point.setdefault("models", {})
-        if model_key not in models or occurrences is not None:
-            models[model_key] = {"occurrences": occurrences}
+        model_entry = models.setdefault(model_key, {})
+        if merge_occurrence_sources and occurrence_sources:
+            incoming_graphs = {
+                source.get("graph")
+                for source in occurrence_sources
+                if isinstance(source, dict)
+            }
+            retained_sources = [
+                source
+                for source in model_entry.get("occurrence_sources") or []
+                if isinstance(source, dict)
+                and source.get("graph") not in incoming_graphs
+            ]
+            occurrence_sources = sorted(
+                retained_sources + occurrence_sources,
+                key=lambda source: (
+                    str(source.get("graph", "")),
+                    tuple(
+                        str(name)
+                        for name in source.get("source_node_names")
+                        or source.get("retraced_node_names")
+                        or []
+                    ),
+                ),
+            )
+            model_entry["occurrence_sources"] = occurrence_sources
+            model_entry["occurrences"] = len(occurrence_sources)
+        else:
+            if occurrences is not None or "occurrences" not in model_entry:
+                model_entry["occurrences"] = occurrences
+            if occurrence_sources:
+                model_entry["occurrence_sources"] = occurrence_sources
         if inputs is not None and "inputs" not in existing_point:
             existing_point["inputs"] = inputs
         elif inputs is not None and existing_point.get("inputs") != inputs:
@@ -198,9 +239,12 @@ def _write_shapes_json(
         # — it is not stored (settled: no duplicative signature field).
         # "signature" is written ONLY as a legacy fallback when the entry
         # carries no structured inputs (pre-codec capture dirs).
+        model_entry = {"occurrences": occurrences}
+        if occurrence_sources:
+            model_entry["occurrence_sources"] = occurrence_sources
         new_point = {
             "shape_hash": shape_hash,
-            "models": {model_key: {"occurrences": occurrences}},
+            "models": {model_key: model_entry},
         }
         if inputs is not None:
             new_point["inputs"] = inputs
@@ -234,7 +278,7 @@ class CaptureMerge:
     mode: str | None = None
     merged: int = 0
 
-    def merge(self) -> int:
+    def merge(self, *, merge_occurrence_sources: bool = False) -> int:
         """Merge the temporary capture into the canonical repro root."""
         self.merged = merge_one_capture(
             self.capture_dir,
@@ -242,6 +286,7 @@ class CaptureMerge:
             self.model_name,
             suite=self.suite,
             mode=self.mode,
+            merge_occurrence_sources=merge_occurrence_sources,
         )
         return self.merged
 
@@ -415,8 +460,16 @@ def _infer_suite_mode(model_name: str) -> tuple[str, str | None, str]:
     return "other", None, name
 
 
-def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
-                      suite: str | None = None, mode: str | None = None):
+def merge_one_capture(
+    capture_dir: Path,
+    canonical_dir: Path,
+    model_name: str,
+    suite: str | None = None,
+    mode: str | None = None,
+    *,
+    graph_name_map: Mapping[str, str] | None = None,
+    merge_occurrence_sources: bool = False,
+):
     """Merge a single capture directory into the canonical set."""
     capture_dir = Path(capture_dir)
     canonical_dir = Path(canonical_dir)
@@ -494,10 +547,28 @@ def merge_one_capture(capture_dir: Path, canonical_dir: Path, model_name: str,
             # Build model key: suite/mode/model_name
             model_key = f"{suite}/{mode}/{clean_name}" if mode else f"{suite}/{clean_name}"
             point_hash = shape_hash[:8] if len(shape_hash) >= 8 else shape_hash
+            occurrence_sources = entry.get("occurrence_sources")
+            if occurrence_sources and graph_name_map:
+                remapped_sources = []
+                for source in occurrence_sources:
+                    if not isinstance(source, dict):
+                        raise ValueError("occurrence source must be an object")
+                    graph_name = source.get("graph")
+                    if graph_name not in graph_name_map:
+                        raise ValueError(
+                            f"captured occurrence references an uncopied graph: "
+                            f"{graph_name!r}"
+                        )
+                    remapped_sources.append(
+                        {**source, "graph": graph_name_map[graph_name]}
+                    )
+                occurrence_sources = remapped_sources
             _write_shapes_json(repro_dir, point_hash, signature, model_key,
                                occurrences=entry.get("occurrences"),
                                inputs=entry.get("inputs"),
-                               alias_group_nbytes=entry.get("alias_group_nbytes"))
+                               alias_group_nbytes=entry.get("alias_group_nbytes"),
+                               occurrence_sources=occurrence_sources,
+                               merge_occurrence_sources=merge_occurrence_sources)
 
         # Update meta.json. Models recorded by QUALIFIED key
         # (suite/mode/name) — the same key shapes.json uses; bare names
