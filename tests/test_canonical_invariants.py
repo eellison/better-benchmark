@@ -955,6 +955,38 @@ def test_alias_group_codec_roundtrip():
     assert rt["alias_group"] == 0 and rt["storage_offset"] == 2
 
 
+def test_symint_codec_roundtrip_preserves_name_and_expression():
+    from input_codec import compact_from_spec, spec_from_compact
+
+    entry = compact_from_spec(
+        {
+            "kind": "symint",
+            "name": "batch",
+            "value": 32,
+            "symbolic_expr": "s0 + 1",
+        },
+        include_name=True,
+    )
+
+    assert spec_from_compact(entry) == {
+        "kind": "symint",
+        "name": "batch",
+        "value": 32,
+        "symbolic_expr": "s0 + 1",
+    }
+
+
+def test_unknown_dtype_is_rejected():
+    from full_graph_harness import _torch_dtype
+
+    try:
+        _torch_dtype("not_a_torch_dtype")
+    except ValueError as exc:
+        assert "unsupported torch dtype" in str(exc)
+    else:
+        raise AssertionError("unknown dtype should fail")
+
+
 def test_alias_group_generation_shares_storage():
     """Members of one alias group must be views of ONE buffer at their own
     offsets — writing through one member must be visible through the
