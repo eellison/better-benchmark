@@ -797,6 +797,74 @@ mod = Repro()
         specs = _parse_input_shapes_from_reader(source)
         self.assertIsNone(specs[0]["value"])
 
+    def test_loader_copies_only_views_that_eager_cannot_perform(self):
+        # A padded matmul's output sliced back to its width has row stride 8,
+        # so merging its rows cannot be a view; splitting its last dim can.
+        source = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[6, 8][8, 1]cpu"):
+        slice_1: "f32[6, 4][8, 1]cpu" = torch.ops.aten.slice.Tensor(x, 1, 0, -4);  x = None
+        view: "f32[2, 12][12, 1]cpu" = torch.ops.aten.view.default(slice_1, [-1, 12])
+        view_1: "f32[6, 2, 2][8, 2, 1]cpu" = torch.ops.aten.view.default(slice_1, [6, 2, 2]);  slice_1 = None
+        return (view, view_1)
+"""
+        x = torch.arange(48, dtype=torch.float32).reshape(6, 8)
+        expected = (x[:, :4].reshape(2, 12), x[:, :4].view(6, 2, 2))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            graphs = {
+                mode: load_graph_module(path, tracing_mode=mode)
+                for mode in ("real", "fake", "symbolic")
+            }
+
+        for mode, gm in graphs.items():
+            with self.subTest(mode=mode):
+                self.assertIsNotNone(gm)
+                targets = [n.target for n in gm.graph.nodes if n.op == "call_function"]
+                self.assertEqual(1, targets.count(torch.ops.aten.view.default))
+                self.assertIn(torch.ops.aten.clone.default, targets)
+        out = graphs["real"](x)
+        self.assertTrue(all(torch.equal(a, b) for a, b in zip(out, expected)))
+        # The view eager can perform still aliases the input.
+        self.assertEqual(x.data_ptr(), out[1].data_ptr())
+
+    def test_loader_rejects_copied_views_whose_aliasing_is_observed(self):
+        prefix = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[6, 8][8, 1]cpu"):
+        slice_1: "f32[6, 4][8, 1]cpu" = torch.ops.aten.slice.Tensor(x, 1, 0, -4)
+        view: "f32[24][1]cpu" = torch.ops.aten.view.default(slice_1, [-1]);  slice_1 = None
+"""
+        bodies = {
+            "in-place op": """
+        add_: "f32[24][1]cpu" = torch.ops.aten.add_.Tensor(view, 1);  view = None
+        return (x,)
+""",
+            "as_strided": """
+        as_strided: "f32[3, 4][8, 1]cpu" = torch.ops.aten.as_strided.default(view, [3, 4], [8, 1], 0);  view = None
+        return (as_strided,)
+""",
+            "as_strided on a view": """
+        view_1: "f32[2, 12][12, 1]cpu" = torch.ops.aten.view.default(view, [2, 12]);  view = None
+        as_strided: "f32[3, 4][8, 1]cpu" = torch.ops.aten.as_strided.default(view_1, [3, 4], [8, 1], 0);  view_1 = None
+        return (as_strided,)
+""",
+        }
+        for case, body in bodies.items():
+            with self.subTest(case=case), tempfile.TemporaryDirectory() as tmp:
+                path = _write(Path(tmp) / "full_graph_000.py", prefix + body)
+                self.assertIsNone(load_graph_module(path, tracing_mode="fake"))
+
+        # as_strided on a fresh result is unaffected by the copy.
+        source = prefix + """
+        mul: "f32[24][1]cpu" = torch.ops.aten.mul.Tensor(view, 2);  view = None
+        as_strided: "f32[3, 4][8, 1]cpu" = torch.ops.aten.as_strided.default(mul, [3, 4], [8, 1], 0);  mul = None
+        return (as_strided,)
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            self.assertIsNotNone(load_graph_module(path, tracing_mode="fake"))
+
 
 if __name__ == "__main__":
     unittest.main()
