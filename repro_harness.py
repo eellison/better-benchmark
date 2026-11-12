@@ -871,9 +871,12 @@ def make_inputs_from_config(config: dict, storage_offsets: bool = False) -> list
             t = result[i]
             if not offset or spec.get("alias_group") is not None or t.storage_offset() == offset:
                 continue
-            padded = t.new_empty(offset + _storage_size_for_strided(list(t.shape), list(t.stride())))
+            extent = _storage_size_for_strided(list(t.shape), list(t.stride()))
+            padded = t.new_empty(offset + extent)
+            # Copy the storage span, not the view: an expanded (stride-0)
+            # view can't be the destination of copy_.
+            padded[offset:].copy_(t.as_strided((extent,), (1,), t.storage_offset()))
             result[i] = padded.as_strided(t.shape, t.stride(), offset)
-            result[i].copy_(t)
     return result
 
 

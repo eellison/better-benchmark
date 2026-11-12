@@ -226,6 +226,20 @@ def test_torch_max_min_in_captured_strides_evaluate():
     assert _symint_expr_evaluator(_sympify_expr("Min(s0, 7)"))({"s0": 9}) == 7
 
 
+def test_family_identity_includes_symbolic_generator_bounds():
+    from merge_captures import _hintfree_inputs_signature as sig
+
+    def ids(gen):
+        return [[["s0"], "i64", {"gen": gen}]]
+
+    # Same family: bounds that differ only by their value at the point.
+    assert sig(ids(["index", 0, 8, "s0"])) == sig(ids(["index", 0, 16, "s0"]))
+    assert sig(ids(["runs", 0, 40, 9, 9, 1])) == sig(ids(["runs", 0, 57, 12, 12, 1]))
+    # Different families: a batch-bounded id vs a fixed-table id, or a permutation.
+    assert sig(ids(["index", 0, 8, "s0"])) != sig(ids(["index", 0, 8]))
+    assert sig(ids(["perm", 8, "s0"])) != sig(ids(["index", 0, 8, "s0"]))
+
+
 def test_tautological_guards_do_not_keep_stale_symbol_names():
     from merge_captures import _canonicalize_symbols
 
@@ -233,6 +247,15 @@ def test_tautological_guards_do_not_keep_stale_symbol_names():
         {"s13": {}, "s7": {}}, [[["s13", "s7"], "f32"]],
         ["Eq(((s13 + s7)//9), floor(s13/9 + s7/9))", "Eq(Mod(s13 + s7, 9), 0)"])
     assert guards == ["Eq(Mod(s0 + s1, 9), 0)"]
+
+
+def test_padded_view_input_with_a_stride_zero_dim():
+    from repro_harness import make_inputs_from_config
+
+    config = {"inputs": [{"kind": "tensor", "shape": [4, 3], "stride": [0, 1],
+                          "storage_offset": 5, "dtype": "float32", "device": "cpu"}]}
+    (t,) = make_inputs_from_config(config, storage_offsets=True)
+    assert (t.shape, t.stride(), t.storage_offset()) == ((4, 3), (0, 1), 5)
 
 
 def test_size_one_dims_are_specialized(tmp_path):

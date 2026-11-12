@@ -811,6 +811,24 @@ def _forward_graph_dump(source_text: str) -> str | None:
     return "".join(ast.dump(stmt) for stmt in body)
 
 
+def _hintfree_gen(gen):
+    """A generator's family-level part: its kind and symbolic bound. Integer
+    index/runs bounds and run statistics are left out: they can come from the
+    values observed at one point (observed max + 1), so they differ between
+    points of one family. Permutation sizes and constants are structural."""
+    if not isinstance(gen, list) or not gen:
+        return gen
+    from input_codec import _gen_bound_expr
+    expr = _gen_bound_expr(gen)
+    if gen[0] in ("index", "runs"):
+        return [gen[0], expr]
+    if gen[0] == "perm":
+        return ["perm", expr if expr is not None else (gen[1] if len(gen) > 1 else None)]
+    if gen[0] == "const":
+        return gen
+    return [gen[0]]
+
+
 def _hintfree_inputs_signature(inputs) -> str:
     """Canonical-symbol input structure with per-point hint values removed.
 
@@ -832,10 +850,10 @@ def _hintfree_inputs_signature(inputs) -> str:
             ])
         elif (isinstance(e, list) and len(e) > 2 and isinstance(e[2], dict)
               and ("gen" in e[2] or "x" in e[2])):
-            # Generated input values (index bounds, observed runs) describe
-            # the data at one point, not the kernel.
-            entries.append([e[0], e[1], {k: v for k, v in e[2].items()
-                                         if k not in ("gen", "x")}])
+            opts = {k: v for k, v in e[2].items() if k not in ("gen", "x")}
+            if "gen" in e[2]:
+                opts["gen"] = _hintfree_gen(e[2]["gen"])
+            entries.append([e[0], e[1], opts])
         else:
             entries.append(e)
     return json.dumps(entries, sort_keys=True)
