@@ -1234,8 +1234,16 @@ def _infer_index_bounds_from_gm(
             found_exprs: list[str] = []
             symbolic = [False]
 
+            def _concrete(size):
+                # An unbacked table size has no value at capture: bound
+                # by its smallest possible value; the expression is kept.
+                if not isinstance(size, torch.SymInt) or size.node.has_hint():
+                    return int(size)
+                lower = size.node.shape_env.bound_sympy(size.node.expr).lower
+                return int(lower) if lower.is_finite and lower >= 1 else 1
+
             def _found(size, chain):
-                b = _invert(int(size), chain)
+                b = _invert(_concrete(size), chain)
                 found.append(b)
                 expr = _sym_expr_str(size)
                 if expr is None:

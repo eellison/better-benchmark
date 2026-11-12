@@ -428,6 +428,28 @@ def test_index_bound_follows_a_symbolic_table(tmp_path):
         execution.module(*execution.args(small))
 
 
+def test_unbacked_column_major_table(tmp_path):
+    """A nonzero() result is a column-major region input of unbacked size:
+    its contiguity and the bound of indices into it are read without a hint."""
+    def f(x, idx, w):
+        table = (x > 0).nonzero().to(torch.float32)
+        return (table[idx] * w).relu().sum(-1)
+
+    x = torch.randn(8, 8)
+    args = (x, torch.randint(0, int((x > 0).sum()), (20,)), torch.randn(20, 2))
+    with torch._dynamo.config.patch(capture_dynamic_output_shape_ops=True):
+        index = _capture(f, [args], tmp_path)
+    assert not index["dropped"], index["dropped"]
+    (name, shapes), = [(n, s) for n, s in _regions(tmp_path).items() if n.startswith("sum")]
+    (u,) = [k for k, v in shapes["symbols"].items() if v.get("unbacked")]
+    (point,) = shapes["points"]
+    table, idx, _ = point["inputs"]
+    assert table[2]["st"] == [1, u], table
+    assert idx[2]["gen"][3] == u, idx
+    rows = _check(tmp_path, name, [{**point["bindings"], u: n} for n in (5, 30)])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
 def test_full_graph_replays_one_artifact_at_two_bindings(mlp_root):
     from full_graph_harness import prepare_full_graph_execution
 

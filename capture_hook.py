@@ -35,6 +35,8 @@ from typing import Any
 import torch
 import torch.fx as fx
 import torch._inductor.config as inductor_config
+from torch._prims_common import is_contiguous_or_false
+from torch.fx.experimental.symbolic_shapes import GuardOnDataDependentSymNode
 
 from full_graph_harness import (
     _is_fake_or_meta_tensor as _is_fake_or_meta,
@@ -629,7 +631,11 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
             with _no_guards(val):
                 for s in (*val.shape, *val.stride(), val.storage_offset()):
                     _note_env(s)
-                is_contig = val.is_contiguous()
+                try:
+                    is_contig = val.is_contiguous()
+                except GuardOnDataDependentSymNode:
+                    # Unbacked sizes: record strides unless provably contiguous.
+                    is_contig = is_contiguous_or_false(val)
                 placeholder_info[name] = {
                     "shape": [_resolve_sym(s) for s in val.shape],
                     "stride": ([_resolve_sym(s) for s in val.stride()]
