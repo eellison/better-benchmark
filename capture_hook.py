@@ -28,6 +28,7 @@ import hashlib
 import json
 import os
 import sys
+import weakref
 from pathlib import Path
 from typing import Any
 
@@ -43,6 +44,12 @@ from full_graph_harness import (
     placeholder_info_from_gm,
 )
 from input_codec import index_gen_from_observed
+from mask_rules import (
+    hw_unsupported_rule,
+    jagged_rule,
+    region_approx_index_rule,
+    side_effect_rule,
+)
 from replay_dependencies import replay_dependencies
 # Single source of truth for the emitted version marker: the generated repro
 # template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
@@ -83,9 +90,268 @@ TRANSPARENT_OPS = {
     torch.ops.aten.as_strided.default,
 }
 
+# Reads of a tensor's symbolic size/stride/offset. They exist only in a
+# symbolic trace (a static re-trace folds them to constants), so like views
+# they never constitute compute.
+SHAPE_METADATA_OPS = {
+    torch.ops.aten.sym_size.int,
+    torch.ops.aten.sym_stride.int,
+    torch.ops.aten.sym_numel.default,
+    torch.ops.aten.sym_storage_offset.default,
+}
+TRANSPARENT_OPS |= SHAPE_METADATA_OPS
+
 ALLOCATION_ONLY_OPS = {
     torch.ops.aten.empty.memory_format,
 }
+
+RUNTIME_ASSERT_OPS = {
+    torch.ops.aten._assert_scalar.default,
+    torch.ops.aten.sym_constrain_range.default,
+    torch.ops.aten.sym_constrain_range_for_size.default,
+}
+
+
+# Masking: work the benchmark cannot measure faithfully. Node-level reasons
+# keep the node out of every partition and mask its whole graph: the
+# full-graph sidecar records the mask, the driver skips the graph's full-graph
+# bench, and projections hold its time at production. Partitions of the rest
+# of the graph are still captured. Region-level reasons mark a repro that is
+# still captured and timed but held at production in projections.
+MASK_REASONS = (
+    "jagged", "hstu", "user_triton", "side_effect", "hw_unsupported",
+    "unbacked_shape", "approx_index", "written_constant",
+)
+NODE_MASK_REASONS = frozenset(
+    {"jagged", "hstu", "user_triton", "side_effect", "hw_unsupported",
+     "unbacked_shape"}
+)
+REGION_MASK_REASONS = frozenset({"approx_index", "written_constant"})
+NON_FUSIBLE_MASK_REASONS = NODE_MASK_REASONS
+GRAPH_SCOPE_MASK_REASONS = NODE_MASK_REASONS
+
+
+def _mask_user_triton(node: fx.Node) -> str | None:
+    """A user-defined Triton kernel launch: the saved graph names the kernel
+    only by its index into the capturing process's kernel_side_table, so no
+    other process can replay it."""
+    from replay_dependencies import USER_TRITON_HOPS
+
+    target = node.target
+    if (
+        node.op == "call_function"
+        and isinstance(target, torch._ops.HigherOrderOperator)
+        and target.name() in USER_TRITON_HOPS
+    ):
+        return "user_triton"
+    return None
+
+
+_data_dependent_symbols: "weakref.WeakKeyDictionary[fx.Graph, frozenset]" = (
+    weakref.WeakKeyDictionary()
+)
+
+
+def _unbacked_symbols(values) -> set:
+    from torch.fx.experimental.symbolic_shapes import free_unbacked_symbols
+    from torch.utils import _pytree as pytree
+
+    return {
+        symbol
+        for value in pytree.tree_leaves(values)
+        if isinstance(value, (torch.Tensor, torch.SymInt, torch.SymFloat, torch.SymBool))
+        for symbol in free_unbacked_symbols(value)
+    }
+
+
+def _node_values(node: fx.Node) -> tuple[list, list]:
+    """``node``'s output value and the values of its arguments."""
+    from torch.utils import _pytree as pytree
+
+    args = [
+        arg.meta.get("val") if isinstance(arg, fx.Node) else arg
+        for arg in pytree.tree_leaves((node.args, node.kwargs))
+    ]
+    return [node.meta.get("val")], args
+
+
+def _introduces_input_derived_symbols(node: fx.Node) -> bool:
+    """Whether the fresh unbacked symbols in ``node``'s output are functions
+    of its inputs: a view (a slice whose bounds come from inputs gets a
+    fresh storage offset) or a read of a tensor's size, stride or offset.
+    Any other op that introduces a symbol (nonzero, .item(), a custom op
+    whose fake impl calls ``new_dynamic_size``) sized it from tensor data."""
+    target = node.target
+    return target in SHAPE_METADATA_OPS or (
+        isinstance(target, torch._ops.OpOverload) and target.is_view
+    )
+
+
+def _graph_data_dependent_symbols(graph: fx.Graph) -> frozenset:
+    """Unbacked symbols whose value depends on tensor data.
+
+    A node introduces the unbacked symbols first seen in its output. They
+    are functions of the inputs when a graph input introduces them, or a
+    view or shape read (``_introduces_input_derived_symbols``) whose inputs
+    carry no data-dependent symbols. Every other op's are data-dependent
+    (unique, nonzero, .item(), custom ops with data-dependent output sizes).
+    """
+    cached = _data_dependent_symbols.get(graph)
+    if cached is not None:
+        return cached
+    seen: set = set()
+    data_dependent: set = set()
+    for node in graph.nodes:
+        out, args = _node_values(node)
+        produced = _unbacked_symbols(out) - seen
+        seen |= produced
+        if node.op == "call_function" and (
+            not _introduces_input_derived_symbols(node)
+            or _unbacked_symbols(args) & data_dependent
+        ):
+            data_dependent |= produced
+    result = frozenset(data_dependent)
+    _data_dependent_symbols[graph] = result
+    return result
+
+
+def _mask_unbacked_shape(node: fx.Node) -> str | None:
+    """A node whose output or inputs have sizes or values produced by a
+    data-dependent op in the graph (unique, nonzero, .item(), a custom op
+    with a data-dependent output size). The capture
+    has no value for them, and random replay inputs would not reproduce the
+    real sizes."""
+    if node.op != "call_function":
+        return None
+    out, args = _node_values(node)
+    dependent = _unbacked_symbols(out + args) & _graph_data_dependent_symbols(node.graph)
+    return "unbacked_shape" if dependent else None
+
+
+# Node rules. Each maps an fx.Node to a reason in NODE_MASK_REASONS, or None;
+# any other value is ignored. To add a rule, append a function here. It must
+# decide from the node and its graph alone (a saved full graph or runnable),
+# never from process state such as the kernel_side_table, because saved
+# artifacts are checked in other processes (hw_unsupported_rule is the one
+# exception: it reads the benchmark target's compute capability). Every rule
+# runs, and a node is masked for all the reasons returned.
+MASK_RULES: list = [
+    _mask_user_triton, side_effect_rule, jagged_rule, hw_unsupported_rule,
+    _mask_unbacked_shape,
+]
+
+# Region rules. Each maps a partition (its list of nodes in the full graph) to
+# a reason in REGION_MASK_REASONS, or None; any other value is ignored. To add
+# a rule, append a function here; like node rules it must decide from the
+# graph alone. The first rule that returns a reason wins, and the reason is
+# recorded as the repro's "masked_reason".
+_written_constants: "weakref.WeakKeyDictionary[fx.Graph, tuple]" = weakref.WeakKeyDictionary()
+
+
+def _region_reads_written_constant(comp: list) -> str | None:
+    """A region that reads a graph constant (``get_attr``) after a node
+    outside the region writes it in place. The repro lifts the constant to
+    an input holding its recorded value, from before the write, and no cut
+    helps: the constant is an input either way."""
+    nodes = [n for n in comp if isinstance(n, fx.Node)]
+    if not nodes or nodes[0].graph.owning_module is None:
+        return None
+    graph = nodes[0].graph
+    cached = _written_constants.get(graph)
+    if cached is None or cached[0] != len(graph.nodes):
+        writes = [w for w in _in_place_writes(graph.owning_module) if w[0].op == "get_attr"]
+        cached = (len(graph.nodes), writes)
+        _written_constants[graph] = cached
+    if not cached[1]:
+        return None
+    order = {n: i for i, n in enumerate(graph.nodes)}
+    members = set(nodes)
+    for base, aliases, writers in cached[1]:
+        if any(
+            user in members and order[user] > order[w]
+            for w in writers if w not in members
+            for alias in aliases
+            for user in alias.users
+        ):
+            return "written_constant"
+    return None
+
+
+REGION_MASK_RULES: list = [region_approx_index_rule, _region_reads_written_constant]
+
+
+_warned_mask_reasons: set = set()
+
+
+def _warn_unknown_mask_reason(rule, reason, allowed) -> None:
+    key = (getattr(rule, "__name__", repr(rule)), reason)
+    if key in _warned_mask_reasons:
+        return
+    _warned_mask_reasons.add(key)
+    print(
+        f"[capture_hook] WARNING: mask rule {key[0]} returned {reason!r}, "
+        f"not one of {sorted(allowed)}; ignored",
+        file=sys.stderr,
+    )
+
+
+def mask_reasons(node: fx.Node) -> tuple[str, ...]:
+    """Every reason ``node`` is masked, in MASK_RULES order, without
+    duplicates; empty when it is not masked."""
+    reasons: list[str] = []
+    for rule in MASK_RULES:
+        reason = rule(node)
+        if reason in NODE_MASK_REASONS:
+            if reason not in reasons:
+                reasons.append(reason)
+        elif reason is not None:
+            _warn_unknown_mask_reason(rule, reason, NODE_MASK_REASONS)
+    return tuple(reasons)
+
+
+def mask_reason(node: fx.Node) -> str | None:
+    """The first reason ``node`` is masked, or None."""
+    reasons = mask_reasons(node)
+    return reasons[0] if reasons else None
+
+
+def region_mask_reason(comp: list) -> str | None:
+    """The reason partition ``comp``'s repro is masked, or None."""
+    for rule in REGION_MASK_RULES:
+        reason = rule(comp)
+        if reason in REGION_MASK_REASONS:
+            return reason
+        if reason is not None:
+            _warn_unknown_mask_reason(rule, reason, REGION_MASK_REASONS)
+    return None
+
+
+def graph_mask(gm: fx.GraphModule) -> dict | None:
+    """Graph-level mask for a full-graph sidecar, or None when nothing in the
+    graph or its HOP subgraphs is masked with a graph-scope reason."""
+    reasons = {
+        reason
+        for module in gm.modules()
+        if isinstance(module, fx.GraphModule)
+        for node in module.graph.nodes
+        for reason in mask_reasons(node)
+        if reason in GRAPH_SCOPE_MASK_REASONS
+    }
+    if not reasons:
+        return None
+    return {"reasons": sorted(reasons), "scope": "graph"}
+
+
+def node_mask_counts(gm: fx.GraphModule) -> dict:
+    """Masked nodes per mask reason over the graph and its HOP subgraphs."""
+    counts = collections.Counter(
+        reason
+        for module in gm.modules()
+        if isinstance(module, fx.GraphModule)
+        for node in module.graph.nodes
+        for reason in mask_reasons(node)
+    )
+    return dict(sorted(counts.items()))
 
 
 def partition_node_is_supported(node: fx.Node) -> bool:
@@ -93,10 +359,16 @@ def partition_node_is_supported(node: fx.Node) -> bool:
 
     A node belongs in a fusible partition if it is a transparent view op or
     Inductor's is_fusible_node says it has a fusible lowering (no BLAS/cuDNN
-    flop-counter ops, no fallbacks, no collectives).
+    flop-counter ops, no fallbacks, no collectives), and it is not masked as
+    non-fusible. Runtime asserts are never fusible: they have no compute
+    to time, and their symbolic inputs have no value outside the trace.
     """
     from torch._inductor.fx_passes.fusion_regions import is_fusible_node
 
+    if node.op == "call_function" and node.target in RUNTIME_ASSERT_OPS:
+        return False
+    if NON_FUSIBLE_MASK_REASONS.intersection(mask_reasons(node)):
+        return False
     if node.op == "call_function" and node.target in TRANSPARENT_OPS:
         return True
     return is_fusible_node(node)
@@ -123,6 +395,9 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
       constant_folded: (only when ``constant_folded`` is given) computed
           once at load time by runtime constant folding, so neither a
           per-call kernel nor an extern
+      masked: (only when some node is masked) outside every partition and
+          masked by ``mask_reasons``; logged as op-target ->
+          {"count", "reasons"} with every reason any such node had
 
     Every bucket logs the aggregate op-target -> count set (graph
     level, never per-partition — partition contents live in the canonical
@@ -142,6 +417,7 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
     }
     if constant_folded is not None:
         buckets["constant_folded"] = collections.Counter()
+    masked: dict[str, dict] = {}
     total = 0
     for node in gm.graph.nodes:
         if node.op != "call_function":
@@ -154,19 +430,28 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
         else:
             name = (f"{getattr(node.target, '__module__', '')}."
                     f"{getattr(node.target, '__name__', node.target)}").lstrip(".")
+        reasons = () if node in partitioned else mask_reasons(node)
         if constant_folded is not None and node in constant_folded:
             buckets["constant_folded"][name] += 1
+        elif reasons:
+            entry = masked.setdefault(name, {"count": 0, "reasons": set()})
+            entry["count"] += 1
+            entry["reasons"].update(reasons)
         elif node in partitioned:
             buckets["fusible_in_partition"][name] += 1
         elif partition_node_is_supported(node):
             buckets["fusible_unpartitioned"][name] += 1
         else:
             buckets["non_fusible"][name] += 1
-    return {
-        "total_call_functions": total,
-        "counts": {k: sum(v.values()) for k, v in buckets.items()},
-        "ops": {k: dict(sorted(v.items())) for k, v in buckets.items()},
-    }
+    counts = {k: sum(v.values()) for k, v in buckets.items()}
+    ops = {k: dict(sorted(v.items())) for k, v in buckets.items()}
+    if masked:
+        counts["masked"] = sum(entry["count"] for entry in masked.values())
+        ops["masked"] = {
+            name: {"count": entry["count"], "reasons": sorted(entry["reasons"])}
+            for name, entry in sorted(masked.items())
+        }
+    return {"total_call_functions": total, "counts": counts, "ops": ops}
 
 
 def partition_has_reduction(nodes) -> bool:
@@ -247,6 +532,189 @@ def _split_connected_components(nodes):
     return result_components
 
 
+_UNINITIALIZED_ALLOCATION_OPS = ALLOCATION_ONLY_OPS | {
+    torch.ops.aten.empty_strided.default,
+    torch.ops.aten.empty_like.default,
+    torch.ops.aten.new_empty.default,
+    torch.ops.aten.new_empty_strided.default,
+}
+
+
+def _written_in_place_args(node: fx.Node) -> list:
+    """Graph values ``node`` may write in place: the ``alias_info.is_write``
+    arguments of an aten op, and for a user Triton kernel launch the tensors
+    its kernel writes when the loader attached a trusted kernel
+    (``user_triton.TrustedKernels``), else every value it takes."""
+    from torch.utils import _pytree as pytree
+
+    if node.op != "call_function":
+        return []
+    target = node.target
+    if (
+        isinstance(target, torch._ops.HigherOrderOperator)
+        and target.name() == "triton_kernel_wrapper_mutation"
+    ):
+        from user_triton import WRITE_ANALYSIS_KEY
+
+        module = node.graph.owning_module
+        trusted = (getattr(module, "meta", None) or {}).get(WRITE_ANALYSIS_KEY)
+        names = trusted.written_kwargs(node) if trusted is not None else None
+        if names is not None:
+            return [
+                arg for name, arg in node.kwargs["kwargs"].items()
+                if name in names and isinstance(arg, fx.Node)
+            ]
+        return [a for a in pytree.tree_leaves(node.kwargs) if isinstance(a, fx.Node)]
+    if not isinstance(target, torch._ops.OpOverload):
+        return []
+    schema_args = target._schema.arguments
+    written = []
+    for i, arg in enumerate(schema_args):
+        if arg.alias_info is None or not arg.alias_info.is_write:
+            continue
+        value = node.args[i] if i < len(node.args) else node.kwargs.get(arg.name)
+        written.extend(a for a in pytree.tree_leaves(value) if isinstance(a, fx.Node))
+    return written
+
+
+def _storages(gm: fx.GraphModule) -> dict:
+    """The storages each node's value lives in.
+
+    Read from the fake values, so every view (split_with_sizes outputs,
+    view.dtype, alias, unflatten, ...) shares its base's storage whatever
+    the op. A view without a value inherits its input's storages; any other
+    node without a value is its own storage.
+    """
+    from torch.multiprocessing.reductions import StorageWeakRef
+    from torch.utils import _pytree as pytree
+
+    storages: dict = {}
+    for node in gm.graph.nodes:
+        val = node.meta.get("val")
+        found = set()
+        for leaf in pytree.tree_leaves(val):
+            if isinstance(leaf, torch.Tensor):
+                try:
+                    found.add(StorageWeakRef(leaf.untyped_storage()))
+                except (NotImplementedError, RuntimeError):
+                    pass
+        if not found and val is None:
+            target = node.target
+            if (
+                node.op == "call_function" and node.args
+                and isinstance(node.args[0], fx.Node)
+                and (target is _operator.getitem or getattr(target, "is_view", False))
+            ):
+                found = set(storages.get(node.args[0], ()))
+            else:
+                found = {node}
+        storages[node] = frozenset(found)
+    return storages
+
+
+def _in_place_writes(gm: fx.GraphModule) -> list:
+    """(base, aliases, writers) for every storage a node writes in place.
+
+    ``base`` is the first node holding the storage, ``aliases`` every node
+    holding it that does not write it (the base, its views and their
+    readers' inputs), and ``writers`` the nodes that write it, in graph order.
+    """
+    storages = _storages(gm)
+    writers: dict = collections.defaultdict(list)
+    for node in gm.graph.nodes:
+        for arg in _written_in_place_args(node):
+            for storage in storages.get(arg, ()):
+                if node not in writers[storage]:
+                    writers[storage].append(node)
+    holders: dict = collections.defaultdict(list)
+    for node, held in storages.items():
+        for storage in held:
+            if storage in writers:
+                holders[storage].append(node)
+    result = []
+    for storage, storage_writers in writers.items():
+        aliases = [n for n in holders[storage] if n not in storage_writers]
+        if aliases:
+            result.append((aliases[0], set(aliases), storage_writers))
+    return result
+
+
+def _read_after(writer: fx.Node, aliases: set, order: dict) -> bool:
+    """Whether any node after ``writer``, the graph output included, reads
+    the written storage."""
+    return any(
+        order[user] > order[writer]
+        for alias in aliases
+        for user in alias.users
+    )
+
+
+def written_allocation_aliases(gm: fx.GraphModule, excluded=()) -> set:
+    """Buffers written in place where no partition can see the write, plus
+    every view of them.
+
+    The write is not a data edge, so a partition holding the buffer's
+    producer and a reader of the written values, but not the writer, would
+    replay the values from before the write: uninitialized memory for an
+    ``empty``, the fill value for a reinplaced ``full`` accumulator, the
+    copied values for the ``clone`` a decomposed Triton kernel writes into.
+    That applies to an uninitialized allocation written by anything, and to
+    any other buffer written by a node outside every partition (not
+    partition-supported, or ``excluded``) and read after the write.
+
+    A user Triton kernel launch counts as writing every value it takes
+    unless the loader attached a trusted kernel for it: the graph names the
+    kernel only by its index into the capturing process's
+    ``kernel_side_table``, so only a kernel whose identity was checked
+    against reviewed source can be analyzed. Keeping
+    these nodes out of every partition makes readers take the buffer as an
+    input instead. Graph inputs, constants and buffers no partition can
+    hold (an extern's output) are inputs already.
+    """
+    excluded = set(excluded)
+    order = {node: i for i, node in enumerate(gm.graph.nodes)}
+    cut: set = set()
+    for base, aliases, writers in _in_place_writes(gm):
+        # Only a partition holding the buffer's producer replays its
+        # pre-write values; views of a buffer no partition holds read it as
+        # an input.
+        if (
+            base.op != "call_function" or base in excluded
+            or not partition_node_is_supported(base)
+        ):
+            continue
+        if base.target in _UNINITIALIZED_ALLOCATION_OPS or any(
+            (w in excluded or not partition_node_is_supported(w))
+            and _read_after(w, aliases, order)
+            for w in writers
+        ):
+            cut |= aliases
+    return cut
+
+
+def _split_writes(gm: fx.GraphModule, components: list) -> set:
+    """Aliases of buffers whose producer shares a partition with a reader
+    of a write made outside that partition."""
+    order = {node: i for i, node in enumerate(gm.graph.nodes)}
+    owner = {node: i for i, comp in enumerate(components) for node in comp}
+    cut: set = set()
+    for base, aliases, writers in _in_place_writes(gm):
+        part = owner.get(base)
+        if part is None:
+            continue
+        for w in writers:
+            if owner.get(w) == part:
+                continue
+            if any(
+                owner.get(user) == part and order[user] > order[w]
+                for alias in aliases
+                for user in alias.users
+            ):
+                cut |= aliases
+                break
+    return cut
+
+
 def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     """Partition a post-grad GraphModule into fusible regions, EXACTLY as the
     capture pipeline does.
@@ -261,10 +729,32 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     would capture.
 
     ``excluded`` nodes (e.g. ``runtime_constant_nodes``) are kept out of every
-    partition, as if they were not fusible.
+    partition, as if they were not fusible, and so are buffers written in
+    place by a node outside the partition and their views
+    (``written_allocation_aliases``).
 
     Returns: list of partitions, each a list of fx.Node from gm.graph.
     """
+    excluded = set(excluded or ())
+    excluded |= written_allocation_aliases(gm, excluded)
+    while True:
+        components = _propose_partitions(gm, excluded)
+        # A partition-supported writer usually joins its buffer's partition;
+        # when it lands elsewhere, cut the buffer and partition again.
+        split = _split_writes(gm, components) - excluded
+        if not split:
+            break
+        excluded |= split
+
+    return [
+        comp
+        for comp in components
+        if partition_has_real_compute(comp)
+        and not partition_is_standalone_allocation_only(comp)
+    ]
+
+
+def _propose_partitions(gm: fx.GraphModule, excluded: set) -> list:
     import inspect
 
     from torch.fx.passes.operator_support import create_op_support
@@ -272,8 +762,6 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
     from fusion_partitioner import (
         PrunedCapabilityBasedPartitioner as CapabilityBasedPartitioner,
     )
-
-    excluded = excluded or ()
 
     def _is_supported(_submodules, node):
         return node not in excluded and partition_node_is_supported(node)
@@ -297,13 +785,7 @@ def get_fusion_partitions(gm: fx.GraphModule, excluded=None) -> list:
         for comp in components:
             split_components.extend(_split_connected_components(comp))
         components = split_components
-
-    return [
-        comp
-        for comp in components
-        if partition_has_real_compute(comp)
-        and not partition_is_standalone_allocation_only(comp)
-    ]
+    return components
 
 
 def graph_input_kind(gm: fx.GraphModule) -> str:
@@ -432,6 +914,103 @@ def runtime_constant_nodes(gm: fx.GraphModule, constant_placeholders) -> set:
     return folded
 
 
+# Placeholder dtypes for symbolic scalars (forward() takes a Python value).
+_SCALAR_PLACEHOLDER_DTYPES = frozenset({"symint", "symbool"})
+
+
+def _input_symbol_values(gm: fx.GraphModule) -> dict:
+    """{symbol: value} for graph inputs that are (or have dims that are) a
+    bare symbol, from the concrete input specs the ingest loader recorded."""
+    specs = (gm.meta or {}).get("better_benchmark_input_specs") or []
+    placeholders = [n for n in gm.graph.nodes if n.op == "placeholder"]
+    values: dict = {}
+    if len(specs) != len(placeholders):
+        return values
+    for node, spec in zip(placeholders, specs):
+        if not isinstance(spec, dict):
+            continue
+        val = node.meta.get("val")
+        if isinstance(val, torch.SymInt) and spec.get("kind") == "symint":
+            pairs = [(val, spec.get("value", spec.get("hint")))]
+        elif isinstance(val, torch.Tensor) and "shape" in spec:
+            pairs = list(zip(val.shape, spec["shape"]))
+        else:
+            continue
+        for sym, concrete in pairs:
+            expr = getattr(getattr(sym, "node", None), "expr", None)
+            if expr is not None and expr.is_Symbol and isinstance(concrete, int):
+                values[expr] = concrete
+    return values
+
+
+def _sym_hint(x, known: dict | None = None):
+    """Concrete value of a SymInt/SymFloat/SymBool, or None.
+
+    SymNode.hint is None for expressions the trace specialized to a
+    constant and for unbacked symbols; fall back to the expression itself,
+    the ShapeEnv's backed values, and ``known`` symbol values.
+    """
+    node = getattr(x, "node", None)
+    if node is None:
+        return x
+    if getattr(node, "hint", None) is not None:
+        return node.hint
+    expr = node.expr
+    shape_env = getattr(node, "shape_env", None)
+    if expr.free_symbols:
+        values = dict(getattr(shape_env, "var_to_val", None) or {})
+        values.update(known or {})
+        import sympy
+
+        expr = sympy.sympify(expr.xreplace(
+            {k: sympy.sympify(v) for k, v in values.items() if v is not None}))
+    if expr.free_symbols:
+        return None
+    if isinstance(x, torch.SymBool):
+        return bool(expr)
+    return float(expr) if isinstance(x, torch.SymFloat) else int(expr)
+
+
+def _without_runtime_asserts(gm: fx.GraphModule) -> fx.GraphModule:
+    """A copy of ``gm`` without runtime asserts and the symbolic shape reads
+    and SymInt arithmetic only they used.
+
+    A symbolic trace adds asserts on unbacked symbols, built from
+    ``aten.sym_storage_offset`` and similar reads that Dynamo cannot trace
+    (they return a non-Tensor). A full graph replays with concrete inputs,
+    and a static re-trace has none of these nodes either. Ops that produce
+    the scalars (``.item()``, custom ops) stay: they are work, such as a
+    device-to-host sync, that the replay must time.
+    """
+    graph = copy.deepcopy(gm.graph)
+
+    def is_shape_arithmetic(node):
+        target = node.target
+        return isinstance(
+            node.meta.get("val"), (torch.SymInt, torch.SymBool, torch.SymFloat)
+        ) and (
+            target in SHAPE_METADATA_OPS
+            or not isinstance(
+                target, (torch._ops.OpOverload, torch._ops.HigherOrderOperator)
+            )
+        )
+
+    removable = [
+        n for n in graph.nodes
+        if n.op == "call_function" and n.target in RUNTIME_ASSERT_OPS
+    ]
+    while removable:
+        node = removable.pop()
+        inputs = list(node.all_input_nodes)
+        graph.erase_node(node)
+        removable.extend(
+            n for n in inputs
+            if not n.users and n.op == "call_function" and is_shape_arithmetic(n)
+            and n not in removable
+        )
+    return fx.GraphModule(gm, graph)
+
+
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     """Extract a standalone sub-GraphModule for one fusible partition.
 
@@ -487,11 +1066,15 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     new_graph = fx.Graph()
     env: dict[fx.Node, fx.Node] = {}
     placeholder_info: dict[str, dict] = {}
+    known_symbols = _input_symbol_values(gm)
 
     def _resolve_sym(x):
         """Resolve SymInt/SymFloat to concrete int/float."""
         if isinstance(x, (torch.SymInt, torch.SymFloat)):
-            return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
+            hint = _sym_hint(x, known_symbols)
+            if hint is None:
+                raise ValueError(f"symbolic size {x} has no concrete value")
+            return hint
         return int(x)
 
     def _storage_key(val):
@@ -529,13 +1112,28 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 except Exception:
                     pass
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
-            hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
+            hint = _sym_hint(val, known_symbols)
+            if hint is None:
+                raise ValueError(f"symbolic input {name!r} ({val}) has no concrete value")
             placeholder_info[name] = {
                 "shape": [],
                 "stride": [],
                 "dtype": "symint",
                 "device": "cpu",
                 "hint": hint,
+            }
+        elif val is not None and isinstance(val, torch.SymBool):
+            # A size comparison computed outside the partition (s0 >= 4)
+            # feeding it: forward() takes the comparison's concrete value.
+            hint = _sym_hint(val, known_symbols)
+            if hint is None:
+                raise ValueError(f"symbolic bool input {name!r} ({val}) has no concrete value")
+            placeholder_info[name] = {
+                "shape": [],
+                "stride": [],
+                "dtype": "symbool",
+                "device": "cpu",
+                "hint": bool(hint),
             }
 
     _ph_names_used: set[str] = set()
@@ -590,6 +1188,9 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         if len(args) < 2 or not isinstance(args[1], (list, tuple)):
             return args
         shape_list = list(args[1])
+        # A dim read from a symbolic input stays a reference to it.
+        if any(isinstance(d, fx.Node) for d in shape_list):
+            return args
         if not _should_lift_shape(shape_list):
             return args
         param_name = f"_shape_param_{_shape_counter[0]}"
@@ -1125,9 +1726,9 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     fake_inputs = []
 
     for name, info in placeholder_info.items():
-        if info.get("dtype") == "symint":
+        if info.get("dtype") in _SCALAR_PLACEHOLDER_DTYPES:
             print(
-                f"[canonicalize] symint placeholder {name!r}: retrace skipped "
+                f"[canonicalize] symbolic placeholder {name!r}: retrace skipped "
                 f"(dynamic-shape partitions not yet canonicalized)",
                 file=sys.stderr,
             )
@@ -1564,7 +2165,7 @@ class _CaptureState:
                 input_lines.append(f"    {shape_params[name]},  # {name}")
                 continue
             info = placeholder_info.get(name)
-            if info and info["dtype"] != "symint":
+            if info and info["dtype"] not in _SCALAR_PLACEHOLDER_DTYPES:
                 shape = info["shape"]
                 stride = info.get("stride", [])
                 dtype = info["dtype"]
@@ -1625,6 +2226,8 @@ class _CaptureState:
                 # This is a scalar dimension (like seq_len) passed to ops like iota/full
                 val = info.get("hint", 1)
                 input_lines.append(f"    {val},  # {name} (symbolic dim)")
+            elif info and info.get("dtype") == "symbool":
+                input_lines.append(f"    {info['hint']},  # {name} (symbolic bool)")
             else:
                 input_lines.append(f"    torch.tensor(1),  # {name} (unknown shape)")
 
@@ -1676,7 +2279,7 @@ class _CaptureState:
                 compact_inputs.append(["S", list(shape_params[name])])
             else:
                 info = placeholder_info.get(name)
-                if info and info["dtype"] != "symint":
+                if info and info["dtype"] not in _SCALAR_PLACEHOLDER_DTYPES:
                     spec = {
                         "kind": "tensor",
                         "shape": info["shape"],
@@ -1706,6 +2309,8 @@ class _CaptureState:
                     compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
                     compact_inputs.append(["sym", info.get("hint", 1)])
+                elif info and info.get("dtype") == "symbool":
+                    compact_inputs.append(["sc", info["hint"]])
         shapes_config_line = render_signature(compact_inputs)
 
         script = f'''"""
@@ -1807,6 +2412,105 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
+    def capture_full_graph(
+        self,
+        gm: fx.GraphModule,
+        *,
+        components=None,
+        validate_partitions: bool = True,
+        constant_folded=None,
+        constant_inputs=None,
+    ):
+        """Write and validate one full graph without requiring partition capture."""
+        if not self.graph_dir:
+            return None
+        full_graph_path = os.path.join(
+            self.graph_dir, f"full_graph_{self.graph_counter:03d}.py"
+        )
+        self.graph_counter += 1
+        try:
+            self._write_full_graph(
+                full_graph_path, gm, components=components,
+                validate_partitions=validate_partitions,
+                constant_folded=constant_folded,
+                constant_inputs=constant_inputs,
+            )
+        except Exception:
+            for path in (full_graph_path, os.path.splitext(full_graph_path)[0] + ".meta.json"):
+                if os.path.exists(path):
+                    os.unlink(path)
+            raise
+        return full_graph_path
+
+    def _write_full_graph(
+        self, full_graph_path, gm, *, components, validate_partitions,
+        constant_folded=None, constant_inputs=None,
+    ):
+        full_code = (gm.meta or {}).get("better_benchmark_source_code")
+        if full_code is None:
+            full_code = _without_runtime_asserts(gm).print_readable(
+                print_output=False,
+                include_stride=True,
+                include_device=True,
+            )
+        with open(full_graph_path, "w") as f:
+            f.write(full_code)
+
+        from full_graph_harness import (
+            infer_full_graph_source,
+            write_full_graph_metadata,
+        )
+
+        placeholder_info = placeholder_info_from_gm(gm)
+        index_bounds = self._infer_index_bounds(gm, placeholder_info)
+        permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+        extra = {
+            "source": infer_full_graph_source(full_graph_path),
+            "replay_dependencies": replay_dependencies(gm),
+        }
+        mask = graph_mask(gm)
+        if mask is not None:
+            extra["masked"] = mask
+        mask_counts = node_mask_counts(gm)
+        if mask_counts:
+            extra["node_mask_counts"] = mask_counts
+        side_effects = (gm.meta or {}).get("better_benchmark_side_effects") or {}
+        if side_effects.get("stripped") or side_effects.get("blocked"):
+            # Ops removed from (or kept in) the source at ingest; see
+            # mask_rules.strip_side_effect_source.
+            extra["side_effects"] = {
+                "stripped": dict(collections.Counter(side_effects.get("stripped", []))),
+                "blocked": side_effects.get("blocked", []),
+            }
+        if components is not None:
+            extra["node_accounting"] = graph_node_accounting(
+                gm, components, constant_folded=constant_folded)
+        if constant_inputs is not None:
+            extra["constant_inputs"] = constant_inputs
+        write_full_graph_metadata(
+            full_graph_path,
+            gm,
+            extra=extra,
+            index_bounds=index_bounds,
+            permutation_indices=permutation_indices,
+            observed_stats=self._current_observed_stats or {},
+            source_input_specs=(gm.meta or {}).get(
+                "better_benchmark_input_specs"
+            ),
+        )
+
+        from roundtrip_validation import run_write_gate
+
+        verdict = run_write_gate(
+            full_graph_path,
+            original_gm=gm if validate_partitions else None,
+            validate_execution=not validate_partitions,
+        )
+        if verdict.get("status") != "ok":
+            raise RuntimeError(
+                f"full graph round-trip validation failed: {verdict.get('reason')}"
+            )
+
     def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
         """Called by the hook for each post-grad graph. Partitions and captures.
 
@@ -1835,66 +2539,12 @@ if __name__ == "__main__":
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
-            full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
-            self.graph_counter += 1
-            try:
-                full_code = gm.print_readable(
-                    print_output=False,
-                    include_stride=True,
-                    include_device=True,
-                )
-                with open(full_graph_path, "w") as f:
-                    f.write(full_code)
-                try:
-                    from full_graph_harness import (
-                        infer_full_graph_source,
-                        write_full_graph_metadata,
-                    )
-
-                    placeholder_info = placeholder_info_from_gm(gm)
-                    index_bounds = self._infer_index_bounds(gm, placeholder_info)
-                    permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
-                    write_full_graph_metadata(
-                        full_graph_path,
-                        gm,
-                        extra={
-                            "source": infer_full_graph_source(full_graph_path),
-                            "node_accounting": graph_node_accounting(
-                                gm, components, constant_folded=folded),
-                            "replay_dependencies": replay_dependencies(gm),
-                            **({"constant_inputs": constant_inputs}
-                               if constant_inputs is not None else {}),
-                        },
-                        index_bounds=index_bounds,
-                        permutation_indices=permutation_indices,
-                        observed_stats=self._current_observed_stats or {},
-                    )
-                except Exception as exc:
-                    print(
-                        f"[capture_hook] WARNING: could not write full graph metadata "
-                        f"for {full_graph_path}: {exc}",
-                        file=sys.stderr,
-                    )
-                # Validate-before-write gate: reload the just-written artifact,
-                # run input round-trip (A) + partition round-trip (C) against
-                # the live gm, stamp the sidecar "roundtrip": "ok"|"failed: ..".
-                # Never deletes the artifact; failures WARN loudly on stderr.
-                try:
-                    from roundtrip_validation import run_write_gate
-
-                    run_write_gate(full_graph_path, original_gm=gm)
-                except Exception as exc:
-                    print(
-                        f"[capture_hook] WARNING: round-trip gate unavailable "
-                        f"for {full_graph_path}: {exc}",
-                        file=sys.stderr,
-                    )
-            except Exception as exc:
-                print(
-                    f"[capture_hook] WARNING: could not write full graph "
-                    f"{full_graph_path}: {exc}",
-                    file=sys.stderr,
-                )
+            self.capture_full_graph(
+                gm,
+                components=components,
+                constant_folded=folded,
+                constant_inputs=constant_inputs,
+            )
         # Shared partitioning + hashing (see module-level helpers above):
         # this is the single source of truth for how graphs are cut into
         # canonical repros and how each partition is content-addressed.
@@ -1907,8 +2557,19 @@ if __name__ == "__main__":
             # extracted+hashed directly here, bypassing canonicalization,
             # which is how live-cut hashes diverged from artifact/retrace
             # hashes (the resnet18 live-vs-artifact hash drift, fixed 2026-06).
-            pattern = compute_partition_pattern(
-                comp, gm, observed_stats=self._current_observed_stats)
+            try:
+                pattern = compute_partition_pattern(
+                    comp, gm, observed_stats=self._current_observed_stats)
+            except ValueError as e:
+                # A partition input without a concrete value: record it like
+                # any other dropped region rather than abort the graph.
+                self.dropped.append({
+                    "filename": None,
+                    "pattern_hash": None,
+                    "shape_hash": None,
+                    "reason": f"ValueError: {str(e)[:300]}",
+                })
+                continue
             if pattern is None:
                 continue
             sub_gm = pattern["sub_gm"]
@@ -1956,6 +2617,7 @@ if __name__ == "__main__":
                 "origin_ops": origin_ops,
                 "reduction_types": [r["reduction_type"] for r in reduction_infos],
             }
+            masked_reason = region_mask_reason(comp)
 
             if is_reduction:
                 red_types = "_".join(sorted(set(r["reduction_type"] for r in reduction_infos)))
@@ -1982,6 +2644,8 @@ if __name__ == "__main__":
                 }
                 if alias_group_nbytes:
                     entry["alias_group_nbytes"] = alias_group_nbytes
+                if masked_reason is not None:
+                    entry["masked_reason"] = masked_reason
                 self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report

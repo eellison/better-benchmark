@@ -30,7 +30,7 @@ GENAI_DIR = ROOT / "repros" / "models" / "genai"
 
 def capture_one(name: str, corpus_root: Path, timeout_s: int) -> dict:
     import torch
-    from full_graph_harness import load_full_graph
+    from full_graph_harness import UserTritonKernelReplayError, load_full_graph
     from capture_hook import install_capture_hook, uninstall_capture_hook
     from run_recapture import write_run_log_entry, _count_roundtrips
     from merge_captures import temporary_capture_for_merge
@@ -70,8 +70,12 @@ def capture_one(name: str, corpus_root: Path, timeout_s: int) -> dict:
                 for g in graphs:
                     # Existing recorded shapes = the same shapes the old
                     # repro coverage used (sidecar inputs).
-                    instance, inputs, _ = load_full_graph(
-                        g, default_device="cuda")
+                    try:
+                        instance, inputs, _ = load_full_graph(
+                            g, default_device="cuda")
+                    except UserTritonKernelReplayError:
+                        entry.setdefault("masked_graphs", []).append(g.name)
+                        continue
                     inputs = [t.cuda() if torch.is_tensor(t) else t
                               for t in inputs]
                     torch._dynamo.reset()
