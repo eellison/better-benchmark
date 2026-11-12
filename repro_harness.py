@@ -703,8 +703,38 @@ def _randn(size, dtype, device) -> torch.Tensor:
     return torch.randn(size, dtype=dtype, device=device)
 
 
-def make_inputs_from_config(config: dict) -> list:
+def _structure_inputs(config: dict, arms: Mapping[str, str]) -> dict[str, torch.Tensor]:
+    """CPU lengths of every jagged lengths/offsets input of the config, by
+    input name, drawn from ``arms["length"]`` (default ``uniform``) with
+    ``arms["pairing"]`` for paired inputs (see kernel_sensitivity)."""
+    from jagged_inputs import JAGGED_KINDS, OFFSETS_KIND, resolve_total
+    from kernel_sensitivity import JaggedInput, structure_lengths
+
+    jagged = []
+    for spec in config["inputs"]:
+        gen = _generation_spec(spec) or {}
+        if gen.get("kind") not in JAGGED_KINDS:
+            continue
+        distribution = gen.get("distribution")
+        pair_with = distribution.get("pair_with") if isinstance(distribution, dict) else None
+        offsets = gen["kind"] == OFFSETS_KIND
+        jagged.append(JaggedInput(
+            spec["name"], "offsets" if offsets else "lengths",
+            spec["shape"][0] - 1 if offsets else spec["shape"][0],
+            int(gen["total_value"]) if "total_value" in gen else resolve_total(gen, config["inputs"]),
+            gen.get("max_len"), spec["dtype"], pair_with))
+    if not jagged:
+        return {}
+    return structure_lengths(
+        jagged, arms.get("length") or "uniform", arms.get("pairing") or "indep")
+
+
+def make_inputs_from_config(config: dict, arms: Mapping[str, str] | None = None) -> list:
     """Create inputs from a shape config. Returns mix of tensors and shape-param lists.
+
+    ``arms`` picks the kernel_sensitivity arms of integer structure inputs:
+    "length" and "pairing" for jagged lengths/offsets, "index" for index
+    inputs (default: the spec's own generator).
 
     Alias groups: specs carrying "alias_group" are views of ONE storage
     (packed-qkv saved views). One buffer is allocated per group — sized by
@@ -739,10 +769,22 @@ def make_inputs_from_config(config: dict) -> list:
             st[i] = st[i + 1] * max(int(shape[i + 1]), 1)
         return st
 
+    arms = arms or {}
+    structure = _structure_inputs(config, arms)
     result = []
     for spec in config["inputs"]:
         if spec.get("kind") == "shape":
             result.append(spec["dims"])
+            continue
+
+        if spec.get("name") in structure:
+            from kernel_sensitivity import to_tensor
+
+            gen = _generation_spec(spec)
+            kind = "offsets" if gen["kind"].endswith("offsets") else "lengths"
+            dtype = getattr(torch, spec["dtype"].replace("torch.", ""))
+            result.append(to_tensor(kind, structure[spec["name"]], dtype,
+                                    spec.get("device", "cuda")))
             continue
 
         if spec.get("kind") == "symint":
@@ -775,6 +817,19 @@ def make_inputs_from_config(config: dict) -> list:
         stride = spec.get("stride")
         device = spec.get("device", "cuda")
         gen = _generation_spec(spec)
+
+        if gen and gen.get("kind") == "index" and arms.get("index"):
+            from kernel_sensitivity import make_indices
+
+            ids = make_indices(_numel(shape), int(gen.get("low", 0)),
+                               int(gen.get("high", 100)), arms["index"])
+            result.append(ids.to(dtype=dtype, device=device).reshape(shape))
+            continue
+
+        if gen and gen.get("kind") == "constant" and dtype.is_floating_point:
+            result.append(torch.full(shape, float(gen.get("value", 0)),
+                                     dtype=dtype, device=device))
+            continue
 
         if gen and gen.get("kind") == "runs":
             # Any integer dtype (incl. unsigned): ids are drawn in int64 and
@@ -1167,6 +1222,210 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     return all_results
 
 
+CUSTOM_KERNEL_KIND = "custom_kernel"
+
+
+def custom_kernel_meta(repro_file: str | Path) -> dict | None:
+    """meta.json of a custom-kernel repro (one launch of a kernel Inductor
+    does not generate, e.g. a user-Triton or HSTU kernel); None otherwise."""
+    meta_path = Path(repro_file).with_name("meta.json")
+    if not meta_path.exists():
+        return None
+    meta = json.loads(meta_path.read_text())
+    return meta if meta.get("kind") == CUSTOM_KERNEL_KIND else None
+
+
+def _kernel_device_ms(fn, iters: int = 20) -> float:
+    """GPU time of the work ``fn`` enqueues, without launch overhead: a
+    sleep kernel queued first keeps the stream busy while ``fn`` launches,
+    so the events bracket only its kernels. Minimum over ``iters``."""
+    fn()
+    torch.cuda.synchronize()
+    best = float("inf")
+    for _ in range(iters):
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+        torch.cuda._sleep(2_000_000)
+        start.record()
+        fn()
+        end.record()
+        torch.cuda.synchronize()
+        best = min(best, start.elapsed_time(end))
+    return best
+
+
+def _prepare_launch(repro_cls, cfg: dict, arms: dict, name: str, notes: list):
+    """One custom-kernel launch ready to time: inputs for ``arms``, the
+    repro's ``prepare`` (e.g. the forward pass a backward kernel reads) and
+    autotuning warmup. Returns (timed, eager): a CUDA-graph replay of the
+    launch when it can be captured (else ``eager``), and the eager launch."""
+    inputs = make_inputs_from_config(cfg, arms)
+    mod = repro_cls()
+    if hasattr(mod, "prepare"):
+        mod.prepare(inputs)
+    if hasattr(mod, "op"):
+        impl_note = f"implementation: {getattr(mod.op, 'note', 'as captured')}"
+        if impl_note not in notes:
+            notes.append(impl_note)
+
+    def eager():
+        with torch.no_grad():
+            return mod(*inputs)
+
+    for _ in range(3):
+        eager()
+    torch.cuda.synchronize()
+    try:
+        graph = torch.cuda.CUDAGraph()
+        with torch.no_grad(), torch.cuda.graph(graph):
+            mod(*inputs)
+        torch.cuda.synchronize()
+        return graph.replay, eager
+    except Exception as error:  # noqa: BLE001 - fall back to eager launches
+        note = f"{name}: CUDA graph capture failed ({type(error).__name__}); timing eager launches"
+        if note not in notes:
+            notes.append(note)
+        return eager, eager
+
+
+def _kernel_case(repro_cls, cfg: dict, arms: dict, kernel_ms: dict, name: str, notes: list):
+    """Setup factory of one timed case (see kernel_sensitivity.time_arms);
+    records the case's kernel-only time once."""
+
+    def setup():
+        timed, eager = _prepare_launch(repro_cls, cfg, arms, name, notes)
+        if name not in kernel_ms:
+            kernel_ms[name] = _kernel_device_ms(eager)
+        return timed
+
+    return setup
+
+
+def bench_custom_kernel_point(repro_cls, cfg: dict, *, bench, rounds: int,
+                              setup_lock=None, bench_lock=None) -> dict:
+    """bench_parallel's result for one shape point of a custom-kernel repro
+    at the default (synthetic, uniform) inputs: the best ``bench`` time of a
+    CUDA-graph replay over ``rounds`` and the kernel-only GPU time, both in
+    us. Not an Inductor result, so no compiled_us/gap fields."""
+    from contextlib import nullcontext
+
+    from user_triton import dev_runs
+
+    notes: list[str] = []
+    with (setup_lock or nullcontext)():
+        timed, eager = _prepare_launch(repro_cls, cfg, {}, "default", notes)
+    with (bench_lock or nullcontext)():
+        for _ in range(25):
+            timed()
+        torch.cuda.synchronize()
+        times = [bench(timed) for _ in range(rounds)]
+        kernel_ms = _kernel_device_ms(eager)
+    result = {
+        "workload": CUSTOM_KERNEL_KIND,
+        "compile_policy": {},
+        "kernel_us": min(times) * 1000,
+        "kernel_device_us": kernel_ms * 1000,
+        "inputs": "synthetic",
+        "notes": notes,
+    }
+    if dev_runs():
+        result["dev_run"] = dev_runs()
+    return result
+
+
+def _structure_summary(cfg: dict, arms: dict) -> list[str]:
+    from kernel_sensitivity import format_index_profile, length_summary
+
+    lines = []
+    for name, lengths in _structure_inputs(cfg, arms).items():
+        lines.append(f"{name}: {length_summary(lengths)}")
+    for spec in cfg["inputs"]:
+        gen = _generation_spec(spec) or {}
+        if gen.get("kind") == "index" and arms.get("index"):
+            from kernel_sensitivity import make_indices
+
+            ids = make_indices(_numel(spec["shape"]), int(gen.get("low", 0)),
+                               int(gen.get("high", 100)), arms["index"])
+            lines.append(f"{spec.get('name')}: ids in [{gen.get('low', 0)}, {gen.get('high')}) "
+                         + format_index_profile(ids))
+    return lines
+
+
+def _run_kernel_benchmark(repro_file, repro_cls, parsed) -> dict:
+    """Custom-kernel repros: time the one launch (CUDA-graph replay and
+    profiler device time) at one arm, or every arm with --sensitivity."""
+    from jagged_inputs import JAGGED_KINDS
+    from kernel_sensitivity import (
+        ARMS, INDEX_ARMS, PAIRINGS, format_verdict, resolve_tier, time_arms, verdict,
+    )
+
+    meta = custom_kernel_meta(repro_file) or {}
+    configs = load_shape_configs(repro_file)
+    label = parsed.shape if parsed.shape in configs else next(iter(configs))
+    cfg = configs[label]
+    tier, tier_notes = resolve_tier(parsed.inputs, parsed.stats_file)
+    gens = [(_generation_spec(spec) or {}) for spec in cfg["inputs"]]
+    has_jagged = any(g.get("kind") in JAGGED_KINDS for g in gens)
+    paired = any(isinstance(g.get("distribution"), dict) and g["distribution"].get("pair_with")
+                 for g in gens)
+    has_index = any(g.get("kind") == "index" for g in gens)
+
+    print(f"[{label}] custom kernel {meta.get('kernel')} on {torch.cuda.get_device_name()}")
+    for note in tier_notes:
+        print(f"[{label}] inputs: {note}")
+    print(f"[{label}] inputs: floats random; structure inputs {tier}")
+
+    base = {"length": parsed.length_arm, "pairing": parsed.pairing, "index": parsed.index_arm}
+    cases: dict[str, dict] = {}
+    pairs: dict[str, tuple[str, str]] = {}
+    if parsed.sensitivity and has_jagged:
+        for arm in ARMS:
+            for pairing in PAIRINGS if paired else (parsed.pairing,):
+                cases[f"{arm}|{pairing}" if paired else arm] = {**base, "length": arm, "pairing": pairing}
+            if paired:
+                pairs[arm] = (f"{arm}|indep", f"{arm}|comono")
+    if parsed.sensitivity and has_index:
+        for arm in INDEX_ARMS:
+            cases[f"index:{arm}"] = {**base, "index": arm}
+    if not cases:
+        cases[parsed.length_arm if has_jagged else (f"index:{parsed.index_arm}" if has_index else "default")] = base
+    for case, arms in cases.items():
+        for line in _structure_summary(cfg, arms):
+            print(f"[{label}]   {case:<22} {line}")
+
+    notes: list[str] = []
+    kernel_ms: dict[str, float] = {}
+    factories = {case: _kernel_case(repro_cls, cfg, arms, kernel_ms, case, notes)
+                 for case, arms in cases.items()}
+    from triton.testing import do_bench
+
+    def bench(fn):
+        return do_bench(fn, warmup=parsed.n_warmup, rep=parsed.rep_ms, return_mode="median")
+
+    times = time_arms(factories, bench, rounds=parsed.rounds if parsed.sensitivity else 1,
+                      log=lambda line: print(f"[{label}]{line}"))
+    for note in notes:
+        print(f"[{label}] note: {note}")
+    result = verdict(times, pairs)
+    print(f"[{label}] {'case':<22} {'graph ms':>10} {'kernel ms':>10}")
+    for case, ms in result["median_ms"].items():
+        print(f"[{label}] {case:<22} {ms:10.3f} {kernel_ms.get(case, float('nan')):10.3f}")
+    print(f"[{label}] graph ms: median CUDA-graph replay (do_bench); kernel ms: GPU time of "
+          "one launch with the stream kept busy, so no launch overhead")
+    if parsed.sensitivity:
+        print(format_verdict(result))
+    from user_triton import dev_runs
+
+    if dev_runs():
+        print(f"[{label}] DEV RUN: {dev_runs()}; these times are not Better Benchmark results")
+    out = {label: {"kernel": meta.get("kernel"), "tier": tier, "dev_run": dev_runs(), "times_ms": times,
+                   "kernel_device_ms": kernel_ms, **result}}
+    if parsed.output:
+        with open(parsed.output, "w") as f:
+            json.dump(out, f, indent=2, default=str)
+    return out
+
+
 @preserve_compile_environment()
 def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
     """Full benchmark entry point for canonical repros.
@@ -1213,9 +1472,32 @@ def benchmark_repro(repro_file: str, repro_cls, make_inputs_fn, args=None):
                         help="GPU kind to lock, e.g. H100 or B200")
     parser.add_argument("--no-gpu-lock", action="store_true",
                         help="Disable the per-GPU benchmark lock")
+    custom = parser.add_argument_group("custom-kernel repros (meta.json kind custom_kernel)")
+    custom.add_argument("--inputs", default="synthetic", choices=("synthetic", "stats", "real"),
+                        help="tier of the integer structure inputs (only synthetic exists yet)")
+    custom.add_argument("--stats-file", type=Path, default=None,
+                        help="aggregate-stats file for --inputs stats")
+    custom.add_argument("--length-arm", default="uniform",
+                        help="length arm of jagged inputs (kernel_sensitivity.ARMS)")
+    custom.add_argument("--pairing", default="indep", choices=("indep", "comono"),
+                        help="pairing of paired jagged inputs")
+    custom.add_argument("--index-arm", default=None,
+                        help="index arm of index inputs (kernel_sensitivity.INDEX_ARMS)")
+    custom.add_argument("--sensitivity", action="store_true",
+                        help="time every arm, interleaved over --rounds, and report the gate verdict")
+    custom.add_argument("--rounds", type=int, default=3)
+    custom.add_argument("--rep-ms", type=int, default=1500,
+                        help="do_bench time budget per case and round (ms)")
     parsed = parser.parse_args(args)
 
     def _run_benchmark():
+        if custom_kernel_meta(repro_file) is not None:
+            if parsed.update_perf:
+                # Also keeps dev runs (user_triton.dev_runs) out of perf.json.
+                raise SystemExit("--update-perf is not supported for custom-kernel repros yet")
+            return _run_kernel_benchmark(repro_file, repro_cls, parsed)
+        if parsed.sensitivity or parsed.index_arm or parsed.inputs != "synthetic":
+            raise SystemExit("--sensitivity, --index-arm and --inputs apply to custom-kernel repros only")
         if parsed.bind or parsed.dynamic:
             # Family-point benchmarking: --bind instantiates symbolic
             # points at explicit bindings; --dynamic measures one

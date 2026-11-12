@@ -15,6 +15,7 @@ from full_graph_harness import (
     compare_outputs,
     rng_dependent_output_leaves,
     run_numerics_gate,
+    upcast_reference,
     validate_full_graph_numerics,
 )
 from scripts.bench_parallel import (
@@ -41,7 +42,7 @@ def test_full_graph_numerics_accepts_nested_outputs():
     eager_out, reference = validate_full_graph_numerics(
         eager, compiled, lambda: [torch.tensor([1.0])]
     )
-    assert reference == "fp64"
+    assert reference == "none"
     assert set(eager_out) == {"main"}
 
 
@@ -157,15 +158,31 @@ def test_compare_outputs_accepts_candidate_as_accurate_as_eager():
     worse = torch.tensor([1.75], dtype=torch.bfloat16)
     ok, details = compare_outputs(reference, baseline, worse)
     assert not ok
-    assert "rmse_vs_fp64" in details[0]
+    assert "RMSE" in details[0]
+
+
+def test_compare_outputs_rejects_lower_max_error_with_elementwise_errors():
+    # Compiled's max error vs fp64 (0.9) is below eager's (1.0), but it is
+    # wrong on every element where eager is exact: the anchored rule is
+    # elementwise, as in the repro checker.
+    reference = torch.zeros(1000, dtype=torch.float64)
+    baseline = torch.zeros(1000)
+    baseline[0] = 1.0
+    ok, _ = compare_outputs(reference, baseline, torch.full((1000,), 0.9))
+    assert not ok
+    compiled = torch.zeros(1000)
+    compiled[0] = 0.9
+    ok, details = compare_outputs(reference, baseline, compiled)
+    assert ok, details
 
 
 def test_compare_outputs_uses_allclose_tolerance():
+    # float32 outputs: atol = rtol = 1e-4 vs eager.
     reference = _f64(1000.0)
     baseline = torch.tensor([1000.0])
-    ok, details = compare_outputs(reference, baseline, torch.tensor([1005.0]))
+    ok, details = compare_outputs(reference, baseline, torch.tensor([1000.05]))
     assert ok, details
-    ok, _ = compare_outputs(reference, baseline, torch.tensor([1100.0]))
+    ok, _ = compare_outputs(reference, baseline, torch.tensor([1001.0]))
     assert not ok
 
 
@@ -212,7 +229,7 @@ def test_compare_outputs_requires_matching_nonfinite_values():
         reference, baseline, torch.tensor([float("inf"), float("nan"), 5.0])
     )
     assert not ok
-    assert "rmse_vs_fp64" in details[0]
+    assert "RMSE" in details[0]
 
 
 def test_compare_outputs_ignores_positions_eager_overflows():
@@ -252,9 +269,10 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
         variant="default",
         seeds=2,
     )
+    # Compiled matches eager, so no reference run is needed.
     assert summary["status"] == "pass"
-    assert summary["reference"] == "eager"
-    assert summary["fp64_reference_available"] is False
+    assert summary["reference"] == "none"
+    assert summary["reference_available"] is True
     assert all(seed["pass"] is True for seed in summary["seeds"])
     assert eager_out.dtype == torch.float32
 
@@ -277,26 +295,91 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
     assert info.value.numerics["seeds"][0]["reference"] == "eager"
 
 
-def test_fp64_reference_covers_tuple_inputs():
+@torch.library.custom_op("bbnum::no_double", mutates_args=())
+def _no_double(x: torch.Tensor) -> torch.Tensor:
+    if x.dtype == torch.float64:
+        raise NotImplementedError("no_double not implemented for 'Double'")
+    return x * 3
+
+
+def test_fp64_reference_runs_ops_without_double_kernels_in_float32():
+    def graph(x):
+        return torch.ops.bbnum.no_double(x.sin()).cos()
+
+    islanded = set()
+    x = torch.randn(64)
+    reference = upcast_reference(graph, lambda: (x,), 0, torch.float64, islanded=islanded)
+    assert reference.dtype == torch.float64
+    assert islanded == {"bbnum.no_double.default"}
+    expected = (x.double().sin().float() * 3).double().cos()
+    assert torch.equal(reference, expected)
+
+
+def test_gate_flags_pass_precision_against_float32_islands_as_weak_anchor():
+    def eager(x):
+        # float32 loses x's low bits here; the float64 reference does not.
+        return torch.ops.bbnum.no_double(x + 1e4 - 1e4)
+
+    def compiled(x):
+        return torch.ops.bbnum.no_double(x)
+
+    summary, _ = run_numerics_gate(
+        eager, compiled, lambda: [torch.randn(4096)], label="c", variant="default", seeds=1)
+    assert summary["label"] == "pass_precision"
+    assert summary["reference_float32_islands"] == ["bbnum.no_double.default"]
+    assert summary["weak_anchor"] is True
+    clean, _ = run_numerics_gate(
+        compiled, compiled, lambda: [torch.randn(4096)], label="c", variant="default", seeds=1)
+    assert "weak_anchor" not in clean
+
+
+def test_upcast_reference_covers_tuple_inputs():
     def add(value):
         return value + 1
 
-    _, reference = validate_full_graph_numerics(add, add, lambda: (torch.randn(4),))
-    assert reference == "fp64"
+    reference = upcast_reference(add, lambda: (torch.randn(4),), 0, torch.float64)
+    assert reference.dtype == torch.float64
 
 
-def test_fp64_reference_upcasts_explicit_low_precision_casts():
+def test_upcast_reference_upcasts_explicit_low_precision_casts():
     def casts(value, weight):
         hidden = torch.ops.prims.convert_element_type.default(value, torch.bfloat16)
         return torch.mm(weight, hidden.to(torch.float32))
 
-    _, reference = validate_full_graph_numerics(
-        casts, casts, lambda: (torch.randn(4, 4), torch.randn(4, 4))
-    )
-    assert reference == "fp64"
+    def make_inputs():
+        return torch.randn(4, 4), torch.randn(4, 4)
+
+    for target in (torch.float32, torch.float64):
+        torch.manual_seed(0)
+        value, weight = make_inputs()
+        reference = upcast_reference(casts, make_inputs, 0, target)
+        assert reference.dtype == target
+        assert torch.allclose(reference, torch.mm(weight.to(target), value.to(target)))
+
+
+def test_fp64_reference_upcasts_factory_dtypes():
+    # A bf16 buffer from ``full`` accumulates fp32 values in the reference run.
+    # Eager loses most of the sum in bf16; compiled accumulates in fp32 and is
+    # far from eager but close to fp32, so it passes only with the reference.
+    def eager(values, index):
+        buffer = torch.full((4,), 0, dtype=torch.bfloat16)
+        return torch.ops.aten.index_put.default(
+            buffer, [index], values.to(torch.bfloat16), True
+        )
+
+    def compiled(values, index):
+        buffer = torch.zeros(4)
+        return buffer.index_put([index], values, accumulate=True).to(torch.bfloat16)
+
+    def make_inputs():
+        return torch.rand(1024), torch.zeros(1024, dtype=torch.int64)
+
+    _, reference = validate_full_graph_numerics(eager, compiled, make_inputs)
+    assert reference == "fp32"
 
 
 def test_numerics_gate_passes_real_full_graph():
+    torch.manual_seed(0)
     instance, inputs, _ = full_graph_harness.load_full_graph(
         ROOT / "repros/models/torchbench/infer/lennard_jones/full_graph_000.py",
         default_device="cpu",
@@ -310,22 +393,20 @@ def test_numerics_gate_passes_real_full_graph():
         seeds=1,
     )
     assert summary["status"] == "pass"
-    assert summary["reference"] == "fp64"
+    assert summary["reference"] in ("none", "fp32")
 
 
-def test_fp64_reference_upcasts_module_parameters():
-    linear = torch.nn.Linear(4, 4)
+def test_upcast_reference_upcasts_module_parameters():
+    linear = torch.nn.Linear(4, 4).to(torch.bfloat16)
     seen = []
     linear.register_forward_pre_hook(
         lambda module, args: seen.append((module.weight.dtype, args[0].dtype))
     )
-    validate_full_graph_numerics(linear, linear, lambda: [torch.randn(2, 4)])
-    assert seen == [
-        (torch.float32, torch.float32),
-        (torch.float64, torch.float64),
-        (torch.float32, torch.float32),
-    ]
-    assert linear.weight.dtype == torch.float32
+    upcast_reference(
+        linear, lambda: [torch.randn(2, 4, dtype=torch.bfloat16)], 0, torch.float32
+    )
+    assert seen == [(torch.float32, torch.float32)]
+    assert linear.weight.dtype == torch.bfloat16
 
 
 class _DropoutPartition(torch.nn.Module):
@@ -448,10 +529,10 @@ def test_numerics_gate_records_every_seed_on_pass():
     assert summary["status"] == "pass"
     assert [seed["seed"] for seed in summary["seeds"]] == [0, 1, 2]
     assert all(seed["pass"] is True for seed in summary["seeds"])
-    assert summary["method"] == "torch._dynamo.utils.same"
-    assert summary["reference"] == "fp64"
-    assert summary["tolerance"] == 1e-2
-    assert summary["fp64_reference_available"] is True
+    assert summary["method"] == "numerics.judge_float_leaf"
+    assert summary["reference"] == "none"
+    assert summary["tolerance"] == "numerics.precision_tolerance"
+    assert summary["reference_available"] is True
     assert isinstance(eager_out, dict)
     assert summary["rng_detection_ok"] is True
     assert summary["skipped_rng_output_leaves"] == []
@@ -488,7 +569,7 @@ def test_numerics_gate_unavailable_when_rng_detection_fails(monkeypatch):
     )
     summary, _ = run_numerics_gate(
         torch.rand_like,
-        torch.zeros_like,
+        torch.rand_like,
         lambda: [torch.zeros(64)],
         label="default compiled",
         variant="default",
@@ -527,7 +608,7 @@ def test_numerics_gate_runs_all_seeds_and_attaches_structured_failure():
     assert second == {
         "seed": 1,
         "pass": True,
-        "reference": "fp64",
+        "reference": "none",
         "failure_classification": None,
         "eager_self_check": None,
         "diagnostics": [],
@@ -536,7 +617,7 @@ def test_numerics_gate_runs_all_seeds_and_attaches_structured_failure():
     }
     assert first["worst_output_idx"] == 0
     assert first["per_output"][0]["pass"] is False
-    assert first["per_output"][0]["err_compiled"] > first["per_output"][0]["err_eager"]
+    assert first["per_output"][0]["rmse_compiled"] > first["per_output"][0]["rmse_eager"]
     json.dumps(numerics)
 
 
@@ -653,8 +734,8 @@ def test_numerics_metadata_reflects_partition_and_full_graph_modes():
     assert partition == {
         "enabled": True,
         "seeds": 4,
-        "method": "torch._dynamo.utils.same",
-        "tolerance": 1e-2,
+        "method": "numerics.judge_float_leaf",
+        "tolerance": "numerics.precision_tolerance",
         "reference": "fp64_or_eager",
     }
 
@@ -745,8 +826,9 @@ def test_numerics_gate_compares_against_eager_when_fp64_is_nonfinite():
             variant="default",
             seeds=1,
         )
+    # The fp64 value is NaN where eager is 0: compiled must equal one of them.
     assert info.value.numerics["status"] == "fail"
-    assert info.value.numerics["reference"] == "eager"
+    assert info.value.numerics["reference"] == "fp64"
     assert info.value.numerics["seeds"][0]["pass"] is False
 
     summary, _ = run_numerics_gate(
@@ -758,10 +840,4 @@ def test_numerics_gate_compares_against_eager_when_fp64_is_nonfinite():
         seeds=1,
     )
     assert summary["status"] == "pass"
-    assert summary["reference"] == "eager"
-
-    ok, details = compare_outputs(
-        _f64(float("nan")), torch.tensor([0.0]), torch.tensor([0.0])
-    )
-    assert not ok
-    assert "fp64 reference is nonfinite" in details[0]
+    assert summary["reference"] == "none"
