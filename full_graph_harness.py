@@ -8,6 +8,7 @@ those annotations so the benchmark runner can time the whole graph directly.
 
 from __future__ import annotations
 
+import ast
 import math
 import operator
 import re
@@ -602,14 +603,21 @@ _DTYPE_SHORT_NAMES = {
     "c64": "complex64",
     "c128": "complex128",
     "f8e4m3fn": "float8_e4m3fn",
+    "f8e4m3fnuz": "float8_e4m3fnuz",
+    "f8e4m3b11fnuz": "float8_e4m3b11fnuz",
     "f8e5m2": "float8_e5m2",
+    "f8e5m2fnuz": "float8_e5m2fnuz",
+    "f8e8m0fnu": "float8_e8m0fnu",
 }
 
 
 def _torch_dtype(dtype_name: str):
     import torch
 
-    return getattr(torch, dtype_name, torch.float32)
+    dtype = getattr(torch, dtype_name, None)
+    if not isinstance(dtype, torch.dtype):
+        raise ValueError(f"unsupported torch dtype: {dtype_name}")
+    return dtype
 
 
 def _dtype_name(dtype: Any) -> str:
@@ -1234,6 +1242,14 @@ def _exact_tensor_payload(value: Any, *, max_numel: int = 4096) -> dict[str, Any
 def _scalar_spec_from_value(name: str, value: Any) -> dict[str, Any]:
     import torch
 
+    if isinstance(value, torch.Generator):
+        device = value.device
+        return {
+            "kind": "generator",
+            "name": name,
+            "device_type": device.type,
+            "device_index": device.index or 0,
+        }
     if isinstance(value, (torch.SymInt, torch.SymFloat)):
         return {"kind": "symint", "name": name, "value": _concrete_int(value)}
     if isinstance(value, (int, float, bool)):
@@ -1372,6 +1388,52 @@ def graph_constraints_from_gm(
     return payload
 
 
+def _merge_source_input_constraints(
+    generated: list[dict[str, Any]],
+    source: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], bool]:
+    if len(generated) != len(source):
+        raise ValueError(
+            "source input count does not match captured graph placeholders: "
+            f"{len(source)} != {len(generated)}"
+        )
+
+    merged = []
+    captured_dynamic = False
+    for index, (generated_spec, source_spec) in enumerate(zip(generated, source)):
+        fake_generator = (
+            generated_spec.get("kind") == "scalar"
+            and source_spec.get("kind") == "generator"
+        )
+        if generated_spec.get("kind") != source_spec.get("kind") and not fake_generator:
+            raise ValueError(
+                f"source input kind does not match captured placeholder {index}"
+            )
+        spec = dict(generated_spec)
+        if fake_generator:
+            spec.pop("value", None)
+            spec["kind"] = "generator"
+        if spec.get("kind") in {"scalar", "symint"} and "value" in source_spec:
+            spec["value"] = source_spec["value"]
+        if spec.get("kind") == "generator":
+            spec["device_type"] = source_spec.get("device_type", "cpu")
+            spec["device_index"] = int(source_spec.get("device_index", 0))
+        for key in ("shape", "stride", "device", "storage_offset", "alias_group"):
+            if source_spec.get(key) is not None:
+                spec[key] = source_spec[key]
+        for key in (
+            "symbolic_expr",
+            "symbolic_dims",
+            "symbolic_stride_dims",
+            "symbolic_storage_offset",
+        ):
+            if key in source_spec:
+                spec[key] = source_spec[key]
+                captured_dynamic = True
+        merged.append(spec)
+    return merged, captured_dynamic
+
+
 def _placeholder_storage_groups(gm: Any) -> list[list[str]]:
     """Group placeholder names whose meta vals share one untyped storage."""
     import torch
@@ -1417,6 +1479,7 @@ def write_full_graph_metadata(
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
     observed_stats: dict[str, dict] | None = None,
+    source_input_specs: list[dict[str, Any]] | None = None,
 ) -> Path:
     graph_path = Path(graph_path)
     payload = graph_constraints_from_gm(
@@ -1425,6 +1488,22 @@ def write_full_graph_metadata(
         permutation_indices=permutation_indices,
         observed_stats=observed_stats,
     )
+    if source_input_specs is not None:
+        payload["inputs"], captured_dynamic = _merge_source_input_constraints(
+            payload["inputs"], source_input_specs
+        )
+        payload["captured_dynamic"] = captured_dynamic
+        if (gm.meta or {}).get("better_benchmark_source_code") is not None:
+            renamed = {}
+            for spec, source_spec in zip(payload["inputs"], source_input_specs):
+                if source_spec.get("name"):
+                    renamed[spec["name"]] = source_spec["name"]
+                    spec["name"] = source_spec["name"]
+            if payload.get("storage_groups"):
+                payload["storage_groups"] = [
+                    [renamed.get(name, name) for name in group]
+                    for group in payload["storage_groups"]
+                ]
     payload["graph"] = graph_path.name
     if extra:
         payload.update(extra)
@@ -1529,12 +1608,18 @@ def _parse_intish(value: str, *, default: int = 32) -> int:
     return default
 
 
+def _split_dim_exprs(value: str) -> list[str]:
+    if not value.strip():
+        return []
+    parsed = ast.parse(f"({value},)", mode="eval").body
+    if not isinstance(parsed, ast.Tuple):
+        raise ValueError(f"expected dimension sequence: {value!r}")
+    return [ast.unparse(item) for item in parsed.elts]
+
+
 def _symbolic_dims(shape_str: str) -> list[dict[str, Any]]:
     symbols = []
-    for idx, dim in enumerate(shape_str.split(",")):
-        dim = dim.strip()
-        if not dim:
-            continue
+    for idx, dim in enumerate(_split_dim_exprs(shape_str)):
         try:
             int(dim)
         except ValueError:
@@ -1546,10 +1631,7 @@ def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
     if stride_str is None:
         return []
     symbolic = []
-    for idx, dim in enumerate(stride_str.split(",")):
-        dim = dim.strip()
-        if not dim:
-            continue
+    for idx, dim in enumerate(_split_dim_exprs(stride_str)):
         try:
             int(dim)
         except ValueError:
@@ -1558,23 +1640,13 @@ def _symbolic_stride_dims(stride_str: str | None) -> list[dict[str, Any]]:
 
 
 def _parse_shape(shape_str: str) -> tuple[int, ...]:
-    dims = []
-    for dim in shape_str.split(","):
-        dim = dim.strip()
-        if dim:
-            dims.append(_parse_intish(dim))
-    return tuple(dims)
+    return tuple(_parse_intish(dim) for dim in _split_dim_exprs(shape_str))
 
 
 def _parse_stride(stride_str: str | None) -> tuple[int, ...] | None:
     if stride_str is None:
         return None
-    dims = []
-    for dim in stride_str.split(","):
-        dim = dim.strip()
-        if dim:
-            dims.append(_parse_intish(dim))
-    return tuple(dims)
+    return tuple(_parse_intish(dim) for dim in _split_dim_exprs(stride_str))
 
 
 def _parse_device(device_str: str | None) -> str | None:
@@ -1640,7 +1712,9 @@ def parse_full_graph_inputs(content: str) -> list[dict[str, Any]]:
             continue
 
         dtype_token, shape_str, stride_str, device_str = tensor_match.groups()
-        dtype_name = _DTYPE_SHORT_NAMES.get(dtype_token, "float32")
+        if dtype_token not in _DTYPE_SHORT_NAMES:
+            raise ValueError(f"unsupported full graph dtype: {dtype_token}")
+        dtype_name = _DTYPE_SHORT_NAMES[dtype_token]
         shape = _parse_shape(shape_str)
         generator = _default_generator_for_dtype(dtype_name, shape)
         spec = {
@@ -1684,7 +1758,9 @@ def parse_full_graph_tensor_attrs(content: str) -> dict[str, dict[str, Any]]:
         if not match:
             continue
         dtype_token, shape_str, stride_str, device_str, attr_name = match.groups()
-        dtype_name = _DTYPE_SHORT_NAMES.get(dtype_token, "float32")
+        if dtype_token not in _DTYPE_SHORT_NAMES:
+            raise ValueError(f"unsupported full graph dtype: {dtype_token}")
+        dtype_name = _DTYPE_SHORT_NAMES[dtype_token]
         shape = _parse_shape(shape_str)
         generator = _default_generator_for_attr_dtype(dtype_name)
         attrs[attr_name] = {
@@ -1764,7 +1840,18 @@ def _resolve_annotation_expr(
 ) -> int:
     import sympy
 
-    expr = sympy.sympify(expr_text, rational=False)
+    normalized = expr_text.replace("math.ceil", "ceiling").replace(
+        "math.floor", "floor"
+    )
+    expr = sympy.sympify(
+        normalized,
+        locals={
+            "CeilToInt": sympy.ceiling,
+            "FloorDiv": lambda left, right: sympy.floor(left / right),
+            "IntTrueDiv": lambda left, right: left / right,
+        },
+        rational=False,
+    )
     missing = sorted(
         str(symbol)
         for symbol in expr.free_symbols
@@ -1952,7 +2039,9 @@ def _validate_sidecar_inputs(
         annotation_spec = annotation_inputs[idx]
         sidecar_kind = sidecar_spec.get("kind")
         annotation_kind = annotation_spec.get("kind")
-        if sidecar_kind != annotation_kind:
+        if sidecar_kind != annotation_kind and not (
+            sidecar_kind == "generator" and annotation_kind == "scalar"
+        ):
             raise ValueError(
                 "full graph sidecar input kind does not match forward annotations "
                 f"for input {idx}: {sidecar_kind!r} != {annotation_kind!r}"
@@ -2056,6 +2145,290 @@ def _strip_runnable_boilerplate(content: str) -> str:
     return re.sub(r"^mod\s*=\s*Repro\(\)\s*$", "", content, flags=re.MULTILINE)
 
 
+def load_graph_class_from_source(
+    content: str, path: str | Path, *, custom_ops: frozenset[str] = frozenset(),
+):
+    import builtins
+    import torch
+    import torch.fx as fx
+    import torch.nn
+    from replay_dependencies import BUILTIN_OP_NAMESPACES, COLLECTIVE_OP_NAMESPACES
+
+    tree = ast.parse(content, filename=str(path))
+    graph_classes = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.ClassDef)
+        and any(ast.unparse(base) in {"Module", "torch.nn.Module"} for base in node.bases)
+    ]
+    if len(graph_classes) != 1:
+        raise ValueError(
+            f"{path} must define exactly one torch.nn.Module graph class"
+        )
+    graph_class = graph_classes[0]
+    if (
+        len(graph_class.bases) != 1
+        or ast.unparse(graph_class.bases[0]) not in {"Module", "torch.nn.Module"}
+        or graph_class.decorator_list
+        or graph_class.keywords
+    ):
+        raise ValueError(
+            f"{path} graph class must have one Module base and no decorators or keywords"
+        )
+
+    allowed_calls = {
+        "device",
+        "self.register_buffer",
+        "super",
+        "super().__init__",
+        "tensor",
+        "torch.sym_float",
+        "torch.sym_max",
+        "torch.sym_min",
+        "torch.sym_not",
+        "torch.sym_sum",
+    }
+    allowed_operator_namespaces = BUILTIN_OP_NAMESPACES | COLLECTIVE_OP_NAMESPACES | {
+        "ads_mkl",
+        "aten",
+        "efficient_module_suite",
+        "ems_mxfp8",
+        "fb",
+        "fbgemm",
+        "flash_attn",
+        "higher_order",
+        "prims",
+    }
+    registered_ops = set()
+    for op in torch._C._dispatch_get_all_op_names():
+        namespace, _, operator = op.partition("::")
+        if namespace in allowed_operator_namespaces:
+            continue
+        name = f"torch.ops.{namespace}.{operator}"
+        registered_ops.add(name)
+        registered_ops.add(f"torch.ops.{namespace}.{operator.split('.')[0]}")
+        if "." not in operator:
+            registered_ops.add(name + ".default")
+    custom_ops = custom_ops | frozenset(registered_ops)
+    custom_namespaces = {op.split(".")[2] for op in custom_ops}
+
+    def is_operator(parts: list[str]) -> bool:
+        return (
+            4 <= len(parts) <= 5
+            and parts[:2] == ["torch", "ops"]
+            and (parts[2] in allowed_operator_namespaces or ".".join(parts) in custom_ops)
+        )
+    allowed_torch_attributes = {
+        *(f"torch.{name}" for name in _DTYPE_SHORT_NAMES.values()),
+        "torch.contiguous_format",
+        "torch.ops",
+        "torch.strided",
+        "torch.sym_float",
+        "torch.sym_max",
+        "torch.sym_min",
+        "torch.sym_not",
+        "torch.sym_sum",
+        "torch.uint8",
+    }
+    forbidden_nodes = (
+        ast.AsyncFunctionDef,
+        ast.Await,
+        ast.ClassDef,
+        ast.Delete,
+        ast.DictComp,
+        ast.For,
+        ast.FunctionDef,
+        ast.GeneratorExp,
+        ast.Global,
+        ast.If,
+        ast.Import,
+        ast.ImportFrom,
+        ast.Lambda,
+        ast.ListComp,
+        ast.Match,
+        ast.Nonlocal,
+        ast.SetComp,
+        ast.Try,
+        ast.While,
+        ast.With,
+        ast.Yield,
+        ast.YieldFrom,
+    )
+    for member in graph_class.body:
+        if isinstance(member, ast.Expr) and isinstance(member.value, ast.Constant):
+            continue
+        if not isinstance(member, ast.FunctionDef):
+            raise ValueError(f"{path} graph class contains executable class-level code")
+        if member.decorator_list:
+            raise ValueError(f"{path} graph methods cannot use decorators")
+        defaults = [*member.args.defaults, *member.args.kw_defaults]
+        if any(
+            default is not None and not isinstance(default, ast.Constant)
+            for default in defaults
+        ):
+            raise ValueError(f"{path} graph methods require literal defaults")
+        local_names = {
+            arg.arg
+            for arg in (
+                *member.args.posonlyargs,
+                *member.args.args,
+                *member.args.kwonlyargs,
+            )
+        }
+        if member.args.vararg is not None:
+            local_names.add(member.args.vararg.arg)
+        if member.args.kwarg is not None:
+            local_names.add(member.args.kwarg.arg)
+        local_names.update(
+            node.id
+            for node in ast.walk(member)
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store)
+        )
+        parents = {
+            child: parent
+            for parent in ast.walk(member)
+            for child in ast.iter_child_nodes(parent)
+        }
+        for node in ast.walk(member):
+            if node is not member and isinstance(node, forbidden_nodes):
+                raise ValueError(
+                    f"{path} graph method contains unsupported {type(node).__name__}"
+                )
+            if isinstance(node, ast.Name) and node.id in {
+                "__builtins__",
+                "__import__",
+                "compile",
+                "eval",
+                "exec",
+                "globals",
+                "locals",
+                "open",
+            }:
+                raise ValueError(f"{path} graph method references unsafe name {node.id!r}")
+            if (
+                isinstance(node, ast.Name)
+                and isinstance(node.ctx, ast.Load)
+                and node.id not in local_names
+                and node.id
+                not in {"device", "inf", "nan", "super", "tensor", "torch"}
+            ):
+                raise ValueError(
+                    f"{path} graph method references unsupported global {node.id!r}"
+                )
+            if (
+                isinstance(node, ast.Attribute)
+                and node.attr.startswith("__")
+                and ast.unparse(node) != "super().__init__"
+            ):
+                raise ValueError(
+                    f"{path} graph method references unsafe attribute {node.attr!r}"
+                )
+            if isinstance(node, ast.Attribute):
+                attribute_name = ast.unparse(node)
+                parts = attribute_name.split(".")
+                is_operator_attribute = (
+                    len(parts) >= 2
+                    and parts[:2] == ["torch", "ops"]
+                    and (
+                        len(parts) == 2
+                        or (
+                            3 <= len(parts) <= 5
+                            and (
+                                parts[2] in allowed_operator_namespaces
+                                or len(parts) == 3 and parts[2] in custom_namespaces
+                                or is_operator(parts)
+                            )
+                        )
+                    )
+                )
+                if (
+                    attribute_name.startswith("torch.")
+                    and attribute_name not in allowed_torch_attributes
+                    and not is_operator_attribute
+                ):
+                    raise ValueError(
+                        f"{path} graph method references unsupported torch "
+                        f"attribute {attribute_name!r}"
+                    )
+            if (
+                isinstance(node, ast.Name)
+                and isinstance(node.ctx, ast.Load)
+                and node.id == "torch"
+            ):
+                outermost: ast.AST = node
+                while (
+                    isinstance(parents.get(outermost), ast.Attribute)
+                    and parents[outermost].value is outermost
+                ):
+                    outermost = parents[outermost]
+                torch_name = ast.unparse(outermost)
+                parent = parents.get(outermost)
+                is_call_target = (
+                    isinstance(parent, ast.Call) and parent.func is outermost
+                )
+                call_parts = torch_name.split(".")
+                is_operator_call = (
+                    is_call_target
+                    and is_operator(call_parts)
+                )
+                is_operator_argument = (
+                    not is_call_target
+                    and is_operator(call_parts)
+                    and isinstance(parent, ast.Call)
+                    and (
+                        outermost in parent.args
+                        or any(
+                            keyword.value is outermost for keyword in parent.keywords
+                        )
+                    )
+                )
+                if (
+                    torch_name not in allowed_torch_attributes
+                    or torch_name
+                    in {"torch.ops", "torch.sym_float", "torch.sym_not", "torch.sym_sum"}
+                    and not is_call_target
+                ) and not (is_operator_call or is_operator_argument):
+                    raise ValueError(
+                        f"{path} graph method references unsupported torch value "
+                        f"{torch_name!r}"
+                    )
+            if isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(
+                node.ctx, (ast.Store, ast.Del)
+            ):
+                raise ValueError(
+                    f"{path} graph method cannot mutate attributes or subscripts"
+                )
+            if isinstance(node, ast.Call):
+                call_name = ast.unparse(node.func)
+                call_parts = call_name.split(".")
+                if call_name not in allowed_calls and not is_operator(call_parts):
+                    raise ValueError(
+                        f"{path} graph method contains unsupported call {call_name!r}"
+                    )
+
+    exec_globals: dict[str, Any] = {
+        "__builtins__": {
+            "__build_class__": builtins.__build_class__,
+            "super": builtins.super,
+        },
+        "__name__": "better_benchmark_graph",
+        "device": torch.device,
+        "fx": fx,
+        "inf": math.inf,
+        "nan": float("nan"),
+        "tensor": torch.tensor,
+        "torch": torch,
+    }
+    for attr in dir(torch.nn):
+        if not attr.startswith("_"):
+            exec_globals[attr] = getattr(torch.nn, attr)
+    class_module = ast.fix_missing_locations(
+        ast.Module(body=[graph_class], type_ignores=[])
+    )
+    exec(compile(class_module, str(path), "exec"), exec_globals)
+    return exec_globals[graph_class.name]
+
+
 def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     import torch
     import torch.fx as fx
@@ -2071,33 +2444,17 @@ def load_full_graph_definition(graph_path: str | Path) -> FullGraphDefinition:
     _validate_sidecar_inputs(sidecar.get("inputs"), annotation_inputs)
     _validate_sidecar_tensor_attrs(sidecar.get("tensor_attrs"), annotation_attrs)
 
-    exec_globals: dict[str, Any] = {"__builtins__": __builtins__}
-    for attr in dir(torch.nn):
-        if not attr.startswith("_"):
-            exec_globals[attr] = getattr(torch.nn, attr)
-    exec_globals.update({
-        "torch": torch,
-        "fx": fx,
-        "inf": math.inf,
-        "nan": float("nan"),
-        "device": torch.device,
-        "tensor": torch.tensor,
-    })
-
-    exec(compile(content, str(path), "exec"), exec_globals)
-
-    graph_cls = None
-    for name, value in exec_globals.items():
-        if (
-            isinstance(value, type)
-            and issubclass(value, torch.nn.Module)
-            and value is not torch.nn.Module
-            and name not in dir(torch.nn)
-        ):
-            graph_cls = value
-            break
-    if graph_cls is None:
-        raise RuntimeError(f"{path} does not define a torch.nn.Module graph class")
+    custom_ops = set()
+    for entry in (sidecar.get("replay_dependencies") or {}).get("custom_ops", []):
+        op = entry["op"]
+        if not isinstance(op, str) or op.count("::") != 1:
+            raise ValueError("invalid replay dependency operator name")
+        name = "torch.ops." + op.replace("::", ".")
+        if len(name.split(".")) not in {4, 5}:
+            raise ValueError("invalid replay dependency operator name")
+        custom_ops.add(name)
+        custom_ops.add(".".join(name.split(".")[:4]))
+    graph_cls = load_graph_class_from_source(content, path, custom_ops=frozenset(custom_ops))
 
     return FullGraphDefinition(
         path=path,
@@ -2144,7 +2501,14 @@ def _is_float8_dtype(dtype) -> bool:
 
     return dtype in tuple(
         getattr(torch, name)
-        for name in ("float8_e4m3fn", "float8_e5m2")
+        for name in (
+            "float8_e4m3fn",
+            "float8_e4m3fnuz",
+            "float8_e4m3b11fnuz",
+            "float8_e5m2",
+            "float8_e5m2fnuz",
+            "float8_e8m0fnu",
+        )
         if hasattr(torch, name)
     )
 
@@ -2174,13 +2538,29 @@ def _effective_stride(
     return _contiguous_stride(shape)
 
 
+def _validate_tensor_layout(
+    shape: tuple[int, ...],
+    stride: tuple[int, ...] | list[int] | None,
+    storage_offset: int,
+) -> None:
+    if any(dim < 0 for dim in shape):
+        raise ValueError("input shape dimensions must be non-negative")
+    if storage_offset < 0:
+        raise ValueError("input storage offset must be non-negative")
+    if stride is not None:
+        if len(stride) != len(shape):
+            raise ValueError("input stride rank does not match shape rank")
+        if any(step < 0 for step in stride):
+            raise ValueError("input strides must be non-negative")
+
+
 def _dense_storage_size(
     shape: tuple[int, ...],
     stride: tuple[int, ...] | list[int] | None,
     *,
     storage_offset: int = 0,
 ) -> int:
-    storage_offset = max(int(storage_offset), 0)
+    storage_offset = int(storage_offset)
     if not shape:
         return storage_offset + 1
     stride = _effective_stride(shape, stride)
@@ -2342,6 +2722,7 @@ def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda")
     stride = spec.get("stride")
     dev = _resolve_device(spec.get("device"), default_device)
     storage_offset = int(spec.get("storage_offset", 0) or 0)
+    _validate_tensor_layout(shape, stride, storage_offset)
     generator = _generation_spec(spec) or _default_generator_for_dtype(
         _normalize_dtype_name(spec.get("dtype", "float32")),
         shape,
@@ -2451,17 +2832,116 @@ def make_inputs_from_full_graph_specs(
     *,
     default_device: str = "cuda",
 ) -> tuple[Any, ...]:
-    inputs = []
-    for spec in input_specs:
+    inputs: list[Any] = [None] * len(input_specs)
+    alias_groups: dict[Any, list[int]] = {}
+    for index, spec in enumerate(input_specs):
+        if spec.get("kind") == "tensor":
+            _validate_tensor_layout(
+                tuple(spec.get("shape", ())),
+                spec.get("stride"),
+                int(spec.get("storage_offset", 0) or 0),
+            )
+            if spec.get("alias_group") is not None:
+                alias_groups.setdefault(spec["alias_group"], []).append(index)
+
+    for indices in alias_groups.values():
+        if len(indices) == 1:
+            continue
+        if any(input_specs[index].get("exact") for index in indices):
+            raise ValueError("exact values for aliased full graph inputs are unsupported")
+        first = input_specs[indices[0]]
+        dtype = _normalize_dtype_name(first.get("dtype", "float32"))
+        device = _normalize_device_name(first.get("device"))
+        storage_size = 1
+        for index in indices:
+            spec = input_specs[index]
+            if _normalize_dtype_name(spec.get("dtype", "float32")) != dtype:
+                raise ValueError("aliased full graph inputs must have the same dtype")
+            if _normalize_device_name(spec.get("device")) != device:
+                raise ValueError("aliased full graph inputs must have the same device")
+            storage_size = max(
+                storage_size,
+                _dense_storage_size(
+                    tuple(spec.get("shape", ())),
+                    spec.get("stride"),
+                    storage_offset=int(spec.get("storage_offset", 0) or 0),
+                ),
+            )
+        gens = [
+            _generation_spec(input_specs[index])
+            or _default_generator_for_dtype(dtype, tuple(input_specs[index].get("shape", ())))
+            for index in indices
+        ]
+        gen = gens[0]
+        if all(g.get("kind") in {"index", "randint", "constant"} for g in gens):
+            ranges = [g for g in gens if g.get("kind") != "constant"]
+            constants = [g.get("value", 0) for g in gens if g.get("kind") == "constant"]
+            low = max((int(g.get("low", 0)) for g in ranges), default=0)
+            high = min((int(g.get("high", 100)) for g in ranges), default=1)
+            if constants:
+                value = constants[0]
+                if any(c != value for c in constants) or ranges and not low <= value < high:
+                    raise ValueError("aliased full graph inputs have incompatible generators")
+                gen = {"kind": "constant", "value": value}
+            else:
+                if high <= low:
+                    raise ValueError("aliased full graph inputs have no common generation range")
+                gen = {"kind": "index", "low": low, "high": high}
+        elif any(g != gen for g in gens[1:]):
+            raise ValueError("aliased full graph inputs have incompatible generators")
+        storage_spec = dict(first)
+        storage_spec.update({"alias_group": None, "exact": False, "gen": gen})
+        if gen.get("kind") == "permutation":
+            layouts = []
+            for index in indices:
+                spec = input_specs[index]
+                shape = tuple(spec.get("shape", ()))
+                layouts.append((shape, _effective_stride(shape, spec.get("stride")),
+                                int(spec.get("storage_offset", 0) or 0)))
+            if any(layout != layouts[0] for layout in layouts[1:]):
+                raise ValueError("aliased permutation inputs with different layouts are unsupported")
+        else:
+            storage_spec.update({"shape": (storage_size,), "storage_offset": 0, "stride": (1,)})
+        storage_spec.pop("data", None)
+        storage = make_tensor_from_spec(
+            storage_spec,
+            default_device=default_device,
+        )
+        for index in indices:
+            spec = input_specs[index]
+            inputs[index] = _view_storage(
+                storage,
+                tuple(spec.get("shape", ())),
+                spec.get("stride"),
+                int(spec.get("storage_offset", 0) or 0),
+            )
+
+    for index, spec in enumerate(input_specs):
+        if inputs[index] is not None:
+            continue
         kind = spec.get("kind")
         if kind == "symint":
-            inputs.append(int(spec.get("value", 32)))
+            inputs[index] = int(spec.get("value", 32))
         elif kind == "scalar":
-            inputs.append(spec.get("value", 1))
+            inputs[index] = spec.get("value", 1)
+        elif kind == "generator":
+            import torch
+
+            device_type = spec.get("device_type", "cpu")
+            device_index = int(spec.get("device_index", 0))
+            if device_type == "cuda" and not torch.cuda.is_available():
+                device_type = "cpu"
+                device_index = 0
+            inputs[index] = torch.Generator(
+                device=torch.device(device_type, device_index)
+            )
         elif kind == "tensor":
-            inputs.append(make_tensor_from_spec(spec, default_device=default_device))
+            inputs[index] = make_tensor_from_spec(
+                spec,
+                default_device=default_device,
+            )
         else:
-            inputs.append(1)
+            inputs[index] = 1
     return tuple(inputs)
 
 
