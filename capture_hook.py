@@ -88,15 +88,105 @@ ALLOCATION_ONLY_OPS = {
 }
 
 
+# Masking: work the benchmark cannot measure faithfully. Node-level reasons
+# keep the node out of every partition and mask its whole graph: the
+# full-graph sidecar records the mask, the driver skips the graph's full-graph
+# bench, and projections hold its time at production. Partitions of the rest
+# of the graph are still captured. Region-level reasons mark a repro that is
+# still captured and timed but held at production in projections.
+MASK_REASONS = ("jagged", "hstu", "user_triton", "side_effect", "approx_index")
+NODE_MASK_REASONS = frozenset({"jagged", "hstu", "user_triton", "side_effect"})
+REGION_MASK_REASONS = frozenset({"approx_index"})
+NON_FUSIBLE_MASK_REASONS = NODE_MASK_REASONS
+GRAPH_SCOPE_MASK_REASONS = NODE_MASK_REASONS
+
+
+def _mask_user_triton(node: fx.Node) -> str | None:
+    """A user-defined Triton kernel launch: the saved graph names the kernel
+    only by its index into the capturing process's kernel_side_table, so no
+    other process can replay it."""
+    from replay_dependencies import USER_TRITON_HOPS
+
+    target = node.target
+    if (
+        node.op == "call_function"
+        and isinstance(target, torch._ops.HigherOrderOperator)
+        and target.name() in USER_TRITON_HOPS
+    ):
+        return "user_triton"
+    return None
+
+
+# Node rules. Each maps an fx.Node to a reason in NODE_MASK_REASONS, or None;
+# any other value is ignored. To add a rule, append a function here. It must
+# decide from the node and its graph alone (a saved full graph or runnable),
+# never from process state such as the kernel_side_table, because saved
+# artifacts are checked in other processes. Every rule runs, and a node is
+# masked for all the reasons returned.
+MASK_RULES: list = [_mask_user_triton]
+
+# Region rules. Each maps a partition (its list of nodes in the full graph) to
+# a reason in REGION_MASK_REASONS, or None; any other value is ignored. To add
+# a rule, append a function here; like node rules it must decide from the
+# graph alone. The first rule that returns a reason wins, and the reason is
+# recorded as the repro's "masked_reason".
+REGION_MASK_RULES: list = []
+
+
+def mask_reasons(node: fx.Node) -> tuple[str, ...]:
+    """Every reason ``node`` is masked, in MASK_RULES order, without
+    duplicates; empty when it is not masked."""
+    reasons: list[str] = []
+    for rule in MASK_RULES:
+        reason = rule(node)
+        if reason in NODE_MASK_REASONS and reason not in reasons:
+            reasons.append(reason)
+    return tuple(reasons)
+
+
+def mask_reason(node: fx.Node) -> str | None:
+    """The first reason ``node`` is masked, or None."""
+    reasons = mask_reasons(node)
+    return reasons[0] if reasons else None
+
+
+def region_mask_reason(comp: list) -> str | None:
+    """The reason partition ``comp``'s repro is masked, or None."""
+    for rule in REGION_MASK_RULES:
+        reason = rule(comp)
+        if reason in REGION_MASK_REASONS:
+            return reason
+    return None
+
+
+def graph_mask(gm: fx.GraphModule) -> dict | None:
+    """Graph-level mask for a full-graph sidecar, or None when nothing in the
+    graph or its HOP subgraphs is masked with a graph-scope reason."""
+    reasons = {
+        reason
+        for module in gm.modules()
+        if isinstance(module, fx.GraphModule)
+        for node in module.graph.nodes
+        for reason in mask_reasons(node)
+        if reason in GRAPH_SCOPE_MASK_REASONS
+    }
+    if not reasons:
+        return None
+    return {"reasons": sorted(reasons), "scope": "graph"}
+
+
 def partition_node_is_supported(node: fx.Node) -> bool:
     """Capture-pipeline fusibility test for a single node.
 
     A node belongs in a fusible partition if it is a transparent view op or
     Inductor's is_fusible_node says it has a fusible lowering (no BLAS/cuDNN
-    flop-counter ops, no fallbacks, no collectives).
+    flop-counter ops, no fallbacks, no collectives), and it is not masked as
+    non-fusible.
     """
     from torch._inductor.fx_passes.fusion_regions import is_fusible_node
 
+    if NON_FUSIBLE_MASK_REASONS.intersection(mask_reasons(node)):
+        return False
     if node.op == "call_function" and node.target in TRANSPARENT_OPS:
         return True
     return is_fusible_node(node)
@@ -123,6 +213,9 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
       constant_folded: (only when ``constant_folded`` is given) computed
           once at load time by runtime constant folding, so neither a
           per-call kernel nor an extern
+      masked: (only when some node is masked) outside every partition and
+          masked by ``mask_reasons``; logged as op-target ->
+          {"count", "reasons"} with every reason any such node had
 
     Every bucket logs the aggregate op-target -> count set (graph
     level, never per-partition — partition contents live in the canonical
@@ -142,6 +235,7 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
     }
     if constant_folded is not None:
         buckets["constant_folded"] = collections.Counter()
+    masked: dict[str, dict] = {}
     total = 0
     for node in gm.graph.nodes:
         if node.op != "call_function":
@@ -154,19 +248,28 @@ def graph_node_accounting(gm: fx.GraphModule, components=None,
         else:
             name = (f"{getattr(node.target, '__module__', '')}."
                     f"{getattr(node.target, '__name__', node.target)}").lstrip(".")
+        reasons = () if node in partitioned else mask_reasons(node)
         if constant_folded is not None and node in constant_folded:
             buckets["constant_folded"][name] += 1
+        elif reasons:
+            entry = masked.setdefault(name, {"count": 0, "reasons": set()})
+            entry["count"] += 1
+            entry["reasons"].update(reasons)
         elif node in partitioned:
             buckets["fusible_in_partition"][name] += 1
         elif partition_node_is_supported(node):
             buckets["fusible_unpartitioned"][name] += 1
         else:
             buckets["non_fusible"][name] += 1
-    return {
-        "total_call_functions": total,
-        "counts": {k: sum(v.values()) for k, v in buckets.items()},
-        "ops": {k: dict(sorted(v.items())) for k, v in buckets.items()},
-    }
+    counts = {k: sum(v.values()) for k, v in buckets.items()}
+    ops = {k: dict(sorted(v.items())) for k, v in buckets.items()}
+    if masked:
+        counts["masked"] = sum(entry["count"] for entry in masked.values())
+        ops["masked"] = {
+            name: {"count": entry["count"], "reasons": sorted(entry["reasons"])}
+            for name, entry in sorted(masked.items())
+        }
+    return {"total_call_functions": total, "counts": counts, "ops": ops}
 
 
 def partition_has_reduction(nodes) -> bool:
@@ -1807,6 +1910,94 @@ if __name__ == "__main__":
         # lossy text-parsing the project bans for graphs.
         return filepath, shapes_config_line, compact_inputs, alias_group_nbytes
 
+    def capture_full_graph(
+        self,
+        gm: fx.GraphModule,
+        *,
+        components=None,
+        validate_partitions: bool = True,
+        constant_folded=None,
+        constant_inputs=None,
+    ):
+        """Write and validate one full graph without requiring partition capture."""
+        if not self.graph_dir:
+            return None
+        full_graph_path = os.path.join(
+            self.graph_dir, f"full_graph_{self.graph_counter:03d}.py"
+        )
+        self.graph_counter += 1
+        try:
+            self._write_full_graph(
+                full_graph_path, gm, components=components,
+                validate_partitions=validate_partitions,
+                constant_folded=constant_folded,
+                constant_inputs=constant_inputs,
+            )
+        except Exception:
+            for path in (full_graph_path, os.path.splitext(full_graph_path)[0] + ".meta.json"):
+                if os.path.exists(path):
+                    os.unlink(path)
+            raise
+        return full_graph_path
+
+    def _write_full_graph(
+        self, full_graph_path, gm, *, components, validate_partitions,
+        constant_folded=None, constant_inputs=None,
+    ):
+        full_code = (gm.meta or {}).get("better_benchmark_source_code")
+        if full_code is None:
+            full_code = gm.print_readable(
+                print_output=False,
+                include_stride=True,
+                include_device=True,
+            )
+        with open(full_graph_path, "w") as f:
+            f.write(full_code)
+
+        from full_graph_harness import (
+            infer_full_graph_source,
+            write_full_graph_metadata,
+        )
+
+        placeholder_info = placeholder_info_from_gm(gm)
+        index_bounds = self._infer_index_bounds(gm, placeholder_info)
+        permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
+        extra = {
+            "source": infer_full_graph_source(full_graph_path),
+            "replay_dependencies": replay_dependencies(gm),
+        }
+        mask = graph_mask(gm)
+        if mask is not None:
+            extra["masked"] = mask
+        if components is not None:
+            extra["node_accounting"] = graph_node_accounting(
+                gm, components, constant_folded=constant_folded)
+        if constant_inputs is not None:
+            extra["constant_inputs"] = constant_inputs
+        write_full_graph_metadata(
+            full_graph_path,
+            gm,
+            extra=extra,
+            index_bounds=index_bounds,
+            permutation_indices=permutation_indices,
+            observed_stats=self._current_observed_stats or {},
+            source_input_specs=(gm.meta or {}).get(
+                "better_benchmark_input_specs"
+            ),
+        )
+
+        from roundtrip_validation import run_write_gate
+
+        verdict = run_write_gate(
+            full_graph_path,
+            original_gm=gm if validate_partitions else None,
+            validate_execution=not validate_partitions,
+        )
+        if verdict.get("status") != "ok":
+            raise RuntimeError(
+                f"full graph round-trip validation failed: {verdict.get('reason')}"
+            )
+
     def process_graph(self, gm: fx.GraphModule, is_inference: bool | None = None):
         """Called by the hook for each post-grad graph. Partitions and captures.
 
@@ -1835,66 +2026,12 @@ if __name__ == "__main__":
 
         # Save the FULL post-grad graph (before partitioning) for recovery
         if self.graph_dir:
-            full_graph_path = os.path.join(self.graph_dir, f"full_graph_{self.graph_counter:03d}.py")
-            self.graph_counter += 1
-            try:
-                full_code = gm.print_readable(
-                    print_output=False,
-                    include_stride=True,
-                    include_device=True,
-                )
-                with open(full_graph_path, "w") as f:
-                    f.write(full_code)
-                try:
-                    from full_graph_harness import (
-                        infer_full_graph_source,
-                        write_full_graph_metadata,
-                    )
-
-                    placeholder_info = placeholder_info_from_gm(gm)
-                    index_bounds = self._infer_index_bounds(gm, placeholder_info)
-                    permutation_indices = self._infer_permutation_indices(gm, placeholder_info)
-                    write_full_graph_metadata(
-                        full_graph_path,
-                        gm,
-                        extra={
-                            "source": infer_full_graph_source(full_graph_path),
-                            "node_accounting": graph_node_accounting(
-                                gm, components, constant_folded=folded),
-                            "replay_dependencies": replay_dependencies(gm),
-                            **({"constant_inputs": constant_inputs}
-                               if constant_inputs is not None else {}),
-                        },
-                        index_bounds=index_bounds,
-                        permutation_indices=permutation_indices,
-                        observed_stats=self._current_observed_stats or {},
-                    )
-                except Exception as exc:
-                    print(
-                        f"[capture_hook] WARNING: could not write full graph metadata "
-                        f"for {full_graph_path}: {exc}",
-                        file=sys.stderr,
-                    )
-                # Validate-before-write gate: reload the just-written artifact,
-                # run input round-trip (A) + partition round-trip (C) against
-                # the live gm, stamp the sidecar "roundtrip": "ok"|"failed: ..".
-                # Never deletes the artifact; failures WARN loudly on stderr.
-                try:
-                    from roundtrip_validation import run_write_gate
-
-                    run_write_gate(full_graph_path, original_gm=gm)
-                except Exception as exc:
-                    print(
-                        f"[capture_hook] WARNING: round-trip gate unavailable "
-                        f"for {full_graph_path}: {exc}",
-                        file=sys.stderr,
-                    )
-            except Exception as exc:
-                print(
-                    f"[capture_hook] WARNING: could not write full graph "
-                    f"{full_graph_path}: {exc}",
-                    file=sys.stderr,
-                )
+            self.capture_full_graph(
+                gm,
+                components=components,
+                constant_folded=folded,
+                constant_inputs=constant_inputs,
+            )
         # Shared partitioning + hashing (see module-level helpers above):
         # this is the single source of truth for how graphs are cut into
         # canonical repros and how each partition is content-addressed.
@@ -1956,6 +2093,7 @@ if __name__ == "__main__":
                 "origin_ops": origin_ops,
                 "reduction_types": [r["reduction_type"] for r in reduction_infos],
             }
+            masked_reason = region_mask_reason(comp)
 
             if is_reduction:
                 red_types = "_".join(sorted(set(r["reduction_type"] for r in reduction_infos)))
@@ -1982,6 +2120,8 @@ if __name__ == "__main__":
                 }
                 if alias_group_nbytes:
                     entry["alias_group_nbytes"] = alias_group_nbytes
+                if masked_reason is not None:
+                    entry["masked_reason"] = masked_reason
                 self.captured.append(entry)
             except Exception as e:
                 # NEVER silently drop a region: record it so the run report
