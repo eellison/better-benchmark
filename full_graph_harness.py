@@ -703,6 +703,154 @@ def placeholder_info_from_gm(gm: Any) -> dict[str, dict]:
     return placeholder_info
 
 
+# Bound for an int64 input that any value is safe for; values over the whole
+# range keep every bit field of a hashed id uniform.
+_ANY_INDEX = 2**62
+
+
+def _masked_to_index_range(node: Any, passthrough_ops: set) -> bool:
+    """True when every use of an integer input reaches indexing only through
+    a non-negative constant mask (``bitwise_and``) that fits the indexed dim.
+
+    ``x & m`` lies in [0, m] for every int64 ``x``, negative or not, so such
+    an input (e.g. a hashed id split into bit fields that each index a table)
+    is safe for any value. Before the mask only constant shifts and offsets
+    are followed (comparisons and graph outputs are harmless uses); after it
+    only value-preserving ops, ``cat`` (paired with the ``select`` that reads
+    the value's slice back) and index consumers.
+    Any other use, or a path not fully explored, gives False.
+    """
+    import torch
+
+    aten = torch.ops.aten
+    pre_mask_ops = {
+        aten.add.Tensor,
+        aten.sub.Tensor,
+        aten.__rshift__.Scalar,
+        aten.bitwise_right_shift.Tensor_Scalar,
+    }
+    masks = {aten.bitwise_and.Scalar, aten.__and__.Scalar}
+    # A comparison yields booleans whatever the input's range.
+    comparisons = {
+        aten.eq.Scalar, aten.ne.Scalar, aten.lt.Scalar,
+        aten.le.Scalar, aten.gt.Scalar, aten.ge.Scalar,
+    }
+    value_ops = passthrough_ops - {aten.where.self, aten._to_copy.default}
+
+    def dim_size(value, dim):
+        if not isinstance(value, torch.Tensor) or not -value.dim() <= dim < value.dim():
+            return None
+        size = value.shape[dim]
+        return int(size) if isinstance(size, int) else None
+
+    def cat_slot(cat, n):
+        tensors = cat.args[0]
+        dim = cat.args[1] if len(cat.args) > 1 else cat.kwargs.get("dim", 0)
+        if not isinstance(dim, int) or sum(t is n for t in tensors) != 1:
+            return None
+        start = 0
+        for t in tensors:
+            size = dim_size(getattr(t, "meta", {}).get("val"), dim)
+            if size is None:
+                return None
+            if t is n:
+                return dim, start, start + size
+            start += size
+        return None
+
+    def index_fits(user, n, high):
+        """n (values in [0, high]) is an index operand of user that fits."""
+        if user.target == aten.embedding.default:
+            return (
+                len(user.args) > 1 and user.args[1] is n
+                and user.args[0] is not n
+                and (dim_size(user.args[0].meta.get("val"), 0) or 0) > high
+            )
+        if user.target in (aten.index.Tensor, aten._unsafe_index.Tensor):
+            indices = user.args[1] if len(user.args) > 1 else None
+            if user.args[0] is n or not isinstance(indices, (list, tuple)):
+                return False
+            # A bool/uint8 mask index spans several dims, so list positions
+            # no longer map to dims.
+            if any(
+                index is not None
+                and getattr(getattr(index, "meta", {}).get("val"), "dtype", None)
+                in (torch.bool, torch.uint8)
+                for index in indices
+            ):
+                return False
+            value = user.args[0].meta.get("val")
+            return all(
+                (dim_size(value, dim) or 0) > high
+                for dim, index in enumerate(indices)
+                if index is n
+            ) and sum(index is n for index in indices) > 0
+        return False
+
+    budget = [256]
+    indexed = [False]
+
+    def after_mask(n, high, slot=None) -> bool:
+        budget[0] -= 1
+        if budget[0] < 0:
+            return False
+        for user in n.users:
+            if user.op == "output":
+                continue
+            if user.op != "call_function":
+                return False
+            target = user.target
+            if slot is not None and target == aten.select.int and len(user.args) > 2:
+                dim, index = user.args[1], user.args[2]
+                size = dim_size(n.meta.get("val"), slot[0])
+                if not isinstance(dim, int) or not isinstance(index, int) or size is None:
+                    return False
+                value = n.meta["val"]
+                if dim % value.dim() == slot[0] % value.dim():
+                    if not slot[1] <= index % size < slot[2]:
+                        continue  # reads another input's slice
+            if target in value_ops and user.args and user.args[0] is n:
+                if not after_mask(user, high):
+                    return False
+            elif target == aten.cat.default:
+                slot_of_n = cat_slot(user, n)
+                if slot_of_n is None or not after_mask(user, high, slot_of_n):
+                    return False
+            elif index_fits(user, n, high):
+                indexed[0] = True
+            else:
+                return False
+        return True
+
+    def before_mask(n) -> bool:
+        budget[0] -= 1
+        if budget[0] < 0:
+            return False
+        for user in n.users:
+            if user.op == "output":
+                continue
+            if user.op != "call_function" or not user.args or user.args[0] is not n:
+                return False
+            if user.target in comparisons:
+                continue
+            other = user.args[1] if len(user.args) > 1 else None
+            target = user.target
+            if target in masks and type(other) is int and other >= 0:
+                if not after_mask(user, other):
+                    return False
+            elif target in pre_mask_ops and type(other) is int:
+                if not before_mask(user):
+                    return False
+            elif target in value_ops:
+                if not before_mask(user):
+                    return False
+            else:
+                return False
+        return True
+
+    return before_mask(node) and indexed[0]
+
+
 def infer_index_bounds_from_gm(
     gm: Any,
     placeholder_info: dict[str, dict],
@@ -783,6 +931,8 @@ def infer_index_bounds_from_gm(
         torch.ops.aten.split.Tensor,
         torch.ops.aten.split_with_sizes.default,
         operator.getitem,
+        # An index cast to another integer dtype keeps its values.
+        torch.ops.aten._to_copy.default,
     }
 
     bounds = {}
@@ -1050,6 +1200,13 @@ def infer_index_bounds_from_gm(
                                     else:
                                         _add(_dim(target_shape[0]), chain)
 
+                        if (target == torch.ops.aten._to_copy.default
+                                and isinstance(user.kwargs.get("dtype"), torch.dtype)
+                                and user.kwargs["dtype"].is_floating_point
+                                and user.kwargs["dtype"].itemsize < 4):
+                            # fp16/bf16 round large ints up (4099 -> 4100 in
+                            # fp16), so a value below the bound can land on it.
+                            continue
                         if target in passthrough_ops or target in _VALUE_PRESERVING:
                             next_frontier.append((user, chain))
                         elif target in _INT_ARITH:
@@ -1079,6 +1236,9 @@ def infer_index_bounds_from_gm(
                 return min(found)
             return None
 
+        if dtype == "torch.int64" and _masked_to_index_range(node, passthrough_ops):
+            bounds[name] = _ANY_INDEX
+            continue
         bound = _find_bound(node)
         if bound is not None:
             if is_float:
