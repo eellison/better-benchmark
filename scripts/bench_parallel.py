@@ -2613,16 +2613,17 @@ def main():
     parser.add_argument("--full-graphs", action="store_true",
                         help="Benchmark saved repros/models full_graph_*.py files "
                              "instead of partition repro.py files. A graph "
-                             "with a captured symbols table uses one faithful "
-                             "dynamic artifact by default; static graphs keep "
-                             "the historical specialized path.")
+                             "with a captured symbols table is compiled "
+                             "specialized at its captured binding unless "
+                             "--dynamic-full-graphs is given.")
     parser.add_argument("--allow-unsafe-full-graphs", action="store_true",
                         help="Queue annotation-only integer/symbolic full graphs "
                              "instead of skipping them during preflight")
-    parser.add_argument("--static", action="store_true",
-                        help="With --full-graphs, specialize a dynamic graph "
-                             "at its captured binding instead of using the "
-                             "default dynamic replay.")
+    parser.add_argument("--dynamic-full-graphs", action="store_true",
+                        help="With --full-graphs, replay a graph that has a "
+                             "captured symbols table as one dynamic artifact "
+                             "(warmed at two bindings, timed at the captured "
+                             "one) instead of specializing it.")
     parser.add_argument("--models-root", type=Path, default=Path("repros/models"),
                         help="Default graph search root for --full-graphs")
     parser.add_argument("--benchmark-set", type=Path, default=None,
@@ -2784,8 +2785,8 @@ def main():
 
     if args.full_graphs and args.benchmark_set:
         parser.error("--benchmark-set selects canonical repros and cannot be used with --full-graphs")
-    if args.static and not args.full_graphs:
-        parser.error("--static currently applies only with --full-graphs")
+    if args.dynamic_full_graphs and not args.full_graphs:
+        parser.error("--dynamic-full-graphs applies only with --full-graphs")
     if args.full_graphs and args.update_perf:
         parser.error("--update-perf writes repro perf.json files and is not supported with --full-graphs")
     if args.oracles and args.full_graphs:
@@ -3090,7 +3091,7 @@ def main():
         "memory_snapshot_dir": str(args.memory_snapshot_dir),
         "models_root": str(Path(root) / args.models_root),
         "tag": args.tag or "latest",
-        "static": args.static,
+        "dynamic_full_graphs": args.dynamic_full_graphs,
     }
 
     if args.oracles:
@@ -4204,7 +4205,7 @@ def _get_or_load_full_graph(repro_path):
     execution = prepare_full_graph_execution(
         definition,
         default_device="cuda",
-        dynamic={False if args_dict.get("static", False) else None},
+        dynamic={None if args_dict.get("dynamic_full_graphs", False) else False},
     )
     inputs = execution.args()
     warm_bindings = (

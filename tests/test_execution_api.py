@@ -140,9 +140,9 @@ def _run(repro_file, args, extra_patches=()):
 
 class TestDynamicByDefault(unittest.TestCase):
     @needs_gpu
-    def test_dynamic_family_runs_dynamic_with_no_flags(self):
+    def test_dynamic_only_runs_dynamic_artifact_at_recorded_points(self):
         with tempfile.TemporaryDirectory() as td:
-            results = _run(_one_symbol_family(Path(td)), [])
+            results = _run(_one_symbol_family(Path(td)), ["--dynamic-only"])
             self.assertEqual(len(results), 2)  # both recorded points
             self.assertEqual(
                 {tuple(row["binding"].items()) for row in results.values()},
@@ -220,7 +220,7 @@ class TestDynamicByDefault(unittest.TestCase):
             )
             results = _run(
                 _one_symbol_family(Path(td)),
-                ["--count-kernels-only"],
+                ["--count-kernels-only", "--dynamic-only"],
                 extra_patches=(no_timing,),
             )
             self.assertEqual(len(results), 2)

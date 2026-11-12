@@ -196,7 +196,9 @@ def _run_bound_benchmark(repro_file, repro_cls, make_inputs_fn, parsed) -> dict:
     dynamic_policy = _harness.compile_policy_from_config(rows[0][2])
 
     def inputs_for(binding, config):
-        inputs = _harness.make_inputs_from_config(config, storage_offsets=mode == "dynamic")
+        # A family's static and dynamic rows place view inputs the same way.
+        offsets = is_family or mode == "dynamic"
+        inputs = _harness.make_inputs_from_config(config, storage_offsets=offsets)
         if binding is None:
             inputs = _harness._merge_default_shape_params(
                 inputs, _harness.make_inputs_safely(make_inputs_fn))

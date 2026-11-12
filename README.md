@@ -74,6 +74,34 @@ python scripts/bench_parallel.py --full-graphs --gpus 0,1 \
 python scripts/validate_eager.py --gpus 0,1 --max-workers 4
 ```
 
+## Dynamic-shape repros
+
+A repro whose `shapes.json` has a `symbols` table is a dynamic family: one
+region captured from a model compiled with dynamic shapes. Input shapes,
+strides and offsets are expressions over the symbols, and each point records
+the binding it was captured at (`"bindings": {"s0": 8}`).
+
+Running a family's `repro.py` with no flags emits two kinds of rows:
+
+- static rows, keyed like a static repro's points: each recorded point
+  compiled specialized at its own binding;
+- dynamic rows (keys end in `::dynamic`): one dynamic artifact, compiled
+  once and timed at every recorded point, with a numerics check and a
+  `recompiled` flag. If the dynamic artifact fails, the static rows are kept
+  and a `::dynamic` row records the error.
+
+```bash
+python repros/canonical/<family>/repro.py                  # static and dynamic rows
+python repros/canonical/<family>/repro.py --static-only    # static rows only
+python repros/canonical/<family>/repro.py --dynamic-only   # dynamic rows only
+python repros/canonical/<family>/repro.py --run-at s0=37   # dynamic artifact at an unrecorded binding
+```
+
+Static repros behave as before. `bench_parallel.py` times a family's
+recorded points as static rows. Saved full graphs with a symbols table are
+compiled specialized at their captured binding under `--full-graphs`; add
+`--dynamic-full-graphs` to replay them as one dynamic artifact instead.
+
 ## Oracles
 
 Each canonical repro carries an **oracle** — a reference implementation

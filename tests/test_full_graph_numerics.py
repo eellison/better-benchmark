@@ -38,7 +38,7 @@ def test_full_graph_numerics_accepts_nested_outputs():
     def compiled(value):
         return {"main": ((value.double() + 1).float(), [value.to(torch.int64)])}
 
-    eager_out, reference = validate_full_graph_numerics(
+    eager_out, reference, _ = validate_full_graph_numerics(
         eager, compiled, lambda: [torch.tensor([1.0])]
     )
     assert reference == "fp64"
@@ -255,6 +255,7 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
     assert summary["status"] == "pass"
     assert summary["reference"] == "eager"
     assert summary["fp64_reference_available"] is False
+    assert summary["fp64_reference_error"] == "TypeError: float64 unsupported"
     assert all(seed["pass"] is True for seed in summary["seeds"])
     assert eager_out.dtype == torch.float32
 
@@ -275,13 +276,33 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
     assert info.value.numerics["status"] == "fail"
     assert info.value.numerics["reference"] == "eager"
     assert info.value.numerics["seeds"][0]["reference"] == "eager"
+    assert "fp64 reference unavailable: TypeError: float64 unsupported" in str(info.value)
+
+
+def test_fp64_reference_keeps_input_layout():
+    """A padded, offset view and a second view of its storage keep their
+    strides, offsets and aliasing in the float64 run (the dynamic replay
+    wrapper checks those relations and raised, so the gate fell back to a
+    strict comparison against eager)."""
+    base = torch.randn(4, 10)
+
+    def checks_layout(x, y):
+        if x.stride() != (10, 1) or x.storage_offset() != 2:
+            raise RuntimeError("captured stride relation failed")
+        if x.untyped_storage().data_ptr() != y.untyped_storage().data_ptr():
+            raise RuntimeError("alias group split")
+        return x * 2 + y.sum()
+
+    _, reference, fp64_error = validate_full_graph_numerics(
+        checks_layout, checks_layout, lambda: (base[:, 2:8], base[:, :2]))
+    assert (reference, fp64_error) == ("fp64", None)
 
 
 def test_fp64_reference_covers_tuple_inputs():
     def add(value):
         return value + 1
 
-    _, reference = validate_full_graph_numerics(add, add, lambda: (torch.randn(4),))
+    _, reference, _ = validate_full_graph_numerics(add, add, lambda: (torch.randn(4),))
     assert reference == "fp64"
 
 
@@ -290,7 +311,7 @@ def test_fp64_reference_upcasts_explicit_low_precision_casts():
         hidden = torch.ops.prims.convert_element_type.default(value, torch.bfloat16)
         return torch.mm(weight, hidden.to(torch.float32))
 
-    _, reference = validate_full_graph_numerics(
+    _, reference, _ = validate_full_graph_numerics(
         casts, casts, lambda: (torch.randn(4, 4), torch.randn(4, 4))
     )
     assert reference == "fp64"
@@ -528,6 +549,7 @@ def test_numerics_gate_runs_all_seeds_and_attaches_structured_failure():
         "seed": 1,
         "pass": True,
         "reference": "fp64",
+        "fp64_reference_error": None,
         "failure_classification": None,
         "eager_self_check": None,
         "diagnostics": [],
