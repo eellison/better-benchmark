@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 import torch
 from torch.utils._python_dispatch import TorchDispatchMode
-from torch.utils._pytree import tree_flatten
+from torch.utils._pytree import tree_flatten, tree_map
 
 
 def _storage_key(value: Any) -> int | None:
@@ -109,6 +109,39 @@ def upcast_factory_dtypes_mode(target: torch.dtype) -> TorchDispatchMode:
             return func(*args, **kwargs)
 
     return UpcastFactoryDtypes()
+
+
+def float32_islands_mode(islanded: set[str]) -> TorchDispatchMode:
+    """Dispatch mode that runs an op with no float64 kernel in float32.
+
+    For a float64 reference of a graph whose ops include some without float64
+    support (fbgemm jagged ops, efficient attention): when an op fails, its
+    float64 tensor arguments are rounded to float32 (same strides and
+    offset, so layout checks still pass), it runs again and its float32
+    outputs come back as float64. Only those ops round at float32; the name
+    of each is added to ``islanded`` so the verdict can say so.
+    """
+    def down(t: Any) -> Any:
+        if not (isinstance(t, torch.Tensor) and t.dtype == torch.float64):
+            return t
+        storage = torch.empty(t.untyped_storage().nbytes() // 8, dtype=torch.float32, device=t.device)
+        view = storage.as_strided(t.size(), t.stride(), t.storage_offset())
+        view.copy_(t)
+        return view
+
+    def up(t: Any) -> Any:
+        return t.double() if isinstance(t, torch.Tensor) and t.dtype == torch.float32 else t
+
+    class Float32Islands(TorchDispatchMode):
+        def __torch_dispatch__(self, func, types, args=(), kwargs=None):
+            kwargs = kwargs or {}
+            try:
+                return func(*args, **kwargs)
+            except (NotImplementedError, RuntimeError):
+                islanded.add(str(func))
+            return tree_map(up, func(*tree_map(down, args), **tree_map(down, kwargs)))
+
+    return Float32Islands()
 
 
 # ---------------------------------------------------------------------------

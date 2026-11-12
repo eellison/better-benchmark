@@ -295,6 +295,44 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
     assert info.value.numerics["seeds"][0]["reference"] == "eager"
 
 
+@torch.library.custom_op("bbnum::no_double", mutates_args=())
+def _no_double(x: torch.Tensor) -> torch.Tensor:
+    if x.dtype == torch.float64:
+        raise NotImplementedError("no_double not implemented for 'Double'")
+    return x * 3
+
+
+def test_fp64_reference_runs_ops_without_double_kernels_in_float32():
+    def graph(x):
+        return torch.ops.bbnum.no_double(x.sin()).cos()
+
+    islanded = set()
+    x = torch.randn(64)
+    reference = upcast_reference(graph, lambda: (x,), 0, torch.float64, islanded=islanded)
+    assert reference.dtype == torch.float64
+    assert islanded == {"bbnum.no_double.default"}
+    expected = (x.double().sin().float() * 3).double().cos()
+    assert torch.equal(reference, expected)
+
+
+def test_gate_flags_pass_precision_against_float32_islands_as_weak_anchor():
+    def eager(x):
+        # float32 loses x's low bits here; the float64 reference does not.
+        return torch.ops.bbnum.no_double(x + 1e4 - 1e4)
+
+    def compiled(x):
+        return torch.ops.bbnum.no_double(x)
+
+    summary, _ = run_numerics_gate(
+        eager, compiled, lambda: [torch.randn(4096)], label="c", variant="default", seeds=1)
+    assert summary["label"] == "pass_precision"
+    assert summary["reference_float32_islands"] == ["bbnum.no_double.default"]
+    assert summary["weak_anchor"] is True
+    clean, _ = run_numerics_gate(
+        compiled, compiled, lambda: [torch.randn(4096)], label="c", variant="default", seeds=1)
+    assert "weak_anchor" not in clean
+
+
 def test_upcast_reference_covers_tuple_inputs():
     def add(value):
         return value + 1
