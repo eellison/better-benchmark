@@ -1067,14 +1067,19 @@ def load_graph_module(
 
         if tracing_mode == "symbolic":
             dynamic_shapes, captured_dynamic = _dynamic_shapes_from_specs(input_shapes)
+            # Constant buffers a graph's __init__ registers are real tensors;
+            # they are traced as constants with their values.
             gm = make_fx(
                 instance,
                 tracing_mode="fake",
                 dynamic_shapes=dynamic_shapes,
+                _allow_non_fake_inputs=True,
             )(*inputs)
         else:
             captured_dynamic = False
-            gm = make_fx(instance, tracing_mode=tracing_mode)(*inputs)
+            gm = make_fx(
+                instance, tracing_mode=tracing_mode, _allow_non_fake_inputs=True
+            )(*inputs)
         gm.meta["better_benchmark_input_specs"] = input_shapes
         gm.meta["better_benchmark_captured_dynamic"] = captured_dynamic
         gm.meta["better_benchmark_side_effects"] = side_effects

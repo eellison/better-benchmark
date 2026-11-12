@@ -6,6 +6,7 @@ Usage:
 
 from __future__ import annotations
 
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -312,6 +313,89 @@ class GraphModule(torch.nn.Module):
         float8 = [n for n in gm.graph.nodes if n.op == "get_attr"]
         self.assertEqual([torch.float8_e4m3fn], [getattr(gm, n.target).dtype for n in float8])
         self.assertIsNone(bogus)
+
+    def test_loader_traces_constant_buffers_registered_in_init(self):
+        source = """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer("_frozen_param0", tensor([2, 0, 1], dtype=torch.int64, device=device(type="cpu")))
+
+    def forward(self, x: "f32[4, 3]"):
+        _frozen_param0: "i64[3][1]cpu" = self._frozen_param0
+        return (torch.ops.aten.index.Tensor(x, [None, _frozen_param0]),)
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            graphs = [load_graph_module(path, tracing_mode=mode) for mode in ("fake", "symbolic")]
+
+        for gm in graphs:
+            self.assertIsNotNone(gm)
+            constants = [getattr(gm, n.target) for n in gm.graph.nodes if n.op == "get_attr"]
+            self.assertEqual([[2, 0, 1]], [c.tolist() for c in constants])
+
+    @unittest.skipUnless(torch.cuda.is_available(), "needs CUDA")
+    def test_loader_loads_cuda_constant_buffers_before_cuda_init(self):
+        # A fresh process: the graph's __init__ is the first CUDA use.
+        source = """
+class GraphModule(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.register_buffer("_frozen_param0", tensor([2, 0, 1], dtype=torch.int64, device=device(type="cuda", index=0)))
+
+    def forward(self, x: "f32[4, 3]"):
+        _frozen_param0: "i64[3][1]cuda:0" = self._frozen_param0
+        return (torch.ops.aten.index.Tensor(x, [None, _frozen_param0]),)
+"""
+        script = (
+            "import sys; from pathlib import Path\n"
+            f"sys.path[:0] = [{str(ROOT)!r}, {str(ROOT / 'scripts')!r}]\n"
+            "import torch; from ingest_tlparse import load_graph_module\n"
+            "assert not torch.cuda.is_initialized()\n"
+            "gm = load_graph_module(Path(sys.argv[1]), tracing_mode='symbolic')\n"
+            "print([getattr(gm, n.target).tolist() for n in gm.graph.nodes if n.op == 'get_attr'])\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            result = subprocess.run(
+                [sys.executable, "-c", script, str(path)],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
+
+        self.assertEqual(0, result.returncode, result.stderr[-2000:])
+        self.assertEqual("[[2, 0, 1]]", result.stdout.strip().splitlines()[-1])
+
+    def test_loader_leaves_cuda_uninitialized_for_forward_only_devices(self):
+        # forward() names CUDA but __init__ does not: loading must not touch
+        # CUDA, so a CPU-only host or a parent that later forks still works.
+        source = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[4, 3]"):
+        full: "f32[3][1]cuda:0" = torch.ops.aten.full.default([3], 1.0, dtype=torch.float32, layout=torch.strided, device=device(type="cuda", index=0), pin_memory=False)
+        return (torch.ops.aten.add.Tensor(x, 1),)
+"""
+        script = (
+            "import os, sys; from pathlib import Path\n"
+            "if sys.argv[2:]: os.environ['CUDA_VISIBLE_DEVICES'] = ''\n"
+            f"sys.path[:0] = [{str(ROOT)!r}, {str(ROOT / 'scripts')!r}]\n"
+            "import torch; from ingest_tlparse import load_graph_module\n"
+            "assert load_graph_module(Path(sys.argv[1]), tracing_mode='fake') is not None\n"
+            "print(torch.cuda.is_initialized())\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            path = _write(Path(tmp) / "full_graph_000.py", source)
+            # With and without CUDA devices visible.
+            for hide_cuda in ([], ["hide_cuda"]):
+                result = subprocess.run(
+                    [sys.executable, "-c", script, str(path), *hide_cuda],
+                    capture_output=True,
+                    text=True,
+                    timeout=600,
+                )
+                self.assertEqual(0, result.returncode, result.stderr[-2000:])
+                self.assertEqual("False", result.stdout.strip().splitlines()[-1])
 
     def test_loader_registers_inductor_prims_for_fma(self):
         with tempfile.TemporaryDirectory() as tmp:
