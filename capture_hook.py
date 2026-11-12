@@ -43,6 +43,12 @@ from full_graph_harness import (
     placeholder_info_from_gm,
 )
 from input_codec import index_gen_from_observed
+from mask_rules import (
+    hw_unsupported_rule,
+    jagged_rule,
+    region_approx_index_rule,
+    side_effect_rule,
+)
 from replay_dependencies import replay_dependencies
 # Single source of truth for the emitted version marker: the generated repro
 # template stamps CURRENT_REPRO_VERSION rather than a hardcoded literal, so a
@@ -94,8 +100,12 @@ ALLOCATION_ONLY_OPS = {
 # bench, and projections hold its time at production. Partitions of the rest
 # of the graph are still captured. Region-level reasons mark a repro that is
 # still captured and timed but held at production in projections.
-MASK_REASONS = ("jagged", "hstu", "user_triton", "side_effect", "approx_index")
-NODE_MASK_REASONS = frozenset({"jagged", "hstu", "user_triton", "side_effect"})
+MASK_REASONS = (
+    "jagged", "hstu", "user_triton", "side_effect", "hw_unsupported", "approx_index"
+)
+NODE_MASK_REASONS = frozenset(
+    {"jagged", "hstu", "user_triton", "side_effect", "hw_unsupported"}
+)
 REGION_MASK_REASONS = frozenset({"approx_index"})
 NON_FUSIBLE_MASK_REASONS = NODE_MASK_REASONS
 GRAPH_SCOPE_MASK_REASONS = NODE_MASK_REASONS
@@ -121,16 +131,34 @@ def _mask_user_triton(node: fx.Node) -> str | None:
 # any other value is ignored. To add a rule, append a function here. It must
 # decide from the node and its graph alone (a saved full graph or runnable),
 # never from process state such as the kernel_side_table, because saved
-# artifacts are checked in other processes. Every rule runs, and a node is
-# masked for all the reasons returned.
-MASK_RULES: list = [_mask_user_triton]
+# artifacts are checked in other processes (hw_unsupported_rule is the one
+# exception: it reads the benchmark target's compute capability). Every rule
+# runs, and a node is masked for all the reasons returned.
+MASK_RULES: list = [
+    _mask_user_triton, side_effect_rule, jagged_rule, hw_unsupported_rule
+]
 
 # Region rules. Each maps a partition (its list of nodes in the full graph) to
 # a reason in REGION_MASK_REASONS, or None; any other value is ignored. To add
 # a rule, append a function here; like node rules it must decide from the
 # graph alone. The first rule that returns a reason wins, and the reason is
 # recorded as the repro's "masked_reason".
-REGION_MASK_RULES: list = []
+REGION_MASK_RULES: list = [region_approx_index_rule]
+
+
+_warned_mask_reasons: set = set()
+
+
+def _warn_unknown_mask_reason(rule, reason, allowed) -> None:
+    key = (getattr(rule, "__name__", repr(rule)), reason)
+    if key in _warned_mask_reasons:
+        return
+    _warned_mask_reasons.add(key)
+    print(
+        f"[capture_hook] WARNING: mask rule {key[0]} returned {reason!r}, "
+        f"not one of {sorted(allowed)}; ignored",
+        file=sys.stderr,
+    )
 
 
 def mask_reasons(node: fx.Node) -> tuple[str, ...]:
@@ -139,8 +167,11 @@ def mask_reasons(node: fx.Node) -> tuple[str, ...]:
     reasons: list[str] = []
     for rule in MASK_RULES:
         reason = rule(node)
-        if reason in NODE_MASK_REASONS and reason not in reasons:
-            reasons.append(reason)
+        if reason in NODE_MASK_REASONS:
+            if reason not in reasons:
+                reasons.append(reason)
+        elif reason is not None:
+            _warn_unknown_mask_reason(rule, reason, NODE_MASK_REASONS)
     return tuple(reasons)
 
 
@@ -156,6 +187,8 @@ def region_mask_reason(comp: list) -> str | None:
         reason = rule(comp)
         if reason in REGION_MASK_REASONS:
             return reason
+        if reason is not None:
+            _warn_unknown_mask_reason(rule, reason, REGION_MASK_REASONS)
     return None
 
 
@@ -535,6 +568,63 @@ def runtime_constant_nodes(gm: fx.GraphModule, constant_placeholders) -> set:
     return folded
 
 
+# Placeholder dtypes for symbolic scalars (forward() takes a Python value).
+_SCALAR_PLACEHOLDER_DTYPES = frozenset({"symint", "symbool"})
+
+
+def _input_symbol_values(gm: fx.GraphModule) -> dict:
+    """{symbol: value} for graph inputs that are (or have dims that are) a
+    bare symbol, from the concrete input specs the ingest loader recorded."""
+    specs = (gm.meta or {}).get("better_benchmark_input_specs") or []
+    placeholders = [n for n in gm.graph.nodes if n.op == "placeholder"]
+    values: dict = {}
+    if len(specs) != len(placeholders):
+        return values
+    for node, spec in zip(placeholders, specs):
+        if not isinstance(spec, dict):
+            continue
+        val = node.meta.get("val")
+        if isinstance(val, torch.SymInt) and spec.get("kind") == "symint":
+            pairs = [(val, spec.get("value", spec.get("hint")))]
+        elif isinstance(val, torch.Tensor) and "shape" in spec:
+            pairs = list(zip(val.shape, spec["shape"]))
+        else:
+            continue
+        for sym, concrete in pairs:
+            expr = getattr(getattr(sym, "node", None), "expr", None)
+            if expr is not None and expr.is_Symbol and isinstance(concrete, int):
+                values[expr] = concrete
+    return values
+
+
+def _sym_hint(x, known: dict | None = None):
+    """Concrete value of a SymInt/SymFloat/SymBool, or None.
+
+    SymNode.hint is None for expressions the trace specialized to a
+    constant and for unbacked symbols; fall back to the expression itself,
+    the ShapeEnv's backed values, and ``known`` symbol values.
+    """
+    node = getattr(x, "node", None)
+    if node is None:
+        return x
+    if getattr(node, "hint", None) is not None:
+        return node.hint
+    expr = node.expr
+    shape_env = getattr(node, "shape_env", None)
+    if expr.free_symbols:
+        values = dict(getattr(shape_env, "var_to_val", None) or {})
+        values.update(known or {})
+        import sympy
+
+        expr = sympy.sympify(expr.xreplace(
+            {k: sympy.sympify(v) for k, v in values.items() if v is not None}))
+    if expr.free_symbols:
+        return None
+    if isinstance(x, torch.SymBool):
+        return bool(expr)
+    return float(expr) if isinstance(x, torch.SymFloat) else int(expr)
+
+
 def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     """Extract a standalone sub-GraphModule for one fusible partition.
 
@@ -590,11 +680,15 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
     new_graph = fx.Graph()
     env: dict[fx.Node, fx.Node] = {}
     placeholder_info: dict[str, dict] = {}
+    known_symbols = _input_symbol_values(gm)
 
     def _resolve_sym(x):
         """Resolve SymInt/SymFloat to concrete int/float."""
         if isinstance(x, (torch.SymInt, torch.SymFloat)):
-            return x.node.hint if hasattr(x, 'node') and hasattr(x.node, 'hint') else int(x)
+            hint = _sym_hint(x, known_symbols)
+            if hint is None:
+                raise ValueError(f"symbolic size {x} has no concrete value")
+            return hint
         return int(x)
 
     def _storage_key(val):
@@ -632,13 +726,28 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
                 except Exception:
                     pass
         elif val is not None and isinstance(val, (torch.SymInt, torch.SymFloat)):
-            hint = val.node.hint if hasattr(val, 'node') and hasattr(val.node, 'hint') else int(val)
+            hint = _sym_hint(val, known_symbols)
+            if hint is None:
+                raise ValueError(f"symbolic input {name!r} ({val}) has no concrete value")
             placeholder_info[name] = {
                 "shape": [],
                 "stride": [],
                 "dtype": "symint",
                 "device": "cpu",
                 "hint": hint,
+            }
+        elif val is not None and isinstance(val, torch.SymBool):
+            # A size comparison computed outside the partition (s0 >= 4)
+            # feeding it: forward() takes the comparison's concrete value.
+            hint = _sym_hint(val, known_symbols)
+            if hint is None:
+                raise ValueError(f"symbolic bool input {name!r} ({val}) has no concrete value")
+            placeholder_info[name] = {
+                "shape": [],
+                "stride": [],
+                "dtype": "symbool",
+                "device": "cpu",
+                "hint": bool(hint),
             }
 
     _ph_names_used: set[str] = set()
@@ -693,6 +802,9 @@ def extract_partition_subgraph(origin_nodes: list, gm: fx.GraphModule):
         if len(args) < 2 or not isinstance(args[1], (list, tuple)):
             return args
         shape_list = list(args[1])
+        # A dim read from a symbolic input stays a reference to it.
+        if any(isinstance(d, fx.Node) for d in shape_list):
+            return args
         if not _should_lift_shape(shape_list):
             return args
         param_name = f"_shape_param_{_shape_counter[0]}"
@@ -1228,9 +1340,9 @@ def canonicalize_subgraph(sub_gm, placeholder_info, shape_params=None):
     fake_inputs = []
 
     for name, info in placeholder_info.items():
-        if info.get("dtype") == "symint":
+        if info.get("dtype") in _SCALAR_PLACEHOLDER_DTYPES:
             print(
-                f"[canonicalize] symint placeholder {name!r}: retrace skipped "
+                f"[canonicalize] symbolic placeholder {name!r}: retrace skipped "
                 f"(dynamic-shape partitions not yet canonicalized)",
                 file=sys.stderr,
             )
@@ -1667,7 +1779,7 @@ class _CaptureState:
                 input_lines.append(f"    {shape_params[name]},  # {name}")
                 continue
             info = placeholder_info.get(name)
-            if info and info["dtype"] != "symint":
+            if info and info["dtype"] not in _SCALAR_PLACEHOLDER_DTYPES:
                 shape = info["shape"]
                 stride = info.get("stride", [])
                 dtype = info["dtype"]
@@ -1728,6 +1840,8 @@ class _CaptureState:
                 # This is a scalar dimension (like seq_len) passed to ops like iota/full
                 val = info.get("hint", 1)
                 input_lines.append(f"    {val},  # {name} (symbolic dim)")
+            elif info and info.get("dtype") == "symbool":
+                input_lines.append(f"    {info['hint']},  # {name} (symbolic bool)")
             else:
                 input_lines.append(f"    torch.tensor(1),  # {name} (unknown shape)")
 
@@ -1779,7 +1893,7 @@ class _CaptureState:
                 compact_inputs.append(["S", list(shape_params[name])])
             else:
                 info = placeholder_info.get(name)
-                if info and info["dtype"] != "symint":
+                if info and info["dtype"] not in _SCALAR_PLACEHOLDER_DTYPES:
                     spec = {
                         "kind": "tensor",
                         "shape": info["shape"],
@@ -1809,6 +1923,8 @@ class _CaptureState:
                     compact_inputs.append(compact_from_spec(spec))
                 elif info and info.get("dtype") == "symint":
                     compact_inputs.append(["sym", info.get("hint", 1)])
+                elif info and info.get("dtype") == "symbool":
+                    compact_inputs.append(["sc", info["hint"]])
         shapes_config_line = render_signature(compact_inputs)
 
         script = f'''"""
@@ -1969,6 +2085,14 @@ if __name__ == "__main__":
         mask = graph_mask(gm)
         if mask is not None:
             extra["masked"] = mask
+        side_effects = (gm.meta or {}).get("better_benchmark_side_effects") or {}
+        if side_effects.get("stripped") or side_effects.get("blocked"):
+            # Ops removed from (or kept in) the source at ingest; see
+            # mask_rules.strip_side_effect_source.
+            extra["side_effects"] = {
+                "stripped": dict(collections.Counter(side_effects.get("stripped", []))),
+                "blocked": side_effects.get("blocked", []),
+            }
         if components is not None:
             extra["node_accounting"] = graph_node_accounting(
                 gm, components, constant_folded=constant_folded)
@@ -2044,8 +2168,19 @@ if __name__ == "__main__":
             # extracted+hashed directly here, bypassing canonicalization,
             # which is how live-cut hashes diverged from artifact/retrace
             # hashes (the resnet18 live-vs-artifact hash drift, fixed 2026-06).
-            pattern = compute_partition_pattern(
-                comp, gm, observed_stats=self._current_observed_stats)
+            try:
+                pattern = compute_partition_pattern(
+                    comp, gm, observed_stats=self._current_observed_stats)
+            except ValueError as e:
+                # A partition input without a concrete value: record it like
+                # any other dropped region rather than abort the graph.
+                self.dropped.append({
+                    "filename": None,
+                    "pattern_hash": None,
+                    "shape_hash": None,
+                    "reason": f"ValueError: {str(e)[:300]}",
+                })
+                continue
             if pattern is None:
                 continue
             sub_gm = pattern["sub_gm"]
