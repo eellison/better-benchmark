@@ -134,6 +134,34 @@ def test_split_scatter_index_is_bounded_by_the_split():
     print("PASS split scatter index is bounded by the split")
 
 
+def test_split_scatter_bound_follows_a_symbolic_split():
+    """On a symbolic graph the split is a SymInt (the table's rows), so the
+    bound is that symbol, not half of the split buffer (32*s0)."""
+    import sympy
+
+    convert = torch.ops.prims.convert_element_type.default
+
+    def f(idx, src, table):
+        rows, splits = table.shape[0], 64
+        part = torch.ops.prims.iota.default(
+            idx.shape[0], start=0, step=1, dtype=torch.int64,
+            device=idx.device, requires_grad=False)
+        pos = idx.unsqueeze(1).expand(-1, 3) + (part & (splits - 1)).view(-1, 1) * rows
+        acc = torch.zeros(rows * splits, 3).scatter_add(0, pos, convert(src, torch.float32))
+        return acc.view(splits, rows, 3).sum(0) + table
+
+    gm = make_fx(f, tracing_mode="symbolic")(
+        torch.zeros(500, dtype=torch.int64), torch.randn(500, 3, dtype=torch.bfloat16), torch.randn(7, 3))
+    idx, src, table = [n for n in gm.graph.nodes if n.op == "placeholder"]
+    exprs = {}
+    bounds = infer_index_bounds_from_gm(gm, placeholder_info_from_gm(gm), exprs_out=exprs)
+    assert bounds == {idx.name: 7}, bounds
+    n, rows = idx.meta["val"].shape[0].node.expr, table.meta["val"].shape[0].node.expr
+    bound = sympy.sympify(exprs[idx.name], locals={str(n): n, str(rows): rows})
+    assert bound.subs({n: 500, rows: 10}) == 10, exprs
+    print("PASS split scatter bound follows a symbolic split")
+
+
 def test_bucketize_boundaries_are_sorted():
     gm = make_fx(torch.bucketize, tracing_mode="fake")(
         torch.randn(32), torch.randn(9))
@@ -214,6 +242,7 @@ if __name__ == "__main__":
     test_lifted_index_constant_is_bounded()
     test_scatter_src_is_not_treated_as_an_index()
     test_split_scatter_index_is_bounded_by_the_split()
+    test_split_scatter_bound_follows_a_symbolic_split()
     test_bucketize_boundaries_are_sorted()
     test_sorted_generator_survives_the_text_signature()
     test_reshaped_sorted_boundaries_stay_sorted()

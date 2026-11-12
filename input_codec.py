@@ -27,6 +27,7 @@ unchanged. The human-readable T()/S() string is a RENDERING of this data
 """
 from __future__ import annotations
 
+import ast
 from typing import Any
 
 SHORT_DTYPE = {
@@ -38,6 +39,18 @@ SHORT_DTYPE = {
     "float8_e4m3fn": "f8e4m3fn", "float8_e5m2": "f8e5m2",
 }
 LONG_DTYPE = {v: k for k, v in SHORT_DTYPE.items()}
+
+
+def _symbol_point_value(definition: dict | None):
+    """Observed concrete value for one family symbol, if any.
+
+    Backed ShapeEnv symbols call this a hint. Unbacked symbols have no guarding
+    hint, so their independently observed runtime value is stored explicitly.
+    Optimization hints and range bounds are never point values.
+    """
+    definition = definition or {}
+    key = "observed_value" if definition.get("unbacked") is True else "hint"
+    return definition.get(key)
 
 
 def _short_dtype(name: str) -> str:
@@ -102,67 +115,186 @@ def _gen_to_compact(gen: dict) -> list | None:
     if kind in (None, "randn"):
         return None  # default for floats — omitted
     if kind == "index":
-        return ["index", int(gen.get("low", 0)), int(gen.get("high", 100))]
+        out = ["index", int(gen.get("low", 0)), int(gen.get("high", 100))]
+        if gen.get("high_expr") is not None:
+            out.append(gen["high_expr"])
+        return out
     if kind == "randint":
         return ["randint", int(gen.get("low", 0)), int(gen.get("high", 2))]
     if kind == "permutation":
         out = ["perm"]
         if gen.get("size") is not None:
             out.append(int(gen["size"]))
+            if gen.get("size_expr") is not None:
+                out.append(gen["size_expr"])
         return out
     if kind == "offsets":
         return ["offsets", int(gen.get("high", 1))]
     if kind == "constant":
         return ["const", gen.get("value", 0)]
     if kind == "runs":
-        return ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
-                int(gen["n_runs"]), int(bool(gen["sorted"]))]
+        out = ["runs", int(gen["low"]), int(gen["high"]), int(gen["n_unique"]),
+               int(gen["n_runs"]), int(bool(gen["sorted"]))]
+        if gen.get("high_expr") is not None:
+            out.append(gen["high_expr"])
+        return out
     return [kind] + [v for k, v in sorted(gen.items()) if k != "kind"]
 
 
 def _gen_from_compact(c: list) -> dict:
     kind = c[0]
     if kind == "index":
-        return {"kind": "index", "low": c[1], "high": c[2]}
+        gen = {"kind": "index", "low": c[1], "high": c[2]}
+        if len(c) > 3:
+            gen["high_expr"] = c[3]
+        return gen
     if kind == "randint":
         return {"kind": "randint", "low": c[1], "high": c[2]}
     if kind == "perm":
-        return {"kind": "permutation",
-                "size": c[1] if len(c) > 1 else None}
+        gen = {"kind": "permutation", "size": c[1] if len(c) > 1 else None}
+        if len(c) > 2:
+            gen["size_expr"] = c[2]
+        return gen
     if kind == "offsets":
         return {"kind": "offsets", "high": c[1]}
     if kind == "const":
         return {"kind": "constant", "value": c[1]}
     if kind == "runs":
-        return {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
-                "n_runs": c[4], "sorted": bool(c[5])}
+        gen = {"kind": "runs", "low": c[1], "high": c[2], "n_unique": c[3],
+               "n_runs": c[4], "sorted": bool(c[5])}
+        if len(c) > 6:
+            gen["high_expr"] = c[6]
+        return gen
     return {"kind": kind}
+
+
+# A generator's bound can be an expression over the size symbols (the rows of
+# a batch-sized table): compact ["index", low, high, expr],
+# ["runs", ..., sorted, expr] and ["perm", size, expr], where high/size is the
+# value at the captured sizes.
+_GEN_EXPR_SLOT = {"index": 3, "runs": 6, "perm": 2}
+
+
+def _gen_bound_expr(gen) -> str | None:
+    """The symbolic bound of a compact generator, or None."""
+    slot = _GEN_EXPR_SLOT.get(gen[0]) if isinstance(gen, list) and gen else None
+    if slot is None or len(gen) <= slot or not isinstance(gen[slot], str):
+        return None
+    return gen[slot]
+
+
+def _bind_gen(gen: list, bindings: dict) -> list:
+    """A compact generator with its symbolic bound evaluated (and dropped)."""
+    expr = _gen_bound_expr(gen)
+    if expr is None:
+        return gen
+    bound = max(_eval_dim(expr, bindings), 1)
+    if gen[0] == "index":
+        return ["index", gen[1], bound]
+    if gen[0] == "perm":
+        return ["perm", bound]
+    # runs: the observed range, clipped to the bound at this binding.
+    low, high = gen[1], min(gen[2], bound)
+    if high <= low:
+        low = 0
+    return ["runs", low, high, *gen[3:6]]
 
 
 # Keys the codec encodes structurally; anything ELSE on a spec passes
 # through opts["x"] verbatim so no producer field is ever silently lost.
 _KNOWN_KEYS = {"kind", "name", "shape", "dtype", "stride", "device",
                "storage_offset", "generator", "gen", "exact", "data",
-               "alias_group"}
+               "alias_group", "symbolic"}
+
+
+def _overlay_exprs(slots: list, exprs: list | None) -> list:
+    """Overlay per-slot expr strings onto hint ints: where exprs[i] is a
+    non-None string, the slot becomes that expr; otherwise the hint int
+    stays. None/empty exprs -> slots unchanged (static)."""
+    if not exprs:
+        return slots
+    return [e if e is not None else s for s, e in zip(slots, exprs)]
+
+
+def _exprs_from_slots(slots: list) -> list | None:
+    """Inverse of _overlay: per-slot expr strings (None where the slot is a
+    plain int). Returns None if NO slot is a string (fully static)."""
+    out = [s if isinstance(s, str) else None for s in slots]
+    return out if any(e is not None for e in out) else None
+
+
+def _validate_symfloat_dtype(dtype) -> str:
+    if dtype not in {"float32", "float64"}:
+        raise ValueError(f"unsupported SymFloat dtype {dtype!r}")
+    return dtype
+
+
+def _validate_symfloat_value(value, *, allow_none: bool):
+    if value is None and allow_none:
+        return value
+    if (not isinstance(value, (int, float))
+            or isinstance(value, bool)):
+        raise ValueError(f"invalid SymFloat value {value!r}")
+    return value
+
+
+def _validate_alias_group(group) -> int:
+    if (not isinstance(group, int) or isinstance(group, bool)
+            or group < 0):
+        raise ValueError(
+            f"alias_group must be a nonnegative integer, got {group!r}")
+    return group
 
 
 def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     """Verbose spec dict -> compact JSON entry (lossless)."""
     kind = spec.get("kind", "tensor")
+    if kind == "symfloat":
+        hint = spec.get("value", spec.get("hint"))
+        dtype = _validate_symfloat_dtype(spec.get("dtype", "float32"))
+        if spec.get("expr") is not None:
+            _validate_symfloat_value(hint, allow_none=True)
+            if (not isinstance(spec["expr"], str)
+                    or not spec["expr"].strip()):
+                raise ValueError(
+                    f"invalid SymFloat expression {spec['expr']!r}")
+            return ["F", hint, spec["expr"], dtype]
+        _validate_symfloat_value(hint, allow_none=False)
+        return ["flt", hint, dtype]
     if kind == "shape":
         return ["S", list(spec["dims"])]
     if kind == "symint":
-        return ["sym", spec.get("value", spec.get("hint", 1))]
+        hint = spec.get("value", spec.get("hint", 1))
+        # A live symint input with an expr -> ['I', hint, expr] (rebindable);
+        # a constant symint -> ['sym', hint].
+        if spec.get("expr") is not None:
+            return ["I", hint, spec["expr"]]
+        return ["sym", hint]
     if kind == "scalar":
         return ["sc", spec.get("value")]
 
-    entry: list = [list(spec["shape"]), _short_dtype(spec["dtype"])]
+    # Symbolic block (dynamic capture): per-slot exprs overlaid onto the hint
+    # shape/stride so the serialized entry IS the instantiate_point format
+    # (a symbolic slot holds the expr string, static slots the hint int).
+    # ONE overlay path for both region and full-graph capture.
+    symbolic = spec.get("symbolic") or {}
+    shape = _overlay_exprs(list(spec["shape"]), symbolic.get("shape_exprs"))
+
+    entry: list = [shape, _short_dtype(spec["dtype"])]
     opts: dict = {}
     if include_name and spec.get("name"):
         opts["n"] = spec["name"]
     stride = spec.get("stride")
+    stride_exprs = symbolic.get("stride_exprs")
     if stride and not _is_contiguous(spec["shape"], stride):
-        opts["st"] = list(stride)
+        opts["st"] = _overlay_exprs(list(stride), stride_exprs)
+    elif stride_exprs is not None and any(e is not None for e in stride_exprs):
+        # Symbolic stride that happens to be contiguous AT THE HINT must
+        # still be recorded as exprs — a different binding may break
+        # contiguity, and the expr is the exact data.
+        opts["st"] = _overlay_exprs(
+            list(stride or _contiguous_stride(list(spec["shape"]))),
+            stride_exprs)
     # Device default = THE accelerator. Capture pins each worker to one
     # GPU via CUDA_VISIBLE_DEVICES, so any cuda ordinal ("cuda:0") is just
     # "the accelerator" — normalize to bare "cuda" (recording ordinals
@@ -174,7 +306,12 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
     if dev != "cuda":
         opts["dev"] = dev
     off = spec.get("storage_offset", 0)
-    if off:
+    # A symbolic storage_offset overrides the (hint) int: emit the expr so it
+    # rebinds. offset_expr lives in the symbolic block.
+    off_expr = (spec.get("symbolic") or {}).get("offset_expr")
+    if off_expr is not None:
+        opts["off"] = off_expr
+    elif off:
         opts["off"] = off
     gen = spec.get("gen") or spec.get("generator")
     if gen:
@@ -187,7 +324,7 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
         # Members of one alias group are views of ONE storage (packed-qkv
         # saved views): generation must allocate a single buffer per group
         # and as_strided each member at its offset.
-        opts["alias"] = spec["alias_group"]
+        opts["alias"] = _validate_alias_group(spec["alias_group"])
     extras = {k: v for k, v in spec.items()
               if k not in _KNOWN_KEYS and v is not None}
     if extras:
@@ -199,24 +336,88 @@ def compact_from_spec(spec: dict, include_name: bool = False) -> list:
 
 def spec_from_compact(entry: list, name: str | None = None) -> dict:
     """Compact JSON entry -> verbose spec dict (the in-memory format)."""
+    if entry and entry[0] == "F":
+        if len(entry) != 4:
+            raise ValueError(
+                "typed SymFloat entry must be "
+                "['F', observed-or-null, expression, dtype]")
+        _validate_symfloat_value(entry[1], allow_none=True)
+        if not isinstance(entry[2], str) or not entry[2].strip():
+            raise ValueError(
+                f"invalid SymFloat expression {entry[2]!r}")
+        spec = {
+            "kind": "symfloat",
+            "name": name,
+            "value": entry[1],
+            "expr": entry[2],
+            "dtype": _validate_symfloat_dtype(entry[3]),
+        }
+        return spec
+    if entry and entry[0] == "flt":
+        if len(entry) != 3:
+            raise ValueError(
+                "constant SymFloat entry must be ['flt', value, dtype]")
+        _validate_symfloat_value(entry[1], allow_none=False)
+        return {
+            "kind": "symfloat",
+            "name": name,
+            "value": entry[1],
+            "dtype": _validate_symfloat_dtype(entry[2]),
+        }
     if entry and entry[0] == "S":
         return {"kind": "shape", "name": name, "dims": list(entry[1])}
     if entry and entry[0] == "sym":
         return {"kind": "symint", "name": name, "value": entry[1]}
+    if entry and entry[0] == "I":
+        # Live symint input: ['I', hint, expr] -> rebindable symint spec.
+        spec = {"kind": "symint", "name": name, "value": entry[1]}
+        if len(entry) > 2 and entry[2] is not None:
+            spec["expr"] = entry[2]
+        return spec
     if entry and entry[0] == "sc":
         return {"kind": "scalar", "name": name, "value": entry[1]}
 
     shape, dtype = list(entry[0]), _long_dtype(entry[1])
     opts = entry[2] if len(entry) > 2 else {}
+    raw_stride = list(opts["st"]) if "st" in opts else None
+    # Reconstruct the symbolic block from any expr strings in the slots, so
+    # the round-trip is lossless and downstream can re-evaluate at any
+    # binding. shape/stride themselves keep the expr strings — evaluation
+    # (evaluate_symbolic_entry/instantiate_point) is the consumer's job, NOT
+    # something we lossily collapse here.
+    # Resolve the effective stride: recorded 'st' if present, else the
+    # contiguous stride (which is SYMBOLIC when the shape has symbolic dims).
+    stride = raw_stride if raw_stride is not None else _contiguous_stride(shape)
+    symbolic: dict = {}
+    sh_exprs = _exprs_from_slots(shape)
+    if sh_exprs is not None:
+        symbolic["shape_exprs"] = sh_exprs
+    # stride_exprs from whatever stride we ended up with (recorded OR the
+    # synthesized symbolic contiguous one) — so evaluate_spec knows to fold
+    # it at a binding instead of leaving expr strings in the stride.
+    st_exprs = _exprs_from_slots(stride)
+    if st_exprs is not None:
+        symbolic["stride_exprs"] = st_exprs
+    # A symbolic storage_offset is an expr string in 'off'; lift it into the
+    # symbolic block (offset_expr) and keep storage_offset numeric (0 — the
+    # real value comes from evaluate_spec at a binding).
+    raw_off = opts.get("off", 0)
+    if isinstance(raw_off, str):
+        symbolic["offset_expr"] = raw_off
+        storage_offset = 0
+    else:
+        storage_offset = raw_off
     spec: dict = {
         "kind": "tensor",
         "name": name,
         "shape": shape,
         "dtype": dtype,
-        "stride": list(opts.get("st", _contiguous_stride(shape))),
+        "stride": stride,
         "device": opts.get("dev", "cuda"),
-        "storage_offset": opts.get("off", 0),
+        "storage_offset": storage_offset,
     }
+    if symbolic:
+        spec["symbolic"] = symbolic
     if "gen" in opts:
         gen = _gen_from_compact(opts["gen"])
         spec["gen"] = gen
@@ -225,7 +426,7 @@ def spec_from_compact(entry: list, name: str | None = None) -> dict:
         spec["exact"] = True
         spec["data"] = opts["data"]
     if "alias" in opts:
-        spec["alias_group"] = opts["alias"]
+        spec["alias_group"] = _validate_alias_group(opts["alias"])
     if "n" in opts and name is None:
         spec["name"] = opts["n"]
     spec.update(opts.get("x", {}))
@@ -243,6 +444,8 @@ def render_T(entry_or_spec) -> str:
         return f"S([{entry[1]}])"
     if entry[0] == "sc":
         return f"Sc({entry[1]})"
+    if isinstance(entry[0], str) and entry[0] in {"F", "flt"}:
+        return f"Sf({entry[1]})"
     shape, dtype = entry[0], entry[1]
     opts = entry[2] if len(entry) > 2 else {}
     kwargs = []
@@ -271,6 +474,20 @@ def render_signature(entries_or_specs: list) -> str:
 
 
 def _contiguous_stride(shape: list) -> list:
+    """Row-major contiguous stride for a shape. Shape slots may be symbolic
+    (expr strings) — then the stride is symbolic too, built as sympy product
+    expr strings (NOT int()'d, which crashed on a symbol). A fully-int shape
+    yields the usual int stride."""
+    if any(isinstance(d, str) for d in shape):
+        import sympy
+        exprs = [_sympify_expr(d) if isinstance(d, str) else sympy.Integer(d)
+                 for d in shape]
+        stride = [None] * len(shape)
+        acc = sympy.Integer(1)
+        for i in range(len(shape) - 1, -1, -1):
+            stride[i] = int(acc) if acc.is_Integer else str(acc)
+            acc = acc * exprs[i]
+        return stride
     stride = [1] * len(shape)
     for i in range(len(shape) - 2, -1, -1):
         stride[i] = stride[i + 1] * max(int(shape[i + 1]), 1)
@@ -300,11 +517,247 @@ def _is_contiguous(shape: list, stride: list) -> bool:
 # evaluate_symbolic_entry under a binding — never eval()'d as Python.
 # ---------------------------------------------------------------------------
 
+_TORCH_SYMPY_LOCALS = None
+
+
+def _sympy_locals():
+    """torch._sympy.functions name -> class map, so str(SymInt) forms like
+    `PythonMod(s0,128)`, `CeilToInt(s0/3)`, `ModularIndexing(...)`,
+    `TruncToInt(ToFloat(s0)*0.5)` re-parse to the ACTUAL torch sympy classes
+    (which fold to a concrete Integer/Bool on substitution) instead of opaque
+    undefined Functions (which never reduce -> silent guard-accept / loud
+    'not an int'). Empty dict if torch isn't importable (pure-int exprs still
+    work). Computed once."""
+    global _TORCH_SYMPY_LOCALS
+    if _TORCH_SYMPY_LOCALS is None:
+        loc: dict = {}
+        try:
+            import torch.utils._sympy.functions as _f
+            for n in dir(_f):
+                obj = getattr(_f, n)
+                if isinstance(obj, type):
+                    loc[n] = obj
+        except Exception:
+            pass
+        _TORCH_SYMPY_LOCALS = loc
+    return _TORCH_SYMPY_LOCALS
+
+
+# AST node types permitted in a captured shape/guard expr string. This is the
+# security boundary for _sympify_expr: sympy.sympify() eval()s its argument
+# (documented-unsafe on untrusted input), and these expr strings arrive from
+# DATA artifacts (shapes.json guards/dims/strides, full-graph annotations) that
+# are never otherwise executed as Python. A poisoned artifact must not run code
+# on load/merge/bench — so we validate the string against the pure
+# numeric/relational-expression grammar BEFORE sympify sees it. Barred:
+# attribute access, subscripting, string/bytes literals, dunder names, and
+# calls to anything outside the sympy/torch shape-function set — the pieces
+# every known escape needs (__import__('os').system(...) needs a str literal +
+# a dunder; the ().__class__.__subclasses__() gadget needs attribute + subscript
+# access). builtins-stripping alone is NOT enough (the subclass walk escapes an
+# empty-__builtins__ eval), which is why this is a structural allowlist.
+_SAFE_EXPR_NODES = (
+    ast.Expression, ast.BinOp, ast.UnaryOp, ast.BoolOp, ast.Compare, ast.Call,
+    ast.Name, ast.Load, ast.Constant,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow,
+    ast.USub, ast.UAdd, ast.Not, ast.Invert,
+    ast.And, ast.Or,
+    ast.Eq, ast.NotEq, ast.Lt, ast.LtE, ast.Gt, ast.GtE,
+    ast.BitAnd, ast.BitOr, ast.BitXor,
+)
+
+
+# Pure sympy helper FUNCTIONS (not classes) that construct expressions with no
+# side effects and no code generation. Everything else legitimate in a shape
+# expr is a Basic-subclass constructor (Eq, Mod, Max, Abs, floor, Add, ...) and
+# is admitted structurally below; this tiny curated set is only for the handful
+# of expr builders sympy exposes as plain functions.
+_SAFE_SYMPY_FUNCS = frozenset({"sqrt", "cbrt", "root"})
+
+
+def _call_name_is_allowed(name: str) -> bool:
+    """A call target is legitimate only if it is a torch shape-function class
+    (_sympy_locals), a sympy EXPRESSION-CONSTRUCTOR class (a subclass of
+    sympy.Basic: Eq, Mod, Max, Abs, floor, And, Add, Mul, Pow, ...), or one of
+    a tiny curated set of pure expression-building functions (sqrt/cbrt/root).
+
+    NOT "any callable sympy exports": sympy.sympify() eval()s the expr, so a
+    side-effecting or code-generating export reached as a call head IS code
+    execution on a poisoned DATA artifact. The str-literal/attribute/subscript
+    bans do NOT contain this — sympy.preview(s0) spawns an external viewer,
+    plot(s0) starts a backend, init_session()/init_printing() mutate global
+    state, and lambdify(s0, s0) compiles generated source, all with only a bare
+    symbol argument. Restricting to Basic-subclass constructors (plus the
+    curated pure functions) is the structural fix: those meta-functions are
+    plain functions, not Basic subclasses, and are not in the curated set."""
+    if name in _sympy_locals():
+        return True
+    import sympy
+    obj = getattr(sympy, name, None)
+    if obj is None:
+        return False
+    if getattr(obj, "__module__", "").split(".")[0] != "sympy":
+        return False
+    if isinstance(obj, type) and issubclass(obj, sympy.Basic):
+        return True
+    return name in _SAFE_SYMPY_FUNCS and callable(obj)
+
+
+def _assert_safe_expr(text: str) -> None:
+    """Raise ValueError unless `text` is a pure numeric/relational expression
+    over symbols and sympy/torch shape functions. Fail-closed and LOUD — never
+    silently strips (that would be lossy). See _SAFE_EXPR_NODES for the why."""
+    try:
+        tree = ast.parse(text, mode="eval")
+    except SyntaxError as e:
+        raise ValueError(f"expr {text!r} is not a parseable expression: {e}")
+    for node in ast.walk(tree):
+        if not isinstance(node, _SAFE_EXPR_NODES):
+            raise ValueError(
+                f"disallowed {type(node).__name__} in expr {text!r} (only "
+                "arithmetic/relational expressions over symbols and sympy/torch "
+                "shape functions are permitted)")
+        if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float)):
+            # bool is an int subclass (True/False ok); str/bytes/complex/None barred.
+            raise ValueError(
+                f"disallowed {type(node.value).__name__} literal in expr {text!r}")
+        if isinstance(node, ast.Name) and "__" in node.id:
+            raise ValueError(f"dunder name {node.id!r} in expr {text!r}")
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name):
+                raise ValueError(f"non-name call target in expr {text!r}")
+            if node.keywords:
+                raise ValueError(f"keyword args not allowed in expr {text!r}")
+            if not _call_name_is_allowed(node.func.id):
+                raise ValueError(
+                    f"call to non-whitelisted function {node.func.id!r} in "
+                    f"expr {text!r}")
+
+
+# The other data-channel eval boundary. Shape-config strings (the T()/S() forms
+# in shapes.txt / _shapes_config / shapes.json compact entries) are parsed by
+# raw eval() in the harnesses with a fixed namespace of data constructors
+# (T/S/Index/Perm) and dtype tokens, under __builtins__: {}. Those strings are
+# DATA — a poisoned corpus artifact must not run code when a repro loads its
+# inputs. The empty-builtins guard is NOT sufficient on its own: the
+# ().__class__.__base__.__subclasses__()[...] gadget walks from a bare literal
+# back to os.system without ever naming a builtin. So we structurally forbid the
+# pieces every escape needs — attribute access, subscripting, dunder names, and
+# calls to anything but the four data constructors. This is the config-grammar
+# analogue of _SAFE_EXPR_NODES; it is deliberately a DIFFERENT allowlist because
+# the grammar differs (data constructors with keyword args + list/tuple/str
+# literals, NOT a relational expression). Arithmetic nodes are permitted because
+# they are provably code-exec-free on validated numeric operands and cost
+# nothing — the boundary is the attribute/subscript/dunder/call-target bans.
+_SAFE_CONFIG_NODES = (
+    ast.Expression, ast.Tuple, ast.List, ast.Call, ast.keyword,
+    ast.Name, ast.Load, ast.Constant, ast.Attribute,
+    ast.UnaryOp, ast.BinOp,
+    ast.Add, ast.Sub, ast.Mult, ast.Div, ast.FloorDiv, ast.Mod, ast.Pow,
+    ast.USub, ast.UAdd,
+)
+
+# The ONLY callables reachable in a shape-config eval namespace (the data
+# constructors of repro_harness._make_shape_eval_ns). Restricting call
+# targets to these means that even if a name somehow resolves, nothing but a
+# data constructor can be invoked.
+_SAFE_CONFIG_CALLS = frozenset({"T", "S", "Index", "Perm", "Runs", "Sorted"})
+
+
+def _assert_safe_shape_config(text: str) -> None:
+    """Raise ValueError unless `text` is a shape-config expression — a tuple/list
+    of T()/S()/Index()/Perm() constructor calls over int/float/str literals and
+    dtype-token names. Fail-closed and LOUD, never silently strips. This is the
+    load-time code-injection boundary for the raw eval() sites that instantiate
+    repro inputs from shapes data. See _SAFE_CONFIG_NODES for the threat model."""
+    try:
+        tree = ast.parse(text, mode="eval")
+    except SyntaxError as e:
+        raise ValueError(f"shape config {text!r} is not a parseable expression: {e}")
+    for node in ast.walk(tree):
+        if not isinstance(node, _SAFE_CONFIG_NODES):
+            raise ValueError(
+                f"disallowed {type(node).__name__} in shape config {text!r} (only "
+                "T()/S()/Index()/Perm() constructor calls over numeric/string "
+                "literals and dtype names are permitted)")
+        if isinstance(node, ast.Constant) and not isinstance(
+                node.value, (int, float, str, type(None))):
+            # bool is an int subclass (ok); bytes/complex barred.
+            raise ValueError(
+                f"disallowed {type(node.value).__name__} literal in shape config {text!r}")
+        if isinstance(node, ast.Name) and "__" in node.id:
+            raise ValueError(f"dunder name {node.id!r} in shape config {text!r}")
+        if isinstance(node, ast.Attribute):
+            # Only `torch.<dtype>` (e.g. torch.complex64) — the sole attribute
+            # access real configs use, for dtypes without a short token. Require
+            # the base to be exactly the Name `torch` and the attr to be a
+            # non-dunder: this admits torch.float32/complex64/... and NOTHING
+            # else. The subclass-walk gadget (().__class__.__base__...) chains
+            # attributes off a literal/attribute, so its .value is never
+            # Name('torch') — it stays barred.
+            if not (isinstance(node.value, ast.Name) and node.value.id == "torch"):
+                raise ValueError(
+                    f"disallowed attribute access in shape config {text!r} "
+                    "(only torch.<dtype> is permitted)")
+            if "__" in node.attr:
+                raise ValueError(f"dunder attribute {node.attr!r} in shape config {text!r}")
+        if isinstance(node, ast.keyword) and node.arg is None:
+            raise ValueError(f"**kwargs splat not allowed in shape config {text!r}")
+        if isinstance(node, ast.Call):
+            if not isinstance(node.func, ast.Name):
+                raise ValueError(f"non-name call target in shape config {text!r}")
+            if node.func.id not in _SAFE_CONFIG_CALLS:
+                raise ValueError(
+                    f"call to non-constructor {node.func.id!r} in shape config "
+                    f"{text!r} (only {sorted(_SAFE_CONFIG_CALLS)} permitted)")
+
+
+def _sympify_expr(text, symbols: dict | None = None):
+    """Parse a captured expr string to a sympy expr. Two things make this
+    faithful vs a bare sympy.sympify: (1) the torch-functions locals map
+    (above), so torch's shape functions fold; (2) free symbols are declared
+    integer with a sign assumption DRIVEN BY THE RANGE FLOOR — positive when
+    the symbol's range lower bound >= 1, else nonnegative (a size is >= 0).
+    Without an integer assumption Max(1, s//k)/floor(s)==s don't simplify and
+    sympy.equals can raise 'nan not comparable'; but a blanket `positive`
+    is WRONG for a zero-capable symbol (unbacked u0, range [0, ...]) — it
+    folds Ne(u0,0)->True / Eq(u0,0)->False, dropping a guard / rejecting a
+    valid 0 binding. `symbols` is the {name: {"range":[lo,hi]}} table; when
+    absent we assume nonnegative (the safe floor for any shape dim).
+
+    A STRING `text` is validated by _assert_safe_expr first: sympify() eval()s
+    it and these strings come from data artifacts, so the safe-grammar gate is
+    the load-time code-injection boundary (non-str input — a sympy expr/int —
+    skips the gate; sympify does not eval those)."""
+    import sympy
+    if isinstance(text, str):
+        _assert_safe_expr(text)
+    expr = sympy.sympify(text, rational=False, locals=_sympy_locals())
+    free = getattr(expr, "free_symbols", None)
+    if free:
+        subs = {}
+        for s in free:
+            lo = None
+            kind = None
+            if symbols and s.name in symbols:
+                rng = symbols[s.name].get("range") or [None, None]
+                lo = rng[0]
+                kind = symbols[s.name].get("kind")
+            if kind == "symfloat":
+                subs[s] = sympy.Symbol(s.name, real=True)
+            elif lo is not None and lo >= 1:
+                subs[s] = sympy.Symbol(s.name, integer=True, positive=True)
+            else:
+                subs[s] = sympy.Symbol(s.name, integer=True, nonnegative=True)
+        expr = expr.subs(subs)
+    return expr
+
+
 def is_symbolic_entry(entry) -> bool:
     """True if a compact entry contains symbolic dims/strides or is symint."""
     if not isinstance(entry, list) or not entry:
         return False
-    if entry[0] == "I":
+    if isinstance(entry[0], str) and entry[0] in {"I", "F"}:
         return True
     if entry[0] == "S" and len(entry) > 1 and isinstance(entry[1], list):
         return any(isinstance(d, str) for d in entry[1])
@@ -312,55 +765,131 @@ def is_symbolic_entry(entry) -> bool:
         if any(isinstance(d, str) for d in entry[0]):
             return True
         opts = entry[2] if len(entry) > 2 else {}
-        if isinstance(opts, dict) and any(
-                isinstance(s, str) for s in opts.get("st", [])):
-            return True
+        if isinstance(opts, dict):
+            if any(isinstance(s, str) for s in opts.get("st", [])):
+                return True
+            if isinstance(opts.get("off"), str):   # symbolic storage_offset
+                return True
+            if _gen_bound_expr(opts.get("gen")) is not None:
+                return True
     return False
 
 
 def _eval_dim(dim, bindings: dict):
     """Evaluate one dim/stride slot: int passes through; expr string is
-    sympified against the bindings. Raises on unbound symbols."""
+    sympified against the bindings. Raises on unbound symbols, and LOUD if
+    the expr does not fold to a concrete int (a torch function we couldn't
+    evaluate — never silently return a wrong value)."""
     if isinstance(dim, int):
         return dim
-    import sympy
 
-    expr = sympy.sympify(dim, rational=False)
+    expr = _sympify_expr(dim)
     free = expr.free_symbols
     missing = [str(s) for s in free if str(s) not in bindings]
     if missing:
         raise ValueError(f"unbound symbols {missing} in dim expr {dim!r}")
-    val = expr.subs({sympy.Symbol(k): v for k, v in bindings.items()})
-    if not val.is_Integer:
+    val = expr.subs({s: bindings[s.name] for s in free})
+    if not getattr(val, "is_Integer", False):
         raise ValueError(f"dim expr {dim!r} did not evaluate to an int "
-                         f"under {bindings} (got {val})")
+                         f"under {bindings} (got {val!r}); an unrecognized "
+                         "symbolic function may not have folded")
     return int(val)
 
 
-def validate_bindings(symbols: dict, bindings: dict,
-                      guards: list | None = None) -> None:
-    """Check bindings against symbol ranges and residual guards. LOUD on
-    violation — benchmarking an impossible shape answers no question."""
+def _eval_scalar(expr_text, bindings: dict,
+                 symbols: dict | None = None) -> float:
+    """Evaluate a typed SymFloat expression under numeric root bindings."""
+    expr = _sympify_expr(expr_text, symbols)
+    free = expr.free_symbols
+    missing = [str(s) for s in free if str(s) not in bindings]
+    if missing:
+        raise ValueError(
+            f"unbound symbols {missing} in scalar expr {expr_text!r}")
+    value = expr.subs({s: bindings[s.name] for s in free})
+    if not getattr(value, "is_number", False):
+        raise ValueError(
+            f"scalar expr {expr_text!r} did not evaluate to a number "
+            f"under {bindings} (got {value!r})")
+    return float(value)
+
+
+def binding_violation(symbols: dict, bindings: dict,
+                      guards: list | None = None) -> str | None:
+    """Return a reason string for the first range/guard violation under
+    `bindings`, or None if the binding is valid. Pure predicate — never
+    raises — so callers can SEARCH for a valid binding (e.g. perturbing to a
+    distinct warmup shape) without exceptions for control flow. The loud
+    authority validate_bindings() wraps this and raises the same reason."""
     import sympy
 
     for name, val in bindings.items():
         sym = symbols.get(name)
         if sym is None:
-            raise ValueError(f"binding for unknown symbol {name!r} "
-                             f"(table has {sorted(symbols)})")
+            return (f"binding for unknown symbol {name!r} "
+                    f"(table has {sorted(symbols)})")
+        is_float = sym.get("kind") == "symfloat"
+        expected = (int, float) if is_float else int
+        if (not isinstance(val, expected)
+                or isinstance(val, bool)):
+            # A hint-less / unresolved symbol can reach here as None (e.g.
+            # instantiate_point on a symbols entry with no hint). Report it as a
+            # violation rather than raising `None < lo` — this predicate is
+            # documented never to raise so callers can search for a valid
+            # binding without exceptions for control flow.
+            return (
+                f"binding {name}={val!r} is not "
+                f"{'numeric' if is_float else 'an int'}"
+            )
         lo, hi = (sym.get("range") or [None, None])
         if lo is not None and val < lo:
-            raise ValueError(f"{name}={val} below range min {lo}")
+            return f"{name}={val} below range min {lo}"
         if hi is not None and val > hi:
-            raise ValueError(f"{name}={val} above range max {hi}")
+            return f"{name}={val} above range max {hi}"
     for g in guards or []:
-        expr = sympy.sympify(g, rational=False)
-        sub = expr.subs({sympy.Symbol(k): v for k, v in bindings.items()})
-        if sub == sympy.false:
-            raise ValueError(f"binding {bindings} violates guard {g!r}")
+        # Pass the symbol table so sign assumptions come from each symbol's
+        # range floor (a zero-capable unbacked symbol must NOT be assumed
+        # positive — that drops Ne(u0,0) / rejects a valid u0=0).
+        expr = _sympify_expr(g, symbols)
+        # A guard that references symbols NOT in this binding is about a
+        # DIFFERENT point (guards are a shared graph-level list); it is not
+        # applicable here — skip it (the benign cross-point case). Only a
+        # guard whose every symbol IS bound must be certified.
+        if any(s.name not in bindings for s in expr.free_symbols):
+            continue
+        sub = expr.subs({s: bindings[s.name] for s in expr.free_symbols})
+        if sub is sympy.false or sub == sympy.false:
+            return f"binding {bindings} violates guard {g!r}"
+        # Fully bound but did NOT collapse to concrete True -> an opaque
+        # torch function never folded. Refuse rather than silently accept
+        # (the interpolate TruncToInt class: a guard that never reduced to
+        # sympy.false used to pass every binding).
+        if not (sub is sympy.true or sub == sympy.true):
+            return (f"guard {g!r} did not reduce to a concrete bool under "
+                    f"{bindings} (got {sub!r}); an unrecognized symbolic "
+                    "function may not have folded — cannot certify the binding")
+    return None
 
 
-def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
+def bindings_satisfy(symbols: dict, bindings: dict,
+                     guards: list | None = None) -> bool:
+    """True iff `bindings` satisfies every symbol range and applicable guard.
+    Non-raising sibling of validate_bindings — for search/perturbation."""
+    return binding_violation(symbols, bindings, guards) is None
+
+
+def validate_bindings(symbols: dict, bindings: dict,
+                      guards: list | None = None) -> None:
+    """Check bindings against symbol ranges and residual guards. LOUD on
+    violation — benchmarking an impossible shape answers no question. A guard
+    that does not fold to a concrete True/False under the binding is itself
+    LOUD (an unevaluated torch function must never be read as 'satisfied')."""
+    reason = binding_violation(symbols, bindings, guards)
+    if reason is not None:
+        raise ValueError(reason)
+
+
+def evaluate_symbolic_entry(entry: list, bindings: dict,
+                            symbols: dict | None = None) -> list:
     """Evaluate a (possibly symbolic) compact entry to a fully static one.
 
     ["I", hint, expr] -> ["sc", value] semantics are NOT applied here; symint
@@ -374,6 +903,22 @@ def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
         hint = entry[1]
         expr = entry[2] if len(entry) > 2 else None
         return ["sym", _eval_dim(expr, bindings) if expr is not None else hint]
+    if entry[0] == "F":
+        if len(entry) != 4:
+            raise ValueError(
+                "typed SymFloat entry must be "
+                "['F', observed-or-null, expression, dtype]")
+        hint = entry[1]
+        _validate_symfloat_value(hint, allow_none=True)
+        expr = entry[2]
+        if not isinstance(expr, str) or not expr.strip():
+            raise ValueError(f"invalid SymFloat expression {expr!r}")
+        dtype = _validate_symfloat_dtype(entry[3])
+        return [
+            "flt",
+            _eval_scalar(expr, bindings, symbols),
+            dtype,
+        ]
     if entry[0] == "S":
         # lifted shape param with symbolic dims: evaluate each slot
         return ["S", [_eval_dim(d, bindings) for d in entry[1]]]
@@ -382,8 +927,60 @@ def evaluate_symbolic_entry(entry: list, bindings: dict) -> list:
     opts = dict(entry[2]) if len(entry) > 2 else {}
     if "st" in opts:
         opts["st"] = [_eval_dim(s, bindings) for s in opts["st"]]
+    # storage_offset can also be symbolic (a view at a symbolic offset);
+    # evaluate it too, else it stays an unevaluated expr string and the
+    # tensor is as_strided at the wrong offset.
+    if isinstance(opts.get("off"), str):
+        opts["off"] = _eval_dim(opts["off"], bindings)
+    if "gen" in opts:
+        opts["gen"] = _bind_gen(opts["gen"], bindings)
     if opts:
         out.append(opts)
+    return out
+
+
+def evaluate_spec(spec: dict, bindings: dict,
+                  symbols: dict | None = None) -> dict:
+    """Evaluate a VERBOSE spec dict's symbolic shape/stride at a binding,
+    returning a concrete spec (symbolic dims/strides -> ints, 'symbolic'
+    block dropped). Static specs pass through. A symint spec with an 'expr'
+    resolves to {'kind':'symint','value':...}. Reuses _eval_dim — one
+    evaluator for compact entries AND verbose specs."""
+    if spec.get("kind") in {"symint", "symfloat"} \
+            and spec.get("expr") is not None:
+        out = dict(spec)
+        out["value"] = (
+            _eval_scalar(spec["expr"], bindings, symbols)
+            if spec["kind"] == "symfloat"
+            else _eval_dim(spec["expr"], bindings)
+        )
+        out.pop("expr", None)
+        return out
+    symbolic = spec.get("symbolic") or {}
+    storage_nbytes_expr = spec.get("storage_nbytes_expr")
+    gen = spec.get("gen") or spec.get("generator")
+    gen_expr = (gen.get("high_expr") or gen.get("size_expr")) if isinstance(gen, dict) else None
+    if not symbolic and storage_nbytes_expr is None and gen_expr is None:
+        return spec
+    out = dict(spec)
+    out.pop("symbolic", None)
+    if gen_expr is not None:
+        bound = _gen_from_compact(_bind_gen(_gen_to_compact(gen), bindings))
+        out["gen"] = out["generator"] = bound
+    if symbolic.get("shape_exprs"):
+        out["shape"] = [_eval_dim(d, bindings)
+                        for d in _overlay_exprs(list(spec["shape"]),
+                                                symbolic["shape_exprs"])]
+    if symbolic.get("stride_exprs"):
+        base = list(spec.get("stride") or [])
+        out["stride"] = [_eval_dim(d, bindings)
+                         for d in _overlay_exprs(base, symbolic["stride_exprs"])]
+    if symbolic.get("offset_expr"):
+        out["storage_offset"] = _eval_dim(symbolic["offset_expr"], bindings)
+    if storage_nbytes_expr is not None:
+        out["storage_nbytes"] = _eval_dim(
+            storage_nbytes_expr, bindings)
+        out.pop("storage_nbytes_expr", None)
     return out
 
 
@@ -396,10 +993,20 @@ def instantiate_point(point: dict, symbols: dict,
     hints (the static snapshot — default behavior matches static corpus).
     Returns fully static compact entries ready for spec_from_compact.
     """
-    eff = dict(point.get("bindings") or
-               {k: v.get("hint") for k, v in (symbols or {}).items()})
+    eff = dict(point.get("bindings") or {
+        name: value
+        for name, definition in (symbols or {}).items()
+        if (value := _symbol_point_value(definition)) is not None
+    })
     if bindings:
         eff.update(bindings)
+    missing = sorted(set(symbols or {}) - set(eff))
+    if missing:
+        raise ValueError(
+            f"point needs explicit bindings for unobserved symbols {missing}")
     if eff:
         validate_bindings(symbols or {}, eff, guards)
-    return [evaluate_symbolic_entry(e, eff) for e in point.get("inputs", [])]
+    return [
+        evaluate_symbolic_entry(e, eff, symbols)
+        for e in point.get("inputs", [])
+    ]

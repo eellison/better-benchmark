@@ -40,6 +40,7 @@ from full_graph_harness import (
     make_tensor_from_spec,
     parse_full_graph_inputs,
     parse_full_graph_tensor_attrs,
+    prepare_full_graph_execution,
     result_metadata,
     write_full_graph_metadata,
 )
@@ -433,14 +434,20 @@ class GraphModule(torch.nn.Module):
     inputs = parse_full_graph_inputs(content)
     attrs = parse_full_graph_tensor_attrs(content)
 
+    # Symbolic annotations are preserved as exprs, not concretized to a
+    # fabricated default: Sym(s0) keeps its symbol name and a symbolic dim
+    # stays an expr string with a `symbolic.shape_exprs` block (the faithful
+    # dynamic pipeline; hints live in the sidecar meta.json / bindings).
     assert inputs[0]["kind"] == "symint"
     assert inputs[0]["value"] == 32
     assert inputs[0]["symbolic_expr"] == "s0"
-    assert inputs[1]["shape"] == (2, 32)
-    assert inputs[1]["stride"] == (32, 1)
+    assert inputs[0]["expr"] == "s0"
+    assert inputs[1]["shape"] == [2, 32]
+    assert inputs[1]["stride"] == [32, 1]
     assert inputs[1]["device"] == "cuda"
     assert inputs[1]["symbolic_dims"] == [{"dim": 1, "symbol": "s0", "default": 32}]
     assert inputs[1]["symbolic_stride_dims"] == [{"dim": 0, "expr": "s0"}]
+    assert inputs[1]["symbolic"] == {"shape_exprs": [None, "s0"], "stride_exprs": ["s0", None]}
     assert inputs[2]["dtype"] == "int64"
     assert inputs[2]["gen"]["kind"] == "index"
     assert inputs[2]["gen"]["high"] == 2
@@ -473,6 +480,104 @@ class GraphModule(torch.nn.Module):
         with torch.no_grad():
             (out,) = instance(*inputs)
         assert out.shape == (2, 2)
+
+
+def test_dynamic_full_graph_reuses_individual_repro_replay_contract():
+    source = '''
+import torch
+
+class GraphModule(torch.nn.Module):
+    def forward(self, n: "Sym(s0)", x: "f32[2, s0]cpu"):
+        view = torch.ops.aten.view.default(x, [2, n])
+        return (torch.ops.aten.mul.Tensor(view, 2),)
+'''
+    with tempfile.TemporaryDirectory() as tmp:
+        graph = Path(tmp) / "full_graph_000.py"
+        graph.write_text(source)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 2,
+            "inputs": [
+                ["I", 2, "s0"],
+                [[2, "s0"], "f32", {"dev": "cpu"}],
+            ],
+            "outputs": [[[2, "s0"], "f32", {"dev": "cpu"}]],
+            "tensor_attrs": {},
+            "symbols": {"s0": {"hint": 2, "range": [2, None]}},
+            "guards": [],
+            "captured_dynamic": True,
+        }))
+
+        execution = prepare_full_graph_execution(
+            graph, default_device="cpu")
+        assert execution.dynamic
+        assert execution._plan_kind == "backed"
+        assert execution.warm_bindings() == [{"s0": 2}, {"s0": 4}]
+        metadata = result_metadata(execution.definition)
+        assert metadata["constraints"]["inputs"][1]["shape"] == [2, "s0"]
+        assert metadata["constraints"]["symbols"] == {
+            "s0": {"hint": 2, "range": [2, None]}}
+        queueable, failures = _preflight_full_graphs([graph])
+        assert queueable == [graph]
+        assert failures == {}
+
+        graphs = []
+
+        def backend(gm, _inputs):
+            graphs.append(gm)
+            return gm.forward
+
+        compiled = torch.compile(execution.module, backend=backend)
+        for size in (2, 4):
+            args = execution.args({"s0": size})
+            # The raw SymInt argument is reconstructed from x.size(1), so the
+            # compiled callable receives only the backed tensor source.
+            assert len(args) == 1
+            (out,) = compiled(*args)
+            assert out.shape == (2, size)
+        assert len(graphs) == 1
+        torch._dynamo.reset()
+
+        static_execution = prepare_full_graph_execution(
+            graph, default_device="cpu", dynamic=False)
+        static_args = static_execution.args({"s0": 4})
+        # Static replay preserves the saved call signature; unlike the
+        # dynamic adapter it does not derive/remove the raw SymInt argument.
+        assert len(static_args) == 2
+        assert static_execution.module(*static_args)[0].shape == (2, 4)
+
+        # Provenance remains authoritative on the full-graph path too. An
+        # unobserved unbacked symbol uses ShapesSpec and requires an explicit
+        # initial point; its optimization hint is not promoted to a point.
+        import pytest
+        sidecar = json.loads(graph.with_suffix(".meta.json").read_text())
+        sidecar["symbols"]["s0"] = {
+            "unbacked": True,
+            "range": [0, 64],
+            "optimization_hint": 8,
+        }
+        graph.with_suffix(".meta.json").write_text(json.dumps(sidecar))
+        with pytest.raises(ValueError, match="explicit symbol_bindings"):
+            prepare_full_graph_execution(graph, default_device="cpu")
+        unbacked = prepare_full_graph_execution(
+            graph,
+            default_device="cpu",
+            symbol_bindings={"s0": 3},
+        )
+        assert unbacked._plan_kind == "shape_env"
+        unbacked_graphs = []
+
+        def unbacked_backend(gm, _inputs):
+            unbacked_graphs.append(gm)
+            return gm.forward
+
+        compiled_unbacked = torch.compile(
+            unbacked.module, backend=unbacked_backend)
+        for size in (3, 5):
+            args = unbacked.args({"s0": size})
+            assert len(args) == 3  # raw SymInt, tensor, private root
+            assert compiled_unbacked(*args)[0].shape == (2, size)
+        assert len(unbacked_graphs) == 1
+        torch._dynamo.reset()
 
 
 def test_full_graph_harness_zeros_fallback_for_annotation_only_integer_tensor_attrs():
@@ -1333,9 +1438,134 @@ class _RecordingCaptureState(_CaptureState):
         super().__init__(output_dir, validate=False)
         self.generated_targets = []
 
-    def _generate_repro_file(self, gm, placeholder_info, meta, filename, shape_params=None):
+    def _generate_repro_file(self, gm, placeholder_info, meta, filename,
+                             shape_params=None, shape_env_block=None):
         self.generated_targets.append(_real_targets(gm.graph.nodes))
         return str(Path(self.output_dir) / filename)
+
+
+
+def test_distinct_dynamic_bindings_are_internally_distinct():
+    """Warm bindings for the general-kernel pre-warm must be INTERNALLY
+    distinct — no two symbols sharing a value — else dynamo unifies them into
+    one square symbol and the "general" artifact is square-specialized. A plain
+    multiplicative scale (hint * (1+j) * (1+shape_idx)) collides for a 2:1 hint
+    ratio (h0 == 2*h1) at every shape_idx; the distinct-value generator must
+    avoid that while (a) keeping each value a multiple of its hint so
+    divisibility guards survive and (b) varying each symbol across the set."""
+    import json as _json
+    import tempfile as _tempfile
+    from pathlib import Path as _Path
+
+    from dynamic_shape_replay import _distinct_dynamic_bindings
+
+    def _bindings(symbols, guards):
+        with _tempfile.TemporaryDirectory() as tmp:
+            d = _Path(tmp)
+            (d / "repro.py").write_text("# placeholder\n")
+            (d / "shapes.json").write_text(_json.dumps(
+                {"symbols": symbols, "guards": guards, "points": []}))
+            return _distinct_dynamic_bindings(str(d / "repro.py"), [], n=2)
+
+    # 2:1 ratio, NO coupling guard: the old scheme returned squares.
+    sym = {"s0": {"hint": 2, "range": [2, None]},
+           "s1": {"hint": 1, "range": [1, None]}}
+    out = _bindings(sym, [])
+    assert len(out) >= 2, out
+    for b in out:
+        assert len(set(b.values())) == len(b), f"square warm binding: {b}"
+    # requirement (2): every symbol takes >= 2 distinct values across the set.
+    for name in ("s0", "s1"):
+        assert len({b[name] for b in out}) >= 2, (name, out)
+
+    # divisibility guard survives: 3:1 with Mod(s0, 6) == 0 stays a multiple.
+    sym2 = {"s0": {"hint": 6, "range": [6, None]},
+            "s1": {"hint": 2, "range": [2, None]}}
+    out2 = _bindings(sym2, ["Eq(Mod(s0, 6), 0)"])
+    assert out2, out2
+    for b in out2:
+        assert len(set(b.values())) == len(b), f"square warm binding: {b}"
+        assert b["s0"] % 6 == 0, b
+
+    # coupled Eq(s0, s1): distinct values would break the guard, so the coupled
+    # (equal-magnitude) fallback is correct — squares are EXPECTED here.
+    sym3 = {"s0": {"hint": 8, "range": [2, None]},
+            "s1": {"hint": 8, "range": [2, None]}}
+    out3 = _bindings(sym3, ["Eq(s0, s1)"])
+    assert out3, out3
+    for b in out3:
+        assert b["s0"] == b["s1"], b
+
+
+def test_shape_hash_symbolization_identity():
+    """shape_hash must (a) stay byte-stable for static captures — the whole
+    static corpus keys on it, (b) distinguish two symbolic FAMILIES whose
+    hint-concretized shapes coincide ([64,128,s0,s1]@(4,4) vs
+    [64,s0,s1,s2]@(128,4,4) — the opacus e129 conflation), and (c) be
+    invariant to the raw symbol names dynamo's global counter allocated."""
+    import hashlib as _hashlib
+    import json as _json
+    from capture_hook import shape_hash_for_placeholders
+
+    static = {
+        "arg0_1": {"shape": [64, 128, 4, 4], "stride": [], "dtype": "torch.float32"},
+        "arg1_1": {"shape": [64, 128, 4, 4], "stride": [], "dtype": "torch.float32"},
+    }
+    legacy = _hashlib.md5(_json.dumps(sorted(
+        f"{i.get('shape', '?')}:{i.get('stride', [])}:{i.get('dtype', '?')}"
+        for i in static.values()
+    )).encode()).hexdigest()[:8]
+    assert shape_hash_for_placeholders(static) == legacy  # (a) static unchanged
+
+    def _dyn(shape_exprs):
+        return {
+            "arg0_1": {"shape": [64, 128, 4, 4], "stride": [],
+                       "dtype": "torch.float32",
+                       "symbolic": {"shape_exprs": shape_exprs}},
+        }
+
+    chan_static = _dyn([None, None, "s16", "s82"])   # [64,128,s,s]
+    all_dynamic = _dyn([None, "s16", "s82", "s90"])  # [64,s,s,s]
+    renamed = _dyn([None, None, "s28", "s31"])       # same family, other trace
+
+    h_cs = shape_hash_for_placeholders(chan_static)
+    h_ad = shape_hash_for_placeholders(all_dynamic)
+    h_rn = shape_hash_for_placeholders(renamed)
+    assert h_cs != h_ad          # (b) same hints, different symbolization
+    assert h_cs == h_rn          # (c) raw trace names don't leak into identity
+    assert h_cs != legacy        # dynamic never collides with the static point
+
+    # (d) a SYMINT placeholder's concrete value is point identity: its
+    # historical fields are constant (shape=[], stride=[],
+    # dtype=symint) and the expr suffix is binding-blind by design, so points
+    # of a family differing ONLY in the symint's value hashed identically —
+    # the later points were deduped away at process_graph and never reached
+    # merge or oracle dispatch. The hint is a symint's analogue of a tensor's
+    # hint-evaluated shape.
+    def _symint_point(hint):
+        return {
+            "arg0_1": {"shape": [], "stride": [], "dtype": "symint",
+                       "device": "cpu", "hint": hint, "expr": "s77"},
+            "arg1_1": {"shape": [64, 128], "stride": [],
+                       "dtype": "torch.float32"},
+        }
+    h8, h16, h32 = (shape_hash_for_placeholders(_symint_point(h))
+                    for h in (8, 16, 32))
+    assert len({h8, h16, h32}) == 3, (h8, h16, h32)
+    assert shape_hash_for_placeholders(_symint_point(8)) == h8  # stable
+
+    def _symfloat_point(hint):
+        point = _symint_point(hint)
+        point["arg0_1"] = dict(
+            point["arg0_1"], dtype="symfloat", expr="zuf0")
+        return point
+
+    hf15, hf25 = (
+        shape_hash_for_placeholders(_symfloat_point(h))
+        for h in (1.5, 2.5)
+    )
+    assert hf15 != hf25
+    assert hf15 != shape_hash_for_placeholders(_symint_point(1.5))
 
 
 def test_capture_hook_process_graph_splits_horizontal_fusion_regions():

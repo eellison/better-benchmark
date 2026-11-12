@@ -564,10 +564,10 @@ def test_partition_worker_gates_default_and_cd_before_capture_when_enabled():
     )[0]
     default_gate = bench_one.index('"default compiled",\n')
     assert default_gate < bench_one.index(
-        "graph_default, default_is_graph = _capture_cudagraph"
+        "graph_default, default_is_graph, _ = _capture_cudagraph"
     )
     cd_gate = bench_one.index('"coordinate-descent compiled"')
-    assert cd_gate < bench_one.index("graph_cd, cd_is_graph = _capture_cudagraph")
+    assert cd_gate < bench_one.index("graph_cd, cd_is_graph, _ = _capture_cudagraph")
     assert '["numerics"] = numerics' in bench_one
     assert '["coord_descent_numerics"] = cd_numerics' in bench_one
 
@@ -598,23 +598,29 @@ def test_full_graph_inputs_are_seeded_independent_of_worker_rng_state():
         "def _get_or_load_full_graph", 1
     )[1].split("\n\n", 1)[0]
 
-    def load_full_graph(definition, **kwargs):
-        return object(), (torch.randn(8), torch.randint(0, 10, (3,))), definition
+    class Execution:
+        dynamic = False
+
+        def __init__(self):
+            self.inputs = (torch.randn(8), torch.randint(0, 10, (3,)))
+
+        def args(self, binding=None):
+            return self.inputs
 
     namespace = {
         "torch": torch,
         "_prefetch_lock": threading.Lock(),
         "_prefetch_cache": {},
         "load_full_graph_definition": lambda path: path,
-        "load_full_graph": load_full_graph,
+        "prepare_full_graph_execution": lambda definition, **kwargs: Execution(),
     }
     exec(helper, namespace)
     load = namespace["_get_or_load_full_graph"]
 
     torch.manual_seed(1234)
-    _, first, _ = load("graph.py")
+    _, first, *_ = load("graph.py")
     torch.randn(100)
-    _, second, _ = load("graph.py")
+    _, second, *_ = load("graph.py")
 
     assert all(torch.equal(a, b) for a, b in zip(first, second))
 

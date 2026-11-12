@@ -6,6 +6,7 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -16,8 +17,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import torch
+
 import recapture_full_graphs as recapture
 from ingest_tlparse import load_graph_module
+from saved_graph_replay import (
+    _build_symbolic_inputs,
+    _sidecar_symbol_definitions,
+    _sidecar_symbol_hints,
+)
 
 
 FAKE_FULL_GRAPH = """
@@ -70,10 +78,35 @@ class GraphModule(torch.nn.Module):
 """
 
 
+FULL_GRAPH_SYM_POINTWISE = """
+class GraphModule(torch.nn.Module):
+    def forward(self, s0: "Sym(s0)", x: "f32[2, s0]cpu"):
+        view: "f32[2, s0]cpu" = torch.ops.aten.reshape.default(x, [2, s0]);  x = None
+        add: "f32[2, s0]cpu" = torch.ops.aten.add.Tensor(view, 1.0);  view = None
+        mul: "f32[2, s0]cpu" = torch.ops.aten.mul.Tensor(add, 2);  add = s0 = None
+        return (mul,)
+"""
+
+
+FULL_GRAPH_WITH_FLOORDIV_DIM = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, s0//2]cpu"):
+        add: "f32[2, s0//2]cpu" = torch.ops.aten.add.Tensor(x, 1.0);  x = None
+        return (add,)
+"""
+
+
 def _write(path: Path, source: str = FAKE_FULL_GRAPH) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(source)
     return path
+
+
+def _without_sources(shapes: dict) -> dict:
+    for point in shapes.get("points", []):
+        for model in (point.get("models") or {}).values():
+            model.pop("occurrence_sources", None)
+    return shapes
 
 
 class RecaptureFullGraphsTests(unittest.TestCase):
@@ -346,6 +379,458 @@ class RecaptureFullGraphsTests(unittest.TestCase):
 
             self.assertIsNotNone(gm)
             self.assertTrue(hasattr(gm, "graph"))
+
+    def test_loader_preserves_dynamism_symint_shares_tensor_dim(self):
+        """Idempotence regression: a saved graph with a symint input shared
+        with a tensor dynamic dim (s0 in both `Sym(s0)` and `f32[2, s0]`) MUST
+        re-trace SYMBOLICALLY with the symint and the tensor dim as the SAME
+        symbol. Real-mode tracing baked them to hints, so a dynamic saved graph
+        recaptured as a STATIC region (different pattern hash, frozen dims,
+        lifted _shape_param const list). This asserts the dim stays symbolic
+        and the two placeholders share one symbol."""
+        import torch
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_SYM_INPUT,
+            )
+            gm = load_graph_module(graph)
+            self.assertIsNotNone(gm)
+
+            phs = [n for n in gm.graph.nodes if n.op == "placeholder"]
+            symint_ph = next(n for n in phs
+                             if isinstance(n.meta.get("val"), torch.SymInt))
+            tensor_ph = next(n for n in phs
+                             if torch.is_tensor(n.meta.get("val")))
+            tdim = tensor_ph.meta["val"].shape[1]
+            # the tensor's 2nd dim must still be symbolic (NOT baked to a hint)
+            self.assertIsInstance(tdim, torch.SymInt)
+            # and it must be the SAME symbol as the symint input
+            self.assertEqual(str(symint_ph.meta["val"].node.expr),
+                             str(tdim.node.expr))
+
+    def test_loader_preserves_floordiv_dims(self):
+        """a saved annotation whose dim
+        uses the closed grammar beyond +/-/* ('f32[2, s0//2]') must re-trace
+        SYMBOLICALLY — pre-fix it silently fell back to a static real-mode
+        trace (dim baked to the concrete hint, dynamism lost)."""
+        import torch
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_FLOORDIV_DIM,
+            )
+            gm = load_graph_module(graph)
+            self.assertIsNotNone(gm)
+            ph = next(n for n in gm.graph.nodes if n.op == "placeholder")
+            self.assertIsInstance(ph.meta["val"].shape[1], torch.SymInt)
+
+    def test_loader_refuses_static_recapture_of_dynamic_graph(self):
+        """a graph with symbolic inputs
+        whose rebuild genuinely fails (a dim folding to a non-integer at its
+        hint) must FAIL ingestion (None) — never silently produce a static
+        GraphModule for a dynamic family (f(f(x)) != f(x), corrupted point
+        identity)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            graph = _write(
+                Path(tmp) / "full_graph_000.py",
+                FULL_GRAPH_WITH_FLOORDIV_DIM.replace("s0//2", "s0*1.5"),
+            )
+            self.assertIsNone(load_graph_module(graph))
+
+    @unittest.skipUnless(torch.cuda.is_available(), "captures validate on a GPU")
+    def test_dynamic_full_graph_partitions_and_repro_reuses_artifact(self):
+        """Run both execution surfaces through one serialized contract.
+
+        The saved full graph must reuse one dynamic artifact at two points;
+        after partitioning, the generated individual repro must do the same
+        and produce the same values. This covers the seam that the loader
+        idempotence and repro-only benchmark tests exercise separately.
+        """
+        import importlib.util
+        import json
+        import torch
+
+        from dynamic_shape_replay import (
+            _backed_args,
+            _backed_replay_plan_for_repro,
+            _backed_repro,
+        )
+        from full_graph_harness import prepare_full_graph_execution
+        from repro_harness import load_shape_configs
+
+        tmp = Path(tempfile.mkdtemp(prefix="full_graph_to_repro_exec_"))
+        models_root = tmp / "repros" / "models"
+        graph = (
+            models_root
+            / "torchbench"
+            / "infer"
+            / "m"
+            / "full_graph_000.py"
+        )
+        _write(graph, FULL_GRAPH_SYM_POINTWISE)
+        graph.with_suffix(".meta.json").write_text(json.dumps({
+            "schema_version": 2,
+            "inputs": [
+                ["I", 2, "s0"],
+                [[2, "s0"], "f32", {"dev": "cpu"}],
+            ],
+            "outputs": [[[2, "s0"], "f32", {"dev": "cpu"}]],
+            "tensor_attrs": {},
+            "symbols": {"s0": {"hint": 2, "range": [2, None]}},
+            "guards": [],
+            "captured_dynamic": True,
+        }))
+
+        def backend_recorder(graphs):
+            def backend(gm, _inputs):
+                graphs.append(gm)
+                return gm.forward
+            return backend
+
+        def output_tensor(output):
+            return output[0] if isinstance(output, tuple) else output
+
+        # Surface 1: the saved full graph itself.
+        full_execution = prepare_full_graph_execution(
+            graph, default_device="cpu")
+        full_graphs = []
+        full_compiled = torch.compile(
+            full_execution.module,
+            backend=backend_recorder(full_graphs),
+        )
+        expected = {}
+        for size in (2, 4):
+            args = full_execution.args({"s0": size})
+            args[0].copy_(
+                torch.arange(2 * size, dtype=args[0].dtype).reshape(2, size))
+            expected[size] = output_tensor(full_compiled(*args)).detach().cpu()
+        self.assertEqual(len(full_graphs), 1)
+        torch._dynamo.reset()
+
+        # Partition the symbolically reloaded graph into a canonical repro.
+        gm = load_graph_module(graph)
+        self.assertIsNotNone(gm)
+        target = recapture.infer_target(graph, models_root=models_root)
+        output_root = tmp / "out"
+        recapture.process_graph_for_target(
+            gm, target, output_root, validate=True)
+        repro_dirs = list((output_root / "canonical").iterdir())
+        self.assertEqual(len(repro_dirs), 1)
+        repro_file = repro_dirs[0] / "repro.py"
+
+        module_spec = importlib.util.spec_from_file_location(
+            "_partitioned_dynamic_repro", repro_file)
+        module = importlib.util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+        plan = _backed_replay_plan_for_repro(str(repro_file))
+        self.assertIsNotNone(plan)
+
+        # Surface 2: the generated individual repro.
+        repro_graphs = []
+        repro_compiled = torch.compile(
+            _backed_repro(module.Repro(), plan),
+            backend=backend_recorder(repro_graphs),
+        )
+        for size in (2, 4):
+            config = next(iter(load_shape_configs(
+                str(repro_file),
+                symbol_bindings={"s0": size},
+            ).values()))
+            inputs = module.make_inputs(config)
+            inputs[0].copy_(
+                torch.arange(
+                    2 * size,
+                    dtype=inputs[0].dtype,
+                    device=inputs[0].device,
+                ).reshape(2, size)
+            )
+            actual = output_tensor(
+                repro_compiled(*_backed_args(inputs, plan))).detach().cpu()
+            torch.testing.assert_close(actual, expected[size])
+        self.assertEqual(len(repro_graphs), 1)
+        torch._dynamo.reset()
+
+    def test_recapture_is_fixed_point_for_dynamic_graph(self):
+        """recapture(recapture(x)) == recapture(x): a dynamic saved graph,
+        recaptured twice, yields byte-identical canonical content. Guards the
+        whole idempotence chain (load -> partition -> merge) for symbolic
+        shapes, not just that the loader doesn't crash."""
+        import json
+        canon_a = self._recapture_once(FULL_GRAPH_WITH_SYM_INPUT, "a")
+        canon_b = self._recapture_once(FULL_GRAPH_WITH_SYM_INPUT, "b")
+        self.assertEqual(sorted(canon_a), sorted(canon_b),
+                         "pattern-hash region set not stable across recapture")
+        for region in canon_a:
+            for fname in ("repro.py", "shapes.json"):
+                fa = canon_a[region] / fname
+                fb = canon_b[region] / fname
+                if fa.exists() and fb.exists():
+                    self.assertEqual(fa.read_text(), fb.read_text(),
+                                     f"{region}/{fname} not byte-stable")
+
+    @unittest.skipUnless(torch.cuda.is_available(), "captures validate on a GPU")
+    def test_recapture_composition_is_fixed_point(self):
+        """f(f(x)) == f(x) THROUGH the pipeline (alignment §6b): the sibling
+        fixed-point test runs the FIRST generation twice, which proves
+        determinism, not composition. Here the LOADED symbolic gm is re-traced
+        a SECOND time (generation 2 = f(f(x))) and BOTH generations are
+        processed through partition/merge into fresh canonical roots — same
+        region-dir set, byte-identical repro.py / shapes.json, and the
+        symint/tensor-dim symbol sharing survives generation 2."""
+        import torch
+        from torch.fx.experimental.proxy_tensor import make_fx
+
+        tmp = Path(tempfile.mkdtemp(prefix="fixedpoint_compose_"))
+        models_root = tmp / "repros" / "models"
+        gpath = models_root / "torchbench" / "infer" / "m" / "full_graph_000.py"
+        # A fixture that actually CAPTURES a region: the bare-reshape source
+        # the sibling test uses partitions to zero regions, which made an
+        # empty-vs-empty comparison pass vacuously.
+        _write(gpath, FULL_GRAPH_SYM_POINTWISE)
+        target = recapture.infer_target(gpath, models_root=models_root)
+
+        gm1 = load_graph_module(gpath)
+        self.assertIsNotNone(gm1)
+
+        # Generation 2: symbolic re-trace OF THE LOADED gm, driving its own
+        # placeholder values back through it under their fake mode.
+        vals = [n.meta["val"] for n in gm1.graph.nodes
+                if n.op == "placeholder"]
+        fake_mode = torch._guards.detect_fake_mode(vals)
+        self.assertIsNotNone(fake_mode)
+        with fake_mode:
+            gm2 = make_fx(gm1, tracing_mode="symbolic")(*vals)
+
+        # The composed generation still shares ONE symbol between the symint
+        # input and the tensor dynamic dim — dynamism survived f(f(x)).
+        phs2 = [n for n in gm2.graph.nodes if n.op == "placeholder"]
+        symint_ph = next(n for n in phs2
+                         if isinstance(n.meta.get("val"), torch.SymInt))
+        tensor_ph = next(n for n in phs2
+                         if torch.is_tensor(n.meta.get("val")))
+        tdim = tensor_ph.meta["val"].shape[1]
+        self.assertIsInstance(tdim, torch.SymInt)
+        self.assertEqual(str(symint_ph.meta["val"].node.expr),
+                         str(tdim.node.expr))
+
+        def _process(gm, tag):
+            root = tmp / f"out_{tag}"
+            recapture.process_graph_for_target(gm, target, root,
+                                               validate=True)
+            canon = root / "canonical"
+            return ({d.name: d for d in canon.iterdir()}
+                    if canon.exists() else {})
+
+        canon_1 = _process(gm1, "gen1")
+        canon_2 = _process(gm2, "gen2")
+        self.assertTrue(canon_1)
+        self.assertEqual(sorted(canon_1), sorted(canon_2),
+                         "region set not stable under composition")
+        for region in canon_1:
+            for fname in ("repro.py", "shapes.json"):
+                fa = canon_1[region] / fname
+                fb = canon_2[region] / fname
+                self.assertEqual(fa.exists(), fb.exists(),
+                                 f"{region}/{fname} presence differs")
+                if fa.exists():
+                    ta, tb = fa.read_text(), fb.read_text()
+                    if fname == "shapes.json":
+                        # occurrence_sources name the source graph's nodes,
+                        # which a re-trace renumbers (mul -> mul_2).
+                        ta, tb = (json.dumps(_without_sources(json.loads(t)), indent=1)
+                                  for t in (ta, tb))
+                    self.assertEqual(
+                        ta, tb, f"{region}/{fname} not byte-stable under composition")
+
+    def _recapture_once(self, source: str, tag: str) -> dict:
+        """Recapture one saved-graph source into a fresh root; return
+        {region_dir_name: canonical_dir_path}. Helper for the fixed-point test."""
+        tmp = Path(tempfile.mkdtemp(prefix=f"fixedpoint_{tag}_"))
+        models_root = tmp / "repros" / "models"
+        gpath = models_root / "torchbench" / "infer" / "m" / "full_graph_000.py"
+        gpath.parent.mkdir(parents=True, exist_ok=True)
+        _write(gpath, source)
+        canonical_root = tmp / "out"
+        target = recapture.infer_target(gpath, models_root=models_root)
+        gm = load_graph_module(gpath)
+        self.assertIsNotNone(gm)
+        recapture.process_graph_for_target(gm, target, canonical_root, validate=True)
+        canon = canonical_root / "canonical"
+        return {d.name: d for d in canon.iterdir()} if canon.exists() else {}
+
+
+class TestBuildSymbolicInputs(unittest.TestCase):
+    """Unit tests for _build_symbolic_inputs symbol resolution (CPU, no CUDA).
+
+    Regression coverage for the symint/stride/hint resolution bugs where a
+    dynamic quantity silently collapsed to a constant (losing dynamism):
+      - constant symint (Sym(256)) and composite symint (Sym(s0*s1))
+      - a symbol appearing ONLY in a stride expr
+      - a symbol whose hint is 0 or 1 (ShapeEnv 0/1-specialization)
+    """
+
+    def _build(self, specs, hints=None, definitions=None):
+        import torch
+        return _build_symbolic_inputs(
+            specs,
+            torch.device("cpu"),
+            hints or {},
+            symbol_definitions=definitions,
+        )
+
+    def test_constant_symint_keeps_value_not_default(self):
+        import torch
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0"],
+             "dtype": "float32", "stride": ["1"], "device": "cpu"},
+            {"kind": "symint", "name": "n", "value": 256},
+        ]
+        _mode, inputs = self._build(specs, {"s0": 8})
+        self.assertEqual(inputs[1], 256)  # not collapsed to the default hint
+
+    def test_composite_symint_stays_symbolic(self):
+        import torch
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0", "s1"],
+             "dtype": "float32", "stride": ["s1", "1"], "device": "cpu"},
+            {"kind": "symint", "name": "n", "expr": "s0*s1"},
+        ]
+        _mode, inputs = self._build(specs, {"s0": 8, "s1": 4})
+        self.assertIsInstance(inputs[1], torch.SymInt)
+
+    def test_stride_only_symbol_is_seeded(self):
+        import torch
+        # s2 appears ONLY in the stride, never in a shape dim or the sidecar.
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0", "4"],
+             "dtype": "float32", "stride": ["s2", "s0"], "device": "cpu"},
+        ]
+        res = self._build(specs, {})
+        self.assertIsNotNone(res, "stride-only symbol dropped -> rebuild None")
+        _mode, inputs = res
+        self.assertIsInstance(inputs[0].stride()[0], torch.SymInt)
+
+    def test_hint_one_does_not_specialize(self):
+        import torch
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0"],
+             "dtype": "float32", "stride": ["1"], "device": "cpu"},
+        ]
+        _mode, inputs = self._build(specs, {"s0": 1})  # falsy hint
+        self.assertIsInstance(inputs[0].shape[0], torch.SymInt)
+
+    def test_unbacked_provenance_and_range_survive_rebuild(self):
+        """Saved-graph replay must not silently turn an unbacked root backed."""
+        specs = [
+            {"kind": "tensor", "name": "x", "shape": ["s0", 3],
+             "dtype": "float32", "stride": ["3", "1"], "device": "cpu"},
+            {"kind": "symint", "name": "n", "expr": "s0"},
+        ]
+        for definition in (
+            {
+                "s0": {
+                    "observed_value": 8,
+                    "range": [0, 64],
+                    "unbacked": True,
+                    "optimization_hint": 16,
+                },
+            },
+            {
+                "s0": {
+                    "range": [0, 64],
+                    "unbacked": True,
+                    "optimization_hint": 9,
+                },
+            },
+            {
+                "s0": {
+                    "range": [0, 64],
+                    "unbacked": True,
+                },
+            },
+        ):
+            mode, inputs = self._build(
+                specs, definitions=definition)
+            expr = inputs[1].node.expr
+            self.assertTrue(mode.shape_env.is_unbacked_symint(expr))
+            value_range = mode.shape_env.var_to_range[expr]
+            self.assertEqual(int(value_range.lower), 0)
+            self.assertEqual(int(value_range.upper), 64)
+            self.assertEqual(inputs[0].shape[0].node.expr, expr)
+            from full_graph_harness import _harvest_shape_env
+            recaptured = next(iter(
+                _harvest_shape_env(mode.shape_env)["symbols"].values()))
+            self.assertEqual(recaptured, definition["s0"])
+
+    def test_composite_grammar_dims_stay_symbolic(self):
+        """valid saved dims using the closed torch
+        grammar beyond +/-/* (floordiv, CeilToInt, PythonMod) must rebuild
+        SYMBOLICALLY over the SAME base symbol — the old evaluator's charset
+        gate returned None for them and the whole graph silently recaptured
+        static."""
+        import torch
+        for dim in ("s0//2", "CeilToInt(s0/3)", "PythonMod(s0, 4)"):
+            specs = [{"kind": "tensor", "name": "x", "shape": ["s0", dim],
+                      "dtype": "float32", "stride": None, "device": "cpu"}]
+            res = self._build(specs, {"s0": 8})
+            self.assertIsNotNone(res, dim)
+            _mode, inputs = res
+            d0, d1 = inputs[0].shape[0], inputs[0].shape[1]
+            self.assertIsInstance(d1, torch.SymInt, dim)
+            self.assertIn(str(d0.node.expr), str(d1.node.expr), dim)
+
+    def test_non_integral_dim_refuses(self):
+        """A dim expr that folds to a NON-integer at the hint ('s0*1.5' at
+        s0=8 -> 12.0) cannot be traced at a concrete size — the rebuild must
+        return None (caller fails ingestion), never guess a coercion."""
+        specs = [{"kind": "tensor", "name": "x", "shape": ["s0*1.5"],
+                  "dtype": "float32", "stride": None, "device": "cpu"}]
+        self.assertIsNone(self._build(specs, {"s0": 8}))
+
+
+class TestSidecarSymbolHints(unittest.TestCase):
+    """Sidecar point values remain typed and separate from optimizer hints."""
+
+    def _hints(self, symbols):
+        with tempfile.TemporaryDirectory() as tmp:
+            g = Path(tmp) / "full_graph_000.py"
+            g.write_text("# stub")
+            (g.with_name("full_graph_000.meta.json")).write_text(
+                __import__("json").dumps({"symbols": symbols}))
+            return _sidecar_symbol_hints(g)
+
+    def test_full_definition_keeps_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            g = Path(tmp) / "full_graph_000.py"
+            g.write_text("# stub")
+            symbols = {
+                "s0": {
+                    "observed_value": 8,
+                    "range": [0, None],
+                    "unbacked": True,
+                    "optimization_hint": 32,
+                },
+            }
+            (g.with_name("full_graph_000.meta.json")).write_text(
+                __import__("json").dumps({"symbols": symbols}))
+            self.assertEqual(_sidecar_symbol_definitions(g), symbols)
+
+    def test_int_hint_is_kept(self):
+        self.assertEqual(self._hints({"s0": {"hint": 16}}), {"s0": 16})
+
+    def test_bool_hint_is_rejected(self):
+        # isinstance(True, int) is True; a bool must not seed a size-1 hint.
+        self.assertEqual(self._hints({"s0": {"hint": True}}), {})
+
+    def test_integral_float_is_rejected_not_normalized(self):
+        self.assertEqual(self._hints({"s0": {"hint": 4.0}}), {})
+
+    def test_non_integral_and_garbage_are_dropped(self):
+        self.assertEqual(
+            self._hints({"a": {"hint": 3.5}, "b": {"hint": "8"},
+                         "c": {"hint": None}, "d": "notadict"}),
+            {})
 
 
 if __name__ == "__main__":

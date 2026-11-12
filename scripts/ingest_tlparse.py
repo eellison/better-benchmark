@@ -17,10 +17,9 @@ Usage:
     python scripts/ingest_tlparse.py --run-id 25956360525 --list-only
 """
 import argparse
-import importlib.util
-import json
 import math
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -28,6 +27,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+
+from saved_graph_replay import symbolic_retrace  # noqa: E402
 
 
 def download_tlparse(run_id: int, suite: str | None, output_dir: Path) -> Path:
@@ -242,7 +243,18 @@ def _forward_takes_no_inputs(content: str) -> bool:
     return fwd_match is not None and not fwd_match.group(1).strip()
 
 
-def load_graph_module(graph_path: Path):
+def runnable_symbol_hints(graph_path: Path) -> dict[str, int]:
+    """Hints of the backed symbols of a tlparse compile: its
+    fx_graph_runnable (next to the post-grad graph) records each as a
+    ``s10 = 1811`` line."""
+    hints = {}
+    for runnable in sorted(Path(graph_path).parent.glob("fx_graph_runnable*.txt")):
+        for name, value in re.findall(r"^(s\d+) = (\d+)$", runnable.read_text(), flags=re.M):
+            hints[name] = int(value)
+    return hints
+
+
+def load_graph_module(graph_path: Path, symbol_hints: dict[str, int] | None = None):
     """Load a post-grad graph txt or fx_graph_runnable as an FX GraphModule.
 
     Handles two formats:
@@ -424,6 +436,30 @@ def load_graph_module(graph_path: Path):
                 return make_base((storage_size,)).as_strided(shape, stride)
             return make_base(shape)
 
+        # FAITHFUL DYNAMIC RECAPTURE (idempotence): a saved full graph whose
+        # forward annotations carry symbolic dims/symints (e.g. arg4_1:
+        # "f32[64,64,s16,s82][64*s16*s82,...]" + arg2_1:"Sym(s16)") must be
+        # re-traced SYMBOLICALLY, with the symint inputs sharing the SAME
+        # symbols as the tensor dynamic dims — else make_fx(real) bakes them to
+        # their hints and a dynamic graph recaptures as a STATIC region
+        # (frozen dims + lifted _shape_param const list). The lossy local
+        # annotation parser collapses s16->hint and strides->garbage, so use
+        # full_graph_harness.parse_full_graph_inputs (keeps symbol names +
+        # exprs) and reconstruct shared ShapeEnv symbols. Static graphs (no
+        # symbolic spec) keep the original real-mode path untouched.
+        try:
+            gm = symbolic_retrace(instance, content, graph_path, dev,
+                                  symbol_hints=symbol_hints)
+        except ValueError as e:
+            # A dynamic graph whose symbolic rebuild failed must NOT
+            # recapture as static: that silently corrupts point/family
+            # identity and breaks f(f(x)) == f(x). A skipped graph is
+            # visible and recoverable, a wrong recapture is neither.
+            print(f"  ERROR: {e} — refusing to recapture a dynamic graph as static")
+            return None
+        if gm is not None:
+            return gm
+
         inputs = []
         for raw_spec in input_shapes:
             spec = normalize_input_spec(raw_spec)
@@ -504,7 +540,7 @@ def main():
         label = infer_model_name(graph_path) + f"_graph{i}"
         print(f"[{i+1}/{len(graphs)}] {graph_path.name} ({label})...", end=" ", flush=True)
 
-        gm = load_graph_module(graph_path)
+        gm = load_graph_module(graph_path, symbol_hints=runnable_symbol_hints(graph_path))
         if gm is None:
             print("SKIP (load failed)")
             continue

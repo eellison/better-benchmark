@@ -2612,10 +2612,17 @@ def main():
                              "mapping consumable by model_graph_accounting.py --timings.")
     parser.add_argument("--full-graphs", action="store_true",
                         help="Benchmark saved repros/models full_graph_*.py files "
-                             "instead of partition repro.py files")
+                             "instead of partition repro.py files. A graph "
+                             "with a captured symbols table uses one faithful "
+                             "dynamic artifact by default; static graphs keep "
+                             "the historical specialized path.")
     parser.add_argument("--allow-unsafe-full-graphs", action="store_true",
                         help="Queue annotation-only integer/symbolic full graphs "
                              "instead of skipping them during preflight")
+    parser.add_argument("--static", action="store_true",
+                        help="With --full-graphs, specialize a dynamic graph "
+                             "at its captured binding instead of using the "
+                             "default dynamic replay.")
     parser.add_argument("--models-root", type=Path, default=Path("repros/models"),
                         help="Default graph search root for --full-graphs")
     parser.add_argument("--benchmark-set", type=Path, default=None,
@@ -2777,6 +2784,8 @@ def main():
 
     if args.full_graphs and args.benchmark_set:
         parser.error("--benchmark-set selects canonical repros and cannot be used with --full-graphs")
+    if args.static and not args.full_graphs:
+        parser.error("--static currently applies only with --full-graphs")
     if args.full_graphs and args.update_perf:
         parser.error("--update-perf writes repro perf.json files and is not supported with --full-graphs")
     if args.oracles and args.full_graphs:
@@ -3081,6 +3090,7 @@ def main():
         "memory_snapshot_dir": str(args.memory_snapshot_dir),
         "models_root": str(Path(root) / args.models_root),
         "tag": args.tag or "latest",
+        "static": args.static,
     }
 
     if args.oracles:
@@ -3798,7 +3808,7 @@ def bench_oracle_point(canonical_dir, shape_label):
         inputs = make_inputs_from_config(config)
         return {{shape_label: bench_oracle(
             fn, instance, inputs, point_id, warmup=WARMUP, rep=REP,
-            compile_policy=compile_policy)}}
+            compile_policy=compile_policy, point=config.get("shape_hash"))}}
     return {{shape_label: {{"repro_id": point_id,
                            "compile_policy": compile_policy,
                            "status": "UNVERIFIED_NUMERICS"}}}}
@@ -3843,7 +3853,7 @@ def bench_oracle_dir(canonical_dir):
             inputs = make_inputs_from_config(config)
             results[label] = bench_oracle(
                 fn, instance, inputs, point_id, warmup=WARMUP, rep=REP,
-                compile_policy=compile_policy)
+                compile_policy=compile_policy, point=config.get("shape_hash"))
         else:
             results[label] = {{"repro_id": point_id,
                                "compile_policy": compile_policy,
@@ -3921,9 +3931,16 @@ import torch._inductor.config as inductor_config
 import torch._inductor.metrics as inductor_metrics
 from triton.testing import do_bench
 import importlib.util, math
-from repro_harness import compile_policy_from_config, compile_repro, load_shape_configs, make_inputs_from_config, make_inputs_safely, preserve_compile_environment
+from repro_harness import (
+    _unique_graph_count, compile_policy_from_config, compile_repro, load_shape_configs,
+    make_inputs_from_config, make_inputs_safely, preserve_compile_environment,
+)
 from byte_accounting import analyze_bytes_effective, sol_result_fields
-from full_graph_harness import FullGraphNumericsError, load_full_graph_definition, load_full_graph, make_inputs_from_full_graph_specs, result_metadata, run_numerics_gate, tensor_bytes
+from full_graph_harness import (
+    FullGraphNumericsError, load_full_graph, load_full_graph_definition,
+    make_inputs_from_full_graph_specs, prepare_full_graph_execution, result_metadata,
+    run_numerics_gate, tensor_bytes,
+)
 from torch._inductor.utils import fresh_cache
 
 STRICT_GPU_LOCK = {args_dict["strict_gpu_lock"]}
@@ -4184,29 +4201,41 @@ def _get_or_load_full_graph(repro_path):
     # Synthetic inputs and module attributes draw from the global torch RNG,
     # whose state otherwise depends on which graphs this worker ran before.
     torch.manual_seed(0)
-    instance, inputs, definition = load_full_graph(definition, default_device="cuda")
-    return instance, inputs, definition
+    execution = prepare_full_graph_execution(
+        definition,
+        default_device="cuda",
+        dynamic={False if args_dict.get("static", False) else None},
+    )
+    inputs = execution.args()
+    warm_bindings = (
+        execution.warm_bindings() if execution.dynamic else [])
+    warm_inputs = [execution.args(binding) for binding in warm_bindings]
+    return execution, inputs, warm_bindings, warm_inputs, definition
 
 N_ROUNDS = 5  # interleaved timing rounds for min-of-mins
 
-def _capture_cudagraph(fn, inps):
-    """Compile warmup and capture a CUDAGraph. Returns (graph, is_graph).
+def _capture_cudagraph(fn, inps, warm_inputs=()):
+    """Compile warmup and capture a CUDAGraph.
 
-    If CUDAGraph capture fails (some ops unsupported), returns (fn, False)
-    as a fallback callable.
+    Returns ``(graph_or_fn, is_graph, measurement_recompiled)``. If CUDAGraph
+    capture fails (some ops unsupported), the callable is returned directly.
     """
     with torch.no_grad():
+        for warm in warm_inputs:
+            fn(*warm)
+        graphs_after_warm = _unique_graph_count()
         for _ in range(3):
             fn(*inps)
+        measurement_recompiled = _unique_graph_count() > graphs_after_warm
         torch.cuda.synchronize()
         try:
             g = torch.cuda.CUDAGraph()
             with torch.cuda.graph(g):
                 fn(*inps)
             torch.cuda.synchronize()
-            return g, True
+            return g, True, measurement_recompiled
         except Exception:
-            return fn, False
+            return fn, False, measurement_recompiled
 
 def _make_bench_callable(graph_or_fn, is_graph, inps):
     """Return a zero-arg callable suitable for do_bench."""
@@ -4216,10 +4245,19 @@ def _make_bench_callable(graph_or_fn, is_graph, inps):
         return lambda: graph_or_fn(*inps)
 
 def bench_full_graph_one(repro_path):
-    instance, inputs, _definition = _get_or_load_full_graph(repro_path)
+    (
+        execution,
+        inputs,
+        warm_bindings,
+        warm_inputs,
+        _definition,
+    ) = _get_or_load_full_graph(repro_path)
+    instance = execution.module
 
     def make_numerics_inputs():
-        return make_inputs_from_full_graph_specs(_definition.input_specs, default_device="cuda")
+        # The execution's own argument adapter: a dynamic replay module takes
+        # mark_dynamic'd inputs or extra live-symbol arguments.
+        return list(execution.args())
 
     if not CHECK_NUMERICS:
         with gpu_setup_lock():
@@ -4238,13 +4276,13 @@ def bench_full_graph_one(repro_path):
     if {args_dict.get("compile_time", False)}:
         with fresh_cache():
             _t0 = time.perf_counter()
-            compiled = torch.compile(instance, fullgraph=CHECK_NUMERICS)
+            compiled = execution.compile(fullgraph=CHECK_NUMERICS)
             with torch.no_grad():
                 compiled(*inputs)
             torch.cuda.synchronize()
             compile_time_s = time.perf_counter() - _t0
     else:
-        compiled = torch.compile(instance, fullgraph=CHECK_NUMERICS)
+        compiled = execution.compile(fullgraph=CHECK_NUMERICS)
     numerics = None
     if CHECK_NUMERICS:
         # Checking requires fullgraph: graph breaks would leave eager code in the
@@ -4259,7 +4297,11 @@ def bench_full_graph_one(repro_path):
             del eager_out
     with gpu_setup_lock():
         with torch.no_grad():
-            graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
+            (
+                graph_default,
+                default_is_graph,
+                default_recompiled,
+            ) = _capture_cudagraph(compiled, inputs, warm_inputs)
     n_kernels = inductor_metrics.generated_kernel_count
 
     # Measure the default compiled artifact before CD resets Dynamo's cache.
@@ -4299,8 +4341,7 @@ def bench_full_graph_one(repro_path):
     cd_numerics = None
     if do_cd:
         torch._dynamo.reset()
-        compiled_cd = torch.compile(
-            instance,
+        compiled_cd = execution.compile(
             fullgraph=CHECK_NUMERICS,
             options={{"coordinate_descent_tuning": True}},
         )
@@ -4315,7 +4356,8 @@ def bench_full_graph_one(repro_path):
                     seeds=1,
                 )
             with torch.no_grad():
-                graph_cd, cd_is_graph = _capture_cudagraph(compiled_cd, inputs)
+                graph_cd, cd_is_graph, _cd_recompiled = _capture_cudagraph(
+                    compiled_cd, inputs, warm_inputs)
 
     bench_default = _make_bench_callable(graph_default, default_is_graph, inputs)
     bench_cd = _make_bench_callable(graph_cd, cd_is_graph, inputs) if do_cd else None
@@ -4414,6 +4456,12 @@ def bench_full_graph_one(repro_path):
             "naive_io_bytes": input_bytes + output_bytes,
             "n_kernels": n_kernels,
             "num_inputs": len(inputs),
+            "mode": "dynamic" if execution.dynamic else "static",
+            "binding": _definition.metadata.get("symbol_bindings"),
+            "compile_bindings": (
+                warm_bindings if execution.dynamic else None),
+            "recompiled": (
+                default_recompiled if execution.dynamic else None),
             "gap_default": None,
             "gap_cd": None,
         }}
@@ -4492,7 +4540,7 @@ def bench_one(task_key):
                     instance, compiled, make_point_inputs, label="default compiled",
                     variant="default", seeds=NUMERICS_SEEDS)
             with torch.no_grad():
-                graph_default, default_is_graph = _capture_cudagraph(compiled, inputs)
+                graph_default, default_is_graph, _ = _capture_cudagraph(compiled, inputs)
         n_kernels = inductor_metrics.generated_kernel_count
 
         # Measure the default compiled artifact before CD resets Dynamo's cache.
@@ -4526,7 +4574,7 @@ def bench_one(task_key):
                         label="coordinate-descent compiled",
                         variant="coordinate_descent", seeds=NUMERICS_SEEDS)
                 with torch.no_grad():
-                    graph_cd, cd_is_graph = _capture_cudagraph(
+                    graph_cd, cd_is_graph, _ = _capture_cudagraph(
                         compiled_cd,
                         inputs,
                     )
