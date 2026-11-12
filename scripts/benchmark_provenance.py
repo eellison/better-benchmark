@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+from pathlib import PurePath
+
+_CORPUS_TREES = ("canonical", "models")
+
 _KNOWN_BENCHMARK_CONFIG_DEFAULTS = {
     "combo_kernels": False,
     "combo_kernel_per_subkernel_blocks": False,
@@ -48,3 +52,26 @@ def semantic_benchmark_config(config: dict | None) -> dict:
     if numerics_check and numerics_check.get("enabled"):
         normalized["numerics_check"] = dict(numerics_check)
     return normalized
+
+
+def corpus_relative_path(path: str | PurePath) -> str | None:
+    """The corpus-relative identity of a repro or full-graph path.
+
+    The same workload lives at different absolute paths in different
+    checkouts, worktrees and copied bundles. Anchor at the last ``repros``
+    directory when there is one (``.../repros/canonical/x/repro.py`` ->
+    ``canonical/x/repro.py``); otherwise at the last ``canonical`` or
+    ``models`` directory, the two trees a corpus root holds. A checkout under
+    a directory that happens to be named ``models`` therefore still resolves
+    to its own corpus tree. Returns None for paths outside any corpus.
+    """
+    parts = PurePath(path).parts
+    if "repros" in parts[:-1]:
+        anchor = len(parts) - 1 - parts[::-1].index("repros")
+        rel = parts[anchor + 1:]
+        if rel and rel[0] in _CORPUS_TREES:
+            return PurePath(*rel).as_posix()
+    markers = [i for i, part in enumerate(parts[:-1]) if part in _CORPUS_TREES]
+    if not markers:
+        return None
+    return PurePath(*parts[markers[-1]:]).as_posix()

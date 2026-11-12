@@ -63,6 +63,7 @@ Usage:
 """
 import argparse
 import dataclasses
+import hashlib
 import inspect
 import json
 import multiprocessing as mp
@@ -80,7 +81,7 @@ for _import_root in (_REPO_ROOT, _SCRIPT_DIR):
         sys.path.insert(0, str(_import_root))
 
 from gpu_lock import matching_gpus  # noqa: E402
-from benchmark_provenance import semantic_benchmark_config  # noqa: E402
+from benchmark_provenance import corpus_relative_path, semantic_benchmark_config  # noqa: E402
 
 
 # Shared inductor cache — all workers read/write the same cache so repeated
@@ -246,6 +247,22 @@ def _expand_repro_shape_tasks(repros: list[Path]) -> list[str]:
     return tasks
 
 
+def _repro_shape_tasks_to_oracle_tasks(tasks: list[str]) -> list[str]:
+    """Convert exact repro.py shape tasks to the oracle worker's dir tasks."""
+    converted = []
+    for task in tasks:
+        repro_path_text, shape_label = _split_shape_task_key(task)
+        repro_path = Path(repro_path_text)
+        if repro_path.name != "repro.py":
+            raise ValueError(
+                f"benchmark-set task must resolve to repro.py, got {repro_path}"
+            )
+        if shape_label is None:
+            raise ValueError(f"benchmark-set task is not shape-qualified: {task}")
+        converted.append(_make_shape_task_key(str(repro_path.parent), shape_label))
+    return converted
+
+
 def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
     """Order sharded (path, shape) tasks so the biggest dirs drain first.
 
@@ -265,6 +282,104 @@ def _sort_shape_tasks_big_dirs_first(tasks: list[str]) -> list[str]:
             _split_shape_task_key(k)[0],
         ),
     )
+
+
+_TASK_DURATION_LEDGER_SCHEMA_VERSION = 1
+
+
+def _task_duration_key(task: str | Path, workload_kind: str, hardware_kind: str) -> str:
+    """Return a stable ledger key for a queued benchmark task."""
+    task_path_text, shape_label = _split_shape_task_key(str(task))
+    stable_path = corpus_relative_path(task_path_text)
+    if stable_path is None:
+        stable_path = Path(task_path_text).resolve().as_posix()
+    key = f"{hardware_kind}:{workload_kind}:{stable_path}"
+    if shape_label is not None:
+        key = _make_shape_task_key(key, shape_label)
+    return key
+
+
+def _load_task_duration_ledger(path: Path) -> dict:
+    """Load and validate a task-duration ledger, or initialize a missing one."""
+    if not path.exists():
+        return {
+            "schema_version": _TASK_DURATION_LEDGER_SCHEMA_VERSION,
+            "tasks": {},
+        }
+    payload = json.loads(path.read_text())
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") != _TASK_DURATION_LEDGER_SCHEMA_VERSION
+        or not isinstance(payload.get("tasks"), dict)
+    ):
+        raise ValueError(
+            "not a schema_version "
+            f"{_TASK_DURATION_LEDGER_SCHEMA_VERSION} task-duration ledger"
+        )
+    return payload
+
+
+def _sort_tasks_by_known_duration(
+    tasks: list[str | Path],
+    ledger: dict,
+    workload_kind: str,
+    hardware_kind: str,
+) -> tuple[list[str | Path], int]:
+    """Schedule known long tasks first and leave unknown task order stable."""
+    entries = ledger["tasks"]
+    decorated = []
+    known = 0
+    for index, task in enumerate(tasks):
+        entry = entries.get(_task_duration_key(task, workload_kind, hardware_kind))
+        if entry is not None:
+            known += 1
+            decorated.append((0, -entry["wall_time_s"], index, task))
+        else:
+            decorated.append((1, 0.0, index, task))
+    decorated.sort(key=lambda item: item[:3])
+    return [item[3] for item in decorated], known
+
+
+def _record_task_duration(
+    ledger: dict,
+    *,
+    task: str | Path,
+    workload_kind: str,
+    hardware_kind: str,
+    wall_time_s: float,
+    status: str,
+) -> None:
+    """Update a duration ledger from one completed worker task.
+
+    The most recent run wins, so one past hang does not pin a task to the
+    front of every later sweep. A failed run only raises the estimate: a task
+    that crashed early says nothing about how long it takes to finish.
+    """
+    key = _task_duration_key(task, workload_kind, hardware_kind)
+    previous = ledger["tasks"].get(key)
+    if status != "ok" and previous is not None and previous["wall_time_s"] >= wall_time_s:
+        return
+    ledger["tasks"][key] = {"wall_time_s": float(wall_time_s), "status": status}
+
+
+def _update_task_duration_ledger(path: Path, **record) -> None:
+    """Record one finished task in the ledger file under an exclusive lock.
+
+    Concurrent sweeps can share a ledger: the on-disk ledger is re-read under
+    the lock, so one sweep never overwrites entries another one recorded.
+    """
+    import fcntl
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock_path = path.with_name(f"{path.name}.lock")
+    with open(lock_path, "a+") as lock_file:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+        try:
+            ledger = _load_task_duration_ledger(path)
+            _record_task_duration(ledger, **record)
+            _atomic_write_json(path, ledger)
+        finally:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
 
 def _regroup_sharded_repro_results(all_results: dict) -> dict:
@@ -1129,6 +1244,7 @@ def _run_metadata(
     n_results: int,
     n_repros: int | None = None,
     extra_inductor_config: dict | None = None,
+    hardware_metadata: dict | None = None,
 ) -> dict:
     commit = _git_query(["rev-parse", "HEAD"]) or ""
     pytorch_commit, pytorch_ref = _pytorch_provenance()
@@ -1153,6 +1269,8 @@ def _run_metadata(
         metadata["workload_kind"] = workload_kind
     if extra_inductor_config:
         metadata["inductor_config"] = extra_inductor_config
+    if hardware_metadata:
+        metadata.update(hardware_metadata)
     return metadata
 
 
@@ -1308,6 +1426,7 @@ def _write_results_output(
     repro_skipped: int | None = None,
     extra_inductor_config: dict | None = None,
     config_metadata: dict | None = None,
+    hardware_metadata: dict | None = None,
 ):
     summary = _build_run_summary(
         point_total=total,
@@ -1325,6 +1444,7 @@ def _write_results_output(
         n_results=summary["repros"]["ok"],
         n_repros=summary["repros"]["ok"],
         extra_inductor_config=extra_inductor_config,
+        hardware_metadata=hardware_metadata,
     )
     metadata["benchmark_config"] = dict(config_metadata or {})
     _sync_numerics_check_metadata(metadata)
@@ -1524,7 +1644,10 @@ def _prefer_shape_point(candidate: dict, existing: dict, floor_excluded) -> bool
 
 
 def _write_oracle_timings_output(
-    output_path: Path, all_results: dict, failures: dict | None = None
+    output_path: Path,
+    all_results: dict,
+    failures: dict | None = None,
+    hardware_metadata: dict | None = None,
 ) -> dict:
     """Write flat {dir_name -> {oracle_us,...}} for model_graph_accounting.
 
@@ -1568,6 +1691,13 @@ def _write_oracle_timings_output(
                     existing.setdefault("shape_failures", note)
         if not agg_failures:
             timed.pop("__failures__", None)
+    if hardware_metadata:
+        n_priced = sum(1 for key in timed if key not in _RESERVED_TOP_LEVEL_KEYS)
+        timed["_metadata"] = _run_metadata(
+            workload_kind="oracle",
+            n_results=n_priced,
+            hardware_metadata=hardware_metadata,
+        )
     _atomic_write_json(output_path, timed)
     return timed
 
@@ -1733,6 +1863,7 @@ def _merge_into_baseline(
     complete_repros: set[str] | None = None,
     extra_inductor_config: dict | None = None,
     config_metadata: dict | None = None,
+    hardware_metadata: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     import fcntl
@@ -1751,9 +1882,188 @@ def _merge_into_baseline(
                 complete_repros=complete_repros,
                 extra_inductor_config=extra_inductor_config,
                 config_metadata=config_metadata,
+                hardware_metadata=hardware_metadata,
             )
         finally:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+
+_HARDWARE_COMPATIBILITY_FIELDS = (
+    "hardware_kind",
+    "clock_lock",
+    "clock_lock_requested_mhz",
+    "timing_method",
+)
+_UNKNOWN = "unknown"
+
+
+def _merge_hardware_metadata(
+    existing: dict,
+    incoming: dict | None,
+    *,
+    baseline_has_results: bool,
+    adds_results: bool,
+) -> None:
+    """Merge run hardware metadata without combining incompatible measurements.
+
+    A field that a baseline with results never recorded (older files), or
+    that the incoming run does not report, is "unknown". Known values on both
+    sides must agree or the merge is refused. Unknown merged with anything
+    stays unknown, so a file never claims a hardware kind, clock policy or
+    timing method that some of its results were not measured with. A
+    baseline without results adopts the incoming run's metadata.
+    """
+    incoming = incoming or {}
+    if not baseline_has_results:
+        if adds_results:
+            existing.update(incoming)
+        return
+
+    def value(meta: dict, field: str):
+        if field not in meta:
+            return _UNKNOWN
+        if field in ("gpu_names", "gpu_indices") and meta[field] != _UNKNOWN:
+            return sorted({str(item) for item in meta[field] or []})
+        return meta[field]
+
+    mismatches = []
+    for field in (*_HARDWARE_COMPATIBILITY_FIELDS, "gpu_names"):
+        old, new = value(existing, field), value(incoming, field)
+        if _UNKNOWN not in (old, new) and old != new:
+            mismatches.append(f"{field}: baseline={old!r}, new={new!r}")
+    if mismatches:
+        raise ValueError(
+            "Cannot merge benchmark results measured with incompatible hardware "
+            "metadata: " + "; ".join(mismatches)
+        )
+    if not adds_results:
+        return
+    for field in (*_HARDWARE_COMPATIBILITY_FIELDS, "gpu_names", "gpu_indices"):
+        old, new = value(existing, field), value(incoming, field)
+        if _UNKNOWN in (old, new):
+            existing[field] = _UNKNOWN
+        elif field == "gpu_indices":
+            existing[field] = sorted(set(old) | set(new))
+        else:
+            existing[field] = old
+
+
+def _timing_method(args: argparse.Namespace) -> str:
+    if args.compile_time:
+        return "cold_compile_wall_time"
+    if args.oracles:
+        return "oracle_harness_interleaved_min"
+    return "cudagraph_interleaved_min"
+
+
+def _source_sha256(path_text: str) -> str | None:
+    try:
+        return hashlib.sha256(Path(path_text).read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def _recorded_source_sha256(results: object) -> str | None:
+    if isinstance(results, dict):
+        for _label, result in _metric_result_items(results):
+            if result.get("source_sha256"):
+                return result["source_sha256"]
+    return None
+
+
+def _stamp_source_sha256(new_results: dict) -> None:
+    """Record the content hash of each benchmarked file in its points."""
+    for task_key, results in new_results.items():
+        if not isinstance(results, dict):
+            continue
+        digest = _source_sha256(_split_shape_task_key(str(task_key))[0])
+        if digest is None:
+            continue
+        for _label, result in _metric_result_items(results):
+            result.setdefault("source_sha256", digest)
+def _rebase_benchmark_update_keys(
+    existing: dict,
+    old_failures: dict,
+    new_results: dict,
+    new_failures: dict,
+    partial_repros: set[str],
+    complete_repros: set[str],
+) -> tuple[dict, dict, set[str], set[str]]:
+    """Match updates from a relocated corpus to existing benchmark keys.
+
+    An update path that is not already a key is mapped to the existing key
+    with the same corpus-relative path *and* the same file content: the hash
+    recorded in its points (source_sha256), else the hash of the existing
+    file if it is still on disk. Two corpora that share a pattern hash but
+    hold different files therefore keep separate keys, and existing keys
+    whose content cannot be established are never rebased onto. Only an
+    update that matches more than one existing key is refused.
+    """
+    existing_paths: dict[str, set[str]] = {}
+    for task_key in (*existing, *old_failures):
+        path_text = _split_shape_task_key(str(task_key))[0]
+        identity = corpus_relative_path(path_text)
+        if identity is not None:
+            existing_paths.setdefault(identity, set()).add(path_text)
+
+    existing_digests: dict[str, str | None] = {}
+
+    def existing_digest(path_text: str) -> str | None:
+        if path_text not in existing_digests:
+            existing_digests[path_text] = _recorded_source_sha256(
+                existing.get(path_text)
+            ) or _source_sha256(path_text)
+        return existing_digests[path_text]
+
+    rebased_paths: dict[str, str] = {}
+
+    def rebase_path(path_text: str) -> str:
+        if path_text in rebased_paths:
+            return rebased_paths[path_text]
+        target = path_text
+        identity = corpus_relative_path(path_text)
+        candidates = existing_paths.get(identity, set()) if identity else set()
+        if path_text not in candidates and candidates:
+            digest = _source_sha256(path_text)
+            matches = sorted(
+                candidate
+                for candidate in candidates
+                if digest is not None and existing_digest(candidate) == digest
+            )
+            if len(matches) > 1:
+                raise ValueError(
+                    f"Benchmark update {path_text!r} matches several baseline "
+                    f"keys with the same content: {', '.join(matches)}"
+                )
+            if matches:
+                target = matches[0]
+        rebased_paths[path_text] = target
+        return target
+
+    def rebase(task_key: str) -> str:
+        path_text, shape_label = _split_shape_task_key(task_key)
+        rebased_path = rebase_path(path_text)
+        if shape_label is None:
+            return rebased_path
+        return _make_shape_task_key(rebased_path, shape_label)
+
+    def rebase_results(results: dict) -> dict:
+        rebased = {}
+        for task_key, value in results.items():
+            target = rebase(str(task_key))
+            if target in rebased:
+                raise ValueError(
+                    f"Benchmark update contains duplicate relocated identity {target!r}"
+                )
+            rebased[target] = value
+        return rebased
+
+    return (
+        rebase_results(new_results),
+        rebase_results(new_failures),
+        {rebase(path) for path in partial_repros},
+        {rebase(path) for path in complete_repros},
+    )
 
 
 def _remove_recovered_shape_failures(
@@ -1807,6 +2117,7 @@ def _merge_into_baseline_locked(
     complete_repros: set[str] | None = None,
     extra_inductor_config: dict | None = None,
     config_metadata: dict | None = None,
+    hardware_metadata: dict | None = None,
 ):
     """Merge new benchmark results into an existing baseline JSON file."""
     partial_repros = partial_repros or set()
@@ -1818,6 +2129,7 @@ def _merge_into_baseline_locked(
             + ", ".join(sorted(overlap))
         )
     requested_inductor_config = extra_inductor_config or {}
+    _stamp_source_sha256(new_results)
     if not baseline_path.exists():
         print(f"[merge-into] {baseline_path} does not exist, writing fresh")
         commit = _git_query(["rev-parse", "HEAD"]) or ""
@@ -1864,6 +2176,7 @@ def _merge_into_baseline_locked(
                     else {}
                 ),
                 "benchmark_config": dict(config_metadata or {}),
+                **(hardware_metadata or {}),
             },
         )
         _sync_numerics_check_metadata(payload["_metadata"])
@@ -1906,6 +2219,12 @@ def _merge_into_baseline_locked(
     else:
         old_meta["benchmark_config"] = dict(config_metadata or {})
     _sync_numerics_check_metadata(old_meta)
+    _merge_hardware_metadata(
+        old_meta,
+        hardware_metadata,
+        baseline_has_results=bool(existing),
+        adds_results=bool(new_results),
+    )
     metadata_kind = old_meta.get("workload_kind")
     content_kind = _infer_workload_kind_from_payload(
         existing,
@@ -1925,6 +2244,17 @@ def _merge_into_baseline_locked(
         raise ValueError(
             f"Cannot merge {workload_kind!r} results into {existing_kind!r} baseline"
         )
+
+    new_results, new_failures, partial_repros, complete_repros = (
+        _rebase_benchmark_update_keys(
+            existing,
+            old_failures,
+            new_results,
+            new_failures,
+            partial_repros,
+            complete_repros,
+        )
+    )
 
     updated = 0
     for repro_path in complete_repros:
@@ -2386,6 +2716,16 @@ def main():
                         help="Write all results to a JSON file")
     parser.add_argument("--merge-into", type=Path, default=None,
                         help="Merge results into an existing baseline JSON (updates only the benchmarked repros)")
+    parser.add_argument(
+        "--task-duration-ledger",
+        type=Path,
+        default=None,
+        help=(
+            "Read and update a separate per-task duration JSON ledger. Known tasks "
+            "are queued longest-first; tasks absent from the ledger retain their "
+            "existing order. Off by default and does not change benchmark output."
+        ),
+    )
     parser.add_argument("--lock-clocks", action=argparse.BooleanOptionalAction, default=True,
                         help="Lock the SM clock of the sweep's GPUs to a sustainable bin before "
                              "timing to remove boost/ramp variance (best-effort, non-blocking — "
@@ -2437,8 +2777,6 @@ def main():
         parser.error("--oracles and --full-graphs are mutually exclusive")
     if args.oracles and args.update_perf:
         parser.error("--update-perf writes repro perf.json files and is not supported with --oracles")
-    if args.oracles and args.benchmark_set:
-        parser.error("--benchmark-set is not supported with --oracles")
 
     # Load benchmark set if specified
     benchmark_entries = None
@@ -2452,18 +2790,32 @@ def main():
         workload_kind = "repro"
     oracle_n_dirs = None
     if args.oracles:
-        oracle_paths = args.paths or [Path("repros/canonical")]
-        oracle_dirs = find_oracle_dirs(oracle_paths)
-        oracle_n_dirs = len(oracle_dirs)
         # Oracle bench is per shape point internally; --all-shapes is implied.
         args.all_shapes = True
-        # SHARDING: make the task unit a (dir, shape) point rather than a whole
-        # dir, so a big multi-shape dir (e.g. 469 shapes) spreads across all
-        # GPUs instead of pinning ONE worker that compiles them serially while
-        # peers idle. Order biggest-dirs-first so any residual tail is small.
-        # Each task still runs the numerics gate + fresh static compile per
-        # shape (commit 4ca6d532b); sharding is purely a scheduling change.
-        repros = _expand_oracle_shape_tasks(oracle_dirs)
+        if args.benchmark_set:
+            # The manifest's exact points, timed through their oracles.
+            benchmark_selection = load_benchmark_set_selection(args.benchmark_set)
+            benchmark_entries = benchmark_selection.n_entries
+            oracle_n_dirs = benchmark_selection.n_repros
+            repros = _repro_shape_tasks_to_oracle_tasks(list(benchmark_selection.tasks))
+            print(
+                f"Benchmark set: {args.benchmark_set.name} "
+                f"({benchmark_selection.n_points} oracle points, "
+                f"{benchmark_selection.n_repros} unique repros, "
+                f"{benchmark_entries} manifest entries)"
+            )
+        else:
+            oracle_paths = args.paths or [Path("repros/canonical")]
+            oracle_dirs = find_oracle_dirs(oracle_paths)
+            oracle_n_dirs = len(oracle_dirs)
+            # SHARDING: make the task unit a (dir, shape) point rather than a
+            # whole dir, so a big multi-shape dir (e.g. 469 shapes) spreads
+            # across all GPUs instead of pinning ONE worker that compiles them
+            # serially while peers idle. Order biggest-dirs-first so any
+            # residual tail is small. Each task still runs the numerics gate +
+            # fresh static compile per shape (commit 4ca6d532b); sharding is
+            # purely a scheduling change.
+            repros = _expand_oracle_shape_tasks(oracle_dirs)
         # Group a dir's shape tasks contiguously, but place dirs with the most
         # shapes first. The worker pool pulls round-robin, so emitting the big
         # dirs' points up front lets all workers chew them in parallel from the
@@ -2576,6 +2928,35 @@ def main():
             return
 
     gpus = _filter_gpus(matching_gpus(args.device_kind), args.gpus)
+    selected_kinds = {gpu["kind"] for gpu in gpus}
+    if len(selected_kinds) > 1 and args.device_kind is None:
+        parser.error(
+            "selected GPUs span multiple hardware kinds "
+            f"({', '.join(sorted(selected_kinds))}); pass --device-kind so "
+            "roofline and oracle results are hardware-specific"
+        )
+    hardware_kind = next(iter(selected_kinds)) if selected_kinds else _UNKNOWN
+
+    task_duration_ledger = None
+    task_duration_ledger_path = args.task_duration_ledger
+    if task_duration_ledger_path is not None:
+        try:
+            task_duration_ledger = _load_task_duration_ledger(
+                task_duration_ledger_path
+            )
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            parser.error(f"invalid --task-duration-ledger: {exc}")
+        repros, known_duration_count = _sort_tasks_by_known_duration(
+            repros,
+            task_duration_ledger,
+            workload_kind,
+            hardware_kind,
+        )
+        print(
+            "Task duration ledger: "
+            f"{known_duration_count}/{len(repros)} known; "
+            "known tasks queued longest-first"
+        )
 
     if args.compile_time and len(gpus) > 1:
         print(f"[compile-time] serializing to 1 GPU: {gpus[0]['index']}:{gpus[0]['kind']}")
@@ -2586,6 +2967,7 @@ def main():
     # via atexit so the node isn't left pinned regardless of how main() returns
     # (normal exit, worker-death break, or an unexpected exception). We only ever
     # reset the GPUs we actually locked. atexit reset is itself non-blocking.
+    locked_indices: set[str] = set()
     if args.lock_clocks:
         locked_indices = _lock_gpu_clocks(
             [g["index"] for g in gpus], args.lock_clocks_mhz
@@ -2593,6 +2975,20 @@ def main():
         if locked_indices and args.reset_clocks:
             import atexit
             atexit.register(_reset_gpu_clocks, locked_indices)
+    # Recorded with the results; merges refuse to combine measurements from
+    # different hardware kinds or clock policies.
+    hardware_metadata = {
+        "hardware_kind": hardware_kind,
+        "gpu_names": [gpu["name"] for gpu in gpus],
+        "gpu_indices": [gpu["index"] for gpu in gpus],
+        "clock_lock": (
+            ("locked" if len(locked_indices) == len(gpus) else "lock_failed")
+            if args.lock_clocks
+            else "unlocked"
+        ),
+        "clock_lock_requested_mhz": args.lock_clocks_mhz if args.lock_clocks else None,
+        "timing_method": _timing_method(args),
+    }
 
     try:
         n_workers, workers_per_gpu = _compute_worker_count(
@@ -2732,6 +3128,22 @@ def main():
             continue
 
         repro_name = _task_display_name(result["repro"])
+        if task_duration_ledger is not None:
+            try:
+                _update_task_duration_ledger(
+                    task_duration_ledger_path,
+                    task=result["repro"],
+                    workload_kind=workload_kind,
+                    hardware_kind=hardware_kind,
+                    wall_time_s=result["elapsed"],
+                    status=result["status"],
+                )
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
+                print(
+                    f"[task-duration-ledger] disabling after write failure: {exc}",
+                    flush=True,
+                )
+                task_duration_ledger = None
         if result["status"] == "ok":
             done += 1
             if args.oracles:
@@ -2779,7 +3191,9 @@ def main():
 
         # Incremental save every 50 results
         if args.output and args.oracles and (done + failed) % 50 == 0:
-            _write_oracle_timings_output(args.output, all_results, failures)
+            _write_oracle_timings_output(
+                args.output, all_results, failures, hardware_metadata
+            )
         elif args.output and (done + failed) % 50 == 0:
             # Regroup sharded (repro, shape) keys back to bare repro.py paths so
             # the incremental snapshot uses the same schema as the final write
@@ -2810,6 +3224,7 @@ def main():
                 repro_skipped=snap_repro_counts[3],
                 extra_inductor_config=extra_inductor_config,
                 config_metadata=benchmark_config,
+                hardware_metadata=hardware_metadata,
             )
 
     # Wait for workers
@@ -2916,7 +3331,9 @@ def main():
 
     # Optional JSON output — include metadata for staleness detection
     if args.output and args.oracles:
-        timed = _write_oracle_timings_output(args.output, all_results, failures)
+        timed = _write_oracle_timings_output(
+            args.output, all_results, failures, hardware_metadata
+        )
         n_priced = sum(1 for k in timed if not k.startswith("_"))
         n_failed = len(timed.get("__failures__", {}))
         print(f"[output] Wrote {args.output} "
@@ -2939,6 +3356,7 @@ def main():
             repro_skipped=repro_counts[3],
             extra_inductor_config=extra_inductor_config,
             config_metadata=benchmark_config,
+            hardware_metadata=hardware_metadata,
         )
         print(f"[output] Wrote {args.output}")
 
@@ -2957,6 +3375,7 @@ def main():
             complete_repros=merge_complete_repros,
             extra_inductor_config=extra_inductor_config,
             config_metadata=benchmark_config,
+            hardware_metadata=hardware_metadata,
         )
 
 

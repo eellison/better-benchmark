@@ -18,6 +18,7 @@ from bench_parallel import (  # noqa: E402
     _repro_status_counts,
     _regroup_sharded_repro_failures,
     _regroup_sharded_repro_results,
+    _repro_shape_tasks_to_oracle_tasks,
     _shape_items_for_task,
     _write_results_output,
     load_benchmark_set_selection,
@@ -355,3 +356,68 @@ def test_recovering_one_shape_preserves_failed_siblings():
     assert set(failures) == {f"{repro}{_SHAPE_TASK_SEP}shape_b"}
     assert failures[f"{repro}{_SHAPE_TASK_SEP}shape_b"]["failed_shape"] == "shape_b"
     assert "failed_shapes" not in failures[f"{repro}{_SHAPE_TASK_SEP}shape_b"]
+
+
+def test_exact_repro_tasks_convert_to_oracle_directory_tasks():
+    tasks = _repro_shape_tasks_to_oracle_tasks(
+        ["repros/canonical/family/repro.py::SHAPE::model_abc123"]
+    )
+    assert tasks == ["repros/canonical/family::SHAPE::model_abc123"]
+
+
+def test_oracles_with_benchmark_set_time_exactly_the_manifest_points(
+    tmp_path, monkeypatch
+):
+    import bench_parallel
+
+    canonical = tmp_path / "repros" / "canonical"
+    repro = _write_repro(
+        canonical,
+        "family",
+        [("hash_a", "ModelA"), ("hash_b", "ModelB"), ("hash_c", "ModelC")],
+    )
+    (repro.parent / "oracle.py").write_text("# test oracle\n")
+    manifest = _write_manifest(
+        tmp_path / "manifest.json",
+        [{"repro": "family", "shape_labels": ["ModelA_hash_a", "ModelC_hash_c"]}],
+    )
+    timed_tasks = []
+
+    def fake_worker(gpu, task_queue, result_queue, args_dict):
+        while not task_queue.empty():
+            task = task_queue.get_nowait()
+            timed_tasks.append(task)
+            label = bench_parallel._split_shape_task_key(task)[1]
+            result_queue.put({
+                "repro": task,
+                "gpu": gpu["index"],
+                "status": "ok",
+                "elapsed": 0.1,
+                "results": {label: {"oracle_us": 1.0, "compile_us": 2.0}},
+            })
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        bench_parallel,
+        "matching_gpus",
+        lambda kind=None: [{"index": "0", "kind": "B200", "name": "NVIDIA B200"}],
+    )
+    monkeypatch.setattr(bench_parallel, "_locked_worker", fake_worker)
+    output = tmp_path / "oracle_timings.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "bench_parallel.py", "--oracles", "--benchmark-set", str(manifest),
+            "--no-lock-clocks", "--output", str(output),
+        ],
+    )
+
+    bench_parallel.main()
+
+    family_dir = str(Path("repros/canonical/family"))
+    assert sorted(timed_tasks) == [
+        f"{family_dir}{_SHAPE_TASK_SEP}ModelA_hash_a",
+        f"{family_dir}{_SHAPE_TASK_SEP}ModelC_hash_c",
+    ]
+    assert output.exists()

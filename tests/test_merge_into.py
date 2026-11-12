@@ -77,6 +77,21 @@ def _sample_result(compiled_us=10.0, sol_us=5.0):
     }
 
 
+_B200 = {
+    "hardware_kind": "B200",
+    "gpu_names": ["NVIDIA B200"],
+    "gpu_indices": ["0"],
+    "timing_method": "cudagraph_interleaved_min",
+}
+
+
+def _write_repro(corpus_root, family, text):
+    path = Path(corpus_root) / "canonical" / family / "repro.py"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    return str(path)
+
+
 def _sample_failure(error="CUDA OOM"):
     return {
         "status": "failed",
@@ -318,6 +333,306 @@ class TestMergeIntoBaseline:
         assert data["__summary__"]["ok"] == 1
         assert data["__summary__"]["points"]["ok"] == 2
         assert data["_metadata"]["n_results"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_partial_rerun_from_relocated_corpus_uses_existing_key(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        old_repro = _write_repro(tmp_path / "old-corpus", "family", "graph")
+        new_repro = _write_repro(tmp_path / "new-corpus", "family", "graph")
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {
+                    old_repro: {
+                        "shape_a": {"compiled_us": 10.0},
+                        "shape_b": {"compiled_us": 20.0},
+                    }
+                }
+            )
+        )
+
+        _merge_into_baseline(
+            baseline,
+            {new_repro: {"shape_a": {"compiled_us": 5.0}}},
+            {},
+            partial_repros={new_repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert new_repro not in data
+        assert data[old_repro]["shape_a"]["compiled_us"] == 5.0
+        assert data[old_repro]["shape_b"] == {"compiled_us": 20.0}
+        assert data["__summary__"]["points"]["ok"] == 2
+        assert data["_metadata"]["n_results"] == 1
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_relocation_matches_recorded_hash_when_old_corpus_is_gone(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        old_repro = _write_repro(tmp_path / "old-corpus", "family", "graph")
+        baseline = tmp_baseline()
+        _merge_into_baseline(baseline, {old_repro: {"s1": {"compiled_us": 1.0}}}, {})
+        Path(old_repro).unlink()
+        new_repro = _write_repro(tmp_path / "new-corpus", "family", "graph")
+
+        _merge_into_baseline(
+            baseline,
+            {new_repro: {"s2": {"compiled_us": 2.0}}},
+            {},
+            partial_repros={new_repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert new_repro not in data
+        assert set(data[old_repro]) == {"s1", "s2"}
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_different_corpus_with_same_pattern_keeps_its_own_key(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        first = _write_repro(tmp_path / "corpus-a", "sum_x", "graph a")
+        second = _write_repro(tmp_path / "corpus-b", "sum_x", "graph b")
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {first: {"a1": {"compiled_us": 1.0}, "a2": {"compiled_us": 2.0}}}
+            )
+        )
+
+        _merge_into_baseline(
+            baseline,
+            {second: {"b1": {"compiled_us": 5.0}}},
+            {},
+            complete_repros={second},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[first] == {"a1": {"compiled_us": 1.0}, "a2": {"compiled_us": 2.0}}
+        assert set(data[second]) == {"b1"}
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_unverifiable_existing_key_is_not_rebased_onto(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        gone = str(tmp_path / "gone" / "canonical" / "family" / "repro.py")
+        new_repro = _write_repro(tmp_path / "new-corpus", "family", "graph")
+        baseline = tmp_baseline(
+            content=_results_payload({gone: {"s1": {"compiled_us": 1.0}}})
+        )
+
+        _merge_into_baseline(
+            baseline, {new_repro: {"s1": {"compiled_us": 2.0}}}, {},
+            partial_repros={new_repro},
+        )
+
+        data = json.loads(baseline.read_text())
+        assert data[gone] == {"s1": {"compiled_us": 1.0}}
+        assert data[new_repro]["s1"]["compiled_us"] == 2.0
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_duplicate_baseline_identity_blocks_only_its_own_updates(
+        self, mock_sp, tmp_baseline, tmp_path
+    ):
+        old_a = _write_repro(tmp_path / "old", "a", "graph a")
+        new_a = _write_repro(tmp_path / "new", "a", "graph a")
+        old_b = _write_repro(tmp_path / "old", "b", "graph b")
+        third_a = _write_repro(tmp_path / "third", "a", "graph a")
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {
+                    old_a: {"s1": {"compiled_us": 1.0}},
+                    new_a: {"s1": {"compiled_us": 1.1}},
+                    old_b: {"s1": {"compiled_us": 2.0}},
+                }
+            )
+        )
+
+        _merge_into_baseline(
+            baseline, {old_b: {"s1": {"compiled_us": 3.0}}}, {},
+            partial_repros={old_b},
+        )
+        assert json.loads(baseline.read_text())[old_b]["s1"]["compiled_us"] == 3.0
+
+        with pytest.raises(ValueError, match="matches several baseline keys"):
+            _merge_into_baseline(
+                baseline, {third_a: {"s1": {"compiled_us": 4.0}}}, {},
+                partial_repros={third_a},
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_fresh_merge_preserves_hardware_metadata(self, mock_sp, tmp_path):
+        baseline = tmp_path / "fresh.json"
+        hardware = {
+            "hardware_kind": "B200",
+            "gpu_names": ["NVIDIA B200"],
+            "gpu_indices": ["0"],
+            "clock_lock_requested_mhz": 1852,
+            "clock_lock": "locked",
+            "timing_method": "cudagraph_min",
+        }
+
+        _merge_into_baseline(
+            baseline,
+            {"repro/a/repro.py": _sample_result()},
+            {},
+            hardware_metadata=hardware,
+        )
+
+        metadata = json.loads(baseline.read_text())["_metadata"]
+        for key, value in hardware.items():
+            assert metadata[key] == value
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_rejects_incompatible_hardware_metadata(
+        self, mock_sp, tmp_baseline
+    ):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            metadata={
+                "hardware_kind": "B200",
+                "gpu_names": ["NVIDIA B200"],
+                "clock_lock_requested_mhz": 1852,
+                "clock_lock": "locked",
+                "timing_method": "cudagraph_min",
+            },
+        )
+        baseline = tmp_baseline(content=existing)
+        before = baseline.read_bytes()
+
+        with pytest.raises(ValueError, match="incompatible hardware metadata"):
+            _merge_into_baseline(
+                baseline,
+                {"repro/b/repro.py": _sample_result()},
+                {},
+                hardware_metadata={
+                    "hardware_kind": "GB300",
+                    "gpu_names": ["NVIDIA GB300"],
+                    "gpu_indices": ["1"],
+                    "clock_lock_requested_mhz": 1800,
+                    "clock_lock": "locked",
+                    "timing_method": "cudagraph_min",
+                },
+            )
+
+        assert baseline.read_bytes() == before
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_merge_accepts_same_hardware_on_different_gpu_indices(
+        self, mock_sp, tmp_baseline
+    ):
+        existing = _results_payload(
+            {"repro/a/repro.py": _sample_result()},
+            metadata={
+                "hardware_kind": "B200",
+                "gpu_names": ["NVIDIA B200"],
+                "gpu_indices": ["0"],
+                "clock_lock_requested_mhz": 1852,
+                "clock_lock": "locked",
+                "timing_method": "cudagraph_min",
+            },
+        )
+        baseline = tmp_baseline(content=existing)
+
+        _merge_into_baseline(
+            baseline,
+            {"repro/b/repro.py": _sample_result()},
+            {},
+            hardware_metadata={
+                "hardware_kind": "B200",
+                "gpu_names": ["NVIDIA B200", "NVIDIA B200"],
+                "gpu_indices": ["1"],
+                "clock_lock_requested_mhz": 1852,
+                "clock_lock": "locked",
+                "timing_method": "cudagraph_min",
+            },
+        )
+
+        metadata = json.loads(baseline.read_text())["_metadata"]
+        assert metadata["hardware_kind"] == "B200"
+        assert metadata["gpu_indices"] == ["0", "1"]
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_unlocked_rerun_is_refused_by_locked_baseline(
+        self, mock_sp, tmp_baseline
+    ):
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {"repro/a/repro.py": _sample_result()},
+                metadata={**_B200, "clock_lock": "locked", "clock_lock_requested_mhz": 1965},
+            )
+        )
+
+        with pytest.raises(ValueError, match="clock_lock"):
+            _merge_into_baseline(
+                baseline,
+                {"repro/a/repro.py": _sample_result()},
+                {},
+                partial_repros={"repro/a/repro.py"},
+                hardware_metadata={
+                    **_B200, "clock_lock": "unlocked", "clock_lock_requested_mhz": None,
+                },
+            )
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_run_without_clock_metadata_makes_locked_baseline_unknown(
+        self, mock_sp, tmp_baseline
+    ):
+        baseline = tmp_baseline(
+            content=_results_payload(
+                {"repro/a/repro.py": _sample_result()},
+                metadata={**_B200, "clock_lock": "locked", "clock_lock_requested_mhz": 1965},
+            )
+        )
+
+        _merge_into_baseline(
+            baseline, {"repro/b/repro.py": _sample_result()}, {},
+            hardware_metadata=dict(_B200),
+        )
+
+        metadata = json.loads(baseline.read_text())["_metadata"]
+        assert metadata["hardware_kind"] == "B200"
+        assert metadata["clock_lock"] == "unknown"
+        assert metadata["clock_lock_requested_mhz"] == "unknown"
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_legacy_baseline_is_marked_unknown_not_stamped(
+        self, mock_sp, tmp_baseline
+    ):
+        baseline = tmp_baseline(
+            content=_results_payload({"repro/a/repro.py": _sample_result()})
+        )
+        b200 = {**_B200, "clock_lock": "locked", "clock_lock_requested_mhz": 1965}
+
+        _merge_into_baseline(
+            baseline, {"repro/b/repro.py": _sample_result()}, {},
+            hardware_metadata=b200,
+        )
+        metadata = json.loads(baseline.read_text())["_metadata"]
+        for field in ("hardware_kind", "gpu_names", "gpu_indices", "clock_lock", "timing_method"):
+            assert metadata[field] == "unknown"
+
+        _merge_into_baseline(
+            baseline, {"repro/c/repro.py": _sample_result()}, {},
+            hardware_metadata={**b200, "hardware_kind": "GB300", "gpu_names": ["NVIDIA GB300"]},
+        )
+        assert json.loads(baseline.read_text())["_metadata"]["hardware_kind"] == "unknown"
+
+    @patch("subprocess.run", side_effect=_mock_sp_run)
+    def test_failure_only_merge_keeps_hardware_metadata(
+        self, mock_sp, tmp_baseline
+    ):
+        b200 = {**_B200, "clock_lock": "locked", "clock_lock_requested_mhz": 1965}
+        baseline = tmp_baseline(
+            content=_results_payload({"repro/a/repro.py": _sample_result()}, metadata=b200)
+        )
+
+        _merge_into_baseline(
+            baseline, {}, {"repro/b/repro.py": _sample_failure()},
+            hardware_metadata={**b200, "gpu_indices": ["3"]},
+        )
+
+        metadata = json.loads(baseline.read_text())["_metadata"]
+        for field, value in b200.items():
+            assert metadata[field] == value
 
     @patch("subprocess.run", side_effect=_mock_sp_run)
     def test_complete_rerun_replaces_obsolete_shapes_and_failures(
@@ -1044,3 +1359,20 @@ class TestRunMetadata:
         assert md["pytorch_commit"] == "wheelsha"
         assert md["pytorch_ref"] is None
         assert "workload_kind" not in md  # omitted when falsy
+
+
+@pytest.mark.parametrize(
+    "compile_time,oracles,expected",
+    [
+        (False, False, "cudagraph_interleaved_min"),
+        (True, False, "cold_compile_wall_time"),
+        (False, True, "oracle_harness_interleaved_min"),
+    ],
+)
+def test_timing_method_follows_the_measurement_mode(compile_time, oracles, expected):
+    import argparse
+
+    from bench_parallel import _timing_method
+
+    args = argparse.Namespace(compile_time=compile_time, oracles=oracles)
+    assert _timing_method(args) == expected
