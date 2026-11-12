@@ -357,11 +357,34 @@ def _half_open_case(s0):
     return _HalfOpen(), contract, original, [x], [(0, 0)], [x], {"s0": s0}
 
 
+class _ColumnSlice(torch.nn.Module):
+    """x is [13, 64] with strides [s0, 1]: a column slice of a buffer whose
+    width is dynamic, so every size is static and only the stride is not."""
+
+    def forward(self, x, y):
+        return (x * 2).sum(-1) + y
+
+
+def _stride_case(width):
+    contract = {
+        "points": [{"inputs": [[[13, 64], "f32", {"st": ["s0", 1]}], [[13], "f32"]],
+                    "bindings": {"s0": 80}, "captured_dynamic": True}],
+        "symbols": {"s0": {"range": [2, None], "hint": 80}},
+    }
+    buf, y = torch.randn(13, width), torch.randn(13)
+
+    def original(buf, y):
+        return _ColumnSlice()(buf[:, :64], y)
+
+    return _ColumnSlice(), contract, original, [buf, y], [(0, 1)], [buf[:, :64], y], {"s0": width}
+
+
 # name -> (case factory, sizes compiled at, sizes replayed at without recompiling)
 _BACKED_CASES = {
     "floor_only": (_floor_case, (64, 96), (32, 48)),
     "scaled_dim": (_scaled_case, (40,), (24,)),
     "half_open_range": (_half_open_case, (37,), (5,)),
+    "stride_only": (_stride_case, (80,), (96,)),
 }
 
 

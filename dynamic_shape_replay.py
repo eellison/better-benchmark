@@ -712,10 +712,36 @@ def _backed_replay_plan_from_contract(data: dict,
             derived[pos] = (
                 lambda env, fns=tuple(fns): [fn(env) for fn in fns])
 
+    # Dynamo gives a tensor whose sizes are all static static strides and
+    # offset, so a symbolic stride or offset there (a column slice of a buffer
+    # whose width is dynamic) would specialize its symbol. Such an input is
+    # passed as a 1-D base spanning its storage, marked dynamic, and the view
+    # is rebuilt in the replay module with its symbolic strides and offset.
+    rebased = {}
+    for pos, entry in enumerate(entries):
+        if not (isinstance(entry, list) and entry and isinstance(entry[0], list)
+                and all(isinstance(n, int) for n in entry[0])):
+            continue
+        options = (entry[2] if len(entry) > 2 else None) or {}
+        sizes = entry[0]
+        strides = options.get("st") or [math.prod(sizes[i + 1:]) for i in range(len(sizes))]
+        offset = options.get("off", 0)
+        if not any(isinstance(v, str) and depends_on_live_symbol(v) for v in [*strides, offset]):
+            continue
+        if 0 in sizes:
+            return None
+        span = " + ".join(f"{n - 1}*({st})" for n, st in zip(sizes, strides) if n != 1)
+        length = f"({offset}) + {span or 0} + 1"
+        fns = [evaluator(str(v)) for v in [*strides, offset, length]]
+        if any(fn is None for fn in fns):
+            return None
+        rebased[pos] = (tuple(sizes), tuple(fns[:-2]), fns[-2], length, fns[-1])
+        marks[(pos, 0)] = None
+
     checks = []
     for pos, entry in enumerate(entries):
         if not (isinstance(entry, list) and entry
-                and isinstance(entry[0], list)):
+                and isinstance(entry[0], list)) or pos in rebased:
             continue
         for dim, value in enumerate(entry[0]):
             if not isinstance(value, str):
@@ -760,6 +786,8 @@ def _backed_replay_plan_from_contract(data: dict,
         "sources": tuple(
             (name, pos, dim) for name, (pos, dim) in sorted(sources.items())),
         "aux": aux,
+        "rebased": tuple((pos, *spec) for pos, spec in sorted(rebased.items())),
+        "rebased_kept": tuple(kept_index[pos] for pos in sorted(rebased)),
         "derived": tuple(sorted(derived.items())),
         "checks": tuple(checks),
         "guards": tuple(guards),
@@ -783,6 +811,12 @@ def _backed_repro(inner, plan):
                 values[name] = full[pos].size(dim)
             for name, carrier in zip(plan.get("aux", ()), args[len(plan["kept"]):]):
                 values[name] = carrier.size(0)
+            for pos, sizes, stride_fns, offset_fn, length, length_fn in plan.get("rebased", ()):
+                base = full[pos]
+                if base.size(0) != length_fn(values):
+                    raise RuntimeError(f"captured storage span {length!r} failed")
+                full[pos] = base.as_strided(
+                    sizes, [fn(values) for fn in stride_fns], offset_fn(values))
             for pos, fn in plan["derived"]:
                 full[pos] = fn(values)
             for pos, kind, dim, expression, fn in plan["checks"]:
@@ -812,6 +846,11 @@ def _backed_args(inputs, plan, binding: dict | None = None):
     Symbols carried by an auxiliary input (``plan["aux"]``) take their value
     from ``binding``."""
     args = [inputs[pos] for pos in plan["kept"]]
+    for pos in plan.get("rebased_kept", ()):
+        # The 1-D base the replay module rebuilds this view from.
+        t = args[pos]
+        span = t.storage_offset() + sum((n - 1) * st for n, st in zip(t.shape, t.stride())) + 1
+        args[pos] = t.as_strided((span,), (1,), 0)
     for pos, dim, bounds in plan["markings"]:
         tensor = args[pos]
         if bounds is None:
