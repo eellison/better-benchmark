@@ -17,6 +17,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from jagged_inputs import JAGGED_KINDS, make_jagged_tensor, resolve_total
+
 
 FULL_GRAPH_NUMERICS_SEED = 0
 NUMERICS_METHOD = "numerics.judge_float_leaf"
@@ -1370,7 +1372,7 @@ def _tensor_spec_from_value(
         "storage_offset": _concrete_int(value.storage_offset(), default=0),
         "generator": generator,
     }
-    if generator.get("kind") in {"index", "permutation", "runs"}:
+    if generator.get("kind") in {"index", "permutation", "runs", *JAGGED_KINDS}:
         spec["gen"] = generator
         spec["constraint_source"] = "graph_inference" if gen_override else "dtype_shape_default"
     exact = _exact_tensor_payload(value) if include_exact else None
@@ -1455,6 +1457,7 @@ def graph_constraints_from_gm(
     index_bounds: dict[str, int] | None = None,
     permutation_indices: dict[str, int] | None = None,
     observed_stats: dict[str, dict] | None = None,
+    jagged_specs: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
     """Extract replay constraints from an FX GraphModule.
 
@@ -1472,6 +1475,7 @@ def graph_constraints_from_gm(
     index_bounds = index_bounds or {}
     permutation_indices = permutation_indices or {}
     observed_stats = observed_stats or {}
+    jagged_specs = jagged_specs or {}
     inputs = []
     outputs = []
     tensor_attrs = {}
@@ -1481,7 +1485,10 @@ def graph_constraints_from_gm(
             if torch.is_tensor(value):
                 gen_override = None
                 constraint_source = None
-                if node.name in permutation_indices:
+                if node.name in jagged_specs:
+                    gen_override = jagged_specs[node.name]
+                    constraint_source = "jagged_inputs"
+                elif node.name in permutation_indices:
                     gen_override = {
                         "kind": "permutation",
                         "size": int(permutation_indices[node.name]),
@@ -1660,6 +1667,7 @@ def write_full_graph_metadata(
     permutation_indices: dict[str, int] | None = None,
     observed_stats: dict[str, dict] | None = None,
     source_input_specs: list[dict[str, Any]] | None = None,
+    jagged_specs: dict[str, dict] | None = None,
 ) -> Path:
     graph_path = Path(graph_path)
     payload = graph_constraints_from_gm(
@@ -1667,6 +1675,7 @@ def write_full_graph_metadata(
         index_bounds=index_bounds,
         permutation_indices=permutation_indices,
         observed_stats=observed_stats,
+        jagged_specs=jagged_specs,
     )
     if source_input_specs is not None:
         payload["inputs"], captured_dynamic = _merge_source_input_constraints(
@@ -1684,6 +1693,13 @@ def write_full_graph_metadata(
                     [renamed.get(name, name) for name in group]
                     for group in payload["storage_groups"]
                 ]
+            for spec in payload["inputs"]:
+                gen = spec.get("gen") or {}
+                total = gen.get("total") if gen.get("kind") in JAGGED_KINDS else {}
+                if "sym" in total:
+                    total["sym"] = renamed.get(total["sym"], total["sym"])
+                elif "size" in total:
+                    total["size"][0] = renamed.get(total["size"][0], total["size"][0])
     payload["graph"] = graph_path.name
     if extra:
         payload.update(extra)
@@ -3034,6 +3050,15 @@ def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda")
     )
     if exact is not None:
         return exact
+    if generator.get("kind") in JAGGED_KINDS:
+        if stride is not None and tuple(stride) not in ((), (1,)):
+            raise ValueError(f"{generator['kind']} inputs must be contiguous, got stride {stride}")
+        values = make_jagged_tensor(generator, shape, dtype, dev)
+        if not storage_offset:
+            return values
+        base = torch.zeros((storage_offset + values.numel(),), dtype=dtype, device=dev)
+        base[storage_offset:] = values
+        return _view_storage(base, shape, (1,), storage_offset)
     if spec.get("requires_exact"):
         # Integer tensor constants without exact data: use zeros as a safe
         # fallback. Zero is always a valid index for indexing ops.
@@ -3216,6 +3241,9 @@ def make_inputs_from_full_graph_specs(
         if inputs[index] is not None:
             continue
         kind = spec.get("kind")
+        gen = _generation_spec(spec) or {}
+        if kind == "tensor" and gen.get("kind") in JAGGED_KINDS:
+            spec = {**spec, "gen": {**gen, "total_value": resolve_total(gen, input_specs)}}
         if kind == "symint":
             inputs[index] = int(spec.get("value", 32))
         elif kind == "scalar":
