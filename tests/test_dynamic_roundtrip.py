@@ -217,6 +217,43 @@ def test_guard_floor_of_rational_sum_is_exact():
     assert _symint_expr_evaluator(_exact_floors(_sympify_expr("ceiling(s1/3)")))({"s1": 200}) == 67
 
 
+def test_point_exclusion_inside_a_bounded_range(tmp_path):
+    """Tracing a [53, s0, 256] permute against [53, 256] weights guards
+    s0 != 53. The family keeps the exclusion and a bounded range (as an
+    exported model's), replays inside both and rejects bindings outside."""
+    def f(x, w, b):
+        p = x.permute(1, 0, 2)
+        y = torch.nn.functional.layer_norm(p.float(), (256,)).to(x.dtype) * w + b
+        return (p * y.sigmoid()).permute(1, 0, 2)
+
+    x = torch.randn(53, 96, 256, dtype=torch.bfloat16)
+    torch._dynamo.mark_dynamic(x, 1)
+    w, b = torch.randn(53, 256, dtype=torch.bfloat16), torch.randn(53, 256, dtype=torch.bfloat16)
+    _capture(f, [(x, w, b)], tmp_path, dynamic=None)
+    (name, shapes), = _regions(tmp_path).items()
+    assert shapes["guards"] == ["Ne(s0, 53)"], shapes["guards"]
+    shapes["symbols"]["s0"]["range"] = [48, 4096]
+    (tmp_path / "canonical" / name / "shapes.json").write_text(json.dumps(shapes))
+    rows = _check(tmp_path, name, [{"s0": 96}, {"s0": 60}])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+    for s0, error in [(53, "violates guard"), (40, "below range min 48"), (5000, "above range max 4096")]:
+        with pytest.raises(ValueError, match=error):
+            _check(tmp_path, name, [{"s0": s0}])
+
+
+def test_bounded_range_tolerates_guards_the_replay_compile_adds(tmp_path):
+    """The replay compile of a reduction guards its width (s1 <= 4096 on CPU);
+    strict min/max marking of a bounded range rejected that at every binding."""
+    _capture(lambda x: x.relu().sum(-1), [(torch.randn(12, 64),)], tmp_path)
+    (name, shapes), = _regions(tmp_path).items()
+    width = next(s for s, d in shapes["symbols"].items() if d["hint"] == 64)
+    shapes["symbols"][width]["range"] = [2, 100000]
+    (tmp_path / "canonical" / name / "shapes.json").write_text(json.dumps(shapes))
+    point = shapes["points"][0]["bindings"]
+    rows = _check(tmp_path, name, [point, {**point, width: 100}])
+    assert [r["numerics"] for r in rows] == ["pass", "pass"], rows
+
+
 def test_floor_over_a_symbolic_denominator_builds_a_spec():
     from dynamic_shape_replay import _shape_env_spec_from_contract
 

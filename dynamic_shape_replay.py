@@ -739,6 +739,15 @@ def _backed_replay_plan_from_contract(data: dict,
             if is_dynamic:
                 marks[(pos, dim)] = bounds
 
+    # mark_dynamic's min/max is strict: a guard the replay compile adds that
+    # narrows the range (Ne(s0, 53) when a size could equal a static dim, a
+    # reduction heuristic's s0 <= 4096) raises ConstraintViolationError. Mark
+    # plain dynamic dims and check bounded ranges as guards instead.
+    marks = dict.fromkeys(marks)
+    range_guards = [
+        guard for name, bounds in root_mark_bounds.items() if bounds is not None
+        for guard in (f"{name} >= {bounds[0]}", f"{name} <= {bounds[1]}")]
+
     derived = {}
     for pos, entry in enumerate(entries):
         if (isinstance(entry, list) and entry and entry[0] == "I"
@@ -789,7 +798,7 @@ def _backed_replay_plan_from_contract(data: dict,
             checks.append((pos, "storage_offset", None, offset, fn))
 
     guards = []
-    for text in data.get("guards") or []:
+    for text in [*(data.get("guards") or []), *range_guards]:
         fn = evaluator(text)
         if fn is None:
             return None
