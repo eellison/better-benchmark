@@ -139,6 +139,33 @@ def load_mask_ops(path: str | Path) -> None:
     register_mask_ops(json.loads(Path(path).read_text()))
 
 
+# Full graphs held at production time whatever their own masks say (e.g. a
+# numerics check that cannot run on the benchmark GPU), keyed by the sha256
+# of the graph runnable they were ingested from, with the reason.
+HELD_GRAPHS: dict[str, str] = {}
+SOURCE_SHA_KEY = "source_runnable_sha256"
+
+
+def register_held_graphs(entries: list[dict]) -> None:
+    """``entries`` = [{"runnable_sha256", "reason"}, ...]."""
+    for entry in entries:
+        HELD_GRAPHS[entry["runnable_sha256"]] = entry["reason"]
+
+
+def load_held_graphs(path: str | Path) -> None:
+    register_held_graphs(json.loads(Path(path).read_text())["held"])
+
+
+def held_mask(sidecar: dict) -> dict | None:
+    """The graph mask of a held full graph's sidecar, or None."""
+    reason = HELD_GRAPHS.get(sidecar.get(SOURCE_SHA_KEY))
+    if reason is None:
+        return None
+    masked = sidecar.get("masked") or {}
+    reasons = sorted({*masked.get("reasons", ()), "held"})
+    return {"reasons": reasons, "scope": "graph", "held_reason": reason}
+
+
 def op_parts(target):
     """(namespace, op name, overload name) of an OpOverload-like target."""
     namespace = getattr(target, "namespace", None)

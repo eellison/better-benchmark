@@ -1667,7 +1667,12 @@ def _full_graph_mask(definition) -> dict | None:
     from full_graph_harness import full_graph_calls_user_triton
     from user_triton import BUNDLE_KEY
 
+    from mask_rules import held_mask
+
     sidecar = (definition.metadata or {}).get("sidecar") or {}
+    held = held_mask(sidecar)
+    if held is not None:
+        return held
     if sidecar.get("masked"):
         return sidecar["masked"]
     if full_graph_calls_user_triton(definition):
