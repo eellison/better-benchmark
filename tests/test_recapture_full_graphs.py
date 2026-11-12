@@ -12,6 +12,8 @@ from pathlib import Path
 
 import sys
 
+import torch
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -290,6 +292,26 @@ def load_args(reader):
 
             self.assertIsNotNone(gm)
             self.assertTrue(hasattr(gm, "graph"))
+
+    def test_loader_keeps_float8_attribute_dtypes(self):
+        source = """
+class GraphModule(torch.nn.Module):
+    def forward(self, x: "f32[2, 2]"):
+        _frozen_param0: "f8e4m3fn[2, 2][2, 1]cpu" = self._frozen_param0
+        to: "f32[2, 2]" = torch.ops.prims.convert_element_type.default(_frozen_param0, torch.float32)
+        return (torch.ops.aten.add.Tensor(x, to),)
+"""
+        with tempfile.TemporaryDirectory() as tmp:
+            gm = load_graph_module(_write(Path(tmp) / "full_graph_000.py", source), tracing_mode="fake")
+            bogus = load_graph_module(
+                _write(Path(tmp) / "full_graph_001.py", source.replace("f8e4m3fn[", "zz9[")),
+                tracing_mode="fake",
+            )
+
+        self.assertIsNotNone(gm)
+        float8 = [n for n in gm.graph.nodes if n.op == "get_attr"]
+        self.assertEqual([torch.float8_e4m3fn], [getattr(gm, n.target).dtype for n in float8])
+        self.assertIsNone(bogus)
 
     def test_loader_registers_inductor_prims_for_fma(self):
         with tempfile.TemporaryDirectory() as tmp:
