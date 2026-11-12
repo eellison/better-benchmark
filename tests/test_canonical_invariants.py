@@ -1273,6 +1273,7 @@ def test_full_graph_alias_groups_handle_overlap_and_mixed_dtypes():
     assert left.untyped_storage()._cdata == right.untyped_storage()._cdata
     assert left.untyped_storage()._cdata == bytes_view.untyped_storage()._cdata
     assert not torch.isnan(left).any()
+    assert not bytes_view.any()  # mixed dtypes keep the all-zero bit pattern
     left[2] = 7.0
     assert right[0].item() == 7.0
 
@@ -1298,21 +1299,19 @@ def test_full_graph_zero_byte_alias_group_is_valid():
     assert second.storage_offset() == 5
 
 
-def test_full_graph_legacy_alias_without_capacity_fails_closed():
-    import pytest
+def test_full_graph_legacy_alias_without_capacity_uses_member_extent():
     from full_graph_harness import make_inputs_from_full_graph_specs
 
-    with pytest.raises(ValueError, match="recapture this legacy artifact"):
-        make_inputs_from_full_graph_specs([{
-            "kind": "tensor",
-            "name": "x",
-            "shape": [2, 2],
-            "stride": [2, 1],
-            "storage_offset": 0,
-            "dtype": "float32",
-            "device": "cpu",
-            "alias_group": 0,
-        }], default_device="cpu")
+    def member(name, offset):
+        return {"kind": "tensor", "name": name, "shape": [2, 2], "stride": [2, 1],
+                "storage_offset": offset, "dtype": "float32", "device": "cpu",
+                "alias_group": 0}
+
+    x, y = make_inputs_from_full_graph_specs([member("x", 0), member("y", 4)], default_device="cpu")
+    assert x.untyped_storage().data_ptr() == y.untyped_storage().data_ptr()
+    assert x.untyped_storage().nbytes() == 32
+    # Normal values, not zeros, so the numerics gate compares something.
+    assert torch.isfinite(x).all() and x.std() > 0.1 and y.std() > 0.1, (x, y)
 
 
 def test_full_graph_legacy_storage_groups_restore_alias_tags():

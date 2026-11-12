@@ -3307,6 +3307,32 @@ def make_inputs_from_full_graph_specs(
 ) -> tuple[Any, ...]:
     import torch
 
+    def _extent_nbytes(spec):
+        element_size = _torch_dtype(spec.get("dtype", "float32")).itemsize
+        return _dense_storage_size(
+            tuple(spec.get("shape", ())), spec.get("stride"),
+            storage_offset=int(spec.get("storage_offset", 0) or 0)) * element_size
+
+    # Group capacity: the recorded allocation, or for sidecars written before
+    # storage_nbytes existed, the largest member's extent.
+    group_capacity: dict[int, int] = {}
+    group_dtypes: dict[int, set] = {}
+    for spec in input_specs:
+        group = spec.get("alias_group") if spec.get("kind") == "tensor" else None
+        if not isinstance(group, int) or isinstance(group, bool) or group < 0:
+            continue
+        group_dtypes.setdefault(group, set()).add(_torch_dtype(spec.get("dtype", "float32")))
+        recorded = spec.get("storage_nbytes")
+        if isinstance(recorded, int) and not isinstance(recorded, bool) and recorded >= 0:
+            if group_capacity.setdefault(group, recorded) != recorded:
+                raise ValueError(f"alias_group {group} members disagree on capacity/device")
+            group_capacity[group] = recorded
+    for spec in input_specs:
+        group = spec.get("alias_group") if spec.get("kind") == "tensor" else None
+        if isinstance(group, int) and not isinstance(group, bool) and group >= 0:
+            if spec.get("storage_nbytes") is None:
+                group_capacity[group] = max(group_capacity.get(group, 0), _extent_nbytes(spec))
+
     inputs = []
     group_storage: dict[Any, tuple[torch.Tensor, int, torch.device]] = {}
     for spec in input_specs:
@@ -3330,21 +3356,20 @@ def make_inputs_from_full_graph_specs(
                     f"invalid alias_group {group!r} for input "
                     f"{spec.get('name')!r}")
 
-            recorded = spec.get("storage_nbytes")
-            if not isinstance(recorded, int) or isinstance(recorded, bool) \
-                    or recorded < 0:
-                raise ValueError(
-                    f"alias_group {group} input {spec.get('name')!r} has no "
-                    "captured storage capacity; recapture this legacy "
-                    "artifact before faithful replay")
+            recorded = group_capacity[group]
             device = _resolve_device(spec.get("device"), default_device)
             if group not in group_storage:
-                # One bit pattern must be valid through every member dtype.
-                # Zero is finite for floating/complex views and a safe value
-                # for bool/integer/index views; random bytes can synthesize
-                # NaNs and make correctness checks fail nondeterministically.
                 raw = torch.zeros(
                     (recorded,), dtype=torch.uint8, device=device)
+                (fill,) = group_dtypes[group] if len(group_dtypes[group]) == 1 else (None,)
+                if fill is not None and fill.is_floating_point and recorded % fill.itemsize == 0:
+                    # Members of one float dtype get normal values, as region
+                    # alias groups do; all zeros make the numerics gate vacuous.
+                    filled = raw.view(fill)
+                    filled.copy_(torch.randn(filled.shape, device=device).to(fill))
+                # Any other group keeps zeros, the one bit pattern valid
+                # through every member dtype (random bytes would synthesize
+                # NaNs and out-of-range indices).
                 group_storage[group] = (raw, recorded, device)
             raw, group_nbytes, group_device = group_storage[group]
             if recorded != group_nbytes or device != group_device:
