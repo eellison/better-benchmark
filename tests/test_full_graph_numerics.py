@@ -1,3 +1,4 @@
+import math
 import subprocess
 import sys
 import threading
@@ -38,10 +39,11 @@ def test_full_graph_numerics_accepts_nested_outputs():
     def compiled(value):
         return {"main": ((value.double() + 1).float(), [value.to(torch.int64)])}
 
-    eager_out, reference, _ = validate_full_graph_numerics(
+    eager_out, reference, _, unstable = validate_full_graph_numerics(
         eager, compiled, lambda: [torch.tensor([1.0])]
     )
     assert reference == "fp64"
+    assert unstable == []
     assert set(eager_out) == {"main"}
 
 
@@ -62,7 +64,7 @@ def test_full_graph_numerics_seeds_eager_and_compiled_identically():
     validate_full_graph_numerics(random_graph, random_graph, lambda: [torch.zeros(64)])
 
 
-def test_full_graph_numerics_classifies_eager_self_instability():
+def test_full_graph_numerics_skips_eager_unstable_leaves():
     calls = []
 
     offsets = [0.0, 0.0, 100.0]
@@ -74,11 +76,62 @@ def test_full_graph_numerics_classifies_eager_self_instability():
     def compiled(value):
         return value + 5
 
-    with pytest.raises(FullGraphNumericsError) as info:
-        validate_full_graph_numerics(unstable_eager, compiled, lambda: [torch.zeros(1)])
-    assert info.value.classification == "eager_self_instability"
+    _, _, _, unstable = validate_full_graph_numerics(
+        unstable_eager, compiled, lambda: [torch.zeros(1)]
+    )
+    assert unstable == [0]
     # eager, fp64 reference, eager rerun
     assert len(calls) == 3
+
+
+def test_full_graph_numerics_fails_stable_leaf_next_to_unstable_one():
+    calls = []
+
+    def eager(value):
+        calls.append(None)
+        return value + 1, value + 100.0 * (len(calls) == 3)
+
+    def compiled(value):
+        return value + 2, value
+
+    with pytest.raises(FullGraphNumericsError) as info:
+        validate_full_graph_numerics(eager, compiled, lambda: [torch.zeros(1)])
+    assert info.value.classification == "stable_eager_vs_compiled_mismatch"
+    assert info.value.seed_record["eager_unstable_leaves"] == [1]
+    assert [e["idx"] for e in info.value.seed_record["per_output"]] == [0]
+
+
+def test_numerics_gate_reports_eager_unstable_leaves_as_unavailable():
+    calls = []
+
+    def eager(value):
+        calls.append(None)
+        # RNG scan, eager, fp64 reference, then the eager rerun turns leaf 1 nonfinite
+        return value + 1, value + (math.nan if len(calls) == 4 else 0.0)
+
+    def compiled(value):
+        return value + 1, value + 7
+
+    summary, _ = run_numerics_gate(
+        eager, compiled, lambda: [torch.zeros(4)], label="t", variant="default", seeds=1
+    )
+    assert summary["status"] == "numerics_unavailable"
+    assert summary["eager_unstable_output_leaves"] == [1]
+
+
+def test_numerics_gate_failure_summary_lists_eager_unstable_leaves():
+    calls = []
+
+    def eager(value):
+        calls.append(None)
+        return value + 1, value + (math.nan if len(calls) == 4 else 0.0)
+
+    def compiled(value):
+        return value + 2, value + 7
+
+    with pytest.raises(FullGraphNumericsError) as info:
+        run_numerics_gate(eager, compiled, lambda: [torch.zeros(4)], label="t", variant="default", seeds=1)
+    assert info.value.numerics["eager_unstable_output_leaves"] == [1]
 
 
 def test_full_graph_numerics_gate_is_opt_in():
@@ -238,6 +291,54 @@ def test_compare_outputs_requires_exact_integers_and_structure():
     assert not ok
 
 
+def test_numerics_gate_falls_back_to_fp32_reference_for_low_precision_outputs():
+    def no_fp64(value):
+        if value.dtype == torch.float64:
+            raise TypeError("float64 unsupported")
+        return (value.float() * 3).to(value.dtype)
+
+    def compiled(value):
+        return (value.float() * 3).to(value.dtype)
+
+    summary, _ = run_numerics_gate(
+        no_fp64, compiled, lambda: [torch.randn(64).bfloat16()], label="t", variant="default", seeds=1
+    )
+    assert summary["status"] == "pass"
+    assert summary["reference"] == "fp32"
+
+
+def test_float32_reference_judges_only_low_precision_outputs():
+    def eager(x, y):
+        if y.dtype == torch.float64:
+            raise TypeError("float64 unsupported")
+        return x * 2, y * 3
+
+    def compiled(x, y):
+        out = y * 3
+        out[:10] += 0.5  # a few wrong elements of a large float32 output, far outside eager-only allclose
+        return x * 2, out
+
+    make_inputs = lambda: (torch.randn(64).bfloat16(), torch.randn(100_000))  # noqa: E731
+    with pytest.raises(FullGraphNumericsError, match="max_abs_diff_vs_eager") as info:
+        run_numerics_gate(eager, compiled, make_inputs, label="t", variant="default", seeds=1)
+    assert info.value.seed_record["reference"] == "fp32"
+
+
+def test_float32_reference_anchors_float8_outputs():
+    def eager(x):
+        if x.dtype == torch.float64:
+            raise TypeError("float64 unsupported")
+        return x * 2, (x * 3).to(torch.float8_e4m3fn)
+
+    def compiled(x):
+        return x * 2, (x.float() * 3).to(torch.float8_e4m3fn)  # one rounding instead of two
+
+    summary, _ = run_numerics_gate(
+        eager, compiled, lambda: [torch.linspace(-4, 4, 256).bfloat16()], label="t", variant="default", seeds=1
+    )
+    assert summary["status"] == "pass" and summary["reference"] == "fp32"
+
+
 def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
     def no_fp64(value):
         if value.dtype == torch.float64:
@@ -275,6 +376,7 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
         )
     assert info.value.numerics["status"] == "fail"
     assert info.value.numerics["reference"] == "eager"
+    assert info.value.seed_record["reference_errors"] == ["torch.float64: TypeError: float64 unsupported"]
     assert info.value.numerics["seeds"][0]["reference"] == "eager"
     assert "fp64 reference unavailable: TypeError: float64 unsupported" in str(info.value)
 
@@ -293,7 +395,7 @@ def test_fp64_reference_keeps_input_layout():
             raise RuntimeError("alias group split")
         return x * 2 + y.sum()
 
-    _, reference, fp64_error = validate_full_graph_numerics(
+    _, reference, fp64_error, _ = validate_full_graph_numerics(
         checks_layout, checks_layout, lambda: (base[:, 2:8], base[:, :2]))
     assert (reference, fp64_error) == ("fp64", None)
 
@@ -302,7 +404,7 @@ def test_fp64_reference_covers_tuple_inputs():
     def add(value):
         return value + 1
 
-    _, reference, _ = validate_full_graph_numerics(add, add, lambda: (torch.randn(4),))
+    _, reference, _, _ = validate_full_graph_numerics(add, add, lambda: (torch.randn(4),))
     assert reference == "fp64"
 
 
@@ -311,7 +413,7 @@ def test_fp64_reference_upcasts_explicit_low_precision_casts():
         hidden = torch.ops.prims.convert_element_type.default(value, torch.bfloat16)
         return torch.mm(weight, hidden.to(torch.float32))
 
-    _, reference, _ = validate_full_graph_numerics(
+    _, reference, _, _ = validate_full_graph_numerics(
         casts, casts, lambda: (torch.randn(4, 4), torch.randn(4, 4))
     )
     assert reference == "fp64"
@@ -332,6 +434,96 @@ def test_numerics_gate_passes_real_full_graph():
     )
     assert summary["status"] == "pass"
     assert summary["reference"] == "fp64"
+
+
+def test_fp64_reference_upcasts_float_dtypes_of_factories_and_reductions():
+    def graph(value, weight):
+        acc = torch.ops.aten.full.default([4, 4], 0.5, dtype=torch.float32)
+        total = torch.ops.aten.sum.dim_IntList(value, [1], True, dtype=torch.float32)
+        return torch.mm(weight, acc) + value * total
+
+    _, reference, _, _ = validate_full_graph_numerics(
+        graph, graph, lambda: (torch.randn(4, 4), torch.randn(4, 4))
+    )
+    assert reference == "fp64"
+
+
+def test_fp64_reference_upcasts_positional_dtype_arguments():
+    def graph(value):
+        hidden = value.to(torch.bfloat16)
+        torch.ops.aten._assert_tensor_metadata.default(hidden, None, None, torch.bfloat16)
+        return hidden * 3
+
+    reference, error = full_graph_harness._fp64_reference(graph, lambda: (torch.randn(4),), 0)
+    assert error is None and reference.dtype == torch.float64
+
+
+def test_fp64_reference_runs_on_the_same_inputs_as_eager():
+    def graph(value):
+        return value, torch.ops.aten.full.default([2], 0.5, dtype=torch.float32)
+
+    make_inputs = lambda: (torch.randn(8, dtype=torch.float32),)  # noqa: E731
+    reference, _ = full_graph_harness._fp64_reference(graph, make_inputs, seed=0)
+    torch.manual_seed(0)
+    assert reference[0].dtype == torch.float64 and reference[1].dtype == torch.float64
+    assert torch.equal(reference[0], make_inputs()[0].double())
+
+
+@pytest.mark.parametrize("dtype", [torch.bool, torch.int64])
+@pytest.mark.parametrize("compiled_flips, passes", [(1, True), (4, False)])
+def test_full_graph_numerics_judges_threshold_flips_against_the_reference(compiled_flips, passes, dtype):
+    # a mask of bf16 values: bf16 rounds 1e-45 to 0, so eager flips those 3 entries relative to the reference
+    def eager(value):
+        return torch.ops.aten.le.Scalar(value.to(torch.bfloat16), 0.0).to(dtype)
+
+    def compiled(value):
+        out = eager(value).clone()
+        out[:compiled_flips] = 1 - out[:compiled_flips] if dtype == torch.int64 else ~out[:compiled_flips]
+        return out
+
+    make_inputs = lambda: (torch.tensor([1.0] * 400 + [1e-45] * 3),)  # noqa: E731
+    if passes:
+        validate_full_graph_numerics(eager, compiled, make_inputs)
+    else:
+        with pytest.raises(FullGraphNumericsError, match="differ from the reference"):
+            validate_full_graph_numerics(eager, compiled, make_inputs)
+
+
+def test_full_graph_numerics_passes_ids_closer_to_the_reference_than_eager():
+    # bf16 rounding moves 40% of floor() results off the float64 ones; compiled keeps fp32 and matches float64
+    def eager(value):
+        return torch.floor(value.to(torch.bfloat16)).to(torch.int64)
+
+    def compiled(value):
+        return torch.floor(value).to(torch.int64)
+
+    validate_full_graph_numerics(eager, compiled, lambda: (torch.tensor([255.6] * 40 + [1.0] * 60),))
+
+
+def test_full_graph_numerics_rejects_flipped_ids_far_from_the_reference():
+    def eager(value):
+        return torch.floor(value.to(torch.bfloat16) * 10).to(torch.int64)
+
+    def compiled(value):
+        out = torch.floor(value * 10).to(torch.int64)
+        out[:1] = 123456
+        return out
+
+    with pytest.raises(FullGraphNumericsError, match="differ from the reference"):
+        validate_full_graph_numerics(eager, compiled, lambda: (torch.linspace(0, 30, 200),))
+
+
+def test_full_graph_numerics_keeps_integer_math_exact():
+    def eager(value):
+        return value * 2
+
+    def compiled(value):
+        out = value * 2
+        out[0] += 1
+        return out
+
+    with pytest.raises(FullGraphNumericsError, match="differ from the reference"):
+        validate_full_graph_numerics(eager, compiled, lambda: (torch.arange(400),))
 
 
 def test_fp64_reference_upcasts_module_parameters():
@@ -505,7 +697,7 @@ def test_numerics_gate_fails_closed_when_rng_skips_lack_output_contract():
 
 def test_numerics_gate_unavailable_when_rng_detection_fails(monkeypatch):
     monkeypatch.setattr(
-        full_graph_harness, "rng_dependent_output_leaves", lambda *args: None
+        full_graph_harness, "rng_dependent_output_leaves", lambda *args, **kwargs: None
     )
     summary, _ = run_numerics_gate(
         torch.rand_like,
@@ -555,6 +747,7 @@ def test_numerics_gate_runs_all_seeds_and_attaches_structured_failure():
         "diagnostics": [],
         "worst_output_idx": None,
         "per_output": [],
+        "eager_unstable_leaves": [],
     }
     assert first["worst_output_idx"] == 0
     assert first["per_output"][0]["pass"] is False
