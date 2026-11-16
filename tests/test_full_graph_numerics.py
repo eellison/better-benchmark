@@ -404,6 +404,7 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
             raise TypeError("float64 unsupported")
         return value + 2
 
+    # Off by 1.0 everywhere: no reference could call that more accurate than eager.
     with pytest.raises(FullGraphNumericsError) as info:
         run_numerics_gate(
             no_fp64,
@@ -418,6 +419,148 @@ def test_numerics_gate_falls_back_to_eager_without_fp64_reference():
     assert info.value.seed_record["reference_errors"] == ["torch.float64: TypeError: float64 unsupported"]
     assert info.value.numerics["seeds"][0]["reference"] == "eager"
     assert "fp64 reference unavailable: TypeError: float64 unsupported" in str(info.value)
+
+
+def _rounds_twenty_times(value):
+    # Twenty bf16 roundings, like a kernel that stores bf16 after every step; out of memory at any upcast precision.
+    if value.dtype != torch.bfloat16:
+        raise torch.OutOfMemoryError("CUDA out of memory. Tried to allocate 8.00 GiB")
+    for _ in range(20):
+        value = value * 1.01
+    return value
+
+
+def _rounds_once(value):
+    return (value.float() * 1.01**20).bfloat16()
+
+
+_LINSPACE_BF16 = lambda: [torch.linspace(1, 8, 64).bfloat16()]  # noqa: E731
+
+
+def test_numerics_gate_reports_reference_unavailable_when_the_reference_runs_out_of_memory():
+    # Compiled rounds once and misses eager's twenty roundings; only the float32 reference can say it is right.
+    summary, _ = run_numerics_gate(
+        _rounds_twenty_times, _rounds_once, _LINSPACE_BF16, label="c", variant="default", seeds=2
+    )
+    assert summary["status"] == "reference_unavailable"
+    assert all(s["failure_classification"] == "reference_unavailable" for s in summary["seeds"])
+    assert "OutOfMemoryError" in summary["seeds"][0]["reference_errors"][0]
+
+    # With a reference that fits, the same compiled output passes.
+    def fits(value):
+        for _ in range(20):
+            value = value * 1.01
+        return value
+
+    summary, _ = run_numerics_gate(fits, _rounds_once, _LINSPACE_BF16, label="c", variant="default", seeds=1)
+    assert summary["status"] == "pass"
+
+
+@pytest.mark.parametrize("compiled_fn", [
+    lambda v: torch.full_like(v, float("nan")),
+    lambda v: v * 1000,
+    lambda v: v * 10,
+    lambda v: -v,
+    torch.zeros_like,
+])
+def test_numerics_gate_fails_outputs_no_reference_could_rescue(compiled_fn):
+    with pytest.raises(FullGraphNumericsError) as info:
+        run_numerics_gate(_rounds_twenty_times, compiled_fn, _LINSPACE_BF16, label="c", variant="default", seeds=1)
+    assert info.value.numerics["status"] == "fail"
+
+
+def test_numerics_gate_fails_a_wrong_tail_without_a_reference():
+    # 8 zeroed elements of 4096 hide under the whole tensor's RMS; each of them is far from eager
+    def compiled(value):
+        out = _rounds_once(value)
+        out[-8:] = 0
+        return out
+
+    with pytest.raises(FullGraphNumericsError):
+        run_numerics_gate(_rounds_twenty_times, compiled, lambda: [torch.linspace(1, 8, 4096).bfloat16()],
+                          label="c", variant="default", seeds=1)
+
+
+def test_numerics_gate_fails_a_float32_output_five_percent_off_without_float64():
+    def eager(value):
+        if value.dtype == torch.float64:
+            raise TypeError("float64 unsupported")
+        return value * 3
+
+    with pytest.raises(FullGraphNumericsError):
+        run_numerics_gate(eager, lambda v: v * 3.15, lambda: [torch.randn(64)], label="c", variant="default", seeds=1)
+
+
+def test_numerics_gate_raises_the_real_mismatch_of_mixed_seeds():
+    def compiled(value):
+        # seed 0: a precision difference only the reference could judge; seed 1: garbage
+        return _rounds_once(value) if torch.initial_seed() == 0 else value * 1000
+
+    with pytest.raises(FullGraphNumericsError) as info:
+        run_numerics_gate(_rounds_twenty_times, compiled, _LINSPACE_BF16, label="c", variant="default", seeds=2)
+    assert info.value.numerics["status"] == "fail"
+    assert [s["failure_classification"] for s in info.value.numerics["seeds"]] == [
+        "reference_unavailable", "stable_eager_vs_compiled_mismatch"]
+    assert info.value.classification == "stable_eager_vs_compiled_mismatch"
+
+
+@pytest.mark.parametrize("flip, status", [(lambda out: ~out[:1], "reference_unavailable"), (None, "fail")])
+def test_numerics_gate_integer_leaves_without_a_reference(flip, status):
+    def eager(value):
+        if value.dtype != torch.bfloat16:
+            raise torch.OutOfMemoryError("CUDA out of memory")
+        return value > 0, (value * 4).to(torch.int64)
+
+    def compiled(value):
+        mask, ids = eager(value)
+        mask, ids = mask.clone(), ids.clone()
+        if flip is not None:
+            mask[:1] = flip(mask)  # one threshold flip in 512 entries
+        else:
+            ids[0] += 5  # integer math eager can't produce by rounding
+        return mask, ids
+
+    make_inputs = lambda: [torch.randn(512).bfloat16()]  # noqa: E731
+    if status == "fail":
+        with pytest.raises(FullGraphNumericsError):
+            run_numerics_gate(eager, compiled, make_inputs, label="c", variant="default", seeds=1)
+    else:
+        summary, _ = run_numerics_gate(eager, compiled, make_inputs, label="c", variant="default", seeds=1)
+        assert summary["status"] == status
+
+
+def test_numerics_gate_fails_a_clear_mismatch_next_to_an_unjudged_leaf():
+    def eager(x, y):
+        if y.dtype != torch.bfloat16:
+            raise torch.OutOfMemoryError("CUDA out of memory")
+        return x + 1, _rounds_twenty_times(y)
+
+    def compiled(x, y):
+        return x + 2, _rounds_once(y)
+
+    with pytest.raises(FullGraphNumericsError) as info:
+        run_numerics_gate(
+            eager, compiled, lambda: [torch.randn(64), torch.linspace(1, 8, 64).bfloat16()],
+            label="c", variant="default", seeds=1,
+        )
+    assert info.value.numerics["status"] == "fail"
+    assert info.value.classification == "stable_eager_vs_compiled_mismatch"
+    assert [e.get("unjudged") for e in info.value.seed_record["per_output"]] == [False, True]
+
+
+def test_numerics_gate_fails_when_the_reference_runs_but_does_not_cover_eager():
+    # The float64 run succeeds but is nonfinite where eager is finite: no reference run failed, so nothing waits.
+    def eager(value):
+        if value.dtype == torch.float64:
+            return value * 1e300 * 1e10
+        for _ in range(20):
+            value = value * 1.01
+        return value
+
+    with pytest.raises(FullGraphNumericsError) as info:
+        run_numerics_gate(eager, _rounds_once, _LINSPACE_BF16, label="c", variant="default", seeds=1)
+    assert info.value.classification == "stable_eager_vs_compiled_mismatch"
+    assert info.value.seed_record["reference_errors"] == []
 
 
 def test_fp64_reference_keeps_input_layout():

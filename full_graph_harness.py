@@ -288,6 +288,48 @@ def _float_leaf_mismatch(
 _UNANCHORED = object()
 
 
+# A failing leaf judged against eager alone is only "unjudged" (a reference could have rescued it) when it misses
+# eager by at most this much: relative RMS difference, and every element's difference relative to |eager| + eager's
+# RMS, below min(_UNJUDGED_MAX_RELATIVE, _UNJUDGED_MAX_TOLERANCES * rtol of its dtype). Being right with a bigger
+# miss would need eager to be about as wrong.
+_UNJUDGED_MAX_RELATIVE = 0.1
+_UNJUDGED_MAX_TOLERANCES = 32
+
+
+def _unjudged_tolerance(dtype: Any) -> tuple[float, float]:
+    """``(rtol, atol)`` of a few ulps of a float ``dtype`` (``torch.testing``'s for bf16/fp16)."""
+    import torch
+
+    real = torch.empty(0, dtype=dtype).real.dtype if dtype.is_complex else dtype
+    if real == torch.bfloat16:
+        return 1.6e-2, 1e-5
+    if real == torch.float16:
+        return 1e-3, 1e-5
+    if real.itemsize == 1:
+        finfo = torch.finfo(real)
+        return 2 * finfo.eps, finfo.smallest_normal * finfo.eps
+    return 1e-4, 1e-4
+
+
+def _close_to_eager(expected: Any, got: Any) -> bool:
+    """Whether ``got`` misses ``expected`` (finite where it is) by little enough that a reference could judge it."""
+    import torch
+
+    if expected.dtype == torch.float64:
+        return False  # its reference would be eager itself
+    e, c = _comparable(expected).double(), _comparable(got).double()
+    finite = e.isfinite()
+    if not torch.equal(finite, c.isfinite()):
+        return False
+    e, diff = e[finite], (c - e)[finite].abs()
+    rms = float(e.square().mean().sqrt()) if e.numel() else 0.0
+    if not rms:
+        return False
+    rtol, atol = _unjudged_tolerance(expected.dtype)
+    relative = max(float(diff.norm() / e.norm()), float((diff / (e.abs() + rms + atol)).max()))
+    return relative <= min(_UNJUDGED_MAX_RELATIVE, _UNJUDGED_MAX_TOLERANCES * rtol)
+
+
 def _full_graph_leaf_check(
     skip_leaves: set[int] | frozenset[int], reference_given: bool
 ):
@@ -343,7 +385,13 @@ def _full_graph_leaf_check(
                     f"{expected.dtype} values differ: {flips} entries differ from the reference (eager {eager_flips})",
                     fields,
                 )
-            return fail(f"{expected.dtype} values differ")
+            if has_reference:
+                return fail(f"{expected.dtype} values differ")
+            # Without a reference, only what could be a threshold flip waits for one: a few bool flips, or ints
+            # off by one (floor at an integer boundary).
+            flip_like = expected.dtype == torch.bool or bool(((got.long() - expected.long()).abs() <= 1).all())
+            unjudged = flip_like and int((got != expected).sum()) * 100 <= expected.numel()
+            return fail(f"{expected.dtype} values differ", {"unjudged": unjudged})
         if has_reference and (
             not isinstance(ref, torch.Tensor) or ref.shape != expected.shape
         ):
@@ -351,6 +399,12 @@ def _full_graph_leaf_check(
         mismatch, errors = _float_leaf_mismatch(ref, expected, got)
         if mismatch is None:
             return {"pass": True}, None
+        if not has_reference:
+            try:
+                unjudged = "max_abs_diff_vs_eager" in errors and _close_to_eager(expected, got)
+            except torch.OutOfMemoryError:
+                unjudged = False
+            errors = {**errors, "unjudged": unjudged}
         if "err_compiled" in errors:
             ratio = errors["err_compiled"] / max(errors["err_eager"], 1e-30)
         else:
@@ -487,7 +541,11 @@ def validate_full_graph_numerics(
     says why there is no usable float64 reference (``None`` when there is
     one) and ``unstable_leaves`` lists the skipped eager-unstable leaves.
     A failure's seed record also lists why reference runs failed
-    (``reference_errors``).
+    (``reference_errors``). A failure whose failing leaves all missed eager
+    by an amount a reference could judge (finite and close to eager overall
+    and per element, see ``_UNJUDGED_MAX_RELATIVE``; integer leaves that
+    look like threshold flips) while the reference runs failed is classified
+    ``reference_unavailable``.
     """
     import torch
     from torch.utils._pytree import tree_flatten, tree_unflatten
@@ -542,13 +600,16 @@ def validate_full_graph_numerics(
                 reference, eager, compiled, skip_leaves=skip | frozenset(unstable)
             )
     if not records["pass"]:
-        # With unstable leaves skipped, the leaves still failing are eager-stable.
-        classification = (
-            "stable_eager_vs_compiled_mismatch"
-            if eager_stable or unstable
-            else "eager_self_instability"
-        )
-        failing_stable = classification == "stable_eager_vs_compiled_mismatch"
+        failing = [e for e in records["per_output"] if e.get("pass") is False]
+        # With unstable leaves skipped, the leaves still failing are eager-stable. When none of them could be
+        # judged against a reference (its runs failed, e.g. out of memory), eager alone decides nothing.
+        failing_stable = eager_stable or bool(unstable)
+        if failing and reference_errors and all(e.get("unjudged") for e in failing):
+            classification = "reference_unavailable"
+        elif failing_stable:
+            classification = "stable_eager_vs_compiled_mismatch"
+        else:
+            classification = "eager_self_instability"
         details = _details(records)
         unavailable = f", fp64 reference unavailable: {fp64_error}" if fp64_error else ""
         raise FullGraphNumericsError(
@@ -598,6 +659,14 @@ def run_numerics_gate(
     output leaves are not listed in ``non_semantic_output_leaves`` (an
     explicit output contract), RNG detection failed, or output leaves were
     skipped because eager does not reproduce them.
+
+    Status is ``reference_unavailable`` rather than ``fail`` when every
+    failing seed is ``reference_unavailable``: outputs differ from eager by
+    an amount only a reference could judge, and the reference runs failed
+    (out of memory, an op without a kernel at that precision), so whether
+    compiled is wrong is unknown. Nothing is raised then, so the graph is
+    still timed. Otherwise the raised error is the first seed's that is not
+    ``reference_unavailable``.
     """
     records: list[dict[str, Any]] = []
     first_error: FullGraphNumericsError | None = None
@@ -621,7 +690,9 @@ def run_numerics_gate(
             records.append(exc.seed_record)
             reference_kinds.add(exc.seed_record["reference"])
             unstable_leaves.update(exc.seed_record.get("eager_unstable_leaves") or ())
-            first_error = first_error or exc
+            # A failing gate raises a real mismatch, not a seed that could not be judged.
+            if first_error is None or first_error.classification == "reference_unavailable":
+                first_error = exc
             continue
         reference_kinds.add(reference_kind)
         unstable_leaves.update(unstable)
@@ -644,7 +715,14 @@ def run_numerics_gate(
         )
     skipped = sorted(rng_leaves or ())
     unjustified = [leaf for leaf in skipped if leaf not in non_semantic_output_leaves]
-    if first_error:
+    unjudged = first_error is not None and first_error.classification == "reference_unavailable"
+    if unjudged:
+        status = "reference_unavailable"
+        # Not raised: drop it first, since its traceback holds the seeds' outputs (and this frame) in a cycle.
+        first_error = None
+        if first_eager_out is None:
+            first_eager_out = _run_seeded(eager_fn, make_inputs, 0)
+    elif first_error:
         status = "fail"
     elif unjustified or rng_leaves is None or unstable_leaves:
         status = "numerics_unavailable"
