@@ -2981,8 +2981,33 @@ def result_metadata(definition: FullGraphDefinition) -> dict[str, Any]:
     }
 
 
+# Launch options only AMD's Triton backend has: scheduling and denormal hints with no NVIDIA counterpart. Graphs
+# captured on MI300/MI350 pass them to user kernels, and NVIDIA Triton rejects them ("Keyword argument waves_per_eu
+# was specified but unrecognised"). Their values are scalars: a dict entry with one, or a bare name in a tuple.
+_AMD_OPTION_NAME = r"'(?:waves_per_eu|matrix_instr_nonkdim|kpack|allow_flush_denorm)'"
+_AMD_OPTION_ENTRY = re.compile(rf"{_AMD_OPTION_NAME}\s*:\s*[\w.+-]+\s*(?:,\s*)?")
+_AMD_OPTION_ELEMENT = re.compile(rf"{_AMD_OPTION_NAME}\s*(?:,\s*)?")
+_LAUNCH_KWARGS = re.compile(r"(launch_kwargs\s*=\s*)\(([^()]*)\)")
+
+
+def drop_amd_launch_options(content: str) -> str:
+    """Graph source without AMD-only Triton options in triton_kernel_wrapper_* kwargs and launch_kwargs (and any
+    autotune config literal in it). Unchanged on ROCm."""
+    import torch
+
+    if torch.version.hip:
+        return content
+
+    def names(m: re.Match) -> str:
+        kept = _AMD_OPTION_ELEMENT.sub("", m.group(2)).rstrip(", ")
+        # one name left must stay a tuple
+        return f"{m.group(1)}({kept}{',' if kept and ',' not in kept else ''})"
+
+    return _LAUNCH_KWARGS.sub(names, _AMD_OPTION_ENTRY.sub("", content))
+
+
 def _strip_runnable_boilerplate(content: str) -> str:
-    content = content.replace("class <lambda>", "class Repro")
+    content = drop_amd_launch_options(content.replace("class <lambda>", "class Repro"))
     content = re.sub(
         r"^if __name__\s*==\s*['\"]__main__['\"]:\s*\n(?:(?:[ \t]+.*)?\n)*",
         "",
@@ -3040,12 +3065,17 @@ def load_full_graph_definition(
         raise RuntimeError(f"{path} does not define a torch.nn.Module graph class")
 
     input_specs = sidecar.get("inputs") or annotation_inputs
+    symbols = sidecar.get("symbols")
+    if not symbols:
+        # Inferred lengths totals and id bounds are sizes at the captured shapes, so only static graphs get them.
+        from full_graph_inputs import refine_unobserved_inputs
+
+        input_specs = refine_unobserved_inputs(content, input_specs)
     # Dynamic graph: input specs carry symbolic shape/stride exprs. Resolve
     # them to concrete dims at the symbol HINT binding (the captured
     # snapshot) so construction is concrete. A different binding is reachable
     # by re-evaluating from the sidecar's symbols table + exprs — the exprs
     # are retained on disk, only the in-memory definition is specialized.
-    symbols = sidecar.get("symbols")
     effective = None
     if symbols:
         from input_codec import (
@@ -3380,6 +3410,8 @@ def _restore_recorded_capacity(tensor, spec: dict[str, Any]):
 def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda"):
     import torch
 
+    from full_graph_inputs import is_jagged, make_jagged_tensor
+
     dtype = _torch_dtype(spec.get("dtype", "float32"))
     shape = tuple(spec.get("shape", ()))
     stride = spec.get("stride")
@@ -3417,6 +3449,17 @@ def make_tensor_from_spec(spec: dict[str, Any], *, default_device: str = "cuda")
         base = torch.zeros((storage_size,), dtype=dtype, device=dev)
         return finish(_view_storage(base, shape, stride, storage_offset))
 
+    if is_jagged(generator):
+        return finish(make_jagged_tensor(spec, generator, default_device))
+    if generator.get("kind") == "sorted":
+        # Sort the flat storage: a non-decreasing storage stays non-decreasing along every dim with stride >= 0.
+        storage_size = _dense_storage_size(shape, stride, storage_offset=storage_offset)
+        if _is_integer_dtype(dtype):
+            low, high = int(generator.get("low", 0)), int(generator.get("high", max(storage_size, 1)))
+            values = torch.randint(low, max(high, low + 1), (storage_size,), dtype=torch.int64, device=dev)
+        else:
+            values = torch.randn((storage_size,), dtype=torch.float32, device=dev)
+        return finish(_view_storage(values.sort().values.to(dtype), shape, stride, storage_offset))
     if generator.get("kind") == "constant":
         value = generator.get("value", 0)
         storage_size = _dense_storage_size(shape, stride, storage_offset=storage_offset)

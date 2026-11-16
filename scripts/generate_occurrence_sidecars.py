@@ -228,6 +228,7 @@ def _benchmark_source_digest() -> str:
         Path(__file__),
         ROOT / "capture_hook.py",
         ROOT / "full_graph_harness.py",
+        ROOT / "full_graph_inputs.py",
         ROOT / "scripts" / "model_attribution.py",
         ROOT / "scripts" / "model_graph_accounting.py",
     ]
