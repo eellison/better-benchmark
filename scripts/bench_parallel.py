@@ -4245,6 +4245,19 @@ def _make_bench_callable(graph_or_fn, is_graph, inps):
     else:
         return lambda: graph_or_fn(*inps)
 
+def _first_calls(compiled, instance, calls):
+    """Compile `compiled` by calling it on each of `calls` (argument lists), leaving the module's buffers as they
+    were (a graph can update them)."""
+    saved = [(b, b.to("cpu", copy=True)) for b in instance.buffers()]
+    with gpu_setup_lock():
+        with torch.no_grad():
+            for args in calls:
+                compiled(*args)
+            for b, v in saved:
+                b.copy_(v)
+        torch.cuda.synchronize()
+    del saved
+
 def bench_full_graph_one(repro_path):
     (
         execution,
@@ -4260,18 +4273,16 @@ def bench_full_graph_one(repro_path):
         # mark_dynamic'd inputs or extra live-symbol arguments.
         return list(execution.args())
 
-    if not CHECK_NUMERICS:
-        with gpu_setup_lock():
-            with torch.no_grad():
-                eager_out = instance(*inputs)
-            torch.cuda.synchronize()
-            input_bytes = tensor_bytes(inputs)
-            output_bytes = tensor_bytes(eager_out)
-            del eager_out
-
     # Compile default
     inductor_metrics.reset()
     torch._dynamo.reset()
+    # Each compile below runs before the GPU work that would otherwise leave its peak cached in this process (the
+    # numerics gate's eager and float64 runs, CUDA graph capture): a compile can take tens of minutes, and processes
+    # that share a GPU would see that memory held the whole time. A dynamic graph compiles on its warm bindings (the
+    # calls _capture_cudagraph makes first), so a recompile at the measured binding still shows up as one.
+    first_calls = warm_inputs or [inputs]
+    gc.collect()
+    torch.cuda.empty_cache()
     # Opt-in: cold-compile wall time.
     compile_time_s = None
     if {args_dict.get("compile_time", False)}:
@@ -4284,6 +4295,15 @@ def bench_full_graph_one(repro_path):
             compile_time_s = time.perf_counter() - _t0
     else:
         compiled = execution.compile(fullgraph=CHECK_NUMERICS)
+        _first_calls(compiled, instance, first_calls)
+    if not CHECK_NUMERICS:
+        with gpu_setup_lock():
+            with torch.no_grad():
+                eager_out = instance(*inputs)
+            torch.cuda.synchronize()
+            input_bytes = tensor_bytes(inputs)
+            output_bytes = tensor_bytes(eager_out)
+            del eager_out
     numerics = None
     if CHECK_NUMERICS:
         # Checking requires fullgraph: graph breaks would leave eager code in the
@@ -4342,10 +4362,13 @@ def bench_full_graph_one(repro_path):
     cd_numerics = None
     if do_cd:
         torch._dynamo.reset()
+        gc.collect()
+        torch.cuda.empty_cache()
         compiled_cd = execution.compile(
             fullgraph=CHECK_NUMERICS,
             options={{"coordinate_descent_tuning": True}},
         )
+        _first_calls(compiled_cd, instance, first_calls)
         with gpu_setup_lock():
             if CHECK_NUMERICS:
                 cd_numerics, _ = run_numerics_gate(

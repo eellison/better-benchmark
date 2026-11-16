@@ -1,8 +1,10 @@
+import contextlib
 import math
 import subprocess
 import sys
 import threading
 from pathlib import Path
+from unittest import mock
 
 import pytest
 import torch
@@ -172,6 +174,43 @@ def test_full_graph_worker_gates_default_and_cd_before_timing():
     )
     assert '"numerics_failed"' in script
     assert '"failure_classification"' in script
+
+
+def test_full_graph_worker_compiles_before_numerics_and_capture():
+    script = _worker_script()
+    full_graph = script.split("def bench_full_graph_one", 1)[1].split(
+        "@preserve_compile_environment()\ndef bench_one", 1
+    )[0]
+    default_compile = full_graph.index("_first_calls(compiled, instance, first_calls)")
+    assert full_graph.index("torch.cuda.empty_cache()") < default_compile
+    assert default_compile < full_graph.index("eager_out = instance(*inputs)")
+    assert default_compile < full_graph.index('label="default compiled"')
+    cd_compile = full_graph.index("_first_calls(compiled_cd, instance, first_calls)")
+    assert "torch.cuda.empty_cache()\n        compiled_cd = execution.compile(" in full_graph
+    assert cd_compile < full_graph.index('label="coordinate-descent compiled"')
+    assert cd_compile < full_graph.index("graph_cd, cd_is_graph, _cd_recompiled = _capture_cudagraph")
+
+
+def test_first_calls_restore_the_module_buffers():
+    script = _worker_script()
+    helper = "def _first_calls" + script.split("def _first_calls", 1)[1].split("\ndef ", 1)[0]
+    namespace = {"torch": torch, "gpu_setup_lock": contextlib.nullcontext}
+    exec(helper, namespace)
+
+    class Counter(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.register_buffer("steps", torch.zeros(1))
+
+        def forward(self, x):
+            self.steps.add_(1)
+            return x + self.steps
+
+    module = Counter()
+    seen = []
+    with mock.patch.object(torch.cuda, "synchronize"):
+        namespace["_first_calls"](lambda x: seen.append(module(x)), module, [(torch.ones(1),), (torch.ones(1),)])
+    assert len(seen) == 2 and module.steps.item() == 0
 
 
 def test_full_graph_worker_excludes_numerics_from_compile_time():
