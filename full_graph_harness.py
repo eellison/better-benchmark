@@ -45,8 +45,8 @@ class FullGraphNumericsError(RuntimeError):
         self.failed_variant: str | None = None
 
 
-def _float64_inputs(inputs: Any) -> Any:
-    """Float64 copies of the float tensors in ``inputs`` with the same layout.
+def _float64_inputs(inputs: Any, dtype: Any = None) -> Any:
+    """Float64 (or ``dtype``) copies of the narrower float tensors in ``inputs`` with the same layout.
 
     Each storage is upcast once and every view keeps its size, stride and
     storage offset, so views of one storage stay aliased and a padded or
@@ -57,8 +57,12 @@ def _float64_inputs(inputs: Any) -> Any:
     storages: dict[tuple, Any] = {}
     copies: dict[int, Any] = {}  # a tensor passed twice stays one tensor
 
+    from numerics import narrower_float
+
+    target = dtype or torch.float64
+
     def upcast(value: Any) -> Any:
-        if not (isinstance(value, torch.Tensor) and value.is_floating_point()):
+        if not (isinstance(value, torch.Tensor) and narrower_float(value.dtype, target)):
             return value
         if id(value) in copies:
             return copies[id(value)]
@@ -67,16 +71,17 @@ def _float64_inputs(inputs: Any) -> Any:
         if key not in storages:
             flat = torch.empty(0, dtype=value.dtype, device=value.device)
             flat.set_(storage, 0, (storage.nbytes() // value.element_size(),), (1,))
-            storages[key] = flat.to(torch.float64)
+            storages[key] = flat.to(target)
         copies[id(value)] = storages[key].as_strided(value.size(), value.stride(), value.storage_offset())
         return copies[id(value)]
 
     return tree_map(upcast, inputs)
 
 
-def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -> Any:
+def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: Any = False) -> Any:
     """Run ``fn`` on fresh inputs from ``make_inputs`` and return a copy of its outputs.
 
+    ``upcast`` (True: float64, or a dtype) runs on copies of the float inputs in that precision.
     Inputs and the run are both seeded with ``seed``. Outputs are cloned so a
     later run cannot overwrite them through state they alias.
     """
@@ -85,8 +90,8 @@ def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -
 
     torch.manual_seed(seed)
     inputs = make_inputs()
-    if upcast:
-        inputs = _float64_inputs(inputs)
+    if upcast is not False:
+        inputs = _float64_inputs(inputs, None if upcast is True else upcast)
     torch.manual_seed(seed)
     with torch.no_grad():
         out = fn(*inputs)
@@ -96,7 +101,10 @@ def _run_seeded(fn: Any, make_inputs: Any, seed: int, *, upcast: bool = False) -
 
 
 def rng_dependent_output_leaves(
-    fn: Any, make_inputs: Any, seed: int = FULL_GRAPH_NUMERICS_SEED
+    fn: Any,
+    make_inputs: Any,
+    seed: int = FULL_GRAPH_NUMERICS_SEED,
+    rng_state: set[int] | None = None,
 ) -> set[int] | None:
     """Return flattened output leaf indices that depend on an RNG op.
 
@@ -104,7 +112,11 @@ def rng_dependent_output_leaves(
     same seed, so these leaves cannot be compared. Dependence is tracked
     dynamically during one eager run because FX tracing constant-folds RNG
     ops whose arguments are not graph inputs. Returns ``None`` when the
-    detection run fails.
+    detection run fails. Leaves that are an attention op's RNG state (philox
+    seed/offset, returned even with dropout off) are also added to
+    ``rng_state``: they carry no values, so skipping them is justified.
+    Allocations nothing wrote (``torch.empty``) are skipped too but not
+    justified, since a write the dispatcher does not see looks the same.
     """
     import torch
 
@@ -113,30 +125,65 @@ def rng_dependent_output_leaves(
     torch.manual_seed(seed)
     inputs = make_inputs()
     torch.manual_seed(seed)
-    return scan_rng_dependence(fn, inputs)
+    return scan_rng_dependence(fn, inputs, rng_state)
 
 
-def _fp64_reference(fn: Any, make_inputs: Any, seed: int) -> tuple[Any | None, str | None]:
-    """Run a float64 copy of ``fn`` on float64 copies of the float inputs.
+def _offload(value: Any) -> tuple[Any, list[Any]]:
+    """``value`` with its tensors copied to host memory, and the devices to restore them to."""
+    import torch
+    from torch.utils._pytree import tree_flatten, tree_unflatten
 
-    Float-to-float casts inside ``fn`` also produce float64. Returns
-    ``(output, None)``, or ``(None, error)`` when the float64 run fails
+    leaves, spec = tree_flatten(value)
+    devices = [leaf.device if isinstance(leaf, torch.Tensor) else None for leaf in leaves]
+    leaves = [leaf.cpu() if isinstance(leaf, torch.Tensor) else leaf for leaf in leaves]
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    return tree_unflatten(leaves, spec), devices
+
+
+def _restore(value: Any, devices: list[Any]) -> Any:
+    from torch.utils._pytree import tree_flatten, tree_unflatten
+
+    leaves, spec = tree_flatten(value)
+    return tree_unflatten([leaf if d is None else leaf.to(d) for leaf, d in zip(leaves, devices)], spec)
+
+
+def _fp64_reference(fn: Any, make_inputs: Any, seed: int, dtype: Any = None) -> tuple[Any | None, str | None]:
+    """Run a float64 (or ``dtype``) copy of ``fn`` on such copies of the narrower float inputs.
+
+    Casts to narrower float dtypes inside ``fn`` also produce float64 (or
+    ``dtype``); a float32 reference keeps the graph's float64 values.
+    Returns ``(output, None)``, or ``(None, error)`` when the run fails
     (unsupported dtype, OOM, ...).
     """
     import copy
 
     import torch
 
-    from numerics import float64_casts_mode
+    from numerics import float64_casts_mode, narrower_float
 
     try:
+        dtype = dtype or torch.float64
         fn64 = copy.deepcopy(fn)
         if isinstance(fn64, torch.nn.Module):
-            fn64 = fn64.double()
-        with float64_casts_mode():
-            return _run_seeded(fn64, make_inputs, seed, upcast=True), None
+            fn64 = fn64._apply(lambda t: t.to(dtype) if narrower_float(t.dtype, dtype) else t)
+
+        def run(*inputs: Any) -> Any:
+            # only the run: under the mode, make_inputs' randn(dtype=float32) would draw different float64 values
+            with float64_casts_mode(dtype):
+                return fn64(*inputs)
+
+        return _run_seeded(run, make_inputs, seed, upcast=dtype), None
     except Exception as e:
         return None, f"{type(e).__name__}: {e}"[:300]
+
+
+def _has_low_precision_leaf(value: Any) -> bool:
+    import torch
+    from torch.utils._pytree import tree_flatten
+
+    return any(isinstance(v, torch.Tensor) and v.dtype in (torch.float16, torch.bfloat16)
+               for v in tree_flatten(value)[0])
 
 
 def _comparable(value: Any) -> Any:
@@ -236,8 +283,13 @@ def _float_leaf_mismatch(
     )
 
 
+# A reference leaf that does not anchor its output (a float32 reference for a float32/float64 output is eager's
+# own precision): that leaf is judged against eager alone.
+_UNANCHORED = object()
+
+
 def _full_graph_leaf_check(
-    skip_leaves: set[int] | frozenset[int], has_reference: bool
+    skip_leaves: set[int] | frozenset[int], reference_given: bool
 ):
     """Per-leaf rule for :func:`numerics.anchored_gate` (candidate = compiled)."""
     import torch
@@ -246,6 +298,8 @@ def _full_graph_leaf_check(
         return {**(errors or {}), "pass": False, "detail": detail}, ratio
 
     def check(index: int, got: Any, expected: Any, ref: Any):
+        has_reference = reference_given and ref is not _UNANCHORED
+        ref = ref if has_reference else None
         if isinstance(expected, torch.Tensor) != isinstance(got, torch.Tensor):
             return fail("tensor/non-tensor mismatch")
         if not isinstance(expected, torch.Tensor):
@@ -265,9 +319,31 @@ def _full_graph_leaf_check(
         if index in skip_leaves:
             return {"skip": "stochastic"}, None
         if not (expected.is_floating_point() or expected.is_complex()):
-            if not torch.equal(expected, got):
-                return fail(f"{expected.dtype} values differ")
-            return {"pass": True}, None
+            if torch.equal(expected, got):
+                return {"pass": True}, None
+            if (
+                has_reference
+                and isinstance(ref, torch.Tensor)
+                and ref.shape == expected.shape
+                and ref.dtype == expected.dtype
+            ):
+                # Masks and ids computed from float values (relu masks, comparisons, floor) flip at a threshold.
+                # Judge flipped entries against the reference like `same` judges float error,
+                # flips(compiled) <= 2 * flips(eager), while compiled mostly agrees with it (an RNG mask does
+                # not). Integer math has eager equal to the reference, so it stays exact.
+                flips, eager_flips = int((got != ref).sum()), int((expected != ref).sum())
+                fields = {"flips_vs_reference": flips, "eager_flips_vs_reference": eager_flips}
+                # A flipped id is off by about what eager is off by (floor at an integer boundary), not garbage.
+                near = expected.dtype == torch.bool or bool(
+                    ((got.long() - ref.long()).abs() <= max(1, int((expected.long() - ref.long()).abs().max()))).all()
+                )
+                if near and flips <= 2 * eager_flips and flips * 100 <= expected.numel():
+                    return {"pass": True, **fields}, None
+                return fail(
+                    f"{expected.dtype} values differ: {flips} entries differ from the reference (eager {eager_flips})",
+                    fields,
+                )
+            return fail(f"{expected.dtype} values differ")
         if has_reference and (
             not isinstance(ref, torch.Tensor) or ref.shape != expected.shape
         ):
@@ -392,40 +468,87 @@ def validate_full_graph_numerics(
     label: str = "compiled",
     seed: int = FULL_GRAPH_NUMERICS_SEED,
     skip_output_leaves: set[int] | frozenset[int] = frozenset(),
-) -> tuple[Any, str]:
+) -> tuple[Any, str, str | None, list[int]]:
     """Compare the outputs of one seeded eager/compiled sample.
 
     Every run (eager, float64 reference, compiled, eager rerun) gets fresh
     inputs from ``make_inputs`` under ``seed``. Outputs are compared against
     the float64 eager run; when no usable float64 reference exists (the
     float64 run fails, or is nonfinite where eager is finite) the comparison
-    falls back to eager alone. On mismatch, eager is rerun to distinguish
-    eager nondeterminism from a stable compiled mismatch. ``skip_output_leaves``
-    indexes the flattened outputs, e.g. from RNG detection.
+    falls back to eager alone. On mismatch, eager is rerun: output leaves that
+    eager itself does not reproduce (atomics, uninitialized memory in custom-op
+    stand-ins, values at the edge of overflow) cannot be judged and are
+    skipped, and the check fails only if an eager-stable leaf mismatches.
+    ``skip_output_leaves`` indexes the flattened outputs, e.g. from RNG
+    detection.
 
-    Returns ``(eager_output, reference, fp64_error)`` where ``reference`` is
-    ``"fp64"`` or ``"eager"`` and ``fp64_error`` says why there is no usable
-    float64 reference (``None`` when there is one).
+    Returns ``(eager_output, reference, fp64_error, unstable_leaves)`` where
+    ``reference`` is ``"fp64"``, ``"fp32"`` or ``"eager"``, ``fp64_error``
+    says why there is no usable float64 reference (``None`` when there is
+    one) and ``unstable_leaves`` lists the skipped eager-unstable leaves.
+    A failure's seed record also lists why reference runs failed
+    (``reference_errors``).
     """
+    import torch
+    from torch.utils._pytree import tree_flatten, tree_unflatten
+
     eager = _run_seeded(eager_fn, make_inputs, seed)
     skip = frozenset(skip_output_leaves)
+    # Park eager's outputs in host memory while the float64 run, which needs about twice eager's memory, runs.
+    eager, eager_devices = _offload(eager)
     reference, fp64_error = _fp64_reference(eager_fn, make_inputs, seed)
+    reference_kind = "fp64"
+    reference_errors = [f"torch.float64: {fp64_error}"] if fp64_error else []
+    if reference is None and _has_low_precision_leaf(eager):
+        # a float32 reference still anchors bf16/fp16 outputs, e.g. when the float64 run does not fit in memory
+        reference, fp32_error = _fp64_reference(eager_fn, make_inputs, seed, torch.float32)
+        reference_kind = "fp32"
+        if fp32_error:
+            reference_errors.append(f"torch.float32: {fp32_error}")
+    eager = _restore(eager, eager_devices)
     if reference is not None and not _reference_covers_eager(reference, eager, skip):
         reference = None
-        fp64_error = "fp64 output does not cover eager's (shape, or nonfinite where eager is finite)"
-    reference_kind = "eager" if reference is None else "fp64"
+        fp64_error = fp64_error or (
+            f"{reference_kind} output does not cover eager's (shape, or nonfinite where eager is finite)"
+        )
+    if reference is None:
+        reference_kind = "eager"
+    elif reference_kind == "fp32":
+        # it anchors the low-precision (16- and 8-bit) outputs it is there for; float32/float64 outputs are judged
+        # against eager alone
+        leaves, spec = tree_flatten(reference)
+        reference = tree_unflatten([
+            _UNANCHORED if isinstance(e, torch.Tensor) and (e.is_floating_point() or e.is_complex())
+            and e.element_size() // (2 if e.is_complex() else 1) >= 4 else r
+            for r, e in zip(leaves, tree_flatten(eager)[0])
+        ], spec)
     compiled = _run_seeded(compiled_fn, make_inputs, seed)
     records = compare_output_records(reference, eager, compiled, skip_leaves=skip)
+    unstable: list[int] = []
     if not records["pass"]:
         eager_repeat = _run_seeded(eager_fn, make_inputs, seed)
-        eager_stable, _ = compare_outputs(
+        repeat = compare_output_records(
             reference, eager, eager_repeat, skip_leaves=skip
         )
+        eager_stable = repeat["pass"]
+        eager_leaves = tree_flatten(eager)[0]
+        unstable = sorted(
+            e["idx"]
+            for e in repeat["per_output"]
+            if e.get("pass") is False and isinstance(eager_leaves[e["idx"]], torch.Tensor)
+        )
+        if unstable:
+            records = compare_output_records(
+                reference, eager, compiled, skip_leaves=skip | frozenset(unstable)
+            )
+    if not records["pass"]:
+        # With unstable leaves skipped, the leaves still failing are eager-stable.
         classification = (
             "stable_eager_vs_compiled_mismatch"
-            if eager_stable
+            if eager_stable or unstable
             else "eager_self_instability"
         )
+        failing_stable = classification == "stable_eager_vs_compiled_mismatch"
         details = _details(records)
         unavailable = f", fp64 reference unavailable: {fp64_error}" if fp64_error else ""
         raise FullGraphNumericsError(
@@ -437,14 +560,17 @@ def validate_full_graph_numerics(
                 "pass": False,
                 "reference": reference_kind,
                 "fp64_reference_error": fp64_error,
+                "reference_errors": reference_errors,
                 "failure_classification": classification,
-                "eager_self_check": {"pass": eager_stable},
+                # whether eager reproduces the leaves that still fail
+                "eager_self_check": {"pass": failing_stable},
                 "diagnostics": details,
                 "worst_output_idx": records["worst_output_idx"],
                 "per_output": _failing_records(records),
+                "eager_unstable_leaves": unstable,
             },
         )
-    return eager, reference_kind, fp64_error
+    return eager, reference_kind, fp64_error, unstable
 
 
 def run_numerics_gate(
@@ -470,16 +596,20 @@ def run_numerics_gate(
     ``fp64_reference_error`` why the float64 run was not usable.
     Status is ``numerics_unavailable`` rather than ``pass`` when RNG-dependent
     output leaves are not listed in ``non_semantic_output_leaves`` (an
-    explicit output contract) or RNG detection failed.
+    explicit output contract), RNG detection failed, or output leaves were
+    skipped because eager does not reproduce them.
     """
     records: list[dict[str, Any]] = []
     first_error: FullGraphNumericsError | None = None
     first_eager_out = None
-    rng_leaves = rng_dependent_output_leaves(eager_fn, make_inputs)
+    rng_state: set[int] = set()
+    rng_leaves = rng_dependent_output_leaves(eager_fn, make_inputs, rng_state=rng_state)
+    non_semantic_output_leaves = frozenset(non_semantic_output_leaves) | rng_state
     reference_kinds: set[str] = set()
+    unstable_leaves: set[int] = set()
     for seed in range(seeds):
         try:
-            eager_out, reference_kind, fp64_error = validate_full_graph_numerics(
+            eager_out, reference_kind, fp64_error, unstable = validate_full_graph_numerics(
                 eager_fn,
                 compiled_fn,
                 make_inputs,
@@ -490,9 +620,11 @@ def run_numerics_gate(
         except FullGraphNumericsError as exc:
             records.append(exc.seed_record)
             reference_kinds.add(exc.seed_record["reference"])
+            unstable_leaves.update(exc.seed_record.get("eager_unstable_leaves") or ())
             first_error = first_error or exc
             continue
         reference_kinds.add(reference_kind)
+        unstable_leaves.update(unstable)
         if first_eager_out is None:
             first_eager_out = eager_out
         del eager_out
@@ -503,17 +635,18 @@ def run_numerics_gate(
                 "reference": reference_kind,
                 "fp64_reference_error": fp64_error,
                 "failure_classification": None,
-                "eager_self_check": None,
+                "eager_self_check": {"pass": False} if unstable else None,
                 "diagnostics": [],
                 "worst_output_idx": None,
                 "per_output": [],
+                "eager_unstable_leaves": unstable,
             }
         )
     skipped = sorted(rng_leaves or ())
     unjustified = [leaf for leaf in skipped if leaf not in non_semantic_output_leaves]
     if first_error:
         status = "fail"
-    elif unjustified or rng_leaves is None:
+    elif unjustified or rng_leaves is None or unstable_leaves:
         status = "numerics_unavailable"
     else:
         status = "pass"
@@ -532,6 +665,7 @@ def run_numerics_gate(
         "rng_detection_ok": rng_leaves is not None,
         "skipped_rng_output_leaves": skipped,
         "unjustified_skipped_output_leaves": unjustified,
+        "eager_unstable_output_leaves": sorted(unstable_leaves),
     }
     if first_error is not None:
         first_error.numerics = summary

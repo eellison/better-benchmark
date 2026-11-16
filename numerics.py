@@ -39,34 +39,120 @@ def written_args(func: Any, args: Any, kwargs: dict[str, Any]) -> list[Any]:
 # ---------------------------------------------------------------------------
 
 
-def float64_casts_mode() -> TorchDispatchMode:
-    """Dispatch mode that turns float-to-float dtype casts into float64 casts.
+def _attention_probs(query, key, is_causal, scale):
+    """softmax(q k^T * scale) and its logsumexp, the math behind the flash kernels (causal: top-left aligned)."""
+    scale = query.shape[-1] ** -0.5 if scale is None else scale
+    scores = query @ key.transpose(-2, -1) * scale
+    if is_causal:
+        keep = torch.ones(scores.shape[-2:], dtype=torch.bool, device=scores.device).tril()
+        scores = scores.masked_fill(~keep, -torch.inf)
+    lse = scores.logsumexp(-1)
+    return (scores - lse.unsqueeze(-1)).exp(), lse, scale
 
-    Captured graphs cast explicitly (``convert_element_type(x, bfloat16)``), so
-    upcasting only parameters and inputs would mix dtypes and fail.
+
+def _flash_attention_math(query, key, value, dropout_p=0.0, is_causal=False, return_debug_mask=False, *,
+                          scale=None):
+    """aten._scaled_dot_product_flash_attention for float32/float64 (the kernel only takes fp16/bf16). Dropout is
+    not reproduced: such outputs depend on RNG and are skipped by RNG detection."""
+    probs, lse, _ = _attention_probs(query, key, is_causal, scale)
+    empty = query.new_empty(0)
+    # the query's strides, as the kernel returns without head-dim padding (graphs view it by its strides)
+    out = torch.empty_like(query).copy_(probs @ value)
+    return (out, lse, empty, empty, query.shape[-2], key.shape[-2], empty, empty, empty)
+
+
+def _flash_attention_backward_math(grad_out, query, key, value, out, logsumexp, cum_seq_q, cum_seq_k, max_q,
+                                   max_k, dropout_p, is_causal, philox_seed, philox_offset, *, scale=None):
+    probs, _, scale = _attention_probs(query, key, is_causal, scale)
+    grad_probs = grad_out @ value.transpose(-2, -1)
+    grad_scores = probs * (grad_probs - (grad_out * out).sum(-1, keepdim=True))
+    grads = (grad_scores @ key * scale, grad_scores.transpose(-2, -1) @ query * scale,
+             probs.transpose(-2, -1) @ grad_out)
+    return tuple(torch.empty_like(x).copy_(g) for x, g in zip((query, key, value), grads))
+
+
+_FLASH_ATTENTION_MATH = {
+    torch.ops.aten._scaled_dot_product_flash_attention.default: _flash_attention_math,
+    torch.ops.aten._scaled_dot_product_flash_attention_backward.default: _flash_attention_backward_math,
+}
+
+
+def narrower_float(dtype: Any, target: torch.dtype) -> bool:
+    """Whether ``dtype`` is a float dtype narrower than ``target`` (what the reference upcasts)."""
+    return isinstance(dtype, torch.dtype) and dtype.is_floating_point and dtype.itemsize < target.itemsize
+
+
+def _flash_math_applies(func: Any, args: Any, kwargs: dict[str, Any]) -> bool:
+    """The math matches the kernel: no dropout (the kernel's RNG is not reproduced; the backward is not tagged as
+    an RNG op) and, if causal, square attention (the math is top-left aligned)."""
+    names = [a.name for a in func._schema.arguments]
+    bound = {**dict(zip(names, args)), **kwargs}
+    query, key = bound["query"], bound["key"]
+    causal_ok = not bound.get("is_causal", False) or query.shape[-2] == key.shape[-2]
+    return not bound.get("dropout_p", 0.0) and causal_ok
+
+
+def float64_casts_mode(target: torch.dtype = torch.float64) -> TorchDispatchMode:
+    """Dispatch mode that turns float dtypes requested inside the graph into float64 (or ``target``: float32 for a
+    reference when the float64 one does not fit in memory).
+
+    Captured graphs cast explicitly (``convert_element_type(x, bfloat16)``) and
+    create float tensors with explicit dtypes (``full``/``empty``/
+    ``scalar_tensor(..., dtype=bfloat16)``, ``sum(..., dtype=float32)``), so
+    upcasting only parameters and inputs would mix dtypes and fail (``mm`` of
+    float64 and bfloat16) or round the reference back to low precision. Flash
+    attention, which has no float32 or float64 kernel, runs as its math
+    definition; custom ops without a float64 kernel that do not write their
+    arguments run on float32 copies. A bitcast (``view(dtype)``) of a float
+    tensor fails the reference run.
     """
-    convert = torch.ops.prims.convert_element_type.default
-    to_copy = torch.ops.aten._to_copy.default
+    bitcast = torch.ops.aten.view.dtype
 
     class Float64Casts(TorchDispatchMode):
         def __torch_dispatch__(self, func, types, args=(), kwargs=None):
             kwargs = dict(kwargs or {})
-            if (
-                func is convert
-                and args[0].is_floating_point()
-                and args[1].is_floating_point
-            ):
-                args = (args[0], torch.float64)
-            elif (
-                func is to_copy
-                and args[0].is_floating_point()
-                and kwargs.get("dtype") is not None
-                and kwargs["dtype"].is_floating_point
-            ):
-                kwargs["dtype"] = torch.float64
-            return func(*args, **kwargs)
+            if func in _FLASH_ATTENTION_MATH and args[0].dtype == target and _flash_math_applies(func, args, kwargs):
+                return _FLASH_ATTENTION_MATH[func](*args, **kwargs)
+            if func is bitcast:
+                # Reinterpreting bits has no upcast equivalent: an integer source keeps its bitcast (its float
+                # result is upcast where it is used), an upcast float source cannot be reinterpreted faithfully.
+                if args[0].is_floating_point():
+                    raise RuntimeError(f"bitcast of an upcast {args[0].dtype} tensor to {args[1]}")
+                return func(*args, **kwargs)
+            # every float `dtype` argument narrower than target, by keyword or position (convert_element_type,
+            # _assert_tensor_metadata); a float32 reference keeps float64 where the graph asks for it
+            names = [a.name for a in func._schema.arguments]
+            if "dtype" in names and names.index("dtype") < len(args):
+                i = names.index("dtype")
+                if narrower_float(args[i], target):
+                    args = (*args[:i], target, *args[i + 1:])
+            if narrower_float(kwargs.get("dtype"), target):
+                kwargs["dtype"] = target
+            mutates = any(a.alias_info is not None and a.alias_info.is_write for a in func._schema.arguments)
+            if func.namespace in ("aten", "prims") or mutates:
+                return func(*args, **kwargs)
+            try:
+                return func(*args, **kwargs)
+            except torch.OutOfMemoryError:
+                raise
+            except (NotImplementedError, RuntimeError):
+                # custom ops without float64 kernels (fbgemm jagged ops): float32 in, float64 out. Not for ops that
+                # write their arguments, whose writes would land in the float32 copies.
+                return _widen(func(*_narrow(args), **_narrow(kwargs)))
 
     return Float64Casts()
+
+
+def _narrow(value: Any) -> Any:
+    from torch.utils._pytree import tree_map
+
+    return tree_map(lambda t: t.float() if isinstance(t, torch.Tensor) and t.dtype == torch.float64 else t, value)
+
+
+def _widen(value: Any) -> Any:
+    from torch.utils._pytree import tree_map
+
+    return tree_map(lambda t: t.double() if isinstance(t, torch.Tensor) and t.dtype == torch.float32 else t, value)
 
 
 # ---------------------------------------------------------------------------
@@ -119,13 +205,40 @@ def is_rng_call(func: Any, args: Any = (), kwargs: dict[str, Any] | None = None)
     return not _rng_disabled_by_args(func, args, kwargs or {})
 
 
-def scan_rng_dependence(fn: Callable[..., Any], inputs: Any) -> set[int] | None:
+# Attention ops that always return their dropout RNG state (philox seed/offset), at these output positions, even
+# with dropout off: the state differs between eager and compiled runs but carries no values.
+_RNG_STATE_OUTPUTS = {
+    "aten::_scaled_dot_product_flash_attention": (6, 7),
+    "aten::_scaled_dot_product_cudnn_attention": (6, 7),
+    "aten::_scaled_dot_product_efficient_attention": (2, 3),
+    "aten::_efficient_attention_forward": (2, 3),
+    "aten::_flash_attention_forward": (2, 3),
+}
+# Graph outputs allocated by these and not written by a dispatched op hold whatever memory they got: eager and
+# compiled cannot be compared there.
+_UNINITIALIZED_ALLOCATIONS = frozenset({
+    "aten::empty", "aten::empty_like", "aten::empty_strided", "aten::empty_permuted", "aten::new_empty",
+    "aten::new_empty_strided", "prims::empty_strided",
+})
+
+
+def scan_rng_dependence(
+    fn: Callable[..., Any], inputs: Any, rng_state: set[int] | None = None
+) -> set[int] | None:
     """Flattened indices of the outputs of ``fn(*inputs)`` that depend on an RNG draw.
 
     Taint is tracked per storage during that one run, so views taken before an
     in-place RNG write and buffers written from RNG values count. Returns
-    ``None`` if the run fails.
+    ``None`` if the run fails. Outputs that are an attention op's RNG state
+    (``_RNG_STATE_OUTPUTS``, also added to ``rng_state`` when given: they
+    carry no values) or an allocation no dispatched op wrote
+    (``_UNINITIALIZED_ALLOCATIONS``; a write the dispatcher does not see,
+    e.g. a Triton kernel launched directly, cannot be told apart) are in the
+    result too. Consuming them (attention backward) does not taint.
     """
+    states: dict[int, Any] = {}
+    # storage key -> storage of allocations not written yet (a partial write counts as initialized)
+    uninitialized: dict[int, Any] = {}
     # Tainted storages stay referenced for the whole scan so their keys cannot
     # be reused by later allocations.
     tainted: dict[int, Any] = {}
@@ -148,6 +261,15 @@ def scan_rng_dependence(fn: Callable[..., Any], inputs: Any) -> set[int] | None:
         def __torch_dispatch__(self, func, types, args=(), kwargs=None):
             kwargs = kwargs or {}
             out = func(*args, **kwargs)
+            name = func._schema.name
+            for index in _RNG_STATE_OUTPUTS.get(name, ()):
+                if isinstance(out, tuple) and isinstance(out[index], torch.Tensor):
+                    states[id(out[index])] = out[index]
+            if name in _UNINITIALIZED_ALLOCATIONS and _storage_key(out) is not None:
+                uninitialized[_storage_key(out)] = out.untyped_storage()
+            elif uninitialized:
+                for value in written_args(func, args, kwargs):
+                    uninitialized.pop(_storage_key(value), None)
             if not is_rng_call(func, args, kwargs) and not any(
                 is_tainted(value) for value in tree_flatten((args, kwargs))[0]
             ):
@@ -163,7 +285,12 @@ def scan_rng_dependence(fn: Callable[..., Any], inputs: Any) -> set[int] | None:
             out = fn(*inputs)
     except Exception:
         return None
-    return {i for i, leaf in enumerate(tree_flatten(out)[0]) if is_tainted(leaf)}
+    leaves = tree_flatten(out)[0]
+    state = {i for i, leaf in enumerate(leaves) if id(leaf) in states}
+    if rng_state is not None:
+        rng_state.update(state)
+    unwritten = {i for i, leaf in enumerate(leaves) if _storage_key(leaf) in uninitialized and leaf.numel()}
+    return {i for i, leaf in enumerate(leaves) if is_tainted(leaf)} | state | unwritten
 
 
 # ---------------------------------------------------------------------------
