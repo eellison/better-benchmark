@@ -9,8 +9,9 @@
     "aten.reshape.default",
     "aten.tanh.default"
   ],
-  "n_models": 1,
+  "n_models": 2,
   "models": [
+    "hf/infer/Gemma4_31B_text_6l_prefill_b1_s2048_sdpa_bf16",
     "hf/infer/google/gemma-2-2b"
   ]
 }

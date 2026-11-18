@@ -20,8 +20,9 @@
     "prims.convert_element_type.default",
     "prims.convert_element_type.default"
   ],
-  "n_models": 2,
+  "n_models": 3,
   "models": [
+    "hf/infer/Gemma4_31B_text_6l_prefill_b1_s2048_sdpa_bf16",
     "hf/infer/google/gemma-2-2b",
     "hf/infer/google/gemma-3-4b-it"
   ]
